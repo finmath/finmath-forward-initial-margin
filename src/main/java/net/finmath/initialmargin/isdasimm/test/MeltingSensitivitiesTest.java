@@ -23,7 +23,7 @@ public class MeltingSensitivitiesTest {
 	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
 
 	// Model Paths 
-	final static int numberOfPaths = 1000;
+	final static int numberOfPaths = 10;
 
 	public static void main(String[] args) throws CalculationException{
 
@@ -68,7 +68,7 @@ public class MeltingSensitivitiesTest {
 		boolean isUseTimeGridAdjustment = true;
 		boolean isConsiderOISSensis     = true;
 
-		System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Mean Deviation in % of Notional" + "\t" + "RMS Error in % of Notional");
+		System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Mean Deviation in % of IM Sum");
 
 		for(int exerciseIndex = 0; exerciseIndex < exerciseDates.length; exerciseIndex++){
 			for(int swapPeriodsIndex = 0; swapPeriodsIndex < swapPeriodNumber.length; swapPeriodsIndex++){
@@ -114,20 +114,20 @@ public class MeltingSensitivitiesTest {
 				long timeEnd2 = System.currentTimeMillis();
 				
 				double deviationSum = 0;
-				double deviationSquaredSum = 0;
+				double sumIM = 0; // The sum of IM values (always positive)
 				
 				// Print Result and calculate Deviations 
 				for(int i=0;i<finalIMTime/timeStep+1;i++){
 					//System.out.println(valuesSwaption[0][i].getAverage() + "\t" + valuesSwaption[1][i].getAverage());
 					double error = (valuesSwaption[1][i].getAverage()-valuesSwaption[0][i].getAverage());
 					deviationSum += error;
-					deviationSquaredSum += error*error;
+					sumIM +=valuesSwaption[0][i].getAverage();
 				}
 
-				double averageDeviationInPercentOfNotional = deviationSum/(((double)valuesSwaption[0].length)*notional);
+				double averageDeviationInPercentOfSumIM = deviationSum/sumIM;
 				
 
-				System.out.println(exerciseTime + "\t" + numberOfPeriods + "\t" + formatterTime.format((timeEnd-timeStart)/1000.0)+"s" + "\t" + formatterTime.format((timeEnd2-timeStart2)/1000.0)+"s"+ "\t" + formatterValue.format(averageDeviationInPercentOfNotional) + "\t" + formatterValue.format(Math.sqrt(deviationSquaredSum/((double)valuesSwaption[0].length))/notional));
+				System.out.println(exerciseTime + "\t" + numberOfPeriods + "\t" + formatterTime.format((timeEnd-timeStart)/1000.0)+"s" + "\t" + formatterTime.format((timeEnd2-timeStart2)/1000.0)+"s"+ "\t" + formatterValue.format(averageDeviationInPercentOfSumIM));
 			}
 		}
 
