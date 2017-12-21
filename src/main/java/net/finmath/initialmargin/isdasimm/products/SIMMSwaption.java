@@ -125,7 +125,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 			
 			// Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
 			if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()){
-				return zeroBucketsIR;		
+				return AbstractSIMMSensitivityCalculation.zeroBucketsIR;		
 			}
 			
 			if(sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {

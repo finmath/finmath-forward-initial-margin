@@ -164,7 +164,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 				   
 				    // Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
 					if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()){
-						return zeroBucketsIR; // @Todo distinguish risk class 										   		
+						return AbstractSIMMSensitivityCalculation.zeroBucketsIR; // @Todo distinguish risk class 										   		
 					}
 			
 				   // Get Swap Sensitivities analytically		

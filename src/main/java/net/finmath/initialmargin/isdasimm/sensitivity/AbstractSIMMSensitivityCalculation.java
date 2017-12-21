@@ -41,6 +41,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		Stochastic //Calculate dL/dS(t) for all forward IM times, i.e. (weakly) stochastic weight adjustment 
 	}
     
+    public static final RandomVariableInterface[] zeroBucketsIR = IntStream.range(0, 12 /*IRMaturityBuckets.length*/).mapToObj(i->new RandomVariable(0.0)).toArray(RandomVariableInterface[]::new);
+
     private WeightMode liborWeightMethod;  
     private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMap = new HashMap<>();
     

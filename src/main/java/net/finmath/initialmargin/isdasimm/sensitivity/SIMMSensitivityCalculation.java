@@ -97,7 +97,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
                 	               	 
                 	 if(product instanceof SIMMBermudanSwaption) {
                 		                		 
-                		 maturityBucketSensis = ((SIMMBermudanSwaption)product).changeMeltedSensisOnExercisedPaths(evaluationTime, curveIndexName, maturityBucketSensis);
+                		maturityBucketSensis = ((SIMMBermudanSwaption)product).changeMeltedSensisOnExercisedPaths(evaluationTime, curveIndexName, maturityBucketSensis);
                 	 }
                 	 
                 	 break;               	
@@ -140,16 +140,11 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
     														double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException{
 		  // also perform melting such that sensitivities are zero at final maturity  
 		  
-		  if(evaluationTime > product.getFinalMaturity()){
-		    	   
-		     return mapSensitivitiesOnBuckets(new RandomVariableInterface[]{new RandomVariable(0.0)}, riskClass, new int[]{12/*random*/}, model);
-		    	   
-		  }
+		  if(evaluationTime > product.getFinalMaturity()) return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
 		  
 		  // Get sensitivities to melt if not provided as input to the function
 		  if(sensitivities == null) {
 			  sensitivities = product.getExactDeltaFromCache(meltingZeroTime, riskClass, curveIndexName);		 
-		      //for(int i=0; i<sensitivities.length; i++) System.out.println("cacheSensis " + sensitivities[i].getAverage());
 		  }
 		  
 		  double[] initialMeltingTime = new double[]{meltingZeroTime};
