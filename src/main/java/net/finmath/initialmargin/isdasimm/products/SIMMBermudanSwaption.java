@@ -234,8 +234,6 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 		         RandomVariableInterface[] meltedSwapSensis = sensitivityCalculationScheme.getMeltedSensitivities(this, swapSensis, initialMeltingTime, evaluationTime, curveIndexName, "InterestRate");
 		   
 		         // Put swap sensis on exercised paths
-		         for(int i=0;i <meltedBermudanSensis.length;i++) meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, meltedSwapSensis[i], meltedBermudanSensis[i]);
-		      
 				 if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 			    		
 					  // Set sensis of not exercised paths to zero
