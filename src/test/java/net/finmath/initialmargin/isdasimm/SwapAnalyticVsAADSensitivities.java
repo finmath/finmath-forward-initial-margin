@@ -1,4 +1,4 @@
-package net.finmath.initialmargin.isdasimm.test;
+package net.finmath.initialmargin.isdasimm;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
