@@ -1,11 +1,10 @@
 package net.finmath.initialmargin.isdasimm.aggregationscheme;
 
+import java.util.Map;
+import java.util.Optional;
+
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /*

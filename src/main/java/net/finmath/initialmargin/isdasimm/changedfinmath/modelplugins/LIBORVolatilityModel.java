@@ -8,8 +8,6 @@ package net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins;
 
 import java.util.Arrays;
 
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 

@@ -3,9 +3,9 @@ import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
-import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
+import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /** This class is a wrapper of single <code> AbstractSIMMProduct <code> 's into one portfolio. 

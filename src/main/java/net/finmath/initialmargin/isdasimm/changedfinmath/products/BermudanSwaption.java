@@ -8,8 +8,6 @@ package net.finmath.initialmargin.isdasimm.changedfinmath.products;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.RandomVariable;

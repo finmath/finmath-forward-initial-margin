@@ -10,9 +10,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.*;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.*;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.*;
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.AbstractNotional;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.AbstractProductComponent;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.AccruingNotional;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.Period;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.ProductCollection;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.AbstractIndex;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.FixedCoupon;
+import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.LinearCombinationIndex;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleInterface;
 

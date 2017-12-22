@@ -6,7 +6,7 @@
 package net.finmath.initialmargin.isdasimm.changedfinmath.products.components;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.*;
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**

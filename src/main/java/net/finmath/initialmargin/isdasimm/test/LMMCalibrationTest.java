@@ -14,10 +14,10 @@ import org.junit.Test;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel;
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel.CalibrationItem;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelInterface;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel.CalibrationItem;
 import net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins.BlendedLocalVolatilityModel;
 import net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
