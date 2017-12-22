@@ -1,10 +1,10 @@
-package net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins;
-
 /*
- * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
+ * (c) Copyright Christian P. Fries, Germany. Contact: email@christian-fries.de.
  *
  * Created on 20.05.2006
  */
+package net.finmath.montecarlo.interestrate.modelplugins;
+
 import java.util.ArrayList;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
@@ -27,7 +27,7 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 	 * A cache for the parameter associated with this model, it is only used when getParameter is
 	 * called repeatedly.
 	 */
-	private transient RandomVariableInterface[]		parameter = null;	
+	private transient double[]	parameter;
 
 	// A lazy init cache
 	private transient RandomVariableInterface[][] volatility;
@@ -84,20 +84,33 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 	}
 
 	@Override
+	public double[] getParameter() {
+		synchronized (this) {
+			if(parameter == null) {
+				ArrayList<Double> parameterArray = new ArrayList<Double>();
+				for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
+					for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
+						if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
+							parameterArray.add(volatilityMatrix[timeIndex][liborPeriodIndex]);
+						}
+					}
+				}
+				parameter = new double[parameterArray.size()];
+				for(int i=0; i<parameter.length; i++) parameter[i] = parameterArray.get(i);
+			}
+		}
+
+		return parameter;
+	}
+
+	@Override
 	public void setParameter(double[] parameter) {
 		this.parameter = null;		// Invalidate cache
 		int parameterIndex = 0;
 		for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
 			for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
 				if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
-					double currentVolatility = parameter[parameterIndex++];
-					
-					// catch negative values
-//					if(currentVolatility < 0.0) 
-//						throw new IllegalArgumentException("Parameter at index " + (parameterIndex - 1) + " indicates negative Volatility(value: "+ currentVolatility +")!");
-					currentVolatility = Math.max(currentVolatility, 0.0);
-					
-					volatilityMatrix[timeIndex][liborPeriodIndex] = currentVolatility;
+					volatilityMatrix[timeIndex][liborPeriodIndex] = Math.max(parameter[parameterIndex++],0.0);
 				}
 			}
 		}
@@ -125,26 +138,4 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 				getLiborPeriodDiscretization(),
 				newVolatilityArray);
 	}
-
-	@Override
-	public RandomVariableInterface[] getParameterAsRandomVariable() {
-		synchronized (this) {
-			if(parameter == null) {
-				ArrayList<RandomVariableInterface> parameterArray = new ArrayList<>();
-				for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
-					for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
-						if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
-							parameterArray.add(getVolatility(timeIndex, liborPeriodIndex));
-						}
-					}
-				}
-				parameter = new RandomVariableInterface[parameterArray.size()];
-				for(int i=0; i<parameter.length; i++) parameter[i] = parameterArray.get(i);
-			}
-		}
-
-		return parameter;	
-	}
-	
-	
 }

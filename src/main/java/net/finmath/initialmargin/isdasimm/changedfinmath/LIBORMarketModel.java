@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.functions.AnalyticFormulas;
-import net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.SwaptionAnalyticApproximation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.SwaptionSimple;
@@ -26,6 +25,7 @@ import net.finmath.marketdata.products.SwapAnnuity;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
+import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.model.AbstractModel;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;

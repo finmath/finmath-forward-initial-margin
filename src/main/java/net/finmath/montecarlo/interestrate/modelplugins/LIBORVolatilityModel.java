@@ -1,12 +1,9 @@
-package net.finmath.initialmargin.isdasimm.changedfinmath.modelplugins;
-
 /*
- * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
+ * (c) Copyright Christian P. Fries, Germany. Contact: email@christian-fries.de.
  *
  * Created on 20.05.2006
  */
-
-import java.util.Arrays;
+package net.finmath.montecarlo.interestrate.modelplugins;
 
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
@@ -25,10 +22,10 @@ public abstract class LIBORVolatilityModel {
     private TimeDiscretizationInterface	timeDiscretization;
     private TimeDiscretizationInterface	liborPeriodDiscretization;
 	
-//    // You cannot instantiate the class empty
-//    @SuppressWarnings("unused")
-//	private LIBORVolatilityModel() {
-//	}
+    // You cannot instantiate the class empty
+    @SuppressWarnings("unused")
+	private LIBORVolatilityModel() {
+	}
     
 	/**
 	 * @param timeDiscretization The vector of simulation time discretization points.
@@ -40,24 +37,9 @@ public abstract class LIBORVolatilityModel {
 		this.liborPeriodDiscretization = liborPeriodDiscretization;
 	}
 
+    public abstract double[]	getParameter();
     public abstract void		setParameter(double[] parameter);
 
-    public abstract RandomVariableInterface[] getParameterAsRandomVariable();
-    
-    public double[]	getParameter() {
-		// get parameters
-		RandomVariableInterface[] parameterAsRandomVariable = getParameterAsRandomVariable();
-
-		// cover case of not calibrateable models
-		if(parameterAsRandomVariable == null) return null;
-
-		// get values of deterministic random variables
-		double[] parameterAsDouble =  Arrays.stream(parameterAsRandomVariable).mapToDouble(param -> param.doubleValue()).toArray();
-		return parameterAsDouble;
-    }
-	
-    
-    
     /**
      * Implement this method to complete the implementation.
 	 * @param timeIndex The time index (for timeDiscretization)
@@ -81,6 +63,4 @@ public abstract class LIBORVolatilityModel {
 	}
 
 	public abstract Object clone();
-	
-	
 }
