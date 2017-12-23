@@ -5,7 +5,7 @@
 	<artifactId>finmath-forward-initial-margin</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>finmath-forward-initial-margin</name>
-	<description>Calculate the forward initial margin for generic products / gerneric models.</description>
+	<description>Calculate the forward initial margin (MVA) for generic products / generic models.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>net.finmath</groupId>
 			<artifactId>finmath-lib</artifactId>
-			<version>3.1.5</version>
+			<version>3.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>net.finmath</groupId>
