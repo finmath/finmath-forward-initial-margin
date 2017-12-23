@@ -92,7 +92,7 @@ public class MeltingSensitivitiesTest {
 				swapTenor = IntStream.range(0, numberOfPeriods+1).mapToDouble(i->exerciseTime+i*0.5).toArray();
 				Arrays.fill(periodLength, 0.5);
 				Arrays.fill(periodNotionals, notional);
-				Arrays.fill(swapRates, 0.0); //LMMCalibrationTest.getParSwaprate(forwardCurve, discountCurve, swapTenor));
+				Arrays.fill(swapRates, 0.0); // getParSwaprate(forwardCurve, discountCurve, swapTenor));
 
 				SIMMSwaption swaption = new SIMMSwaption(exerciseTime, fixingDates, paymentDates, swapRates, notional, 
 						DeliveryType.Physical, new String[]{"OIS","Libor6m"}, "EUR");

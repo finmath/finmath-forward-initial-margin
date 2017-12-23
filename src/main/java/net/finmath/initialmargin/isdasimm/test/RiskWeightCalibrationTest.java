@@ -4,13 +4,15 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.LMMCalibrationTest;
 import net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.SIMMSimpleSwap;
 import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurve;
+import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
+import net.finmath.time.TimeDiscretization;
 
 public class RiskWeightCalibrationTest {
 
@@ -81,7 +83,7 @@ public class RiskWeightCalibrationTest {
 			fixingDatesSwap = IntStream.range(0, fixingDatesSwap.length).mapToDouble(i->i*0.5).toArray();
 			paymentDatesSwap = IntStream.range(0, paymentDatesSwap.length).mapToDouble(i->(i+1)*periodLength).toArray();
 			swapTenorSwap = IntStream.range(0, numberOfPeriods[swapIndex]+1).mapToDouble(i->i*periodLength).toArray();
-			Arrays.fill(swapRatesSwap, LMMCalibrationTest.getParSwaprate(forwardCurve, discountCurve, swapTenorSwap));
+			Arrays.fill(swapRatesSwap, getParSwaprate(forwardCurve, discountCurve, swapTenorSwap));
 
 			swaps[swapIndex] = new SIMMSimpleSwap(fixingDatesSwap, paymentDatesSwap, swapRatesSwap, true /*isPayFix*/,notional, new String[]{"OIS", "Libor6m"}, "EUR");
 		}
@@ -89,4 +91,7 @@ public class RiskWeightCalibrationTest {
 
 	}
 
+	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) throws CalculationException {
+		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
+	}
 }

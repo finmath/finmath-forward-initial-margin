@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.LMMCalibrationTest;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModelInterface;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelInterface;
@@ -23,7 +22,9 @@ import net.finmath.initialmargin.isdasimm.products.SIMMSwaption.DeliveryType;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
 import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurve;
+import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.BrownianMotionInterface;
@@ -146,7 +147,7 @@ public class SIMMTest {
 //		isPeriodStartDateExerciseDate[16]=true;
 
 		
-		System.out.println("Swap Rate: " + LMMCalibrationTest.getParSwaprate(forwardCurve, discountCurve, swapTenor));
+		System.out.println("Swap Rate: " + getParSwaprate(forwardCurve, discountCurve, swapTenor));
 		
 		double     exerciseTime2     = 5.0;	// Exercise date //5
 		double     constantSwapRate2 = 0.017;
@@ -610,6 +611,9 @@ public class SIMMTest {
 		return properties;
 	}
 
+	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) throws CalculationException {
+		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
+	}
 
 }
 
