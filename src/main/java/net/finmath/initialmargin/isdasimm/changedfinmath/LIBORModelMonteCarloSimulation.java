@@ -173,11 +173,6 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 		return model.getForwardBondOIS(T, t);
 	}
 	
-	@Override
-	public AbstractRandomVariableFactory getRandomVariableFactory(){
-		return model.getRandomVariableFactory();
-	}
-
 	public LIBORModelInterface getModel() {
 		return model;
 	}

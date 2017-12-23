@@ -129,11 +129,6 @@ public interface LIBORModelMonteCarloSimulationInterface extends TermStructureMo
 	RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException;
 
 	/**
-	 * 
-	 * @return The random variable factory of this model
-	 */
-	public AbstractRandomVariableFactory getRandomVariableFactory();
-	/**
 	 * Return a clone of this model with a modified Brownian motion using a different seed.
 	 * 
 	 * @param seed The seed

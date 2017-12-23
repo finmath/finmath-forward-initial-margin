@@ -570,6 +570,7 @@ public class SIMMTest {
 	}
 	
 	public static LIBORModelMonteCarloSimulationInterface getZeroVolatilityModel(LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
+		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
 		
 		// Set brownian motion with one path
 		BrownianMotionInterface originalBM = model.getBrownianMotion();
@@ -579,7 +580,7 @@ public class SIMMTest {
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
 		
 		// Create zero volatility model
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(model.getRandomVariableFactory(),model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.0}/*volatility*/,false);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.0}/*volatility*/,false);
 
 		//Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
 		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), model.getNumberOfFactors(),0);
@@ -589,7 +590,7 @@ public class SIMMTest {
 				new LIBORCovarianceModelFromVolatilityAndCorrelation(model.getTimeDiscretization(),
 						model.getLiborPeriodDiscretization(), volatilityModel, correlationModel);
 		
-		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(model.getRandomVariableFactory(),covarianceModel, 0.0/*displacementParameter*/, false);
+		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(covarianceModel, 0.0/*displacementParameter*/, false);
 	
 		Map<String, Object> dataModified = new HashMap<>();
 		dataModified.put("covarianceModel", covarianceModelBlended);

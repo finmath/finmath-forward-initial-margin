@@ -71,6 +71,4 @@ public interface TermStructureModelInterface extends AbstractModelInterface {
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 
 	RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException;
-
-	AbstractRandomVariableFactory getRandomVariableFactory();
 }

@@ -69,7 +69,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 	public AbstractLIBORCovarianceModelParametric(TimeDiscretizationInterface timeDiscretization, TimeDiscretizationInterface liborPeriodDiscretization, int numberOfFactors) {
 		super(timeDiscretization, liborPeriodDiscretization, numberOfFactors);
 	}
-	
+
 	/**
 	 * Get the parameters of determining this parametric
 	 * covariance model. The parameters are usually free parameters

@@ -131,11 +131,6 @@ public class TermStructureModelMonteCarloSimulation implements LIBORModelMonteCa
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
-	public AbstractRandomVariableFactory getRandomVariableFactory(){
-		return model.getRandomVariableFactory();
-	}
-
 	public int getNumberOfComponents() {
 		return model.getNumberOfComponents();
 	}

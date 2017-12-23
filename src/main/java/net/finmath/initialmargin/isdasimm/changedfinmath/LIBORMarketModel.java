@@ -1195,11 +1195,6 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 	public DiscountCurveInterface getDiscountCurve() {
 		return discountCurve;
 	}
-
-	@Override
-	public AbstractRandomVariableFactory getRandomVariableFactory() {
-		return this.randomVariableFactory;
-	}
 }
 
 
