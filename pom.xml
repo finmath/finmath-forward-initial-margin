@@ -13,6 +13,26 @@
 		<src.test.java.dir>src/test/java</src.test.java.dir>
 	</properties>
 
+	<developers>
+		<developer>
+			<id>fries</id>
+			<name>Christian Fries</name>
+			<email>email@christian-fries.de</email>
+			<url>http://www.christian-fries.de</url>
+			<timezone>1</timezone>
+		</developer>
+		<developer>
+			<id>viehmann</id>
+			<name>Mario Viehmann</name>
+			<email>marioviehmann@gmail.com</email>
+			<timezone>1</timezone>
+		</developer>
+		<developer>
+			<id>pekola</id>
+			<timezone>1</timezone>
+		</developer>
+	</developers>
+
 	<build>
 		<defaultGoal>clean install javadoc:javadoc</defaultGoal>
 		<finalName>${project.artifactId}-${project.version}</finalName>
