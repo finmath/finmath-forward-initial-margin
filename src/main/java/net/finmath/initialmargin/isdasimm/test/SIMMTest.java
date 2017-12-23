@@ -58,7 +58,7 @@ public class SIMMTest {
 	final static boolean isCalculateBermudan  = false;
 	
 	// Model Paths 
-	final static int numberOfPaths = 1000;
+	final static int numberOfPaths = 100;
 
 	public static void main(String[] args) throws CalculationException{
 
