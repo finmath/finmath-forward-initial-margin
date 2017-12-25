@@ -26,6 +26,7 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelFrom
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloRegressionProduct;
 import net.finmath.montecarlo.interestrate.products.Portfolio;
 import net.finmath.montecarlo.interestrate.products.Swap;
 import net.finmath.montecarlo.interestrate.products.SwapLeg;
@@ -61,12 +62,12 @@ public class InitialMarginRegressionTest {
 
          LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(new RandomVariableFactory(),numberOfPaths, numberOfFactors, 
                                                                                  discountCurve,
-                                                                                 forwardCurve, 0.0 /* Correlation */, 0.4);
+                                                                                 forwardCurve, 0.0 /* Correlation */, 0.2);
         // Another model with different volatility structure. 
         //LIBORModelMonteCarloSimulationInterface model2 = createLIBORMarketModel2(1000, 2, 0.2);
      	
         // IM Portfolio Products. First test: Simple IR Swap
- 		AbstractLIBORMonteCarloProduct[] products = new Swap[1];
+ 		AbstractLIBORMonteCarloRegressionProduct[] products = new Swap[1];
  		products = createSwaps(new String[] {"5Y"});
    		
  		double finalTime = 6.0;
@@ -153,7 +154,7 @@ public class InitialMarginRegressionTest {
 				if(timeToMaturity <= 0)
 					instVolatility = 0;				// This forward rate is already fixed, no volatility
 				else
-					instVolatility = volatilityParameter + volatilityParameter * Math.exp(-0.4 * timeToMaturity);
+					instVolatility = volatilityParameter + volatilityParameter * Math.exp(-0.2 * timeToMaturity);
 
 				// Store
 				volatility[timeIndex][liborIndex] = instVolatility;
@@ -306,8 +307,8 @@ public class InitialMarginRegressionTest {
 //	
 	
 	
-	 public static AbstractLIBORMonteCarloProduct[] createSwaps(String[] maturities){
-		    AbstractLIBORMonteCarloProduct[] swaps = new AbstractLIBORMonteCarloProduct[maturities.length];
+	 public static AbstractLIBORMonteCarloRegressionProduct[] createSwaps(String[] maturities){
+		    AbstractLIBORMonteCarloRegressionProduct[] swaps = new AbstractLIBORMonteCarloRegressionProduct[maturities.length];
 		    // 1) Create Portfolio of swaps -------------------------------------------------------------------------------
 		    for(int swapIndex = 0; swapIndex < maturities.length; swapIndex++){
 		    // Floating Leg
@@ -345,7 +346,7 @@ public class InitialMarginRegressionTest {
 			SwapLeg legF = new SwapLeg(scheduleF, notionalF, indexF, spreadF, false /* isNotionalExchanged */);
 
 			// Swap
-			AbstractLIBORMonteCarloProduct swap = new Swap(leg,legF);
+			AbstractLIBORMonteCarloRegressionProduct swap = new Swap(leg,legF);
 			swaps[swapIndex]=swap;
 		    }
 		    return swaps;

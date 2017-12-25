@@ -16,7 +16,8 @@ import java.util.concurrent.RejectedExecutionException;
 import net.finmath.concurrency.FutureWrapper;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.AbstractMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloRegressionProduct;
+import net.finmath.montecarlo.interestrate.products.AbstractMonteCarloRegressionProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
@@ -96,7 +97,7 @@ public class ProductCollection extends AbstractProductComponent {
 
 		// Ignite asynchronous calculation if possible
 		ArrayList< Future<RandomVariableInterface> > results = new ArrayList< Future<RandomVariableInterface> >();
-		for(final AbstractMonteCarloProduct product : products) {
+		for(final AbstractLIBORMonteCarloRegressionProduct product : products) {
 			Future<RandomVariableInterface> valueFuture;
 			try {
 				valueFuture = executor.submit(
@@ -144,8 +145,7 @@ public class ProductCollection extends AbstractProductComponent {
 
 		// Ignite asynchronous calculation if possible
 		ArrayList< Future<RandomVariableInterface> > results = new ArrayList< Future<RandomVariableInterface> >();
-		for(final AbstractMonteCarloProduct product : products) {
-			RandomVariableInterface test = product.getCF(initialTime, finalTime, model);
+		for(final AbstractLIBORMonteCarloRegressionProduct product : products) {
 			Future<RandomVariableInterface> valueFuture;
 			try {
 				valueFuture = executor.submit(

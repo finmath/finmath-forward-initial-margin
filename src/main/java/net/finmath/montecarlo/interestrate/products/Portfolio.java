@@ -30,7 +30,7 @@ public class Portfolio extends AbstractProductComponent {
 	
 	private static final long serialVersionUID = -1360506093081238482L;
 
-	private AbstractLIBORMonteCarloProduct[]	products;
+	private AbstractLIBORMonteCarloRegressionProduct[]	products;
 	private double[]							weights;
 	private double                              initialLifeTime;
 
@@ -42,9 +42,9 @@ public class Portfolio extends AbstractProductComponent {
 	 * @param product A product.
 	 * @param weight A weight.
 	 */
-	public Portfolio(AbstractLIBORMonteCarloProduct product, double weight) {
+	public Portfolio(AbstractLIBORMonteCarloRegressionProduct product, double weight) {
 		super(product.getCurrency());
-		this.products = new AbstractLIBORMonteCarloProduct[] { product };
+		this.products = new AbstractLIBORMonteCarloRegressionProduct[] { product };
 		this.weights = new double[] { weight };
 	}
 
@@ -56,7 +56,7 @@ public class Portfolio extends AbstractProductComponent {
 	 * @param products An array of products.
 	 * @param weights An array of weights (having the same lengths as the array of products).
 	 */
-	public Portfolio(AbstractLIBORMonteCarloProduct[] products, double[] weights) {
+	public Portfolio(AbstractLIBORMonteCarloRegressionProduct[] products, double[] weights) {
 		super();
 		//String currency = products[0].getCurrency();
 		//for(AbstractLIBORMonteCarloProduct product : products) if(!currency.equals(product.getCurrency()))
@@ -75,7 +75,7 @@ public class Portfolio extends AbstractProductComponent {
 	 * @param products An array of products.
 	 * @param weights An array of weights (having the same lengths as the array of products).
 	 */
-	public Portfolio(String currency, AbstractLIBORMonteCarloProduct[] products, double[] weights) {
+	public Portfolio(String currency, AbstractLIBORMonteCarloRegressionProduct[] products, double[] weights) {
 		super(currency);
 
 		for(AbstractLIBORMonteCarloProduct product : products) if(!currency.equals(product.getCurrency()))
