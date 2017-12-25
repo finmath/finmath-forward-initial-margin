@@ -370,69 +370,66 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
  	 *  <code> getDiscountCurveSensitivities(String riskClass, double evaluationTime) <code>.
  	 * 
  	 * @param evaluationTime The time as of which the forward sensitivities are considered
- 	 * @param futureDiscountTimes (may be null) The times at which the the numeraire has been used in the last valuation
+ 	 * @param discountTimes (may be null) The times after evaluation time at which the the numeraire has been used in the last valuation of this product
  	 * @param dVdP (may be null) The sensitivities w.r.t. the OIS bond. Only used if dV/dP is given analytically.
  	 * @param riskClass The risk class
  	 * @param model The Libor market model
  	 * @return The forward sensitivities w.r.t. the OIS curve 
  	 * @throws CalculationException
  	 */
-    protected RandomVariableInterface[] getDiscountCurveSensitivities(double evaluationTime, double[] futureDiscountTimes, 
+    protected RandomVariableInterface[] getDiscountCurveSensitivities(double evaluationTime, double[] discountTimes, 
     		                                                             RandomVariableInterface[] dVdP, String riskClass, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
        
-       if(dVdP == null || futureDiscountTimes == null){ //i.e. need to calculate it with AAD
+       if(dVdP == null || discountTimes == null){ //i.e. need to calculate it with AAD
        
-    	   // Get map with all numeraire adjustments used for this product
+    	   // Get map with all numeraire adjustments used for this product (may contain adjustment factors not relevant for this product)
 	       Map<Double, RandomVariableInterface> adjustmentMap = getNumeraireAdjustmentMap();
 	
-	       // Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
-	       if(!adjustmentMap.keySet().stream().filter(time -> time > evaluationTime).findAny().isPresent()){
-		      return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
-	       }
-	
-	       // Calculate adjustment at evaluationTime
-	       RandomVariableInterface adjustmentAtEval = model.getNumeraireOISAdjustmentFactor(evaluationTime);
-			
-	       // Get all adjustments after evaluationTime
-	       Set<Double> relevant = new HashSet<Double>();
-	       relevant = adjustmentMap.keySet().stream().filter(entry -> entry>evaluationTime).collect(Collectors.toCollection(HashSet::new));
-	       adjustmentMap.keySet().retainAll(relevant);
-	       futureDiscountTimes = ArrayUtils.toPrimitive(Arrays.stream(adjustmentMap.keySet().toArray()).sorted().toArray(Double[]::new));
+	       // Filter for adjustments after evaluationTime, since derivatives w.r.t. adjustments in the past may be non-zero.
+	       Set<Double> adjustmentSetAfterEval = new HashSet<Double>();
+	       adjustmentSetAfterEval = adjustmentMap.keySet().stream().filter(entry -> entry>evaluationTime).collect(Collectors.toCollection(HashSet::new));
+	       adjustmentMap.keySet().retainAll(adjustmentSetAfterEval);
+	       double[] adjustmentTimesAfterEval = ArrayUtils.toPrimitive(Arrays.stream(adjustmentMap.keySet().toArray()).sorted().toArray(Double[]::new));
 	
 	       //Calculate derivative w.r.t. adjustment
-	       int numberOfSwaps = adjustmentMap.size();
-	       dVdP = new RandomVariableInterface[numberOfSwaps];
-	
+	       ArrayList<RandomVariableInterface> dVdPList = new ArrayList<RandomVariableInterface>();
+	       ArrayList<Double> relevantDiscountTimes = new ArrayList<Double>();
 	       setConditionalExpectationOperator(evaluationTime);
 	       RandomVariableInterface numeraireAtEval  = model.getNumeraire(evaluationTime);
-	
-	       for(int i=0;i<dVdP.length;i++){
-		
-		      // Calculate dVdA
-		      RandomVariableInterface adjustment = adjustmentMap.get(futureDiscountTimes[i]);
-		      RandomVariableInterface dVdA = getDerivative(adjustment).getConditionalExpectation(conditionalExpectationOperator).mult(numeraireAtEval);
-		
-		      // Calculate dV(t)/dP(t_cf;t) where t_cf are the cash flow times of this product
-		      RandomVariableInterface bond = model.getForwardBondLibor(futureDiscountTimes[i],evaluationTime);
-		      //RandomVariableInterface test = model.getNumeraire(evaluationTime).div(model.getNumeraire(futureDiscountTimes[i])).mult(adjustment).div(adjustmentAtEval).getConditionalExpectation(conditionalExpectationOperator);
-		      dVdP[i] = dVdA.mult(adjustment.squared()).mult(-1.0).div(bond).div(adjustmentAtEval);
-		
+	       RandomVariableInterface adjustmentAtEval = model.getNumeraireOISAdjustmentFactor(evaluationTime);
+			
+
+	       for(int i=0;i<adjustmentTimesAfterEval.length;i++){
+
+	    	   // Calculate dVdA
+	    	   RandomVariableInterface adjustment = adjustmentMap.get(adjustmentTimesAfterEval[i]);
+	    	   RandomVariableInterface dVdA = getDerivative(adjustment).getConditionalExpectation(conditionalExpectationOperator).mult(numeraireAtEval);
+
+	    	   if(!(dVdA.getMin()==0 && dVdA.getMax()==0)){ // If dVdA is zero the adjustment is assumed to belong to a different product.
+	    		   // Calculate dV(t)/dP(t_cf;t) where t_cf are the cash flow times of this product
+	    		   RandomVariableInterface bond = model.getForwardBondLibor(adjustmentTimesAfterEval[i],evaluationTime);		  
+	    		   dVdPList.add(dVdA.mult(adjustment.squared()).mult(-1.0).div(bond).div(adjustmentAtEval));
+	    		   relevantDiscountTimes.add(adjustmentTimesAfterEval[i]);
+	    	   }
 	       }
+	       dVdP = dVdPList.toArray(new RandomVariableInterface[0]);
+	       discountTimes = ArrayUtils.toPrimitive(Arrays.stream(relevantDiscountTimes.toArray()).toArray(Double[]::new));
+	       if(dVdP.length==0) return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
        }
 	
 	   // Perform a log-linear interpolation of the discount factors to obtain dP(t_cf;t)/dP(t+i\Delta_T;t).
 	   int numberOfP = getNumberOfRemainingLibors(evaluationTime, model);
-	   RandomVariableInterface[][] dPdP = new RandomVariableInterface[futureDiscountTimes.length][numberOfP];
+	   RandomVariableInterface[][] dPdP = new RandomVariableInterface[discountTimes.length][numberOfP];
 	
 	   double deltaT = model.getLiborPeriodDiscretization().getTimeStep(0);
 	   TimeDiscretizationInterface timesP = new TimeDiscretization(evaluationTime, numberOfP, deltaT);
 	   for(int cfIndex=0; cfIndex<dPdP.length; cfIndex++){
-		   int lowerIndex = timesP.getTimeIndexNearestLessOrEqual(futureDiscountTimes[cfIndex]);
-		   double alpha = (futureDiscountTimes[cfIndex]-timesP.getTime(lowerIndex))/deltaT;
+		   int lowerIndex = timesP.getTimeIndexNearestLessOrEqual(discountTimes[cfIndex]);
+		   double alpha = (discountTimes[cfIndex]-timesP.getTime(lowerIndex))/deltaT;
 		   Arrays.fill(dPdP[cfIndex], new RandomVariable(0.0));
 		   RandomVariableInterface bondLowerIndex = lowerIndex==0 ? new RandomVariable(1.0) : model.getForwardBondOIS(timesP.getTime(lowerIndex),evaluationTime);
 		   RandomVariableInterface bondUpperIndex = model.getForwardBondOIS(timesP.getTime(lowerIndex+1),evaluationTime);
-		   RandomVariableInterface bondAtCF       = model.getForwardBondOIS(futureDiscountTimes[cfIndex],evaluationTime);		   
+		   RandomVariableInterface bondAtCF       = model.getForwardBondOIS(discountTimes[cfIndex],evaluationTime);		   
 		   dPdP[cfIndex][lowerIndex] = bondAtCF.mult(1-alpha).div(bondLowerIndex);
 		   dPdP[cfIndex][lowerIndex+1] = bondAtCF.mult(alpha).div(bondUpperIndex);
 	   }
