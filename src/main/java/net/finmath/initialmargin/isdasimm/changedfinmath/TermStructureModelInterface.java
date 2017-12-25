@@ -11,7 +11,6 @@ import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.AnalyticModelInterface;
 import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.model.AbstractModelInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 
@@ -62,11 +61,10 @@ public interface TermStructureModelInterface extends AbstractModelInterface {
 	TermStructureModelInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException;
 
 	// Added by Mario Viehmann
-	void clearNumeraireAdjustmentCache();
 		
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 	
-	RandomVariableInterface getNumeraireAdjustment(double time) throws CalculationException;
+	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
 		
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 

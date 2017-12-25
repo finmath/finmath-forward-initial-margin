@@ -61,11 +61,10 @@ public interface LIBORModelInterface extends TermStructureModelInterface {
 	LIBORModelInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException;
 
 	// Added by Mario Viehmann
-	void clearNumeraireAdjustmentCache();
 	
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 	
-	RandomVariableInterface getNumeraireAdjustment(double time) throws CalculationException;
+	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
 	
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 

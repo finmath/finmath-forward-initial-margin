@@ -195,8 +195,6 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	 */
     private void setSwapGradient() throws CalculationException{
 		 if(!super.isGradientOfDeliveryProduct){
-		    // Clear cache of numeraire adjustments of the model to capture the numeraire adjustments from the product valuation
-		    modelCache.clearNumeraireAdjustmentCache();
 		    // Calculate the product value as of time 0.
 		    RandomVariableInterface indicator = getExerciseIndicator(swaption.getExerciseDate()+0.0001);
 		    RandomVariableDifferentiableInterface productValue = (RandomVariableDifferentiableInterface) swap.getValue(0.0, modelCache).mult(indicator);

@@ -242,7 +242,6 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
      */
  	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() throws CalculationException{
 	   if(this.numeraireAdjustmentMap==null) {
-		  modelCache.clearNumeraireAdjustmentCache();
 		  getLIBORMonteCarloProduct().getValue(0.0,modelCache);
 		  this.numeraireAdjustmentMap = modelCache.getNumeraireAdjustmentMap();
 	   }
@@ -253,8 +252,6 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
  	public Map<Long, RandomVariableInterface> getGradient() throws CalculationException {
 		  
  	   if(gradient==null) {
-	      // Clear cache of numeraire adjustments of the model to capture the numeraire adjustments from the product valuation
-		  modelCache.clearNumeraireAdjustmentCache();		
 		  // Calculate the product value as of time 0.
 		  RandomVariableDifferentiableInterface productValue = (RandomVariableDifferentiableInterface) getLIBORMonteCarloProduct().getValue(0.0, modelCache);		     
 		  // Get the map of numeraire adjustments used specifically for this product
@@ -394,7 +391,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	       }
 	
 	       // Calculate adjustment at evaluationTime
-	       RandomVariableInterface adjustmentAtEval = model.getNumeraireAdjustment(evaluationTime);
+	       RandomVariableInterface adjustmentAtEval = model.getNumeraireOISAdjustmentFactor(evaluationTime);
 			
 	       // Get all adjustments after evaluationTime
 	       Set<Double> relevant = new HashSet<Double>();

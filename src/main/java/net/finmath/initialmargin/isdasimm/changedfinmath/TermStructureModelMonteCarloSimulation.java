@@ -191,19 +191,14 @@ public class TermStructureModelMonteCarloSimulation implements LIBORModelMonteCa
 
 	// Added by Mario Viehmann
 	
-	@Override
-	public void clearNumeraireAdjustmentCache(){
-		model.clearNumeraireAdjustmentCache();
-	}
-	
 	@Override 
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
 		return model.getNumeraireAdjustmentMap();
 	}
 	
 	@Override
-	public RandomVariableInterface getNumeraireAdjustment(double time) throws CalculationException{
-		return model.getNumeraireAdjustment(time);
+	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
+		return model.getNumeraireOISAdjustmentFactor(time);
 	}
 	
 	@Override

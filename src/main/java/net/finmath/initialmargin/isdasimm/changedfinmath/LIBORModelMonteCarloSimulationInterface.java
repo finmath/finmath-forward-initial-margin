@@ -8,9 +8,7 @@ package net.finmath.initialmargin.isdasimm.changedfinmath;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotionInterface;
-//import net.finmath.montecarlo.interestrate.TermStructureModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -91,11 +89,7 @@ public interface LIBORModelMonteCarloSimulationInterface extends TermStructureMo
 	 */
 	TermStructureModelInterface getModel();
 	
-	/**
-	 * Clears the cache containing the numeraire adjustments
-	 */
-	void clearNumeraireAdjustmentCache();
-	
+
 	/**
 	 * Returns the map of <code> Double <code> (time) and <code> RandomVariableInterface <code> (numeraire Adjustment)
 	 * @return The numeraire adjustment map
@@ -108,7 +102,7 @@ public interface LIBORModelMonteCarloSimulationInterface extends TermStructureMo
 	 * @return
 	 * @throws CalculationException 
 	 */
-	RandomVariableInterface getNumeraireAdjustment(double time) throws CalculationException;
+	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
 	
 	/** 
 	 * Returns the forward bond P(T;t) on the forward curve. Calculated directly from Libors without using conditional expectation

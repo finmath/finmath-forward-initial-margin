@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
@@ -148,10 +147,6 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 		return model.getNumeraire(time);
 	}
 	
-	@Override
-	public void clearNumeraireAdjustmentCache(){
-		model.clearNumeraireAdjustmentCache();
-	}
 	
 	@Override 
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
@@ -159,8 +154,8 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 	}
 	
 	@Override
-	public RandomVariableInterface getNumeraireAdjustment(double time) throws CalculationException{
-		return model.getNumeraireAdjustment(time);
+	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
+		return model.getNumeraireOISAdjustmentFactor(time);
 	}
 	
 	@Override

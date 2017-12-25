@@ -654,17 +654,14 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 		
 		return numeraires.get(timeIndex);
 	}
-	
-	public void clearNumeraireAdjustmentCache(){
-		numeraireAdjustmentCache.clear();
-	}
+
 	
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
 		return this.numeraireAdjustmentCache;
 	}
 	
 	 
-	public RandomVariableInterface getNumeraireAdjustment(double time) throws CalculationException {
+	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		if(numeraireAdjustmentCache.containsKey(time)) return numeraireAdjustmentCache.get(time);
 		
 		// Get unadjusted Numeraire
@@ -735,8 +732,8 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
 		
 		// Get bondOIS = P^OIS(T;t) = P^L(T;t)*a_t/a_T
-		RandomVariableInterface adjustment_t = getNumeraireAdjustment(t);
-		RandomVariableInterface adjustment_T = getNumeraireAdjustment(T);
+		RandomVariableInterface adjustment_t = getNumeraireOISAdjustmentFactor(t);
+		RandomVariableInterface adjustment_T = getNumeraireOISAdjustmentFactor(T);
 		
 		return getForwardBondLibor(T,t).mult(adjustment_t).div(adjustment_T);
 	}
