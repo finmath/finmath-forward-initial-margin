@@ -170,11 +170,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
  		          // Calculate dV/dS = dV/dP * dP/dS. These Sensis are already on SIMM Buckets
  		          delta = product.getDiscountCurveSensitivities("InterestRate" /*riskClass*/,evaluationTime, model); 
  			    		    
- 		        } else {
- 		          // Set OIS sensitivities to zero on all SIMM buckets
- 		          delta = new RandomVariableInterface[12]; Arrays.fill(delta, new RandomVariable(0.0));
- 		        }
- 		   
+ 		        } else delta = zeroBucketsIR;
+ 		          
  		        break;
  		        
  		    default:
