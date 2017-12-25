@@ -32,7 +32,7 @@ import net.finmath.time.TimeDiscretizationInterface;
  * @author Christian Fries
  * @version 1.3
  */
-public class Swaption extends AbstractLIBORMonteCarloProduct {
+public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	private double     exerciseDate;	// Exercise date
 	private double[]   fixingDates;		// Vector of fixing dates (must be sorted)
 	private double[]   paymentDates;	// Vector of payment dates (same length as fixing dates)
@@ -40,7 +40,7 @@ public class Swaption extends AbstractLIBORMonteCarloProduct {
 	private double[]   swaprates;		// Vector of strikes
 	
 	private RandomVariableInterface barrierIndicator = null;
-	private AbstractLIBORMonteCarloProduct swap;
+	private AbstractLIBORMonteCarloRegressionProduct swap;
 	private final double notional;
 	
 	/**

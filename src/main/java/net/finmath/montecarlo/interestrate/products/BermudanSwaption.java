@@ -22,7 +22,7 @@ import net.finmath.stochastic.RandomVariableInterface;
  * @version 1.2
  * @date 06.12.2009
  */
-public class BermudanSwaption extends AbstractLIBORMonteCarloProduct {
+public class BermudanSwaption extends AbstractLIBORMonteCarloRegressionProduct {
 
 	private final boolean[]	isPeriodStartDateExerciseDate;	// Exercise date
 	private final double[]	fixingDates;                  	// Vector of fixing dates (must be sorted)

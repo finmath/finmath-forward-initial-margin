@@ -25,10 +25,10 @@ import net.finmath.time.ScheduleInterface;
  * 
  * @author Christian Fries
  */
-public class Swap extends AbstractLIBORMonteCarloProduct {
+public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 
-	private final AbstractLIBORMonteCarloProduct legReceiver;
-	private final AbstractLIBORMonteCarloProduct legPayer;
+	private final AbstractLIBORMonteCarloRegressionProduct legReceiver;
+	private final AbstractLIBORMonteCarloRegressionProduct legPayer;
 
 	/**
 	 * Create a swap which values as <code>legReceiver - legPayer</code>.
@@ -36,7 +36,7 @@ public class Swap extends AbstractLIBORMonteCarloProduct {
 	 * @param legReceiver The receiver leg.
 	 * @param legPayer The payer leg.
 	 */
-	public Swap(AbstractLIBORMonteCarloProduct legReceiver, AbstractLIBORMonteCarloProduct legPayer) {
+	public Swap(AbstractLIBORMonteCarloRegressionProduct legReceiver, AbstractLIBORMonteCarloRegressionProduct legPayer) {
 		super();
 		this.legReceiver = legReceiver;
 		this.legPayer = legPayer;

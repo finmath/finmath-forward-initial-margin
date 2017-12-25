@@ -18,7 +18,7 @@ import net.finmath.stochastic.RandomVariableInterface;
  * @author Christian Fries
  * @version 1.2
  */
-public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
+public class SimpleSwap extends AbstractLIBORMonteCarloRegressionProduct {
 	private final double[] fixingDates;	// Vector of fixing dates
 	private final double[] paymentDates;	// Vector of payment dates (same length as fixing dates)
 	private final double[] swaprates;		// Vector of strikes

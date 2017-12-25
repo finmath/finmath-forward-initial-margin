@@ -26,7 +26,7 @@ import net.finmath.time.ScheduleInterface;
  * @author Christian Fries
  *
  */
-public class SwapLeg extends AbstractLIBORMonteCarloProduct {
+public class SwapLeg extends AbstractLIBORMonteCarloRegressionProduct {
 
 	private final ScheduleInterface				legSchedule;
 	private final AbstractNotional				notional;
