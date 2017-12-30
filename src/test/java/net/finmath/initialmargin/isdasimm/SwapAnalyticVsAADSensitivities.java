@@ -66,7 +66,7 @@ public class SwapAnalyticVsAADSensitivities {
 				new double[] {0.02, 0.02, 0.02, 0.02, 0.02},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(randomVariableFactory,5000/*numberOfPaths*/, 1 /*numberOfFactors*/, 
+		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(randomVariableFactory,20000/*numberOfPaths*/, 1 /*numberOfFactors*/, 
 				discountCurve,
 				forwardCurve,0.0 /* Correlation */);
 
@@ -102,6 +102,7 @@ public class SwapAnalyticVsAADSensitivities {
 		double timeStep = 0.1;
 		double relError = 0;
 		int    counter=0;
+		double rmse = 0.0;
 
 		for(int timeIndex=0;timeIndex<(int)(paymentDates[paymentDates.length-1]/timeStep);timeIndex++){
 			double time = timeStep*timeIndex;
@@ -116,12 +117,14 @@ public class SwapAnalyticVsAADSensitivities {
 				if(sensisANA[liborIndex].getAverage()!=0){
 					//l2error += Math.sqrt(sensisAAD[liborIndex].sub(sensisANA[liborIndex]).squared().getAverage()*1000);
 					relError +=Math.abs(sensisAAD[liborIndex].getAverage()-sensisANA[liborIndex].getAverage())/Math.abs(sensisANA[liborIndex].getAverage());
+					rmse += sensisAAD[liborIndex].sub(sensisANA[liborIndex]).squared().average().sqrt().getAverage();
 					counter++;
 				}
 			} 
 
 		}
 		System.out.println("Rel. Error " + relError/counter);
+		System.out.println("Average RMSE " + rmse/counter);
 		Assert.assertTrue(relError/counter<0.01);
 	}
 
