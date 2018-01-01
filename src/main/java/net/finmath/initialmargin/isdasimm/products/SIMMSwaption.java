@@ -84,7 +84,8 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 		
 		
     @Override
-    public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct() {
+    public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time) {
+    	if(deliveryType == DeliveryType.Physical && time >= swaption.getExerciseDate()) return this.swap;
 		return this.swaption;
 	}
 
@@ -140,6 +141,15 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 		}
 
 	    return getDiscountCurveSensitivities(evaluationTime, futureDiscountTimes, dVdP /* null => use AAD*/, riskClass, model);
+	}
+	
+	@Override
+	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		if(deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) setSwapGradient();
+
+		return getValueNumeraireSensitivitiesAAD(evaluationTime, model);
+
 	}
 		  
 
