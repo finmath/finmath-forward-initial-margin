@@ -71,9 +71,13 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
                  case Exact:  
 
-                     maturityBucketSensis = doCalculateDeltaSensitivitiesIR(product, curveIndexName, evaluationTime, model);
-                                      
+                     maturityBucketSensis = doCalculateDeltaSensitivitiesIR(product, curveIndexName, evaluationTime, model);           
+               
                      break;
+                     
+                 case ExactConsideringDependencies:
+                	 
+                	 maturityBucketSensis = doCalculateDeltaSensitivitiesOISLiborDependence(product, curveIndexName, evaluationTime, model);
                      
                  case Interpolation:
 
