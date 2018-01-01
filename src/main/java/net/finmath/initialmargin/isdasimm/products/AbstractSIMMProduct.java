@@ -242,7 +242,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
      */
  	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() throws CalculationException{
 	   if(this.numeraireAdjustmentMap==null) {
-		  getLIBORMonteCarloProduct().getValue(0.0,modelCache);
+		  getLIBORMonteCarloProduct(0.0).getValue(0.0,modelCache);
 		  this.numeraireAdjustmentMap = modelCache.getNumeraireAdjustmentMap();
 	   }
 	   return this.numeraireAdjustmentMap;
@@ -253,7 +253,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		  
  	   if(gradient==null) {
 		  // Calculate the product value as of time 0.
-		  RandomVariableDifferentiableInterface productValue = (RandomVariableDifferentiableInterface) getLIBORMonteCarloProduct().getValue(0.0, modelCache);		     
+		  RandomVariableDifferentiableInterface productValue = (RandomVariableDifferentiableInterface) getLIBORMonteCarloProduct(0.0).getValue(0.0, modelCache);		     
 		  // Get the map of numeraire adjustments used specifically for this product
 		  this.numeraireAdjustmentMap.putAll(modelCache.getNumeraireAdjustmentMap());			 
 		  // Calculate the gradient
@@ -356,8 +356,18 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		    RandomVariableInterface[] dVdLAdjusted = AbstractSIMMSensitivityCalculation.multiply(valueLiborSensitivities,dLdL);
 		
 		    return dVdLAdjusted; 
-		} else return valueLiborSensitivities;
-		
+		} else {//return valueLiborSensitivities;
+			// Consider Libors only up to last Libor which has a sensitivity
+//	        int maxIndex = 0;
+//		    for(int i=valueLiborSensitivities.length-1; i>0;i--) {
+//		    	if(valueLiborSensitivities[i].getMin()==0 && valueLiborSensitivities[i].getMax()==0) {
+//		    		continue;
+//		    	} else {
+//		    		maxIndex = i; break;
+//		    	}
+//		    } return ArrayUtils.subarray(valueLiborSensitivities, 0, maxIndex+1);
+			return valueLiborSensitivities;
+		}
 	}
  	  
  	/** Calculate the sensitivities w.r.t. the OIS curve: dV/dS. These sensitivities are calculated using the numeraire adjustments at future 
@@ -443,6 +453,90 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	
 	   return AbstractSIMMSensitivityCalculation.mapSensitivitiesOnBuckets(dVdS, riskClass, null, model);
    }
+    
+    
+    /** Calculate the forward derivatives of the product w.r.t. the Numeraires at a given evaluation time.
+     *  These derivatives are not w.r.t. the numeraires on the Libor period discretization, but w.r.t. the numeraires 
+     *  in the numeraireCache of LIBORMarketModel.
+     *  This function is called by the subclasses in the overridden functions
+     *  <code> getValueNumeraireSensitivities <code>.
+     * 
+     * @param evaluationTime The time for which the forward sensitivities are calculated
+     * @param model The libor market model
+     * @return The forward Numeraire sensitivities of this product 
+     * @throws CalculationException
+     */
+    // NUMERAIRE SENSITIVITIES IF dVdN CALCULATED ONLY FOR REQUESTED NUMERAIRE TIMES AND NOT ON LIBOR PERIOD DISCRETIZATION
+    
+//    protected Map<Double,RandomVariableInterface> getValueNumeraireSensitivitiesAAD(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
+//    	Map<Double, RandomVariableInterface> dVdNMap = new HashMap<>();
+//    	Map<Double, RandomVariableInterface> numeraireCache = modelCache.getNumeraireCache();
+//
+//    	// Filter for numeraires after evaluationTime, since derivatives w.r.t. numeraires in the past may be non-zero.
+//    	Set<Double> numeraireSetAfterEval = new HashSet<Double>();
+//    	numeraireSetAfterEval = numeraireCache.keySet().stream().filter(entry -> entry>evaluationTime).collect(Collectors.toCollection(HashSet::new));
+//    	numeraireCache.keySet().retainAll(numeraireSetAfterEval);
+//    	double[] numeraireTimesAfterEval = ArrayUtils.toPrimitive(Arrays.stream(numeraireCache.keySet().toArray()).sorted().toArray(Double[]::new));
+//
+//    	//Calculate derivative w.r.t. numeraire
+//    	setConditionalExpectationOperator(evaluationTime);
+//    	RandomVariableInterface numeraireAtEval  = model.getNumeraire(evaluationTime);
+//
+//    	for(int i=0;i<numeraireTimesAfterEval.length;i++){
+//
+//    		// Calculate dVdN
+//    		RandomVariableInterface numeraire = numeraireCache.get(numeraireTimesAfterEval[i]);
+//    		RandomVariableInterface dVdN = getDerivative(numeraire).getConditionalExpectation(conditionalExpectationOperator).mult(numeraireAtEval);// Sensi wrt numeraireAtEval?! 
+//    		// If dVdN is zero the numeraire is assumed to belong to a different product.	  
+//    		if(!(dVdN.getMin()==0 && dVdN.getMax()==0)) dVdNMap.put(numeraireTimesAfterEval[i], dVdN);
+//
+//    	}
+//    	return dVdNMap;
+//    }
+	
+    protected RandomVariableInterface[] getValueNumeraireSensitivitiesAAD(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
+
+    	RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
+    	Map<Long, RandomVariableInterface> gradientOfNumeraireAtEval = ((RandomVariableDifferentiableInterface)numeraireAtEval).getGradient();
+    	setConditionalExpectationOperator(evaluationTime);
+    	RandomVariableInterface productValueAtEval = getLIBORMonteCarloProduct(evaluationTime).getValue(evaluationTime, model).getConditionalExpectation(conditionalExpectationOperator);
+    	// Calculate forward sensitivities
+    	int numberOfRemainingLibors = getNumberOfRemainingLibors(evaluationTime,model);
+    	int numberOfSensis = evaluationTime == getNextLiborTime(evaluationTime,model) ? numberOfRemainingLibors : numberOfRemainingLibors+1;
+    	RandomVariableInterface[] valueNumeraireSensitivities = new RandomVariableInterface[numberOfSensis];
+
+    	// Set dVdN for last numeraire which is already fixed (if applicable)
+    	int timeGridIndicator = evaluationTime == getNextLiborTime(evaluationTime,model) ? 0 : 1;
+    	int lastLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(evaluationTime);
+
+    	if(numberOfSensis!=numberOfRemainingLibors){
+    		double lastLiborTime = model.getLiborPeriodDiscretization().getTime(lastLiborIndex);
+    		RandomVariableInterface lastNumeraire = model.getNumeraire(lastLiborTime);
+    		RandomVariableInterface dVdN = getDerivative(lastNumeraire);
+    		RandomVariableInterface numeraireDerivative = gradientOfNumeraireAtEval.get(((RandomVariableDifferentiableInterface)lastNumeraire).getID());
+    		RandomVariableInterface dVdNSummand =  numeraireDerivative==null ? new RandomVariable(0.0) : numeraireDerivative.mult(productValueAtEval);
+    		valueNumeraireSensitivities[0] = dVdN.mult(numeraireAtEval).add(dVdNSummand);
+    	}
+
+    	for(int liborIndex=lastLiborIndex+timeGridIndicator;liborIndex<model.getNumberOfLibors(); liborIndex++){
+    		RandomVariableInterface numeraire = model.getNumeraire(model.getLiborPeriod(liborIndex));
+    		RandomVariableInterface dVdN = getDerivative(numeraire);
+    		RandomVariableInterface numeraireDerivative = gradientOfNumeraireAtEval.get(((RandomVariableDifferentiableInterface)numeraire).getID());
+    		RandomVariableInterface dVdNSummand =  numeraireDerivative==null ? new RandomVariable(0.0) : numeraireDerivative.mult(productValueAtEval);
+    		valueNumeraireSensitivities[liborIndex-lastLiborIndex] = dVdN.mult(numeraireAtEval).getConditionalExpectation(conditionalExpectationOperator).add(dVdNSummand);
+    	}
+
+//    	int maxIndex = 0;
+//    	for(int i=valueNumeraireSensitivities.length-1; i>0;i--) {
+//    		if(valueNumeraireSensitivities[i].getMin()==0 && valueNumeraireSensitivities[i].getMax()==0) {
+//    			continue;
+//    		} else {
+//    			maxIndex = i; break;
+//    		}
+//    	} 
+//    	return ArrayUtils.subarray(valueNumeraireSensitivities, 0, maxIndex+1);
+    	return valueNumeraireSensitivities;
+    }
  	  
  	/** Clear the time dependent delta cache and the vega sensitivity. 
  	 *  This is performed always upon change of the evaluation time of initial margin.
@@ -485,7 +579,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
     	
     }
     
-    public abstract AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct();
+    public abstract AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time);
     
     public String getProductClass(){
     	return this.productClass;

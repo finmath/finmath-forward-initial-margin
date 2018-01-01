@@ -2,6 +2,7 @@ package net.finmath.initialmargin.isdasimm.products;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
@@ -147,7 +148,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 	}
 	
 	@Override
-	public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct() {
+	public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time) {
 		return this.swap;
 	}
 
@@ -195,6 +196,15 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 		return getDiscountCurveSensitivities(evaluationTime, futureDiscountTimes, dVdP /* null => use AAD*/, riskClass, model);
 		   
     }
+	
+	@Override
+	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		// No need to adjust sensitivities on paths.
+		return getValueNumeraireSensitivitiesAAD(evaluationTime, model);
+
+	}
+
 
 	@Override
 	public RandomVariableInterface getExerciseIndicator(double time) {

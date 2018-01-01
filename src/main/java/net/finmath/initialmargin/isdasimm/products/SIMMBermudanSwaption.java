@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.BermudanSwaption;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.SimpleSwap;
+import net.finmath.initialmargin.isdasimm.products.SIMMSwaption.DeliveryType;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
@@ -29,8 +31,8 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	static final String[] riskClass = new String[]{"InterestRate"};
 	
 	// Swap after exercise
-	private SimpleSwap swap = null; 
-	//private boolean isUseAnalyticSensitivities = true;
+	private SimpleSwap swap = null;
+	private SIMMSimpleSwap SIMMSwap = null;
 	
 	private BermudanSwaption bermudan;
 	
@@ -52,7 +54,10 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	    
 	    this.bermudan = bermudan;	    
 	    this.exerciseType = bermudan.getIsCallable() ? ExerciseType.Callable : ExerciseType.Cancelable;
-	    if(exerciseType==ExerciseType.Callable) this.swap = bermudan.getSwap();
+	    if(exerciseType==ExerciseType.Callable) {
+	    	this.swap = bermudan.getSwap();
+	    	this.SIMMSwap = new SIMMSimpleSwap(swap, curveIndexNames, currency);
+	    }
 	}
 		
 	
@@ -75,13 +80,16 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			boolean isCallable = exerciseType == ExerciseType.Callable ? true : false;
 			this.bermudan = new BermudanSwaption(isPeriodStartDateExerciseDate,fixingDates,periodLengths, paymentDates,periodNotionals,swapRates, isCallable);
 		    this.exerciseType = exerciseType;
-		    if(exerciseType==ExerciseType.Callable) this.swap = bermudan.getSwap();
+		    if(exerciseType==ExerciseType.Callable) {
+		    	this.swap = bermudan.getSwap();
+		    	this.SIMMSwap = new SIMMSimpleSwap(swap, curveIndexNames, currency);
+		    }
 		    
 	}
 		
 		
     @Override
-    public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct() {
+    public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time) {
 		return this.bermudan;
 	}
 
@@ -204,7 +212,112 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	    
 	}
 	
+//	@Override
+//	public Map<Double, RandomVariableInterface> getValueNumeraireSensitivities(double evaluationTime,
+//											LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+//		// Get Bermudan sensitivities
+//		Map<Double,RandomVariableInterface> bermudanSensiMap = SIMMSwap.getValueNumeraireSensitivitiesAAD(evaluationTime, model);
+//        if(bermudanSensiMap == null) return null;
+//        
+//		// Set exercise indicator
+//		RandomVariableInterface[] indicator = new RandomVariableInterface[]{getExerciseIndicator(evaluationTime)}.clone();
+//		indicator[0] = indicator[0].sub(0.5); // i.e. -0.5: not exercised, 0.5: exercised
+//
+//		// Set sensitivities on exercised paths 
+//		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
+//
+//			switch(exerciseType){
+//
+//			case Callable:
+//
+//				Map<Double, RandomVariableInterface> swapSensiMap = SIMMSwap.getValueNumeraireSensitivities(evaluationTime, model);		    
+//
+//				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
+//
+//					// Set sensis of not exercised paths to zero		    	  
+//					bermudanSensiMap.entrySet().stream().forEach(e -> e.setValue(e.getValue().barrier(indicator[0], swapSensiMap.get(e.getKey()), new RandomVariable(0.0))));
+//
+//				} else {
+//
+//					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
+//					bermudanSensiMap.entrySet().stream().forEach(e -> e.setValue(e.getValue().barrier(indicator[0], swapSensiMap.get(e.getKey()), e.getValue())));
+//
+//				}
+//
+//				break;
+//
+//			case Cancelable:
+//
+//				// Set the sensitivities on exercised paths to zero
+//				bermudanSensiMap.entrySet().stream().forEach(e -> e.setValue(e.getValue().barrier(indicator[0], new RandomVariable(0.0), e.getValue())));
+//
+//				break;
+//
+//			default:
+//				break;
+//			}
+//
+//		}
+//
+//		return bermudanSensiMap;
+//	}
 	
+	
+	@Override
+	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
+											LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		// Get Bermudan sensitivities
+		RandomVariableInterface[] bermudanSensis = getValueNumeraireSensitivitiesAAD(evaluationTime, model);
+        
+		// Set exercise indicator
+		RandomVariableInterface[] indicator = new RandomVariableInterface[]{getExerciseIndicator(evaluationTime)}.clone();
+		indicator[0] = indicator[0].sub(0.5); // i.e. -0.5: not exercised, 0.5: exercised
+
+		// Set sensitivities on exercised paths 
+		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
+
+			switch(exerciseType){
+
+			case Callable:
+
+				RandomVariableInterface[] swapSensis = SIMMSwap.getValueNumeraireSensitivities(evaluationTime, model);		    
+
+				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
+
+					// Set sensis of not exercised paths to zero		    	  
+					IntStream.range(0,bermudanSensis.length).forEach(i->{
+						bermudanSensis[i].barrier(indicator[0], swapSensis[i], new RandomVariable(0.0));
+					});
+
+				} else {
+
+					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
+					IntStream.range(0,bermudanSensis.length).forEach(i->{
+						bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+					});
+					
+				}
+
+				break;
+
+			case Cancelable:
+
+				// Set the sensitivities on exercised paths to zero
+				IntStream.range(0,bermudanSensis.length).forEach(i->{
+					bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+				});
+				
+				break;
+
+			default:
+				break;
+			}
+
+		}
+
+		return bermudanSensis;
+	}
+
 	/** This function sets the sensitivities on the exercised paths to either swap sensitivities (for a Callable) 
 	 *  or to zero (for a Cancelable). This is necessary as the melting function in class <code> SIMMSensitivityCalculation <code>
 	 *  does not know on which paths we have already exercised. 
