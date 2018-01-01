@@ -64,6 +64,8 @@ public interface LIBORModelInterface extends TermStructureModelInterface {
 	
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 	
+	Map<Double, RandomVariableInterface> getNumeraireCache();
+	
 	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
 	
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;

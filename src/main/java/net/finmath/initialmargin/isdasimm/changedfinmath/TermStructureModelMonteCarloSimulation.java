@@ -196,6 +196,11 @@ public class TermStructureModelMonteCarloSimulation implements LIBORModelMonteCa
 		return model.getNumeraireAdjustmentMap();
 	}
 	
+	@Override 
+	public Map<Double, RandomVariableInterface> getNumeraireCache(){
+		return model.getNumeraireAdjustmentMap();
+	}
+	
 	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
 		return model.getNumeraireOISAdjustmentFactor(time);
