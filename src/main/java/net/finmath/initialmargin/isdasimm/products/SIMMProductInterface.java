@@ -65,6 +65,18 @@ public interface SIMMProductInterface {
      */
     public RandomVariableInterface[] getDiscountCurveSensitivities(String riskClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
+    /** Calculates the delta sensitivities w.r.t. the Numeraire at all times the numeraire is used in the 
+     * valuation of the product
+     * 
+     * @param riskClass The risk class to be considered
+     * @param evaluationTime The time of evaluation 
+     * @param model The Libor market model
+     * @return The map of times at which the numeraire is requested in the product valuation and the 
+     *         corresponding delta sensitivities w.r.t. the numeraire.
+     * @throws CalculationException
+     */
+    public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+
     /** Returns an indicator of the paths on which we have exercised at the given time. 1 if exercised, 0 if not exercised.
      *  This is necessary for the sensitivity calculation of Bermudans and Swaptions after the (first) exercise time.
      * @param time The time of evaluation
