@@ -7,7 +7,6 @@ import net.finmath.functions.NormalDistribution;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.Portfolio;
-import net.finmath.montecarlo.interestrate.products.Swap;
 import net.finmath.stochastic.ConditionalExpectationEstimatorInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
@@ -123,7 +122,7 @@ public class InitialMarginForwardRegression {
 		RandomVariableInterface initialValue = portfolio.getValue(time, model);
 		initialValue = initialValue.sub(cashFlows);
 
-		if(time>0 && time < lastFixingTime && !(portfolio.getProducts()[0] instanceof Swap)) { // For swap we go forward along paths
+		if(time>0 && time < lastFixingTime) { // For swap we go forward along paths
 
 			ConditionalExpectationEstimatorInterface condExpOperatorInitial = getConditionalExpectationEstimatorLibor(time, model);
 
@@ -133,7 +132,7 @@ public class InitialMarginForwardRegression {
 
 		RandomVariableInterface finalValue = portfolio.getValue(time+MPR, model);
 
-		if(time+MPR<lastFixingTime && !(portfolio.getProducts()[0] instanceof Swap)) {
+		if(time+MPR<lastFixingTime) {
 
 			ConditionalExpectationEstimatorInterface condExpOperatorFinal = getConditionalExpectationEstimatorLibor(time+MPR, model);
 
@@ -197,7 +196,7 @@ public class InitialMarginForwardRegression {
 		// If Libor for last CF is not yet fixed
 		RandomVariableInterface NPV = portfolio.getValue(forwardVaRTime, model); 
 		double lastFixingTime = model.getLiborPeriodDiscretization().getTime(model.getLiborPeriodDiscretization().getTimeIndex(portfolio.getInitialLifeTime())-1);
-		if(forwardVaRTime < lastFixingTime && !(portfolio.getProducts()[0] instanceof Swap)){ 
+		if(forwardVaRTime < lastFixingTime){ 
 			// to get NPV at time t
 			ConditionalExpectationEstimatorInterface condExpEstimatorLibor = getConditionalExpectationEstimatorLibor(forwardVaRTime, model);
 			// State Variables: NPV of portfolio
@@ -206,8 +205,6 @@ public class InitialMarginForwardRegression {
 
 		//RandomVariableInterface NPV = portfolio.getValue(forwardVaRTime, model);
 		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<RandomVariableInterface>();
-
-		//for(int i=0; i<NPV.size(); i++) System.out.println(NPV.get(i));
 
 		// Basis Functions
 		for(int orderIndex = 0; orderIndex <=polynomialOrder; orderIndex ++){
@@ -256,13 +253,15 @@ public class InitialMarginForwardRegression {
 		}
 		RandomVariableInterface[] finalLibors = libors.toArray(new RandomVariableInterface[libors.size()]);
 		// Basis Functions
-		//basisFunctions.add(new RandomVariable(1.0)); // order zero
 		for(int liborIndex = 0; liborIndex <finalLibors.length; liborIndex ++){
 			for(int orderIndex = 0; orderIndex<=2; orderIndex++){
 				basisFunctions.add(finalLibors[liborIndex].pow(orderIndex));
 			}
 		}
+		RandomVariableInterface numeraire = model.getNumeraire(forwardVaRTime);
 
+		basisFunctions.add(numeraire);
+		basisFunctions.add(numeraire.pow(2));
 		RandomVariableInterface[] finalBasisFunctions = basisFunctions.toArray(new RandomVariableInterface[basisFunctions.size()]);
 		return finalBasisFunctions;
 	}

@@ -44,7 +44,7 @@ public class InitialMarginRegressionTest {
 	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
 	final static DecimalFormat formatterIM  	= new DecimalFormat("0.00000000000");
 	
-	private final static int numberOfPaths		= 1000;
+	private final static int numberOfPaths		= 2000;
 	private final static int numberOfFactors	= 1;
  
      public static void main(String[] args) throws CalculationException{
@@ -70,7 +70,6 @@ public class InitialMarginRegressionTest {
  		AbstractLIBORMonteCarloRegressionProduct[] products = new Swap[1];
  		products = createSwaps(new String[] {"5Y"});
    		
- 		double finalTime = 6.0;
  		double timeStep  = 0.1;
    	    // Create Portfolio of single 10y swap
   		Portfolio portfolio = new Portfolio(products, new double[]{1});
@@ -84,25 +83,6 @@ public class InitialMarginRegressionTest {
    		                       /*formatterIM.format(*/imModel.getInitialMargin(i*timeStep));
    		}
     
-//   		// Swaption
-//   		double     exerciseDate  = 2.0;	// Exercise date
-//   		double[]   fixingDates   = {2.0, 2.5, 3.0, 3.5, 4.0,4.5,5.0,5.5};   // Vector of fixing dates (must be sorted)
-//   		double[]   paymentDates  = {    2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0};	// Vector of payment dates (same length as fixing dates)
-//   		double[]   swaprates     = {-0.01,-0.01,-0.01,-0.01,-0.01,-0.01,-0.01,-0.01};// Vector of strikes
-//   		
-//   		//AbstractLIBORMonteCarloProduct[] swapSimple = new AbstractLIBORMonteCarloProduct[] {new SimpleSwap(fixingDates,paymentDates,swaprates, 100.0)};
-//   		AbstractLIBORMonteCarloProduct[] swaption = new AbstractLIBORMonteCarloProduct[] {new Swaption(exerciseDate,fixingDates,paymentDates,swaprates,100.0)};
-//   		
-//   		Portfolio portfolio2 = new Portfolio(swaption, new double[] {1});
-//   		portfolio2.setInitialLifeTime(6.0);
-//   		InitialMarginForwardRegression IMRegression = new InitialMarginForwardRegression(portfolio2, model2, 2 /*polynomialOrder*/,"LSQREGRESSION");
-//   		
-//   		System.out.println("Initial Margin of swaption by Regression ");
-//   		System.out.println("Time " + "\t" + "Initial Margin");
-//   		for(int i = 1; i<=(finalTime/timeStep); i++){
-//   		   System.out.println(formatterTime.format(i*timeStep) + "\t " +
-//   		                      formatterIM.format(IMRegression.getInitialMargin(i*timeStep)));
-//   		}
   		
    	}
      
