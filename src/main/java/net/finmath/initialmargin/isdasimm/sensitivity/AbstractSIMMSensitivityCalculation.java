@@ -170,7 +170,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			RandomVariableInterface[] dVdL = product.getValueLiborSensitivities(evaluationTime, model);
 
 		// Calculate dV/dS = dV/dL * dL/dS
-		delta = getValueSwapSensitivities(evaluationTime, dVdL, model);  
+		delta = mapLiborToMarketRateSensitivities(evaluationTime, dVdL, model);  
 
 		// Map Sensitivities on SIMM Buckets
 		delta = mapSensitivitiesOnBuckets(delta, "InterestRate" /*riskClass*/, null, model);		       
@@ -246,8 +246,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @return The derivatives dV/dS 
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface[] getValueSwapSensitivities(double evaluationTime, 
-			RandomVariableInterface[] dVdL,
+	public RandomVariableInterface[] mapLiborToMarketRateSensitivities(double evaluationTime, 
+			RandomVariableInterface[] dVdL, /*Libor sensitivities*/
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 		// the following line will be removed later. Just checking how timeGridAdjustment affects the result
 		int timeGridIndicator = 0; if(!isUseTimeGridAdjustment && !onLiborPeriodDiscretization(evaluationTime,model)) timeGridIndicator = 1;
