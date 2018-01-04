@@ -91,14 +91,14 @@ public interface SIMMProductInterface {
      * @param time The time of evaluation
      * @throws CalculationException
      */
-    public void setConditionalExpectationOperator(double time) throws CalculationException;
+    public void setConditionalExpectationOperator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
     /** Returns the AAD gradient of the product.
      * 
      * @return The gradient of the product 
      * @throws CalculationException
      */
-	Map<Long, RandomVariableInterface> getGradient() throws CalculationException;
+	Map<Long, RandomVariableInterface> getGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 	
 	/** Returns the final time of the product (maturity). This is important for sensitivity interpolation 
 	 *  where we need to known the latest time to be considered as right interpolation input.
