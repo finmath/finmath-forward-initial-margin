@@ -28,7 +28,7 @@ public class SensitivityApproximationTest {
 	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
 
 	// Model Paths 
-	final static int numberOfPaths = 1000;
+	final static int numberOfPaths = 100;
 	final static double notional = 100;
 
 	public static enum TestProductType {Swaps, Swaptions, BermudanCallable, BermudanCancelable};
@@ -65,7 +65,7 @@ public class SensitivityApproximationTest {
 		int[] numberOfPeriods = null;
 
 		// Select TestProducts
-		TestProductType testProductType = TestProductType.BermudanCallable;
+		TestProductType testProductType = TestProductType.BermudanCancelable;
 
 		switch(testProductType){
 		case Swaps: 
@@ -77,7 +77,7 @@ public class SensitivityApproximationTest {
 			numberOfPeriods = new int[]  {4, 8, 10, 12, 16};
 		case BermudanCallable: 
 		case BermudanCancelable:
-			exerciseDates = new double[] {5.0, 8.0, 10.0};
+			exerciseDates = new double[] {10.0, 8.0, 10.0};
 			numberOfPeriods = new int[]  {20};
 		}
 
