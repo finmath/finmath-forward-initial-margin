@@ -207,10 +207,10 @@ public class SIMMTest {
 		 *  Set calculation parameters
 		 */
 		double finalIMTime=exerciseTime+model.getLiborPeriodDiscretization().getTimeStep(0)*numberOfPeriods;
-		double timeStep = 0.5;
+		double timeStep = 0.25;
 		double interpolationStep = 1.0;
 		boolean isUseAnalyticSwapSensis = false;
-		boolean isUseTimeGridAdjustment = false;
+		boolean isUseTimeGridAdjustment = true;
 		boolean isConsiderOISSensis     = true;
         // time measurement variables
 		long timeStart;
@@ -400,7 +400,10 @@ public class SIMMTest {
 			RandomVariableInterface[][] valuesBermudan = new RandomVariableInterface[3][(int)(finalIMTime/timeStep)+1];
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesBermudan[0][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.ExactConsideringDependencies, WeightMode.Constant, 1.0, isUseTimeGridAdjustment, true, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) {
+				valuesBermudan[0][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.ExactConsideringDependencies, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, true, isConsiderOISSensis);
+			    System.out.println(valuesBermudan[0][i].getAverage());
+			}
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for BERMUDAN, AAD in every step, constant weights: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
