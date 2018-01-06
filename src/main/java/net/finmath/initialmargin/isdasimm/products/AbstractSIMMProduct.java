@@ -151,7 +151,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
  			setGradient(model); // Set the (new) gradient. The method setModel also clears the sensitivity maps and sets the model as modelCache.
  			this.exerciseIndicator = null;
  			this.exactDeltaCache.clear();
- 			this.sensitivityCalculationScheme = new SIMMSensitivityCalculation(SensitivityMode.LinearMelting, WeightMode.Stochastic, 1.0, model, true /*isUseTimeGridAdjustment*/, true /*isUseAnalyticSwapSensis*/, true /*isConsiderOISSensitivities*/);
+ 			this.sensitivityCalculationScheme = new SIMMSensitivityCalculation(SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, model, true /*isUseTimeGridAdjustment*/, true /*isUseAnalyticSwapSensis*/, true /*isConsiderOISSensitivities*/);
  		}
 
  		return simmScheme.getValue(this, evaluationTime); 
@@ -350,13 +350,14 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		    valueLiborSensitivities[liborIndex-lastLiborIndex] = dVdL.mult(numeraire).getConditionalExpectation(conditionalExpectationOperator);
 		}
 
-		if(sensitivityCalculationScheme.isUseTimeGridAdjustment){
-		    // Up to now dVdL is wrt the Libors on the LiborPeriodDiscretization. Adjust it such that we have dVdL wrt Libors starting at evaluationTime 
-		    RandomVariableInterface[][] dLdL = AbstractSIMMSensitivityCalculation.getLiborTimeGridAdjustment(evaluationTime, model);
-		    RandomVariableInterface[] dVdLAdjusted = AbstractSIMMSensitivityCalculation.multiply(valueLiborSensitivities,dLdL);
-		
-		    return dVdLAdjusted; 
-		} else return valueLiborSensitivities;
+//		if(sensitivityCalculationScheme.isUseTimeGridAdjustment){
+//		    // Up to now dVdL is wrt the Libors on the LiborPeriodDiscretization. Adjust it such that we have dVdL wrt Libors starting at evaluationTime 
+//		    RandomVariableInterface[][] dLdL = AbstractSIMMSensitivityCalculation.getLiborTimeGridAdjustment(evaluationTime, model);
+//		    RandomVariableInterface[] dVdLAdjusted = AbstractSIMMSensitivityCalculation.multiply(valueLiborSensitivities,dLdL);
+//		
+//		    return dVdLAdjusted; 
+//		} else 
+			return valueLiborSensitivities;
 		
 	}
  	  

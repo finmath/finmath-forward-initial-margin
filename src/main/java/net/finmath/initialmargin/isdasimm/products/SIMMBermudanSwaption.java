@@ -113,13 +113,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			   case Callable:
 				   
 			      // Calculate sensis analytically
-				  RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");				  
-				  
-				  if(sensitivityCalculationScheme.isUseTimeGridAdjustment){
-					  // Get time grid adjustment
-					  RandomVariableInterface[][] dLdL =  AbstractSIMMSensitivityCalculation.getLiborTimeGridAdjustment(evaluationTime, model);	   
-					  swapSensis = AbstractSIMMSensitivityCalculation.multiply(swapSensis,dLdL);
-				  }
+				  RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");				  			
 				  
 				  if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 			    		
