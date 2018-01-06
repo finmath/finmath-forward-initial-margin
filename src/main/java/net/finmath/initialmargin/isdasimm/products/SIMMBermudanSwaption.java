@@ -377,7 +377,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	
 	@Override
 	public double getMeltingResetTime(){
-		return Double.MAX_VALUE; //bermudan.getLastValuationExerciseTime().getMin();
+		return bermudan.getLastValuationExerciseTime().getMin();
 	}
 	
 	@Override
