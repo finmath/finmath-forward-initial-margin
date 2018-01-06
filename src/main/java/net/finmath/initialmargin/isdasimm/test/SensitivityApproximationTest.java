@@ -110,17 +110,17 @@ public class SensitivityApproximationTest {
 
 				// 1) Exact
 				long timeStart = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEnd = System.currentTimeMillis();
 
 				// 2) Melting
 				long timeStartMelting = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation
 				long timeStartInterpolation = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[2][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[2][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndInterpolation = System.currentTimeMillis();
 
 				double deviationSumMelting = 0;

@@ -83,9 +83,9 @@ public class WeightAdjustmentTest {
 
 		// Create calculation schemes mor model 1 and model 2 (steep curves) with both constant and stochastic weight mode
 		SIMMSensitivityCalculation sc1 = new SIMMSensitivityCalculation(SensitivityMode.Exact, WeightMode.Constant, 0, model, true);
-		SIMMSensitivityCalculation ss1 = new SIMMSensitivityCalculation(SensitivityMode.Exact, WeightMode.Stochastic, 0, model, true);
+		SIMMSensitivityCalculation ss1 = new SIMMSensitivityCalculation(SensitivityMode.Exact, WeightMode.TimeDependent, 0, model, true);
 		SIMMSensitivityCalculation sc2 = new SIMMSensitivityCalculation(SensitivityMode.Exact, WeightMode.Constant, 0, model2, true);
-		SIMMSensitivityCalculation ss2 = new SIMMSensitivityCalculation(SensitivityMode.Exact, WeightMode.Stochastic, 0, model2, true);
+		SIMMSensitivityCalculation ss2 = new SIMMSensitivityCalculation(SensitivityMode.Exact, WeightMode.TimeDependent, 0, model2, true);
 
 
 
@@ -135,7 +135,7 @@ public class WeightAdjustmentTest {
 		// 1) Stochastic
 		double[] IM_Stochastic = new double[(int)(finalTime/timeStep)];
 		long timeStochasticStart = System.currentTimeMillis();
-		for(int i=0;i<IM_Stochastic.length;i++) IM_Stochastic[i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Stochastic, 0, true, true, true).getAverage();
+		for(int i=0;i<IM_Stochastic.length;i++) IM_Stochastic[i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 0, true, true, true).getAverage();
 		long timeStochasticEnd   = System.currentTimeMillis();
 
 		// 2) Constant

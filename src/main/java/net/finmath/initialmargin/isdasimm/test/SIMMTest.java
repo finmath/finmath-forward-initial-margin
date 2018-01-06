@@ -67,8 +67,8 @@ public class SIMMTest {
 
 	final static boolean isCalculatePortfolio = false;
 	final static boolean isCalculateSwap      = false;
-	final static boolean isCalculateSwaption  = false;
-	final static boolean isCalculateBermudan  = true;
+	final static boolean isCalculateSwaption  = true;
+	final static boolean isCalculateBermudan  = false;
 	
 	// Model Paths 
 	final static int numberOfPaths = 100;
@@ -211,7 +211,7 @@ public class SIMMTest {
 		double interpolationStep = 1.0;
 		boolean isUseAnalyticSwapSensis = false;
 		boolean isUseTimeGridAdjustment = true;
-		boolean isConsiderOISSensis     = true;
+		boolean isConsiderOISSensis     = false;
         // time measurement variables
 		long timeStart;
 		long timeEnd;
@@ -228,19 +228,19 @@ public class SIMMTest {
 			RandomVariableInterface[][] valuesPortfolio = new RandomVariableInterface[4][(int)(finalIMTime/timeStep)+1];
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesPortfolio[0][i] = SIMMPortfolio.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesPortfolio[0][i] = SIMMPortfolio.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for Portfolio, Exact: " + formatterTime.format((timeEnd-timeStart)/1000.0)+" s");
 			
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesPortfolio[1][i] = SIMMPortfolio.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesPortfolio[1][i] = SIMMPortfolio.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for Portfolio, Melting: " + formatterTime.format((timeEnd-timeStart)/1000.0)+" s");
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesPortfolio[2][i] = SIMMPortfolio.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.Stochastic, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesPortfolio[2][i] = SIMMPortfolio.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.TimeDependent, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 			
 			System.out.println("Time for Portfolio, Interpolation: " + formatterTime.format((timeEnd-timeStart)/1000.0)+" s");
@@ -280,7 +280,7 @@ public class SIMMTest {
 
 			timeStart = System.currentTimeMillis();
 			for(int i=0;i<finalIMTime/timeStep+1;i++) {
-				valuesSwap[0][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				valuesSwap[0][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			    System.out.println(valuesSwap[0][i].getAverage());
 			}
 			timeEnd = System.currentTimeMillis();
@@ -288,22 +288,22 @@ public class SIMMTest {
 			System.out.println("Time for SWAP, AAD in every step, constant weights: " + formatterTime.format((timeEnd-timeStart)/1000.0)+" s");
 
 			timeStart = System.currentTimeMillis();
-//			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[1][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+//			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[1][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for SWAP, Melting: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
-//			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[2][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.Stochastic, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+//			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[2][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.TimeDependent, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for SWAP, Interpolation with step " + interpolationStep + ": " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
-//			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[3][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Stochastic, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+//			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[3][i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
-			System.out.println("Time for SWAP, AAD in every step, stochastic weights " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
+			System.out.println("Time for SWAP, AAD in every step, TimeDependent weights " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
 //			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwap[4][i] = SIMMSwap.getInitialMargin(i*timeStep, zeroVolatilityModel, "EUR", SensitivityMode.Exact, WeightMode.Constant, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
@@ -313,7 +313,7 @@ public class SIMMTest {
 			
 			if(isPrintAverage){	   
 				System.out.println("Expected Forward IM for Swap");
-				System.out.println("Exact, constant weights" + "\t" + "Exact, stochastic weights" + "\t" + "Melting " + "\t" + "Interpolation" + "\t" + "OnePathAgeing");
+				System.out.println("Exact, constant weights" + "\t" + "Exact, TimeDependent weights" + "\t" + "Melting " + "\t" + "Interpolation" + "\t" + "OnePathAgeing");
 				for(int i=0;i<finalIMTime/timeStep+1;i++){
 					System.out.println(valuesSwap[0][i].getAverage());// + "\t" +  valuesSwap[3][i].getAverage() + "\t" + valuesSwap[1][i].getAverage() + "\t" + valuesSwap[2][i].getAverage() + "\t" + valuesSwap[4][i].getAverage());
 				}
@@ -346,19 +346,19 @@ public class SIMMTest {
 			RandomVariableInterface[][] valuesSwaption = new RandomVariableInterface[3][(int)(finalIMTime/timeStep)+1];
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = SIMMSwaption.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = SIMMSwaption.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Constant, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
-			System.out.println("Time for SWAPTION, AAD in every step, stochastic weights: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
+			System.out.println("Time for SWAPTION, AAD in every step, TimeDependent weights: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = SIMMSwaption.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = SIMMSwaption.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for SWAPTION, Melting: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[2][i] = SIMMSwaption.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.Stochastic, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[2][i] = SIMMSwaption.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.TimeDependent, interpolationStep, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for SWAPTION, Interpolation with step " + interpolationStep + ": " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
@@ -401,7 +401,7 @@ public class SIMMTest {
 
 			timeStart = System.currentTimeMillis();
 			for(int i=0;i<finalIMTime/timeStep+1;i++) {
-				valuesBermudan[0][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.ExactConsideringDependencies, WeightMode.Stochastic, 1.0, isUseTimeGridAdjustment, true, isConsiderOISSensis);
+				valuesBermudan[0][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Constant, 1.0, isUseTimeGridAdjustment, true, isConsiderOISSensis);
 			    System.out.println(valuesBermudan[0][i].getAverage());
 			}
 			timeEnd = System.currentTimeMillis();
