@@ -47,7 +47,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 	public enum WeightMode{
 		Constant,  //Sets dL/dS(t=0) for all forward IM times, i.e. leave the weight adjustment dL/dS constant
-		Stochastic //Calculate dL/dS(t) for all forward IM times, i.e. (weakly) stochastic weight adjustment 
+		TimeDependent //Calculate dL/dS(t) for all forward IM times, i.e. (weakly) stochastic weight adjustment 
 	}
 
 	public static final RandomVariableInterface[] zeroBucketsIR = IntStream.range(0, 12 /*IRMaturityBuckets.length*/).mapToObj(i->new RandomVariable(0.0)).toArray(RandomVariableInterface[]::new);
@@ -168,7 +168,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
 
-		RandomVariableInterface[] delta = null; // The vector of delta sensitivities on all SIMM Buckets
+		RandomVariableInterface[] dVdS = null; // The vector of delta sensitivities on all SIMM Buckets
 
 		switch(curveIndexName){
 
@@ -176,8 +176,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 			RandomVariableInterface[] dVdL = product.getValueLiborSensitivities(evaluationTime, model);
 
-		// Calculate dV/dS = dV/dL * dL/dS
-		delta = mapLiborToMarketRateSensitivities(evaluationTime, dVdL, model);  	       
+		// Calculate dV/dS = dV/dL * (dL/dL*dL/dS)
+		dVdS = mapLiborToMarketRateSensitivities(evaluationTime, dVdL, model);  	       
 
 		break;
 
@@ -185,12 +185,12 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 			if(isConsiderOISSensitivities) {
 
-				// Calculate dV/dS = dV/dP * dP/dS. These Sensis are already on SIMM Buckets
+				// Calculate dV/dS = dV/dP * dP/dS. 
 				RandomVariableInterface[] dVdP = product.getDiscountCurveSensitivities("InterestRate" /*riskClass*/,evaluationTime, model); 
 
-				delta = mapOISBondToMarketRateSensitivities(evaluationTime, dVdP, model);
+				dVdS = mapOISBondToMarketRateSensitivities(evaluationTime, dVdP, model);
 
-			} else delta = zeroBucketsIR;
+			} else dVdS = zeroBucketsIR;
 
 		break;
 
@@ -199,8 +199,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		}
 
 		// Map Sensitivities on SIMM Buckets
-		delta = mapSensitivitiesOnBuckets(delta, "InterestRate" /*riskClass*/, null, model);	
-		return delta;
+		dVdS = mapSensitivitiesOnBuckets(dVdS, "InterestRate" /*riskClass*/, null, model);	
+		return dVdS;
 	}
 
 
@@ -217,9 +217,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			RandomVariableInterface[] dVdP, /*Libor sensitivities*/
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
+		if(dVdP==null) return zeroBucketsIR;
 		RandomVariableInterface[] delta = new RandomVariableInterface[dVdP.length];
 		RandomVariableInterface[][] dPdS;
-		if(this.weightTransformationMethod == WeightMode.Stochastic){
+		if(this.weightTransformationMethod == WeightMode.TimeDependent){
 			dPdS = getBondSwapSensitivities(evaluationTime, model);
 		} else dPdS = getBondSwapSensitivities(0.0, model);
 		// Calculate Sensitivities wrt Swaps
@@ -250,15 +251,23 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			RandomVariableInterface[] dVdL, /*Libor sensitivities*/
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
-		int timeGridIndicator = 0; if(!isUseTimeGridAdjustment && !onLiborPeriodDiscretization(evaluationTime,model)) timeGridIndicator = 1;
+		int timeGridIndicator = 0; 
+		int numberOfSwaps;
 
-		RandomVariableInterface[] delta = new RandomVariableInterface[dVdL.length-timeGridIndicator];
 		RandomVariableInterface[][] dLdS;
-		if(this.weightTransformationMethod == WeightMode.Stochastic){
+		if(this.weightTransformationMethod == WeightMode.TimeDependent){
 			dLdS = getLiborSwapSensitivities(evaluationTime, model);
-		} else dLdS = getLiborSwapSensitivities(0.0, model);
+			RandomVariableInterface[][] dLdL = getLiborTimeGridAdjustment(evaluationTime, model);
+			dLdS = multiply(dLdL,dLdS);
+			numberOfSwaps = dLdS[0].length;
+		} else {
+			dLdS = getLiborSwapSensitivities(0.0, model);
+			timeGridIndicator = onLiborPeriodDiscretization(evaluationTime, model) ? 0 : 1;
+			numberOfSwaps = dVdL.length - timeGridIndicator;
+		}
 		// Calculate Sensitivities wrt Swaps
-		for(int swapIndex = 0; swapIndex<dVdL.length-timeGridIndicator; swapIndex++){
+		RandomVariableInterface[] delta = new RandomVariableInterface[numberOfSwaps];
+		for(int swapIndex = 0; swapIndex<numberOfSwaps; swapIndex++){
 			RandomVariableInterface dVdS  =new RandomVariable(0.0);
 			RandomVariableInterface factor;
 			for(int liborIndex=0;liborIndex<dVdL.length-timeGridIndicator;liborIndex++){
@@ -656,7 +665,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		 * dN/dS_{LIBOR}     dN/dS_{OIS}
 		 */
 		RandomVariableInterface[][] jacobian;
-		if(this.weightTransformationMethod == WeightMode.Stochastic){
+		if(this.weightTransformationMethod == WeightMode.TimeDependent){
 			jacobian = getModelToMarketRateJacobianMatrix(evaluationTime, model);
 		} else jacobian = getModelToMarketRateJacobianMatrix(0.0, model);
 		int numberOfSwaps = (int)(jacobian[0].length/2.0);
