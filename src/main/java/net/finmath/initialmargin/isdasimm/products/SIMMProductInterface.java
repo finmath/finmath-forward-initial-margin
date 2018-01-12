@@ -124,5 +124,5 @@ public interface SIMMProductInterface {
 	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
 	 */
-	 public RandomVariableInterface[] getExactDeltaFromCache(double time, String riskClass, String curveIndexName) throws SolverException, CloneNotSupportedException, CalculationException;
+	 public RandomVariableInterface[] getExactDeltaFromCache(double time, String riskClass, String curveIndexName, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException;
 }

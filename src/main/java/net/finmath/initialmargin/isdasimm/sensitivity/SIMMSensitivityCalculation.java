@@ -2,6 +2,8 @@ package net.finmath.initialmargin.isdasimm.sensitivity;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
@@ -81,21 +83,22 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
                      
                 	 break;
                 	 
-                 case Interpolation:
+                 case InterpolationSIMM:
+                 case InterpolationLibor:
 
                 	 maturityBucketSensis = getInterpolatedSensitivities(product, riskClass, curveIndexName, evaluationTime, model);
 
                 	 break;
                 	 
-                 case InterpolationOIS:
+//                 case InterpolationOIS:
+//                	 
+//                	 if(curveIndexName=="Libor6m") maturityBucketSensis = doCalculateDeltaSensitivitiesIR(product, curveIndexName, evaluationTime, model);
+//                	 if(curveIndexName=="OIS") maturityBucketSensis = getInterpolatedSensitivities(product, riskClass, curveIndexName, evaluationTime, model);
+//                	 
+//                	 break;
                 	 
-                	 if(curveIndexName=="Libor6m") maturityBucketSensis = doCalculateDeltaSensitivitiesIR(product, curveIndexName, evaluationTime, model);
-                	 if(curveIndexName=="OIS") maturityBucketSensis = getInterpolatedSensitivities(product, riskClass, curveIndexName, evaluationTime, model);
-                	 
-                	 break;
-                	 
-                 case LinearMelting:
-                	 
+                 case LinearMeltingSIMM:
+                 case LinearMeltingLibor: 
                 	 // The time of the sensitivities used for melting     
         		     double initialMeltingTime = evaluationTime < product.getMeltingResetTime() ? 0 : product.getMeltingResetTime();
                 	 
@@ -145,14 +148,17 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
     														RandomVariableInterface[] sensitivities, double meltingZeroTime,
     														double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException{
 		  // also perform melting such that sensitivities are zero at final maturity  
-		  
+		  boolean isMarketRateSensi = sensitivityMode==SensitivityMode.LinearMeltingSIMM ? true : false;
 		  if(evaluationTime > product.getFinalMaturity()) return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
-		  
+		  RandomVariableInterface[] meltedSensis=null;
+		  int[] riskFactorDays=null;
 		  // Get sensitivities to melt if not provided as input to the function
 		  if(sensitivities == null) {
-			  sensitivities = product.getExactDeltaFromCache(meltingZeroTime, riskClass, curveIndexName);		 
+			  sensitivities = product.getExactDeltaFromCache(meltingZeroTime, riskClass, curveIndexName, isMarketRateSensi);	
 		  }
 		  
+		  switch(sensitivityMode){
+		  case LinearMeltingSIMM:
 		  double[] initialMeltingTime = new double[]{meltingZeroTime};
 		  
 	      int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};	
@@ -161,22 +167,75 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		  if(sensitivities.length!=riskFactorsSIMM.length) sensitivities = mapSensitivitiesOnBuckets(sensitivities, riskClass, null, model); 
 			   
 		  // Get new riskFactor times
-		  int[] riskFactorDays = Arrays.stream(riskFactorsSIMM).filter(n -> n > (int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).map(n -> n-(int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).toArray();
+		  riskFactorDays = Arrays.stream(riskFactorsSIMM).filter(n -> n > (int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).map(n -> n-(int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).toArray();
 		       
 		  // Find first bucket later than evaluationTime
 		  int firstIndex = IntStream.range(0, riskFactorsSIMM.length)
 			                          .filter(i -> riskFactorsSIMM[i]>(int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).findFirst().getAsInt();
 			   
 		  //Calculate melted sensitivities
-		  RandomVariableInterface[] meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
+		  meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
 			   
 		  for(int i=0;i<meltedSensis.length;i++){
 			  meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-initialMeltingTime[0]))/(double)riskFactorsSIMM[i+firstIndex]);
 		  }
-			   
-		  return mapSensitivitiesOnBuckets(meltedSensis, riskClass, riskFactorDays, null); 
+			break;  
+		  case LinearMeltingLibor:
+			  // First index of Libor at evaluation time given the initial melting time
+			  int liborIndexAtInitialMeltingTime = model.getLiborPeriodIndex(meltingZeroTime);
+			  liborIndexAtInitialMeltingTime = liborIndexAtInitialMeltingTime < 0 ? -liborIndexAtInitialMeltingTime-1 : liborIndexAtInitialMeltingTime;
+			  int liborIndexAtEval = model.getLiborPeriodIndex(evaluationTime);
+			  int oisIndex = (liborIndexAtEval < 0 && curveIndexName == "OIS") ? 1 : 0;
+			  liborIndexAtEval = liborIndexAtEval < 0 ? -liborIndexAtEval-2 : liborIndexAtEval;
+			  firstIndex = liborIndexAtEval-liborIndexAtInitialMeltingTime+oisIndex;
+			  // Retain all libor sensis after eval
+			  meltedSensis = ArrayUtils.subarray(sensitivities, firstIndex, sensitivities.length);
+			  // Map model sensis to market rate sensis
+			  meltedSensis = curveIndexName == "Libor6m" ? mapLiborToMarketRateSensitivities(evaluationTime, meltedSensis, model) :
+				                                           mapOISBondToMarketRateSensitivities(evaluationTime, meltedSensis, model);
+		  break;
+		  default: break;
+		  }
+		  return mapSensitivitiesOnBuckets(meltedSensis, riskClass, riskFactorDays, model); 
 			  
 	  }
+	
+//	public RandomVariableInterface[] getMeltedModelSensitivitiesOnSIMMBuckets(AbstractSIMMProduct product, 
+//			RandomVariableInterface[] sensitivities, double meltingZeroTime,
+//			double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException{
+//		// also perform melting such that sensitivities are zero at final maturity  
+//
+//		if(evaluationTime > product.getFinalMaturity()) return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
+//
+//		// Get sensitivities to melt if not provided as input to the function
+//		if(sensitivities == null) {
+//			sensitivities = product.getExactDeltaFromCache(meltingZeroTime, riskClass, curveIndexName, false/*isMarketRateSensi*/);	
+//		}
+//
+//		double[] initialMeltingTime = new double[]{meltingZeroTime};
+//
+//		int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};	
+//
+//		// If sensitivities are given on LiborPeriodDiscretization, map them on SIMM Buckets 
+//		if(sensitivities.length!=riskFactorsSIMM.length) sensitivities = mapSensitivitiesOnBuckets(sensitivities, riskClass, null, model); 
+//
+//		// Get new riskFactor times
+//		int[] riskFactorDays = Arrays.stream(riskFactorsSIMM).filter(n -> n > (int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).map(n -> n-(int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).toArray();
+//
+//		// Find first bucket later than evaluationTime
+//		int firstIndex = IntStream.range(0, riskFactorsSIMM.length)
+//				.filter(i -> riskFactorsSIMM[i]>(int)Math.round(365*(evaluationTime-initialMeltingTime[0]))).findFirst().getAsInt();
+//
+//		//Calculate melted sensitivities
+//		RandomVariableInterface[] meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
+//
+//		for(int i=0;i<meltedSensis.length;i++){
+//			meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-initialMeltingTime[0]))/(double)riskFactorsSIMM[i+firstIndex]);
+//		}
+//
+//		return mapSensitivitiesOnBuckets(meltedSensis, riskClass, riskFactorDays, null); 
+//
+//	}
 	   
 	   
 	/** Interpolates sensitivities on SIMM buckets linearly between two exact sensitivities obtained by AAD. 
@@ -196,8 +255,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			 													   String curveIndexName,
 			 													   double evaluationTime, 
 			 													   LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
-		 
-		 
+		 // Only works for InterpolationSIMM currently
+		 boolean isMarketRateSensi = sensitivityMode==SensitivityMode.InterpolationSIMM ? true : false;
 		 // time of initial and final sensitivities
 		 TimeDiscretizationInterface exactSensiTimes = new TimeDiscretization(0,50,interpolationStep);
 		 int initialIndex = exactSensiTimes.getTimeIndexNearestLessOrEqual(evaluationTime);
@@ -205,8 +264,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		 double finalTime   = initialTime < product.getMeltingResetTime() ? Math.min(product.getMeltingResetTime(),exactSensiTimes.getTime(initialIndex+1)) : exactSensiTimes.getTime(initialIndex+1);
          
          // Get Sensitivities from exactDeltaCache 
-         RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName);
-         RandomVariableInterface[] finalSensitivities   = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName);
+         RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, isMarketRateSensi);
+         RandomVariableInterface[] finalSensitivities   = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName, isMarketRateSensi);
 
          // Perform linear interpolation
          double deltaT = finalTime-initialTime;

@@ -36,9 +36,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	public static double secondsPseudoInverse = 0;
 
 	public enum SensitivityMode{
-		LinearMelting,    // Melting of sensitivties to zero until final maturity
-		Interpolation,    // Interpolate OIS and Forward curve sensitivities between time points of exact AAD sensitivities
-		InterpolationOIS,
+		LinearMeltingSIMM,    // Melting of sensitivties to zero until final maturity
+		InterpolationSIMM,    // Interpolate OIS and Forward curve sensitivities between time points of exact AAD sensitivities
+		LinearMeltingLibor,
+		InterpolationLibor,
 		Exact,            // AAD or Analytic (for Swaps)
 		ExactConsideringDependencies
 	}
