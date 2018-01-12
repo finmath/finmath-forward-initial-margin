@@ -1,226 +1,283 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-diagram version="1.2.2" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
   associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
-  <class id="1" language="java" name="initialmargin.isdasimm.products.SIMMSimpleSwap" project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMSimpleSwap.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="326" width="235" x="1275" y="1262"/>    
-    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="2" language="java" name="initialmargin.isdasimm.products.AbstractSIMMProduct" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/AbstractSIMMProduct.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="611" width="460" x="1585" y="552"/>    
-    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <enumeration id="3" language="java" name="initialmargin.isdasimm.products.SIMMBermudanSwaption.ExerciseType" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMBermudanSwaption.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="2037" y="1759"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </enumeration>  
-  <class id="4" language="java" name="initialmargin.isdasimm.products.SIMMSwaption" project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMSwaption.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="325" width="235" x="1557" y="1259"/>    
-    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <enumeration id="5" language="java" name="initialmargin.isdasimm.products.SIMMSwaption.DeliveryType" 
-    project="ForwardInitialMargin" file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMSwaption.java" 
+  <class id="1" language="java" name="net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/sensitivity/AbstractSIMMSensitivityCalculation.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1677" y="1763"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    <position height="433" width="350" x="114" y="314"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="2" language="java" 
+    name="net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/sensitivity/AbstractSIMMSensitivityCalculation.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="146" width="262" x="401" y="95"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="6" language="java" name="initialmargin.isdasimm.products.SIMMPortfolio" project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMPortfolio.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1076" y="1345"/>    
-    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="false" 
-      sort-features="false" accessors="true" visibility="false">      
+  <enumeration id="3" language="java" 
+    name="net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/sensitivity/AbstractSIMMSensitivityCalculation.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="244" y="149"/>    
+    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
-  </class>  
-  <class id="7" language="java" name="initialmargin.isdasimm.products.SIMMBermudanSwaption" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMBermudanSwaption.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="360" width="378" x="1826" y="1256"/>    
+  </enumeration>  
+  <class id="4" language="java" name="net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/sensitivity/SIMMSensitivityCalculation.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="218" width="355" x="113" y="787"/>    
     <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="8" language="java" name="initialmargin.isdasimm.products.SIMMProductInterface" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/products/SIMMProductInterface.java" binary="false" 
-    corner="TOP_LEFT">    
-    <position height="238" width="273" x="1672" y="250"/>    
+  <class id="5" language="java" name="net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/AbstractSIMMProduct.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="609" width="476" x="513" y="398"/>    
     <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="false" protected="false" private="false" static="true"/>    
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="6" language="java" name="net.finmath.initialmargin.isdasimm.products.SIMMSwaption.DeliveryType" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/SIMMSwaption.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="867" y="1570"/>    
+    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <class id="7" language="java" name="net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/SIMMBermudanSwaption.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="394" width="290" x="431" y="1079"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <enumeration id="8" language="java" 
+    name="net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption.ExerciseType" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/SIMMBermudanSwaption.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="106" width="289" x="433" y="1517"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </enumeration>  
+  <class id="9" language="java" name="net.finmath.initialmargin.isdasimm.products.SIMMSwaption" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/SIMMSwaption.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="394" width="252" x="738" y="1079"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="10" language="java" name="net.finmath.initialmargin.isdasimm.products.SIMMSimpleSwap" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/SIMMSimpleSwap.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="395" width="252" x="115" y="1079"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <interface id="11" language="java" name="net.finmath.initialmargin.isdasimm.products.SIMMProductInterface" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/products/SIMMProductInterface.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="250" width="274" x="708" y="96"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="9" language="java" name="initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/sensitivity/AbstractSIMMSensitivityCalculation.java" 
+  <class id="12" language="java" 
+    name="net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA.ParameterCollection" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/aggregationscheme/CalculationSchemeInitialMarginISDA.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="341" width="308" x="921" y="542"/>    
+    <position height="368" width="316" x="1045" y="989"/>    
     <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <enumeration id="10" language="java" 
-    name="initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/sensitivity/AbstractSIMMSensitivityCalculation.java" 
+  <class id="13" language="java" 
+    name="net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/aggregationscheme/CalculationSchemeInitialMarginISDA.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1274" y="441"/>    
-    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </enumeration>  
-  <enumeration id="11" language="java" 
-    name="initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/sensitivity/AbstractSIMMSensitivityCalculation.java" 
-    binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1018" y="433"/>    
-    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </enumeration>  
-  <class id="12" language="java" name="initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation" 
-    project="ForwardInitialMargin" 
-    file="/ForwardInitialMargin/src/initialmargin/isdasimm/sensitivity/SIMMSensitivityCalculation.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="216" width="229" x="1109" y="931"/>    
-    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="false" 
+    <position height="-1" width="-1" x="1204" y="686"/>    
+    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <association id="13">    
-    <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="14" name="products"/>      
-      <multiplicity id="15" minimum="0" maximum="2147483647"/>    
+  <class id="14" language="java" name="net.finmath.initialmargin.isdasimm.aggregationscheme.MarginSchemeIRDelta" 
+    project="finmath-forward-initial-margin" 
+    file="/finmath-forward-initial-margin/src/main/java/net/finmath/initialmargin/isdasimm/aggregationscheme/MarginSchemeIRDelta.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1202" y="240"/>    
+    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <association id="15">    
+    <end type="SOURCE" refId="14" navigable="false">      
+      <attribute id="16" name="calculationSchemeInitialMarginISDA"/>      
+      <multiplicity id="17" minimum="0" maximum="1"/>    
     </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
+    <end type="TARGET" refId="13" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <nesting id="16">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="3"/>  
-  </nesting>  
-  <association id="17">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="18" name="sensitivityCalculationScheme"/>      
-      <multiplicity id="19" minimum="0" maximum="1"/>    
+  <association id="18">    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="19" name="deliveryType"/>      
+      <multiplicity id="20" minimum="0" maximum="1"/>    
     </end>    
-    <end type="TARGET" refId="9" navigable="true"/>    
+    <end type="TARGET" refId="6" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <generalization id="20">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="2"/>  
-  </generalization>  
   <nesting id="21">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="5"/>  
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="12"/>  
   </nesting>  
-  <nesting id="22">    
-    <end type="SOURCE" refId="9"/>    
-    <end type="TARGET" refId="11"/>  
-  </nesting>  
-  <generalization id="23">    
-    <end type="SOURCE" refId="12"/>    
-    <end type="TARGET" refId="9"/>  
-  </generalization>  
-  <association id="24">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="25" name="liborWeightMethod"/>      
-      <multiplicity id="26" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="11" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="27">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="2"/>  
-  </generalization>  
-  <nesting id="28">    
-    <end type="SOURCE" refId="9"/>    
-    <end type="TARGET" refId="10"/>  
-  </nesting>  
-  <association id="29">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="30" name="sensitivityMode"/>      
-      <multiplicity id="31" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="10" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <realization id="32">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="8"/>  
-  </realization>  
-  <association id="33">    
-    <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="34" name="sensitivityCalculationScheme"/>      
-      <multiplicity id="35" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="9" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="36">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="2"/>  
-  </generalization>  
-  <association id="37">    
-    <end type="SOURCE" refId="7" navigable="false">      
-      <attribute id="38" name="exerciseType"/>      
-      <multiplicity id="39" minimum="0" maximum="1"/>    
+  <association id="22">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="23" name="weightTransformationMethod"/>      
+      <multiplicity id="24" minimum="0" maximum="1"/>    
     </end>    
     <end type="TARGET" refId="3" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="40">    
-    <end type="SOURCE" refId="4" navigable="false">      
-      <attribute id="41" name="deliveryType"/>      
-      <multiplicity id="42" minimum="0" maximum="1"/>    
+  <association id="25">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="26" name="exerciseType"/>      
+      <multiplicity id="27" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="28">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="5"/>  
+  </generalization>  
+  <nesting id="29">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="6"/>  
+  </nesting>  
+  <association id="30">    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="31" name="sensitivityCalculationScheme"/>      
+      <multiplicity id="32" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="1" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="33">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="34" name="sensitivityMode"/>      
+      <multiplicity id="35" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="36">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="8"/>  
+  </nesting>  
+  <nesting id="37">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="2"/>  
+  </nesting>  
+  <generalization id="38">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="1"/>  
+  </generalization>  
+  <association id="39">    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="40" name="simmScheme"/>      
+      <multiplicity id="41" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="13" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="42">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="43" name="SIMMSwap"/>      
+      <multiplicity id="44" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="45">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="11"/>  
+  </realization>  
+  <association id="46">    
+    <end type="SOURCE" refId="13" navigable="false">      
+      <attribute id="47" name="products"/>      
+      <multiplicity id="48" minimum="0" maximum="2147483647"/>    
     </end>    
     <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="49">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="5"/>  
+  </generalization>  
+  <generalization id="50">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="5"/>  
+  </generalization>  
+  <nesting id="51">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="3"/>  
+  </nesting>  
+  <association id="52">    
+    <end type="SOURCE" refId="13" navigable="false">      
+      <attribute id="53" name="parameterCollection"/>      
+      <multiplicity id="54" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="12" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
