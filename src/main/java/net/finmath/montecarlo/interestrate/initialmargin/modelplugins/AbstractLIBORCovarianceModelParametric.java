@@ -1,4 +1,4 @@
-package net.finmath.montecarlo.interestrate.modelplugins;
+package net.finmath.montecarlo.interestrate.initialmargin.modelplugins;
 /*
  * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
  *

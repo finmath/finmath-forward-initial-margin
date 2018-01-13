@@ -3,7 +3,7 @@
  *
  * Created on 26.05.2013
  */
-package net.finmath.montecarlo.interestrate.modelplugins;
+package net.finmath.montecarlo.interestrate.initialmargin.modelplugins;
 
 import java.util.Arrays;
 
@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
