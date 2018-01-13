@@ -280,11 +280,16 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			double time, LIBORModelMonteCarloSimulationInterface model, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException{
 
 		// Calculate the sensitivities 
-		RandomVariableInterface[] deltaSensis;
+		RandomVariableInterface[] deltaSensis = null;
 		if(isMarketRateSensi){
 			deltaSensis = sensitivityCalculationScheme.getExactDeltaSensitivities(this, curveIndexName, riskClass, time, model);
 		} else {
-			deltaSensis = curveIndexName == "Libor6m" ? getLiborModelSensitivities(time, model) : getOISModelSensitivities(riskClass, time, model);
+			if(curveIndexName.equals("Libor6m")){
+				deltaSensis =  getLiborModelSensitivities(time, model);
+			}
+			if(curveIndexName.equals("OIS")){
+				deltaSensis =  getOISModelSensitivities(riskClass,time, model);
+			}
 		}
 		// Create a new element of the curveIndex List for given risk class		         
 		HashMap<String,RandomVariableInterface[]> curveIndexNameDeltaCache = new HashMap<String,RandomVariableInterface[]>();

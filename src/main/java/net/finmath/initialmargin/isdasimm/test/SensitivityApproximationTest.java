@@ -20,6 +20,7 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
+import net.finmath.montecarlo.RandomVariable;
 import net.finmath.stochastic.RandomVariableInterface;
 
 
@@ -65,7 +66,7 @@ public class SensitivityApproximationTest {
 		int[] numberOfPeriods = null;
 
 		// Select TestProducts
-		TestProductType testProductType = TestProductType.BermudanCancelable;
+		TestProductType testProductType = TestProductType.BermudanCallable;
 
 		switch(testProductType){
 		case Swaps: 
@@ -73,12 +74,13 @@ public class SensitivityApproximationTest {
 			numberOfPeriods = new int[] {10,20,30,40};
 			break;
 		case Swaptions: 
-			exerciseDates = new double[] {5.0, 10.0};
-			numberOfPeriods = new int[]  {4, 8, 10, 12, 16};
+			exerciseDates = new double[] {10.0};//, 10.0};
+			numberOfPeriods = new int[]  {12};//, 8, 10, 12, 16};
+			break;
 		case BermudanCallable: 
 		case BermudanCancelable:
-			exerciseDates = new double[] {10.0, 8.0, 10.0};
-			numberOfPeriods = new int[]  {20};
+			exerciseDates = new double[] {5.0};//, 8.0, 10.0};
+			numberOfPeriods = new int[]  {26};
 		}
 
 
@@ -93,7 +95,6 @@ public class SensitivityApproximationTest {
 
 		double  timeStep = 0.1;
 		boolean isUseAnalyticSwapSensis = false;
-		boolean isUseTimeGridAdjustment = true;
 		boolean isConsiderOISSensis     = true;
 
 		System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpolation" + "\t" + "Mean Deviation in % of IM Sum Melting" + "\t" + "Mean Deviation in % of IM Sum Interpolation" + "\t" + "RMSE Melting" + "\t" + "RMSE Interpolation");
@@ -110,17 +111,17 @@ public class SensitivityApproximationTest {
 
 				// 1) Exact
 				long timeStart = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEnd = System.currentTimeMillis();
 
 				// 2) Melting
 				long timeStartMelting = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMeltingLibor, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation
 				long timeStartInterpolation = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[2][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.TimeDependent, 1.0, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[2][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndInterpolation = System.currentTimeMillis();
 
 				double deviationSumMelting = 0;

@@ -40,13 +40,13 @@ import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
-import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
-import net.finmath.montecarlo.interestrate.modelplugins.BlendedLocalVolatilityModel;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.BlendedLocalVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModelExponentialDecay;
-import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
-import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelPiecewiseConstant;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.LIBORVolatilityModelPiecewiseConstant;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
@@ -67,8 +67,8 @@ public class SIMMTest {
 
 	final static boolean isCalculatePortfolio = false;
 	final static boolean isCalculateSwap      = false;
-	final static boolean isCalculateSwaption  = true;
-	final static boolean isCalculateBermudan  = false;
+	final static boolean isCalculateSwaption  = false;
+	final static boolean isCalculateBermudan  = true;
 	
 	// Model Paths 
 	final static int numberOfPaths = 100;
@@ -144,7 +144,7 @@ public class SIMMTest {
 		
 		// 3) Bermudan Input
 		double     exerciseTimeB     = 5.0;	// Exercise date //5
-		int        numberOfPeriodsB  = 20;
+		int        numberOfPeriodsB  = 26;
 		double     notionalB         = 100;
 		double[]   fixingDatesB     = new double[numberOfPeriodsB];
 		double[]   paymentDatesB    = new double[numberOfPeriodsB];
@@ -160,13 +160,13 @@ public class SIMMTest {
 		swapTenorB = IntStream.range(0, numberOfPeriodsB+1).mapToDouble(i->exerciseTimeB+i*0.5).toArray();
 		Arrays.fill(periodLengthB, 0.5);
 		Arrays.fill(periodNotionalsB, notionalB);
-		Arrays.fill(swapRatesB, getParSwaprate(forwardCurve, discountCurve, swapTenorB)); 
+		Arrays.fill(swapRatesB, 0.025);//getParSwaprate(forwardCurve, discountCurve, swapTenorB)); 
 		Arrays.fill(isPeriodStartDateExerciseDate, false);
 		isPeriodStartDateExerciseDate[0]=true;
-		isPeriodStartDateExerciseDate[4]=true;
-		isPeriodStartDateExerciseDate[8]=true;
+		isPeriodStartDateExerciseDate[6]=true;
 		isPeriodStartDateExerciseDate[12]=true;
-		isPeriodStartDateExerciseDate[16]=true;
+		isPeriodStartDateExerciseDate[18]=true;
+	//	isPeriodStartDateExerciseDate[16]=true;
 
 		
 		// Second Swaption
@@ -207,10 +207,10 @@ public class SIMMTest {
 		 *  Set calculation parameters
 		 */
 		double finalIMTime=exerciseTime+model.getLiborPeriodDiscretization().getTimeStep(0)*numberOfPeriods;
-		double timeStep = 0.25;
+		double timeStep = 0.1;
 		double interpolationStep = 1.0;
 		boolean isUseAnalyticSwapSensis = false;		
-		boolean isConsiderOISSensis     = false;
+		boolean isConsiderOISSensis     = true;
         // time measurement variables
 		long timeStart;
 		long timeEnd;
@@ -408,13 +408,13 @@ public class SIMMTest {
 			System.out.println("Time for BERMUDAN, AAD in every step, constant weights: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesBermudan[1][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.Constant, 1.0, true, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesBermudan[1][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMeltingLibor, WeightMode.Constant, 1.0, true, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for BERMUDAN, Melting: " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");
 
 			timeStart = System.currentTimeMillis();
-			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesBermudan[2][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, WeightMode.Constant, interpolationStep, true, isConsiderOISSensis);
+			for(int i=0;i<finalIMTime/timeStep+1;i++) valuesBermudan[2][i] = SIMMBermudan.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMeltingLibor, WeightMode.Constant, interpolationStep, true, isConsiderOISSensis);
 			timeEnd = System.currentTimeMillis();
 
 			System.out.println("Time for BERMUDAN, Interpolation with step " + interpolationStep + ": " + formatterTime.format((timeEnd-timeStart)/1000.0)+"s");

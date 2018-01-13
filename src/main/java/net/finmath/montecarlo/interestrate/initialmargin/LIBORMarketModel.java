@@ -22,9 +22,9 @@ import net.finmath.montecarlo.interestrate.initialmargin.products.SwaptionAnalyt
 import net.finmath.montecarlo.interestrate.initialmargin.products.SwaptionSimple;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.initialmargin.products.AbstractLIBORMonteCarloSIMMProduct;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
-import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.model.AbstractModel;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
@@ -125,14 +125,14 @@ import net.finmath.time.TimeDiscretizationInterface;
  * 
  * The calibration of the covariance structure is not part of this class. For the calibration
  * of parametric models of the instantaneous covariance see
- * {@link net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric#getCloneCalibrated(LIBORMarketModelInterface, AbstractLIBORMonteCarloRegressionProduct[], double[], double[], Map)}.
+ * {@link net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric#getCloneCalibrated(LIBORMarketModelInterface, AbstractLIBORMonteCarloRegressionProduct[], double[], double[], Map)}.
  * 
  * @author Christian Fries
  * @version 1.2
  * @see net.finmath.montecarlo.process.AbstractProcessInterface The interface for numerical schemes.
  * @see net.finmath.montecarlo.model.AbstractModelInterface The interface for models provinding parameters to numerical schemes.
  * @see net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel The abstract covariance model plug ins.
- * @see net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric A parametic covariance model including a generic calibration algorithm.
+ * @see net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric A parametic covariance model including a generic calibration algorithm.
  */
 public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelSIMMInterface{
 
