@@ -135,13 +135,13 @@ public class WeightAdjustmentTest {
 		// 1) Stochastic
 		double[] IM_Stochastic = new double[(int)(finalTime/timeStep)];
 		long timeStochasticStart = System.currentTimeMillis();
-		for(int i=0;i<IM_Stochastic.length;i++) IM_Stochastic[i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 0, true, true, true).getAverage();
+		for(int i=0;i<IM_Stochastic.length;i++) IM_Stochastic[i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 0, true, true).getAverage();
 		long timeStochasticEnd   = System.currentTimeMillis();
 
 		// 2) Constant
 		double[] IM_Constant = new double[(int)(finalTime/timeStep)];
 		long timeConstantStart = System.currentTimeMillis();
-		for(int i=0;i<IM_Constant.length;i++) IM_Constant[i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Constant, 0, true, false, true).getAverage();
+		for(int i=0;i<IM_Constant.length;i++) IM_Constant[i] = SIMMSwap.getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.Constant, 0, true, true).getAverage();
 		long timeConstantEnd   = System.currentTimeMillis();
 
 		// Printing results

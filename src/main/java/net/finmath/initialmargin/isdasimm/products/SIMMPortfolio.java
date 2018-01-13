@@ -18,13 +18,13 @@ import net.finmath.stochastic.RandomVariableInterface;
  *
  */
 public class SIMMPortfolio {
-	
+
 	private AbstractSIMMProduct[] products;
-    private AbstractSIMMSensitivityCalculation sensitivityCalculationScheme;  // WeightMode and SensitivityMode are set in the class SIMMSensitivityMapping
-    private CalculationSchemeInitialMarginISDA SIMMScheme;
-    private LIBORModelMonteCarloSimulationInterface model;
-    
-   
+	private AbstractSIMMSensitivityCalculation sensitivityCalculationScheme;  // WeightMode and SensitivityMode are set in the class SIMMSensitivityMapping
+	private CalculationSchemeInitialMarginISDA SIMMScheme;
+	private LIBORModelMonteCarloSimulationInterface model;
+
+
 	/**Construct a <code> SIMMPortfolio </code>. 
 	 * Default values <code> SensitivityMode.Exact <code> and <code> WeightMode.Constant <code> and interpolation step size 0.5 are 
 	 * set for the <code> SIMMSensitivityMapping <code>.
@@ -34,16 +34,16 @@ public class SIMMPortfolio {
 	 * @throws CalculationException 
 	 */
 	public SIMMPortfolio(AbstractSIMMProduct[] products, String currency) throws CalculationException{
-		   this.products=products;
-		   this.SIMMScheme = new CalculationSchemeInitialMarginISDA(this, currency);
-		   
+		this.products=products;
+		this.SIMMScheme = new CalculationSchemeInitialMarginISDA(this, currency);
+
 	}	
-	
+
 	public AbstractSIMMProduct[] getProducts(){
 		return this.products;
 	}
-	
-	
+
+
 	/**Calculate the forward initial margin of the portfolio.
 	 * 
 	 * @param evaluationTime The forward initial margin time
@@ -55,15 +55,15 @@ public class SIMMPortfolio {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface getInitialMargin(double evaluationTime, 
-             										LIBORModelMonteCarloSimulationInterface model, 
-             										String calculationCCY,
-             										SensitivityMode sensitivityMode,
-             										WeightMode liborWeightMode,
-             										double interpolationStep) throws CalculationException{
-		return getInitialMargin(evaluationTime, model, calculationCCY, sensitivityMode,liborWeightMode,interpolationStep,true,false,true);
+			LIBORModelMonteCarloSimulationInterface model, 
+			String calculationCCY,
+			SensitivityMode sensitivityMode,
+			WeightMode liborWeightMode,
+			double interpolationStep) throws CalculationException{
+		return getInitialMargin(evaluationTime, model, calculationCCY, sensitivityMode,liborWeightMode,interpolationStep,false,true);
 	}
-	
-	
+
+
 	/**Calculate the forward initial margin of the portfolio.
 	 * 
 	 * @param evaluationTime The forward initial margin time
@@ -78,44 +78,43 @@ public class SIMMPortfolio {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface getInitialMargin(double evaluationTime, 
-             										LIBORModelMonteCarloSimulationInterface model, 
-             										String calculationCCY,
-             										SensitivityMode sensitivityMode,
-             										WeightMode liborWeightMode,
-             										double interpolationStep,         										
-             										boolean isUseTimeGridAdjustment,
-             										boolean isUseAnalyticSwapSensis,
-             										boolean isConsiderOISSensis) throws CalculationException{
-		
-		
-	 	if(this.model==null || !model.equals(this.model) || (sensitivityCalculationScheme!=null && (sensitivityMode !=sensitivityCalculationScheme.getSensitivityMode() || liborWeightMode !=sensitivityCalculationScheme.getWeightMode()))) { // At inception (t=0) or if the model is reset            
-	 	    
-	 	    this.sensitivityCalculationScheme = new SIMMSensitivityCalculation(sensitivityMode, liborWeightMode, interpolationStep, model, isUseTimeGridAdjustment, isUseAnalyticSwapSensis, isConsiderOISSensis);
-	 	    setModel(model); // Set the (new) model. The method setModel also clears the sensitivity maps and the gradient.
-	 	    this.SIMMScheme= new CalculationSchemeInitialMarginISDA(this,calculationCCY);
-	 	}  
-		
-		
+			LIBORModelMonteCarloSimulationInterface model, 
+			String calculationCCY,
+			SensitivityMode sensitivityMode,
+			WeightMode liborWeightMode,
+			double interpolationStep,         										            								
+			boolean isUseAnalyticSwapSensis,
+			boolean isConsiderOISSensis) throws CalculationException{
+
+
+		if(this.model==null || !model.equals(this.model) || (sensitivityCalculationScheme!=null && (sensitivityMode !=sensitivityCalculationScheme.getSensitivityMode() || liborWeightMode !=sensitivityCalculationScheme.getWeightMode()))) { // At inception (t=0) or if the model is reset            
+
+			this.sensitivityCalculationScheme = new SIMMSensitivityCalculation(sensitivityMode, liborWeightMode, interpolationStep, model, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			setModel(model); // Set the (new) model. The method setModel also clears the sensitivity maps and the gradient.
+			this.SIMMScheme= new CalculationSchemeInitialMarginISDA(this,calculationCCY);
+		}  
+
+
 		return SIMMScheme.getValue(evaluationTime);
 	}
-	
-	
+
+
 	/**Set the LIBOR market model for all products and clear some maps.
 	 * 
 	 * @param model The LIBOR market model
 	 * @throws CalculationException 
 	 */
 	private void setModel(LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
-		
+
 		this.model = model;
 		for(AbstractSIMMProduct product : products){
 			// Within the method setModel sensitivity maps are cleared and the gradient of each product is set to null.
 			product.setGradient(model);
 			product.clearDeltaCache();
- 	        product.setNullExerciseIndicator();
+			product.setNullExerciseIndicator();
 			product.setSIMMSensitivityCalculation(sensitivityCalculationScheme);
 		}
-		
+
 	}
 
 } 
