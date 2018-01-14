@@ -1,4 +1,4 @@
-package net.finmath.montecarlo.interestrate.products.components;
+package net.finmath.initialmargin.regression.products.components;
 
 import java.util.Set;
 

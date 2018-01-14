@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.functions.NormalDistribution;
+import net.finmath.initialmargin.regression.products.Portfolio;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.Portfolio;
 import net.finmath.stochastic.ConditionalExpectationEstimatorInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
@@ -21,14 +21,14 @@ import net.finmath.time.TimeDiscretizationInterface;
  */
 public class InitialMarginForwardRegression {
 	private final double confidenceLevel = 0.99;
-	private final double MPR = 10.0/250.0; // The Marginal Period of Risk: 10 Days
+	private final double MPR = 10.0/250.0;       // The Marginal Period of Risk: 10 Days
 	private enum Method {SIMPLE, LSQREGRESSION}; // The Method to calculate Initial Margin
 	private Method method;
-	private int polynomialOrder; // The order of the regression polynomial
+	private int polynomialOrder;                 // The order of the regression polynomial
 
 	private LIBORModelMonteCarloSimulationInterface model;
 	private Portfolio portfolio;
-    //...
+    
 
 	public InitialMarginForwardRegression(Portfolio portfolio,
 										  LIBORModelMonteCarloSimulationInterface model,
@@ -122,7 +122,7 @@ public class InitialMarginForwardRegression {
 		RandomVariableInterface initialValue = portfolio.getValue(time, model);
 		initialValue = initialValue.sub(cashFlows);
 
-		if(time>0 && time < lastFixingTime) { // For swap we go forward along paths
+		if(time>0 && time < lastFixingTime) { 
 
 			ConditionalExpectationEstimatorInterface condExpOperatorInitial = getConditionalExpectationEstimatorLibor(time, model);
 

@@ -1,7 +1,7 @@
 /*
  * Created on 06.12.2009
  */
-package net.finmath.montecarlo.interestrate.products.components;
+package net.finmath.initialmargin.regression.products.components;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +15,8 @@ import java.util.concurrent.RejectedExecutionException;
 
 import net.finmath.concurrency.FutureWrapper;
 import net.finmath.exception.CalculationException;
+import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloRegressionProduct;
-import net.finmath.montecarlo.interestrate.products.AbstractMonteCarloRegressionProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**

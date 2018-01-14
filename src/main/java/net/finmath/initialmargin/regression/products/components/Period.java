@@ -1,7 +1,7 @@
 /*
  * Created on 22.11.2009
  */
-package net.finmath.montecarlo.interestrate.products.components;
+package net.finmath.initialmargin.regression.products.components;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariable;
@@ -118,7 +118,7 @@ public class Period extends AbstractPeriod {
 		if(couponFlow) {
 			
 			// getCoupon has been changed
-			values = getCoupon(evaluationTime, model);   // write here getCoupon(evaluationTime, model); if we want to get future value by going forward on the paths and not taking conditional expectation
+			values = getCoupon(evaluationTime, model);   // write here getCoupon(evaluationTime, model); if we want to get future value by going forward on the paths
 			
 			values = values.mult(notionalAtPeriodStart);
 			values = values.div(numeraire);
@@ -238,7 +238,7 @@ public class Period extends AbstractPeriod {
 		}
 
 		if(payer) values = values.mult(-1.0);
-		RandomVariableInterface	numeraireAtEval			= model.getNumeraire(finalTime); // was finalTime
+		RandomVariableInterface	numeraireAtEval			= model.getNumeraire(initialTime); // was finalTime
 		values = values.mult(numeraireAtEval);
 
 		// Return values

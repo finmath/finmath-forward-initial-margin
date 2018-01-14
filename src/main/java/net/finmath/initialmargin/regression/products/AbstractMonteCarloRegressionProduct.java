@@ -3,7 +3,7 @@
  *
  * Created on 20.05.2006
  */
-package net.finmath.montecarlo.interestrate.products;
+package net.finmath.initialmargin.regression.products;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;

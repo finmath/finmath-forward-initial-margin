@@ -3,7 +3,7 @@
  *
  * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
  */
-package net.finmath.montecarlo.interestrate.products.indices;
+package net.finmath.initialmargin.regression.products.indices;
 
 import java.util.Set;
 
@@ -58,6 +58,7 @@ public class FixedCoupon extends AbstractIndex {
 				+ super.toString() + "]";
 	}
 
+	// INSERTED
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -70,4 +71,5 @@ public class FixedCoupon extends AbstractIndex {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

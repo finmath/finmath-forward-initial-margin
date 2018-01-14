@@ -3,14 +3,15 @@
  * 
  * Created on 15.02.2004
  */
-package net.finmath.montecarlo.interestrate.products;
+package net.finmath.initialmargin.regression.products;
 
 import java.util.Set;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.initialmargin.regression.products.components.AbstractProductComponent;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.components.AbstractProductComponent;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
@@ -169,6 +170,7 @@ public class Portfolio extends AbstractProductComponent {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 
 }

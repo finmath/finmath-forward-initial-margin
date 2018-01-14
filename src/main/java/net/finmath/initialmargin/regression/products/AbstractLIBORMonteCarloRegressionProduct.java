@@ -3,16 +3,13 @@
  *
  * Created on 10.02.2004
  */
-package net.finmath.montecarlo.interestrate.products;
+package net.finmath.initialmargin.regression.products;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-//import net.finmath.montecarlo.AbstractMonteCarloProduct;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.process.component.factordrift.FactorDriftInterface;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**

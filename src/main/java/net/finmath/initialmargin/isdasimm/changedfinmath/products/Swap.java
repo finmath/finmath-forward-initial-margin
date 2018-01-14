@@ -20,7 +20,7 @@ import net.finmath.time.ScheduleInterface;
  * <code>
  * 	legReceiver.getValue(evaluationTime, model).sub(legPayer.getValue(evaluationTime, model))
  * </code>
- * where <code>legReceiver</code> and <code>legPayer</code> are {@link net.finmath.montecarlo.interestrate.products.SwapLeg}s.
+ * where <code>legReceiver</code> and <code>legPayer</code> are {@link net.finmath.initialmargin.regression.products.SwapLeg}s.
  * 
  * @author Christian Fries
  */

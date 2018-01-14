@@ -3,7 +3,7 @@
  *
  * Created on 15.02.2004
  */
-package net.finmath.montecarlo.interestrate.products;
+package net.finmath.initialmargin.regression.products;
 
 import java.util.Arrays;
 

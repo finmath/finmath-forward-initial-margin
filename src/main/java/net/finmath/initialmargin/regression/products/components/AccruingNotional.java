@@ -4,7 +4,7 @@
  * Created on 21.01.2016
  */
 
-package net.finmath.montecarlo.interestrate.products.components;
+package net.finmath.initialmargin.regression.products.components;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;

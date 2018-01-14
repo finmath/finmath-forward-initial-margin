@@ -3,7 +3,7 @@
  *
  * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
  */
-package net.finmath.montecarlo.interestrate.products.components;
+package net.finmath.initialmargin.regression.products.components;
 
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;

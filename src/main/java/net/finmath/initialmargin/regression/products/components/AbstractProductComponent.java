@@ -3,7 +3,7 @@
  *
  * Created on 03.09.2006
  */
-package net.finmath.montecarlo.interestrate.products.components;
+package net.finmath.initialmargin.regression.products.components;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -16,9 +16,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
+import net.finmath.initialmargin.regression.products.AbstractMonteCarloRegressionProduct;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloRegressionProduct;
-import net.finmath.montecarlo.interestrate.products.AbstractMonteCarloRegressionProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**

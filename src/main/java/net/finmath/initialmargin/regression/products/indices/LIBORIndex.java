@@ -3,7 +3,7 @@
  *
  * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
  */
-package net.finmath.montecarlo.interestrate.products.indices;
+package net.finmath.initialmargin.regression.products.indices;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,14 +56,6 @@ public class LIBORIndex extends AbstractIndex {
 		return forwardRate;
 	}
 	
-	// INSERTED
-	@Override
-	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-
-		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
-		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime,fixingTime), fixingTime+periodStartOffset, fixingTime+periodStartOffset+periodLength);
-		return forwardRate; 
-	}
 
 	/**
 	 * Returns the periodStartOffset as an act/365 daycount.
@@ -96,6 +88,15 @@ public class LIBORIndex extends AbstractIndex {
 				+ ", periodLength=" + periodLength + ", toString()="
 				+ super.toString() + "]";
 	}
+	
+	// INSERTED
+	@Override
+	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+
+		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
+		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime,fixingTime), fixingTime+periodStartOffset, fixingTime+periodStartOffset+periodLength);
+		return forwardRate; 
+	}
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
@@ -103,4 +104,5 @@ public class LIBORIndex extends AbstractIndex {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

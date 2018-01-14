@@ -4,13 +4,12 @@
  * Created on 28.02.2015
  */
 
-package net.finmath.montecarlo.interestrate.products;
+package net.finmath.initialmargin.regression.products;
 
 import net.finmath.exception.CalculationException;
-//import net.finmath.montecarlo.MonteCarloSimulationInterface;
+import net.finmath.initialmargin.regression.products.components.AbstractNotional;
+import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.components.AbstractNotional;
-import net.finmath.montecarlo.interestrate.products.indices.AbstractIndex;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleInterface;
 
@@ -21,7 +20,7 @@ import net.finmath.time.ScheduleInterface;
  * <code>
  * 	legReceiver.getValue(evaluationTime, model).sub(legPayer.getValue(evaluationTime, model))
  * </code>
- * where <code>legReceiver</code> and <code>legPayer</code> are {@link net.finmath.montecarlo.interestrate.products.SwapLeg}s.
+ * where <code>legReceiver</code> and <code>legPayer</code> are {@link net.finmath.initialmargin.regression.products.SwapLeg}s.
  * 
  * @author Christian Fries
  */

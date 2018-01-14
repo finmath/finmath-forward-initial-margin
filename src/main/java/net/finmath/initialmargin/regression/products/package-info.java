@@ -5,4 +5,4 @@
  * @author Mario Viehmann
  *
  */
-package net.finmath.montecarlo.interestrate.products;
+package net.finmath.initialmargin.regression.products;
