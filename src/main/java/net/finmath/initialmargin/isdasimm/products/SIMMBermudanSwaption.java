@@ -32,7 +32,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	// Swap after exercise
 	private SimpleSwap swap = null;
-	private SIMMSimpleSwap SIMMSwap = null;
+	private SIMMSimpleSwap SIMMSwap = null; // Only used if we take the numeraire as the model sensitivity.
 
 	private BermudanSwaption bermudan;
 
@@ -169,7 +169,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 				// Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
 				if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()){
-					return AbstractSIMMSensitivityCalculation.zeroBucketsIR; // @Todo distinguish risk class 										   		
+					return AbstractSIMMSensitivityCalculation.zeroBucketsIR;  										   		
 				}
 
 				// Get Swap Sensitivities analytically		

@@ -13,6 +13,7 @@ import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption;
 import net.finmath.initialmargin.isdasimm.products.SIMMSimpleSwap;
 import net.finmath.initialmargin.isdasimm.products.SIMMSwaption;
+import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct.MVAMode;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption.ExerciseType;
 import net.finmath.initialmargin.isdasimm.products.SIMMSwaption.DeliveryType;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
@@ -66,16 +67,16 @@ public class SensitivityApproximationTest {
 		int[] numberOfPeriods = null;
 
 		// Select TestProducts
-		TestProductType testProductType = TestProductType.BermudanCallable;
+		TestProductType testProductType = TestProductType.Swaptions;
 
 		switch(testProductType){
 		case Swaps: 
 			exerciseDates = new double[] {0.0};
-			numberOfPeriods = new int[] {10,20,30,40};
+			numberOfPeriods = new int[] {30};
 			break;
 		case Swaptions: 
 			exerciseDates = new double[] {10.0};//, 10.0};
-			numberOfPeriods = new int[]  {12};//, 8, 10, 12, 16};
+			numberOfPeriods = new int[]  {10};//, 8, 10, 12, 16};
 			break;
 		case BermudanCallable: 
 		case BermudanCancelable:
@@ -111,12 +112,12 @@ public class SensitivityApproximationTest {
 
 				// 1) Exact
 				long timeStart = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEnd = System.currentTimeMillis();
 
 				// 2) Melting
 				long timeStartMelting = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMeltingLibor, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) valuesSwaption[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation
@@ -132,7 +133,7 @@ public class SensitivityApproximationTest {
 
 				// Print Result and calculate Deviations 
 				for(int i=0;i<finalIMTime/timeStep+1;i++){
-					System.out.println(valuesSwaption[0][i].getAverage() + "\t" + valuesSwaption[1][i].getAverage() + "\t" + valuesSwaption[2][i].getAverage());
+					//System.out.println(valuesSwaption[0][i].getAverage() + "\t" + valuesSwaption[1][i].getAverage() + "\t" + valuesSwaption[2][i].getAverage());
 					double errorMelting = (valuesSwaption[1][i].getAverage()-valuesSwaption[0][i].getAverage());
 					deviationSumMelting += errorMelting;
 					double errorInterpolation = (valuesSwaption[2][i].getAverage()-valuesSwaption[0][i].getAverage());
@@ -154,6 +155,16 @@ public class SensitivityApproximationTest {
 						"\t" + formatterValue.format(averageDeviationInPercentOfSumMelting) + 
 						"\t" + formatterValue.format(averageDeviationInPercentOfSumInterpolation) + 
 						"\t" + RMSEMelting + "\t" + RMSEInterpolation);
+				
+				// Get MVA and Print
+				double fundingSpread = 0.005;
+				double MVAExact = getMVA(valuesSwaption[0], model, timeStep, fundingSpread, MVAMode.Exact);
+				double MVAMelting = getMVA(valuesSwaption[1], model, timeStep, fundingSpread, MVAMode.Exact);
+				double MVAInterpolation = getMVA(valuesSwaption[2], model, timeStep, fundingSpread, MVAMode.Exact);
+				double MVAApproximationExact = getMVA(valuesSwaption[0], model, timeStep, fundingSpread, MVAMode.Approximation);
+				System.out.println("MVA Green Exact" + "MVA Fries" + "\t" + "Exact " + "deviation Melting " + "\t" + "deviation Interpolation");
+				System.out.println(MVAApproximationExact+ "         " + "\t" + MVAExact + "\t" + (MVAMelting-MVAExact) + "\t" + (MVAInterpolation-MVAExact));
+				
 				productIndex++;
 			}
 		}
@@ -296,6 +307,20 @@ public class SensitivityApproximationTest {
 		}
 		return products.stream().toArray(AbstractSIMMProduct[]::new);
 
+	}
+	
+	public static double getMVA(RandomVariableInterface[] initialMargin, LIBORModelMonteCarloSimulationInterface model, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException{
+			
+		RandomVariableInterface forwardBond;
+		RandomVariableInterface MVA = new RandomVariable(0.0);
+		for(int i=0; i<initialMargin.length; i++){
+			forwardBond = model.getNumeraire((i+1)*timeStep).mult(Math.exp((i+1)*timeStep*fundingSpread)).invert();
+			forwardBond = forwardBond.sub(model.getNumeraire(i*timeStep).mult(Math.exp(i*timeStep*fundingSpread)).invert());
+			if(mvaMode == MVAMode.Green) initialMargin[i] = initialMargin[i].average();
+			MVA = MVA.add(forwardBond.mult(initialMargin[i]));		
+					
+		}	
+		return MVA.getAverage();
 	}
 
 }

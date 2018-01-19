@@ -199,7 +199,8 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 		if(!super.isGradientOfDeliveryProduct){
 			// Calculate the product value as of time 0.
 			RandomVariableInterface indicator = getExerciseIndicator(swaption.getExerciseDate()+0.0001);
-			RandomVariableDifferentiableInterface productValue = (RandomVariableDifferentiableInterface) swap.getValue(0.0, modelCache).mult(indicator);
+			RandomVariableDifferentiableInterface productValue = 
+					(RandomVariableDifferentiableInterface) swap.getValue(0.0, modelCache).mult(indicator);
 			// Get the map of numeraire adjustments used specifically for this product
 			super.numeraireAdjustmentMap.putAll(modelCache.getNumeraireAdjustmentMap());
 			// Calculate the gradient
