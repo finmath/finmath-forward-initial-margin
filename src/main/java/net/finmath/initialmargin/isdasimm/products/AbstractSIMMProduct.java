@@ -601,6 +601,23 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 		return valueNumeraireSensitivities;
 	}
+	
+	public enum MVAMode {Approximation, Exact};
+	public double getMVA(LIBORModelMonteCarloSimulationInterface model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException{
+		double finalMaturity = this.getFinalMaturity();
+		RandomVariableInterface forwardBond;
+		RandomVariableInterface initialMargin;
+		RandomVariableInterface MVA = new RandomVariable(0.0);
+		for(int i=0; i<((int)finalMaturity/timeStep); i++){
+			forwardBond = model.getNumeraire((i+1)*timeStep).mult(Math.exp((i+1)*timeStep*fundingSpread)).invert();
+			forwardBond = forwardBond.sub(model.getNumeraire(i*timeStep).mult(Math.exp(i*timeStep*fundingSpread)).invert());
+			initialMargin = getInitialMargin(i*timeStep, model, "EUR", sensitivityMode, weightMode, 1.0, false, true);
+			if(mvaMode == MVAMode.Approximation) initialMargin = initialMargin.average();
+			MVA = MVA.add(forwardBond.mult(initialMargin));		
+					
+		}	
+		return MVA.getAverage();
+	}
 
 
 }
