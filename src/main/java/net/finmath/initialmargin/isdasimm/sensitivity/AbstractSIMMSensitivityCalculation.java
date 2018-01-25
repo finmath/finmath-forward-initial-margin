@@ -213,15 +213,15 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] mapOISBondToMarketRateSensitivities(double evaluationTime, 
-			RandomVariableInterface[] dVdP, /*Libor sensitivities*/
+			RandomVariableInterface[] dVdP, /*OIS bond sensitivities*/
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		if(dVdP==null) return zeroBucketsIR;
 		RandomVariableInterface[] delta = new RandomVariableInterface[dVdP.length];
 		RandomVariableInterface[][] dPdS;
 		if(this.weightTransformationMethod == WeightMode.TimeDependent){
-			dPdS = getBondSwapSensitivities(evaluationTime, model);
-		} else dPdS = getBondSwapSensitivities(0.0, model);
+			dPdS = getSensitivityWeightOIS(evaluationTime, model);
+		} else dPdS = getSensitivityWeightOIS(0.0, model);
 		// Calculate Sensitivities wrt Swaps
 		// return multiply(dVdP,dPdS);
 		for(int swapIndex = 0; swapIndex<dVdP.length; swapIndex++){
@@ -255,11 +255,11 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 		RandomVariableInterface[][] dLdS;
 		if(this.weightTransformationMethod == WeightMode.TimeDependent){
-			dLdS = getLiborSwapSensitivities(evaluationTime, model);
+			dLdS = getSensitivityWeightLIBOR(evaluationTime, model);
 			numberOfSwaps = dLdS[0].length;
 		} else {
 			// Get sensitivity weight from cache
-			dLdS = getLiborSwapSensitivities(0.0, model); 
+			dLdS = getSensitivityWeightLIBOR(0.0, model); 
 			timeGridIndicator = onLiborPeriodDiscretization(evaluationTime, model) ? 0 : 1;
 			numberOfSwaps = dVdL.length - timeGridIndicator;
 		}
@@ -285,7 +285,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @return The matrix dL/dS 
 	 * @throws CalculationException
 	 */
-	private RandomVariableInterface[][] getLiborSwapSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
+	private RandomVariableInterface[][] getSensitivityWeightLIBOR(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		if(riskWeightMapLibor.containsKey(evaluationTime)) return riskWeightMapLibor.get(evaluationTime);
 
@@ -326,7 +326,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @return The sensitivity of the discount curve (bonds) wrt to swap rates of the same curve.
 	 * @throws CalculationException 
 	 */
-	private RandomVariableInterface[][] getBondSwapSensitivities(double evaluationTime, 
+	private RandomVariableInterface[][] getSensitivityWeightOIS(double evaluationTime, 
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		if(riskWeightMapOIS.containsKey(evaluationTime)) return riskWeightMapOIS.get(evaluationTime);
