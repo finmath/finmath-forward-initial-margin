@@ -256,11 +256,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		RandomVariableInterface[][] dLdS;
 		if(this.weightTransformationMethod == WeightMode.TimeDependent){
 			dLdS = getLiborSwapSensitivities(evaluationTime, model);
-			RandomVariableInterface[][] dLdL = getLiborTimeGridAdjustment(evaluationTime, model);
-			dLdS = multiply(dLdL,dLdS);
 			numberOfSwaps = dLdS[0].length;
 		} else {
-			dLdS = getLiborSwapSensitivities(0.0, model);
+			// Get sensitivity weight from cache
+			dLdS = getLiborSwapSensitivities(0.0, model); 
 			timeGridIndicator = onLiborPeriodDiscretization(evaluationTime, model) ? 0 : 1;
 			numberOfSwaps = dVdL.length - timeGridIndicator;
 		}
@@ -298,7 +297,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		int numberOfRemainingLibors = model.getNumberOfLibors()-nextLiborIndex;
 		dLdS = new RandomVariableInterface [numberOfRemainingLibors][numberOfRemainingLibors];
 
-		// Calculate dLdS directly  
+		// Calculate d\tilde{L}dS directly  
 		dLdS[0][0]=new RandomVariable(1.0);
 		double discountTime = evaluationTime+liborPeriodLength;
 		RandomVariableInterface sumDf = model.getForwardBondOIS(discountTime, evaluationTime);
@@ -310,6 +309,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			dLdS[liborIndex][liborIndex] = sumDf.div(denominator);
 
 		}
+		
+		// Calculate dLdS = dLd\tilde{L} * d\tilde{L}dS 
+		RandomVariableInterface[][] dLdL = getLiborTimeGridAdjustment(evaluationTime, model);
+		dLdS = multiply(dLdL,dLdS);
 
 		riskWeightMapLibor.put(evaluationTime, dLdS);		
 		return dLdS;
