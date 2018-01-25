@@ -234,7 +234,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	} // end getSensitivity()
 
 
-	/** Returns the cache of numeraire adjustments used in the last valuation of this product. We need the numeraire adjustments
+	/** Returns the cache of numeraire adjustments of the LMM. We need the numeraire adjustments
 	 *  to calculate the sensitivities w.r.t. the OIS curve.
 	 * 
 	 * @return The cache of numeraire adjustments from the Libor market model
