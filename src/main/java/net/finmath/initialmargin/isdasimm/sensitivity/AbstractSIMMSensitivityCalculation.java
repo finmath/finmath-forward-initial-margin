@@ -35,8 +35,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	public static double secondsPseudoInverse = 0;
 
 	public enum SensitivityMode{
-		LinearMelting,     // Melting of sensitivties to zero until final maturity
-		LinearMeltingLibor,// Linear Melting on Libor Buckets
+		MeltingSIMMBuckets,     // Melting of sensitivties to zero until final maturity
+		MeltingLIBORBuckets,// Linear Melting on Libor Buckets
 		Interpolation,     // Interpolate OIS and Forward curve sensitivities between time points of exact AAD sensitivities
 		Exact,             // AAD or Analytic (for Swaps) assuming independence of OIS and Libor for the sensitivity transformation.
 		ExactConsideringDependencies 

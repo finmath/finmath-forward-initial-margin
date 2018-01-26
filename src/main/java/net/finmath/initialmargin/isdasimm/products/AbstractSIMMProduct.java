@@ -151,7 +151,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			setGradient(model); // Set the (new) gradient. The method setModel also clears the sensitivity maps and sets the model as modelCache.
 			this.exerciseIndicator = null;
 			this.exactDeltaCache.clear();
-			this.sensitivityCalculationScheme = new SIMMSensitivityCalculation(SensitivityMode.LinearMelting, WeightMode.TimeDependent, 1.0, model, true /*isUseAnalyticSwapSensis*/, true /*isConsiderOISSensitivities*/);
+			this.sensitivityCalculationScheme = new SIMMSensitivityCalculation(SensitivityMode.MeltingSIMMBuckets, WeightMode.TimeDependent, 1.0, model, true /*isUseAnalyticSwapSensis*/, true /*isConsiderOISSensitivities*/);
 		}
 
 		return simmScheme.getValue(this, evaluationTime); 

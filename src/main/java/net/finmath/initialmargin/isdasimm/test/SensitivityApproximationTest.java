@@ -139,7 +139,7 @@ public class SensitivityApproximationTest {
 
 				// 2) Melting
 				long timeStartMelting = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.LinearMelting, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MeltingLIBORBuckets, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation

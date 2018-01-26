@@ -88,8 +88,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 			break;               
 
-		case LinearMelting:       // Linear Melting on SIMM Buckets
-		case LinearMeltingLibor:  // Linear Melting on Libor Buckets
+		case MeltingSIMMBuckets:       // Linear Melting on SIMM Buckets
+		case MeltingLIBORBuckets:  // Linear Melting on Libor Buckets
 		// The time of the sensitivities used for melting: Initial Melting Time    
 		double initialMeltingTime = evaluationTime < product.getMeltingResetTime() ? 0 : product.getMeltingResetTime();
 
@@ -144,7 +144,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			RandomVariableInterface[] sensitivities, double meltingZeroTime,
 			double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException{
 
-		boolean isMarketRateSensi = sensitivityMode==SensitivityMode.LinearMelting ? true : false;
+		boolean isMarketRateSensi = sensitivityMode==SensitivityMode.MeltingSIMMBuckets ? true : false;
 		if(evaluationTime > product.getFinalMaturity()) return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
 		RandomVariableInterface[] meltedSensis=null;
 		int[] riskFactorDays=null;
@@ -154,7 +154,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		}
 
 		switch(sensitivityMode){
-		case LinearMelting:
+		case MeltingSIMMBuckets:
 
 			double[] initialMeltingTime = new double[]{meltingZeroTime};
 
@@ -178,7 +178,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			}
 			break;  
 
-		case LinearMeltingLibor:
+		case MeltingLIBORBuckets:
 			// First index of Libor at evaluation time given the initial melting time
 			int liborIndexAtInitialMeltingTime = model.getLiborPeriodIndex(meltingZeroTime);
 			liborIndexAtInitialMeltingTime = liborIndexAtInitialMeltingTime < 0 ? -liborIndexAtInitialMeltingTime-1 : liborIndexAtInitialMeltingTime;
