@@ -38,7 +38,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	public enum ExerciseType {Callable, Cancelable};
 	private ExerciseType exerciseType;
-	private Map<String, RandomVariableInterface[]> swapSensitivityMap = new HashMap<>();
+	private Map<String, RandomVariableInterface[]> swapSensitivityMap = new HashMap<>(); // Cache for sensitivities of underlying swap
 
 
 	/** Construct a bermudan swaption as a product for the SIMM. Initial margin and MVA can be calculated for this product.
@@ -221,7 +221,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
 	 */
-	public RandomVariableInterface[] changeMeltedSensisOnExercisedPaths(double evaluationTime, String curveIndexName, RandomVariableInterface[] meltedBermudanSensis) throws CalculationException, SolverException, CloneNotSupportedException{
+	public RandomVariableInterface[] changeMeltedSensitivitiesOnExercisedPaths(double evaluationTime, String curveIndexName, RandomVariableInterface[] meltedBermudanSensis) throws CalculationException, SolverException, CloneNotSupportedException{
 
 		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
 
