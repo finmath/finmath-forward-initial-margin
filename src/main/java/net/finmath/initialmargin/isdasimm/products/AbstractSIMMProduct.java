@@ -616,7 +616,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			MVA = MVA.add(forwardBond.mult(initialMargin));		
 					
 		}	
-		return MVA.getAverage();
+		return -MVA.getAverage();
 	}
 
 
