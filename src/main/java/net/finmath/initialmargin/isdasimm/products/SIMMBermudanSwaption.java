@@ -30,9 +30,9 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	static final String productClass = "RatesFX";
 	static final String[] riskClass = new String[]{"InterestRate"};
 
-	// Swap after exercise
+	// Swap after exercise (delivery product)
 	private SimpleSwap swap = null;
-	private SIMMSimpleSwap SIMMSwap = null; // Only used if we take the numeraire as the model sensitivity.
+	private SIMMSimpleSwap SIMMSwap = null; // Only used if we take the numeraire as the model sensitivity, such that we can easily calculate the sensitivities of the swap w.r.t. the numeraire.
 
 	private BermudanSwaption bermudan;
 
@@ -363,6 +363,11 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 		swapSensitivityMap.clear();
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------------------
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
+	//----------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
 	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,

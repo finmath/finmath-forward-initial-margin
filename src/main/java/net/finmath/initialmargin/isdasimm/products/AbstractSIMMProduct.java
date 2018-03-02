@@ -557,6 +557,29 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 	
 	
+	public enum MVAMode {Approximation, Exact};
+	public double getMVA(LIBORModelMonteCarloSimulationInterface model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException{
+		double finalMaturity = this.getFinalMaturity();
+		RandomVariableInterface forwardBond;
+		RandomVariableInterface initialMargin;
+		RandomVariableInterface MVA = new RandomVariable(0.0);
+		for(int i=0; i<((int)finalMaturity/timeStep); i++){
+			forwardBond = model.getNumeraire((i+1)*timeStep).mult(Math.exp((i+1)*timeStep*fundingSpread)).invert();
+			forwardBond = forwardBond.sub(model.getNumeraire(i*timeStep).mult(Math.exp(i*timeStep*fundingSpread)).invert());
+			initialMargin = getInitialMargin(i*timeStep, model, "EUR", sensitivityMode, weightMode, 1.0, false, true);
+			if(mvaMode == MVAMode.Approximation) initialMargin = initialMargin.average();
+			MVA = MVA.add(forwardBond.mult(initialMargin));		
+					
+		}	
+		return -MVA.getAverage();
+	}
+	
+	
+	//----------------------------------------------------------------------------------------------------------------------------------
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
+	//----------------------------------------------------------------------------------------------------------------------------------
+
 	/** Calculate the forward derivatives of the product w.r.t. the Numeraires at a given evaluation time.
 	 *  These derivatives are w.r.t. the numeraires on the Libor period discretization.
 	 *  This function is called by the subclasses in the overridden functions
@@ -601,23 +624,5 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 		return valueNumeraireSensitivities;
 	}
-	
-	public enum MVAMode {Approximation, Exact};
-	public double getMVA(LIBORModelMonteCarloSimulationInterface model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException{
-		double finalMaturity = this.getFinalMaturity();
-		RandomVariableInterface forwardBond;
-		RandomVariableInterface initialMargin;
-		RandomVariableInterface MVA = new RandomVariable(0.0);
-		for(int i=0; i<((int)finalMaturity/timeStep); i++){
-			forwardBond = model.getNumeraire((i+1)*timeStep).mult(Math.exp((i+1)*timeStep*fundingSpread)).invert();
-			forwardBond = forwardBond.sub(model.getNumeraire(i*timeStep).mult(Math.exp(i*timeStep*fundingSpread)).invert());
-			initialMargin = getInitialMargin(i*timeStep, model, "EUR", sensitivityMode, weightMode, 1.0, false, true);
-			if(mvaMode == MVAMode.Approximation) initialMargin = initialMargin.average();
-			MVA = MVA.add(forwardBond.mult(initialMargin));		
-					
-		}	
-		return -MVA.getAverage();
-	}
-
 
 }

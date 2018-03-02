@@ -237,6 +237,11 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 	}
 	
 	
+	//----------------------------------------------------------------------------------------------------------------------------------
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
+	//----------------------------------------------------------------------------------------------------------------------------------
+
 	@Override
 	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {

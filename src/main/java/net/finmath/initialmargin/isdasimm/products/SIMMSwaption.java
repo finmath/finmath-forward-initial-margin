@@ -27,7 +27,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	static final String productClass = "RatesFX";
 	static final String[] riskClass = new String[]{"InterestRate"};
 
-	// Swap after exercise
+	// Swap after exercise (delivery product)
 	private SimpleSwap swap = null; 
 
 	private Swaption swaption;
@@ -217,6 +217,11 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	}
 	
 	
+	//----------------------------------------------------------------------------------------------------------------------------------
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
+	//----------------------------------------------------------------------------------------------------------------------------------
+
 	@Override
 	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
