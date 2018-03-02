@@ -35,11 +35,11 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	public static double secondsPseudoInverse = 0;
 
 	public enum SensitivityMode{
-		MeltingSIMMBuckets,     // Melting of sensitivties to zero until final maturity
-		MeltingLIBORBuckets,// Linear Melting on Libor Buckets
-		Interpolation,     // Interpolate OIS and Forward curve sensitivities between time points of exact AAD sensitivities
-		Exact,             // AAD or Analytic (for Swaps) assuming independence of OIS and Libor for the sensitivity transformation.
-		ExactConsideringDependencies 
+		MeltingSIMMBuckets, // Melting on SIMM maturity buckets
+		MeltingLIBORBuckets,// Melting on LIBOR buckets
+		Interpolation,      // Interpolate OIS and Forward curve sensitivities between time points of exact AAD sensitivities
+		Exact,              // AAD or Analytic (for Swaps) assuming independence of OIS and LIBOR for the sensitivity transformation.
+		ExactConsideringDependencies // NOT PART OF THE THESIS. PRELIMINARY TRIAL!
 	}
 
 	protected SensitivityMode sensitivityMode;
@@ -53,17 +53,13 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 	private WeightMode weightTransformationMethod;  
 	private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMapLibor = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the Forward Curve.
-	private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMapOIS   = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the Forward Curve.
+	private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMapOIS   = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the OIS Curve.
 
 	/*
 	 * Reference for sensitivity cache in case OIS - Libor dependencies are considered. In this case we must calculate 
 	 * (dV/dS_{LIBOR}, dV/dS_{OIS}) at a given evaluation time at once (and not dV/dS_{LIBOR}, dV/dS_{OIS} separately).
 	 */
 	private SoftReference<Map<Double, Map<String, RandomVariableInterface[]>>> sensitivityCacheReference = null; 
-	/**
-	 * This is a cache for the risk weight transformation matrix in the (new) SensitivityMode.ExactConsideringDependencies
-	 */
-	private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMapJacobi   = new HashMap<>();
 
 	/**
 	 * 
@@ -591,8 +587,14 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 	//----------------------------------------------------------------------------------------------------------------------------------
 	// Additional methods for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// NOT USED IN THE THESIS!
 	//----------------------------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * This is a cache for the risk weight transformation matrix in the (new) SensitivityMode.ExactConsideringDependencies
+	 */
+	private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMapJacobi   = new HashMap<>();
+	
 	/**Calculate the sensitivities dV/dS with respect to all swap rates for given product and curve 
 	 * considering exact OIS-Libor dependencies (SensitivityMode.ExactConsideringDependencies).
 	 * This applies to the risk class Interest Rates only.
