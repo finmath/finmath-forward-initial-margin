@@ -103,7 +103,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 				swapSensis = Arrays.stream(swapSensis).map(n->n.mult(indicator)).toArray(RandomVariableInterface[]::new);
 				return swapSensis;
 
-			} else setSwapGradient(); // Set Gradient of Delivery Product to obtain sensitivities with AAD
+			} else setSwapGradient(); // Set Gradient of delivery product to obtain sensitivities with AAD
 
 		}
 
@@ -133,7 +133,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 				dVdP = Arrays.stream(dVdP).map(n->n.mult(indicator)).toArray(RandomVariableInterface[]::new);
 				futureDiscountTimes = Arrays.stream(swap.getPaymentDates()).filter(n -> n > evaluationTime).toArray();
 
-			} else setSwapGradient(); // Set Gradient of Delivery Product to obtain sensitivities with AAD
+			} else setSwapGradient(); // Set gradient of delivery product to obtain sensitivities with AAD
 
 		}
 

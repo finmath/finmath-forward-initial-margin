@@ -103,7 +103,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 		// return zero if evaluationTime > last payment date
 		if(evaluationTime>=fixingDates[fixingDates.length-1]+periodLength) return sensis; 
 
-		// Actual Sensitivity Calculation: dV/dL = P(T,t)*periodLength
+		// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
 		for(int liborIndex=currentLiborIndex;liborIndex<numberOfSensis+currentLiborIndex;liborIndex++){
 			int i = liborIndex < firstLiborIndex ? 0 : liborIndex-firstLiborIndex+1;
 			if(!(i>fixingDates.length-periodIndex || i==0) ){ 		
@@ -115,7 +115,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 
 		case("OIS"):
 
-			// Actual Sensitivity Calculation: dV/dL = P(T,t)*periodLength
+			// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
 			numberOfSensis = fixingDates.length-periodIndex;
 
 		// return zero if evaluationTime > last payment date, i.e. if numberOfSensis <= 0

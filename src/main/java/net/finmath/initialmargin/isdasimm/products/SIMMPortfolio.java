@@ -8,10 +8,10 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
 import net.finmath.stochastic.RandomVariableInterface;
 
-/** This class is a wrapper of single <code> AbstractSIMMProduct <code> 's into one portfolio. 
- *  Within the portfolio all products share the same <code> LIBORModelMonteCarloSimulationInterface <code>,
- *  have the same sensitivity mapping <code> SIMMSensitivityMapping <code> (i.e. the weights used for converting 
- *  Libor sensitivities into Swap-rate sensitivities are the same for all products. Moreover, the WeightMode and 
+/** This class is a wrapper of single <code> AbstractSIMMProduct </code> s into one portfolio. 
+ *  Within the portfolio all products share the same <code> LIBORModelMonteCarloSimulationInterface </code>,
+ *  have the same sensitivity mapping <code> SIMMSensitivityMapping </code> (i.e. the weights used for converting 
+ *  LIBOR sensitivities into Swap-rate sensitivities are the same for all products. Moreover, the WeightMode and 
  *  SensitivityMode (Exact, Melting, Interpolation) are the same for all products.
  * 
  * @author Mario Viehmann

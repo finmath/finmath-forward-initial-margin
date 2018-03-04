@@ -63,7 +63,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	// Define the sensitivity maps.
 	/**
 	 *  The map of delta sensitivities at a specific time. This map is filled once per evaluation time step and the
-	 *  function <code> getSensitivity <code> defined in class <code> AbstractSIMMProduct </code> which is called in
+	 *  function <code> getSensitivity </code> defined in class <code> AbstractSIMMProduct </code> which is called in
 	 *  <code> MarginSchemeIRDelta </code> picks the sensitivies for a specified riskClass, curveIndexName and maturityBucket
 	 *  from this map. This map may - in contrast to the second map "exactDeltaCache" - contain interpolated sensitivities.
 	 */
@@ -80,7 +80,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	//private RandomVariableInterface vegaSensitivity=null; 
 
 	/**
-	 * The cache of numeraire OIS adjustment factors used in the evaluation of this product in the <code> LIBORMarketModel <code>.
+	 * The cache of numeraire OIS adjustment factors used in the evaluation of this product in the <code> LIBORMarketModel </code>.
 	 * This data is the basis of the OIS curve sensitivities, which we calculate by applying AAD to the numeraire adjustments
 	 */
 	protected Map<Double,RandomVariableInterface> numeraireAdjustmentMap = new HashMap<>();
@@ -96,7 +96,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @param hasOptionality True if this product is not linear
 	 */
 	public AbstractSIMMProduct(String   productClass,
-			String[] riskClass,     // One product may contribute to several risk Classes
+			String[] riskClass,     // One product may contribute to several risk classes
 			String[] curveIndexNames,
 			String   currency,
 			String   bucketKey,
@@ -140,7 +140,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		return simmScheme.getValue(evaluationTime); 
 	}
 
-	// for risk weight calibration only
+	// for risk weight calibration only. Not used in the thesis.
 	public RandomVariableInterface getInitialMargin(double evaluationTime, 
 			LIBORModelMonteCarloSimulationInterface model, 		                                        
 			CalculationSchemeInitialMarginISDA simmScheme) throws CalculationException{
@@ -234,10 +234,10 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	} // end getSensitivity()
 
 
-	/** Returns the cache of numeraire adjustments of the LMM. We need the numeraire adjustments
+	/** Returns the cache of numeraire adjustments of the LIBOR market model. We need the numeraire adjustments
 	 *  to calculate the sensitivities w.r.t. the OIS curve.
 	 * 
-	 * @return The cache of numeraire adjustments from the Libor market model
+	 * @return The cache of numeraire adjustments from the LIBOR market model
 	 * @throws CalculationException
 	 */
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() throws CalculationException{
@@ -266,12 +266,12 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 
 	/** Set the cache of exact delta sensitivities (calculated by AAD or analytically for Swaps). This cache is used in the class 
-	 *  <code> SIMMSensitivityCalculation <code> to obtain the sensitivities used for melting and interpolation.
+	 *  <code> SIMMSensitivityCalculation </code> to obtain the sensitivities used for melting and interpolation.
 	 * 
 	 * @param riskClass The risk class
 	 * @param curveIndexName The name of the curve (OIS or Libor6m)
 	 * @param time The time for which the forward sensitivity is calculated
-	 * @param model The Libor Market model
+	 * @param model The LIBOR Market model
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
@@ -322,14 +322,14 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 
 	
-	/** Calculate the forward derivatives of the product w.r.t. the Libors at a given evaluation time.
-	 *  These derivatives are not w.r.t. the libors on the Libor period discretization, but w.r.t. the general libors 
+	/** Calculate the forward derivatives of the product w.r.t. the LIBORs at a given evaluation time t.
+	 *  These derivatives are not w.r.t. the LIBORs on the LIBOR period discretization, but w.r.t. the general LIBORs 
 	 *  L(t+i\Delta_T,t+(i+1)\Delta_T;t). This function is called by the subclasses in the overridden functions
-	 *  <code> getValueLiborSensitivities <code>.
+	 *  <code> getValueLiborSensitivities </code>.
 	 * 
 	 * @param evaluationTime The time for which the forward sensitivities are calculated
-	 * @param model The libor market model
-	 * @return The forward Libor sensitivities of this product 
+	 * @param model The LIBOR market model
+	 * @return The forward LIBOR sensitivities of this product 
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
@@ -367,19 +367,19 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	
 	/** Calculate the sensitivities w.r.t. the OIS Bonds: dV/dP. These sensitivities are calculated using the numeraire adjustments at future 
-	 *  discount times (times at which the model has called the <code> getNumeraire <code> function of the <code> LIBORMarketModel <code>.
+	 *  discount times (times at which the model has called the <code> getNumeraire </code> function of the <code> LIBORMarketModel </code>.
 	 *  The function calculates the AAD derivatives dV/dA i.e. w.r.t. the adjustments at the future discount times and converts them into 
 	 *  dV/dP (sensitivties w.r.t. the OIS Bonds P_{OIS}(t+i\Delta_T, t)). 
 	 *  dV(t)/dP_{OIS}(t_cf;t), i.e. the bond sensitivities at the CF times, may be provided as input to this function such that only the 
 	 *  conversion to dV(t)/dP(t+i\Delta_T;t) is perfromed. This is useful if we have already obtained the sensitivities dV/dP analytically. 
 	 *  This function is called inside the subclasses in the overridden function 
-	 *  <code> getDiscountCurveSensitivities(String riskClass, double evaluationTime) <code>.
+	 *  <code> getDiscountCurveSensitivities(String riskClass, double evaluationTime) </code>.
 	 * 
 	 * @param evaluationTime The time as of which the forward sensitivities are considered
 	 * @param discountTimes (may be null) The times after evaluation time at which the the numeraire has been used in the last valuation of this product
 	 * @param dVdP (may be null) The sensitivities w.r.t. the OIS bond. Only used if dV/dP is given analytically.
 	 * @param riskClass The risk class
-	 * @param model The Libor market model
+	 * @param model The LIBOR market model
 	 * @return The forward sensitivities w.r.t. the OIS Bonds
 	 * @throws CalculationException
 	 */
@@ -475,9 +475,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * Getters and setters
 	 */
 
-	/** Set the libor market model in the model cache, set the gradient of the product w.r.t. the new model.  
+	/** Set the LIBOR market model in the model cache, set the gradient of the product w.r.t. the new model.  
 	 * 
-	 * @param model The libor market model
+	 * @param model The LIBOR market model
 	 * @throws CalculationException
 	 */
 	public void setGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
@@ -583,7 +583,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	/** Calculate the forward derivatives of the product w.r.t. the Numeraires at a given evaluation time.
 	 *  These derivatives are w.r.t. the numeraires on the Libor period discretization.
 	 *  This function is called by the subclasses in the overridden functions
-	 *  <code> getValueNumeraireSensitivities <code>.
+	 *  <code> getValueNumeraireSensitivities </code>.
 	 * 
 	 * @param evaluationTime The time for which the forward sensitivities are calculated
 	 * @param model The libor market model
