@@ -1,7 +1,6 @@
 package net.finmath.initialmargin.isdasimm.sensitivity;
 
 import java.lang.ref.SoftReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,6 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
-import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
@@ -56,12 +54,12 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	private HashMap<Double /*time*/, RandomVariableInterface[][]> riskWeightMapOIS   = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the OIS Curve.
 
 	/*
-	 * Reference for sensitivity cache in case OIS - Libor dependencies are considered. In this case we must calculate 
+	 * Reference for sensitivity cache in case OIS - LIBOR dependencies are considered. Not used in the thesis! In this case we must calculate 
 	 * (dV/dS_{LIBOR}, dV/dS_{OIS}) at a given evaluation time at once (and not dV/dS_{LIBOR}, dV/dS_{OIS} separately).
 	 */
 	private SoftReference<Map<Double, Map<String, RandomVariableInterface[]>>> sensitivityCacheReference = null; 
 
-	/**
+	/**Constructor
 	 * 
 	 * @param sensitivityMode
 	 * @param weightTransformationMode 
@@ -76,7 +74,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		this.isConsiderOISSensitivities = isConsiderOISSensitivities;   	
 	}
 
-	/**
+	/**Constructor
 	 * 
 	 * @param sensitivityMode
 	 * @param liborWeightMode
@@ -94,7 +92,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @param riskClass The risk class of the product 
 	 * @param curveIndexName The name of the index curve
 	 * @param evaluationTime The time at which the sensitivities should be calculated
-	 * @param model The Libor market model
+	 * @param model The LIBOR market model
 	 * @return The sensitivities at evaluationTime on the SIMM buckets (or on Libor Buckets)
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
@@ -115,7 +113,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @param curveIndexName The name of the curve
 	 * @param riskClass The risk class for the sensitivity calculation
 	 * @param evaluationTime The time at which the sensitivities should be calculated
-	 * @param model The Libor market model
+	 * @param model The LIBOR market model
 	 * @return The delta sensitivities calculated by AAD
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
@@ -127,7 +125,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			double evaluationTime, 
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
 
-	/** Get the sensitivities using sensitivity melting on SIMM Buckets or Libor Buckets depending on the SensitivityMode.
+	/** Get the sensitivities using sensitivity melting on SIMM Buckets or LIBOR buckets depending on the SensitivityMode.
 	 * 
 	 * @param product The product whose sensitivities are melted
 	 * @param sensitivities 
@@ -156,14 +154,13 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
-	 * 
 	 */
 	public RandomVariableInterface[] doCalculateDeltaSensitivitiesIR(AbstractSIMMProduct product,
 			String curveIndexName, 
 			double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
 
-		RandomVariableInterface[] dVdS = null; // The vector of delta sensitivities on all SIMM Buckets
+		RandomVariableInterface[] dVdS = null; // The vector of delta sensitivities on all SIMM buckets
 
 		switch(curveIndexName){
 
@@ -193,19 +190,19 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			throw new IllegalArgumentException("Unknow curve: " + curveIndexName);
 		}
 
-		// Map Sensitivities on SIMM Buckets
+		// Map sensitivities on SIMM buckets
 		dVdS = mapSensitivitiesOnBuckets(dVdS, "InterestRate" /*riskClass*/, null, model);	
 		return dVdS;
 	}
 
 
-	/**Calculate the sensitivities of the value of a product w.r.t. swap rates given the Libor sensitivities dV/dL
-	 * This is the mapping of libor sensitivities dV/dL to (SIMM) model sensitivities dV/dS.
+	/**Calculate the sensitivities of the value of a product w.r.t. swap rates given the OIS bond sensitivities dV/dP^{OIS}.
+	 * This is the mapping of OIS bond sensitivities dV/dP^{OIS} to (SIMM) model sensitivities dV/dS^{OIS}.
 	 *  
 	 * @param evaluationTime The time of evaluation
-	 * @param dVdL The vector of derivatives dV/dL = dV/dL_0,...,dV/dL_n
-	 * @param model The Libor Market Model
-	 * @return The derivatives dV/dS 
+	 * @param dVdP The vector of derivatives dV/dP^{OIS} = dV/dP^{OIS}_0,...,dV/dP^{OIS}_m
+	 * @param model The LIBOR market model
+	 * @return The derivative vector dV/dS^{OIS} 
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] mapOISBondToMarketRateSensitivities(double evaluationTime, 
@@ -233,13 +230,13 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	}
 
 
-	/**Calculate the sensitivities of the value of a product w.r.t. swap rates given the Libor sensitivities dV/dL
-	 * This is the mapping of libor sensitivities dV/dL to (SIMM) model sensitivities dV/dS.
+	/**Calculate the sensitivities of the value of a product w.r.t. swap rates given the LIBOR sensitivities dV/dL
+	 * This is the mapping of LIBOR sensitivities dV/dL to (SIMM) model sensitivities dV/dS.
 	 *  
 	 * @param evaluationTime The time of evaluation
 	 * @param dVdL The vector of derivatives dV/dL = dV/dL_0,...,dV/dL_n
-	 * @param model The Libor Market Model
-	 * @return The derivatives dV/dS 
+	 * @param model The LIBOR market model
+	 * @return The derivative vector dV/dS 
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] mapLiborToMarketRateSensitivities(double evaluationTime, 
@@ -259,7 +256,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			timeGridIndicator = onLiborPeriodDiscretization(evaluationTime, model) ? 0 : 1;
 			numberOfSwaps = dVdL.length - timeGridIndicator;
 		}
-		// Calculate Sensitivities wrt Swaps
+		// Calculate sensitivities w.r.t. Swaps
 		RandomVariableInterface[] delta = new RandomVariableInterface[numberOfSwaps];
 		for(int swapIndex = 0; swapIndex<numberOfSwaps; swapIndex++){
 			RandomVariableInterface dVdS  =new RandomVariable(0.0);
@@ -274,11 +271,12 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	}
 
 
-	/**Calculates dL/dS: The risk weights used to apply Libor Sensitivities to SIMM: dV/dS = dV/dL * dL/dS.
+	/**Calculates dL/dS: The sensitivity weights used for the transformation from model to market-rate sensitivities
+	 * dV/dS = dV/dL * dL/dS.
 	 * 
 	 * @param evaluationTime The time at which the sensitivity is calculated
-	 * @param model The Libor market model
-	 * @return The matrix dL/dS 
+	 * @param model The LIBOR market model
+	 * @return The matrix dL/dS (sensitivity weight)
 	 * @throws CalculationException
 	 */
 	private RandomVariableInterface[][] getSensitivityWeightLIBOR(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
@@ -288,7 +286,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		RandomVariableInterface[][] dLdS=null;
 		double liborPeriodLength = model.getLiborPeriodDiscretization().getTimeStep(0);
 
-		// Get index of first Libor starting >= evaluationTime
+		// Get index of first LIBOR starting >= evaluationTime
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		int numberOfRemainingLibors = model.getNumberOfLibors()-nextLiborIndex;
 		dLdS = new RandomVariableInterface [numberOfRemainingLibors][numberOfRemainingLibors];
@@ -318,7 +316,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	/**Calculates dPdS in a single curve context. Used for calculating sensis with respect to discount curve.
 	 * 
 	 * @param evaluationTime The time at which the initial margin is calculated
-	 * @param model The Libor market model
+	 * @param model The LIBOR market model
 	 * @return The sensitivity of the discount curve (bonds) wrt to swap rates of the same curve.
 	 * @throws CalculationException 
 	 */
@@ -350,10 +348,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	}
 
 
-	/**Since dV/dL is wrt the incorrect Libor times this function provides a matrix dL/dL to be multiplied with dV/dL in order to 
-	 * have the correct libor times starting at evaluationTime.
+	/**Since dV/dL is w.r.t. the incorrect LIBOR times this function provides a matrix dL/dL to be multiplied with dV/dL in order to 
+	 * have the correct LIBOR times starting at evaluationTime.
 	 * @param evaluationTime The time at which the adjustment should be calculated.
-	 * @param model The Libor market model
+	 * @param model The LIBOR market model
 	 * @return Pseudo Inverse of derivative band matrix; Identity matrix in case of evaluationTime on LiborPeriodDiscretization; 
 	 * @throws CalculationException
 	 */
@@ -404,7 +402,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @param sensitivities The sensitivities wrt swap rates dV/dS
 	 * @param riskClass The risk class
 	 * @param riskFactorDays The number of days corresponding to the sensitivities
-	 * @param model The Libor Market Model
+	 * @param model The LIBOR Market Model
 	 * @return The sensitivities on the SIMM maturity buckets
 	 */
 	public static RandomVariableInterface[] mapSensitivitiesOnBuckets(RandomVariableInterface[] sensitivities, String riskClass, int[] riskFactorDays, LIBORModelMonteCarloSimulationInterface model){
@@ -449,11 +447,11 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 	}
 
-	/** Return the days of the risk factors on the Libor Buckets for a given model. Needed for mapping sensitivities
-	 *  on Libor Buckets to SIMM Buckets
+	/** Return the days of the risk factors on the LIBOR Buckets for a given model. Needed for mapping sensitivities
+	 *  on LIBOR Buckets to SIMM Buckets
 	 * 
-	 * @param sensis The vector of Sensitivities on Libor Buckets
-	 * @param model The Libor Market Model
+	 * @param sensis The vector of Sensitivities on LIBOR Buckets
+	 * @param model The LIBOR Market Model
 	 * @return The vector of times of the risk factors (in days)
 	 */
 	public static int[] riskFactorDaysLibor(RandomVariableInterface[] sensis, LIBORModelMonteCarloSimulationInterface model){
