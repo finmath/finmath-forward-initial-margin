@@ -435,15 +435,13 @@ public class CalculationSchemeInitialMarginISDA {
     // BUCKET IS CURRENCY FOR IR   risk Factor = index Name (e.g. Libor6m)
     public RandomVariableInterface   getNetSensitivity(String productClassKey, String riskClassKey, String maturityBucket,String riskFactor, String bucketKey,String riskType, double atTime) {
 
-        //SIMMSchemeSensitivitySet.Key key = this.getKeySensitivitySet(iRateTenor,riskFactor,bucketKey,productClassKey,riskClassKey,riskType);
-        
         RandomVariableInterface isdasimmsensiofAllProducts = Stream.of(products).map(
         		product->{try{
         					return product.getSensitivity(productClassKey, 
         							                      riskClassKey, 
                                                           maturityBucket, // only for IR and Credit risk class, null otherwise
-                                                          riskFactor,     // CurveIndexName, can be inflation?! 
-                                                          bucketKey,      // currency for IR otherwise null ?
+                                                          riskFactor,     // CurveIndexName 
+                                                          bucketKey,      // currency for IR otherwise null.
                                                           riskType, atTime);
         					 }
         					catch(Exception e){ return null;
