@@ -284,7 +284,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			RandomVariableInterface[] dVdP = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime,swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "OIS");
 			double[] futureDiscountTimes = Arrays.stream(swap.getPaymentDates()).filter(n -> n > evaluationTime).toArray();
 			RandomVariableInterface[] swapSensisOIS = getOISModelSensitivities(evaluationTime, futureDiscountTimes, dVdP, "InterestRate", modelCache);		    
-			if(meltingMode==SensitivityMode.MeltingSIMMBuckets) { // Melting on SIMM Buckets
+			if(meltingMode==SensitivityMode.MELTINGSIMMBUCKETS) { // Melting on SIMM Buckets
 				swapSensisOIS =  sensitivityCalculationScheme.mapOISBondToMarketRateSensitivities(evaluationTime, swapSensisOIS, modelCache);
 				swapSensisOIS =  AbstractSIMMSensitivityCalculation.mapSensitivitiesOnBuckets(swapSensisOIS, SIMMSimpleSwap.riskClass[0], null, modelCache);
 			}
@@ -293,7 +293,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			// Get forward curve sensis
 			RandomVariableInterface[] swapSensisLibor = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "Libor");				  
 
-			if(meltingMode==SensitivityMode.MeltingSIMMBuckets){
+			if(meltingMode==SensitivityMode.MELTINGSIMMBUCKETS){
 				// Calculate dV/dS = dV/dL * dL/dS
 				swapSensisLibor = sensitivityCalculationScheme.mapLiborToMarketRateSensitivities(evaluationTime, swapSensisLibor, modelCache);  
 				// Map Sensitivities on SIMM Buckets

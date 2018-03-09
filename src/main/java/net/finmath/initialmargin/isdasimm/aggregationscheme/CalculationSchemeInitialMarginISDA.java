@@ -29,13 +29,13 @@ import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
+ * 
  * @author Peter Kohl-Landgraf
  */
-
 public class CalculationSchemeInitialMarginISDA {
 
-	public class ParameterCollection{
-	     public ParameterCollection(){//hard values inserted by Mario Viehmann
+	public class ParameterCollection {
+	     public ParameterCollection() {//hard values inserted by Mario Viehmann
 	     	
 	     	// Set correlationMatrixWithinSubCurve
 	     	Double[][] corrMatrix = new Double[correlationMatrixWithinSubCurve.length*5+2][correlationMatrixWithinSubCurve.length*5+2];

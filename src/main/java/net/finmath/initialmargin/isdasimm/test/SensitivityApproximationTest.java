@@ -70,7 +70,7 @@ public class SensitivityApproximationTest {
 		// Select TestProducts
 		TestProductType testProductType = TestProductType.BermudanCallable;
 		// Select sensitivity transformation mode
-		WeightMode weightMode = WeightMode.Constant;
+		WeightMode weightMode = WeightMode.CONSTANT;
 		// Define further parameters
 		boolean isConsiderOISSensis     = true;
 		double interpolationStep = 1.0;
@@ -108,8 +108,8 @@ public class SensitivityApproximationTest {
 		double  timeStep = 0.1;
 		boolean isUseAnalyticSwapSensis = false;
 
-		if(weightMode==WeightMode.TimeDependent) System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpolation" + "\t" + "MVA Exact" + "\t" + "MVA Deviation Melting" + "\t" + "MVA Deviation Interpolation" + "\t" + "Deterministic Rates MVA");
-		if(weightMode==WeightMode.Constant) System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpolation" +  "\t" +  "MVA Deviation Exact" + "\t" + "MVA Deviation Melting" + "\t" + "MVA Deviation Interpolation" + "\t" + "Deterministic Rates MVA");
+		if(weightMode==WeightMode.TIMEDEPENDENT) System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpolation" + "\t" + "MVA Exact" + "\t" + "MVA Deviation Melting" + "\t" + "MVA Deviation Interpolation" + "\t" + "Deterministic Rates MVA");
+		if(weightMode==WeightMode.CONSTANT) System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpolation" +  "\t" +  "MVA Deviation Exact" + "\t" + "MVA Deviation Melting" + "\t" + "MVA Deviation Interpolation" + "\t" + "Deterministic Rates MVA");
 		int productIndex = 0;
 		double MVAExactTD = 0;
 		for(int exerciseIndex = 0; exerciseIndex < exerciseDates.length; exerciseIndex++){
@@ -125,26 +125,26 @@ public class SensitivityApproximationTest {
 				// 1) Exact
 				long timeStart = System.currentTimeMillis();
 				for(int i=0;i<finalIMTime/timeStep+1;i++) {
-					initialMargin[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+					initialMargin[0][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.EXACT, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				}
 				long timeEnd = System.currentTimeMillis();
 
-				if(weightMode == WeightMode.Constant){
+				if(weightMode == WeightMode.CONSTANT){
 					// Calculate benchmark MVA from initial margin under time dependent sensitivity transformation
 					for(int i=0;i<finalIMTime/timeStep+1;i++) {
-						initialMarginTD[i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Exact, WeightMode.TimeDependent, 1.0,  isUseAnalyticSwapSensis, isConsiderOISSensis);
+						initialMarginTD[i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.EXACT, WeightMode.TIMEDEPENDENT, 1.0,  isUseAnalyticSwapSensis, isConsiderOISSensis);
 					}
 					MVAExactTD = getMVA(initialMarginTD, model, timeStep, fundingSpread, MVAMode.Exact);
 				}
 
 				// 2) Melting (on SIMM buckets)
 				long timeStartMelting = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MeltingSIMMBuckets, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGSIMMBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation
 				long timeStartInterpolation = System.currentTimeMillis();
-				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[2][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.Interpolation, weightMode, interpolationStep, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[2][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.INTERPOLATION, weightMode, interpolationStep, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndInterpolation = System.currentTimeMillis();
 
 				// MVA	
@@ -155,7 +155,7 @@ public class SensitivityApproximationTest {
 
 				// Print Result and calculate Deviations 
 
-				if(weightMode == WeightMode.TimeDependent){
+				if(weightMode == WeightMode.TIMEDEPENDENT){
 					if(isPrintProfile) System.out.println("Exact"  + "\t" + "Melting" + "\t" + "Interpolation" );
 					for(int i=0;i<finalIMTime/timeStep+1;i++){
 						if(isPrintProfile) System.out.println(initialMargin[0][i].getAverage() + "\t" + initialMargin[1][i].getAverage() + "\t" + initialMargin[2][i].getAverage());						
