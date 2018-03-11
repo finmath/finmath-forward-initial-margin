@@ -27,13 +27,31 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
-/** This class contains the functions and methods which are shared by all products to be considered for 
+/**
+ * This class contains the functions and methods which are shared by all products to be considered for 
  *  initial margin (MVA) calculation by the SIMM. 
  *  
  * @author Mario Viehmann
  *
  */
 public abstract class AbstractSIMMProduct implements SIMMProductInterface {
+
+	/**
+	 * MVA Calculation method. For research interest we allow to approximate the MVA via an expected exposure.
+	 * There is no computational benefit of this "approximation".
+	 */
+	public enum MVAMode
+	{
+		/**
+		 * Calculation of MVA via expected exposure (neglecting correlation between exposure and interest rates)
+		 */
+		APPROXIMATION,
+
+		/**
+		 * Exact calculation of MVA (stochastic exposures with stochastic discounting).
+		 */
+		EXACT
+	};
 
 	// Product classification within ISDA SIMM
 	private String   productClass;      // RatesFX, Credit, 
@@ -559,7 +577,6 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 	
 	
-	public enum MVAMode {Approximation, Exact};
 	public double getMVA(LIBORModelMonteCarloSimulationInterface model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException{
 		double finalMaturity = this.getFinalMaturity();
 		RandomVariableInterface forwardBond;
@@ -569,7 +586,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			forwardBond = model.getNumeraire((i+1)*timeStep).mult(Math.exp((i+1)*timeStep*fundingSpread)).invert();
 			forwardBond = forwardBond.sub(model.getNumeraire(i*timeStep).mult(Math.exp(i*timeStep*fundingSpread)).invert());
 			initialMargin = getInitialMargin(i*timeStep, model, "EUR", sensitivityMode, weightMode, 1.0, false, true);
-			if(mvaMode == MVAMode.Approximation) initialMargin = initialMargin.average();
+			if(mvaMode == MVAMode.APPROXIMATION) initialMargin = initialMargin.average();
 			MVA = MVA.add(forwardBond.mult(initialMargin));		
 					
 		}	

@@ -134,7 +134,7 @@ public class SensitivityApproximationTest {
 					for(int i=0;i<finalIMTime/timeStep+1;i++) {
 						initialMarginTD[i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.EXACT, WeightMode.TIMEDEPENDENT, 1.0,  isUseAnalyticSwapSensis, isConsiderOISSensis);
 					}
-					MVAExactTD = getMVA(initialMarginTD, model, timeStep, fundingSpread, MVAMode.Exact);
+					MVAExactTD = getMVA(initialMarginTD, model, timeStep, fundingSpread, MVAMode.EXACT);
 				}
 
 				// 2) Melting (on SIMM buckets)
@@ -148,10 +148,10 @@ public class SensitivityApproximationTest {
 				long timeEndInterpolation = System.currentTimeMillis();
 
 				// MVA	
-				double MVAExact         = getMVA(initialMargin[0], model, timeStep, fundingSpread, MVAMode.Exact);
-				double MVAMelting       = getMVA(initialMargin[1], model, timeStep, fundingSpread, MVAMode.Exact);
-				double MVAInterpolation = getMVA(initialMargin[2], model, timeStep, fundingSpread, MVAMode.Exact);
-				double MVAApproximation = getMVA(initialMargin[0], model, timeStep, fundingSpread, MVAMode.Approximation);
+				double MVAExact         = getMVA(initialMargin[0], model, timeStep, fundingSpread, MVAMode.EXACT);
+				double MVAMelting       = getMVA(initialMargin[1], model, timeStep, fundingSpread, MVAMode.EXACT);
+				double MVAInterpolation = getMVA(initialMargin[2], model, timeStep, fundingSpread, MVAMode.EXACT);
+				double MVAApproximation = getMVA(initialMargin[0], model, timeStep, fundingSpread, MVAMode.APPROXIMATION);
 
 				// Print Result and calculate Deviations 
 
@@ -338,7 +338,7 @@ public class SensitivityApproximationTest {
 		for(int i=0; i<initialMargin.length; i++){
 			forwardBond = model.getNumeraire((i+1)*timeStep).mult(Math.exp((i+1)*timeStep*fundingSpread)).invert();
 			forwardBond = forwardBond.sub(model.getNumeraire(i*timeStep).mult(Math.exp(i*timeStep*fundingSpread)).invert());
-			if(mvaMode == MVAMode.Approximation) initialMargin[i] = initialMargin[i].average();
+			if(mvaMode == MVAMode.APPROXIMATION) initialMargin[i] = initialMargin[i].average();
 			MVA = MVA.add(forwardBond.mult(initialMargin[i]));		
 
 		}	
