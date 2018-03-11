@@ -188,8 +188,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			break;
 		default: break;
 		}
+		
 		return mapSensitivitiesOnBuckets(meltedSensis, riskClass, riskFactorDays, model); 
-
 	}
 
 

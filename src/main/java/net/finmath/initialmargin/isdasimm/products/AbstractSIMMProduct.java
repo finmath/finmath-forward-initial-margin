@@ -460,9 +460,11 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	@Override
 	public RandomVariableInterface[] getExactDeltaFromCache(double time, String riskClass, String curveIndexName, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException{
 
-		if(!exactDeltaCache.containsKey(time) || !exactDeltaCache.get(time).stream().filter(n->n.containsKey(riskClass)).findAny().isPresent()){
+		if(!exactDeltaCache.containsKey(time) || !exactDeltaCache.get(time).stream().filter(n->n.containsKey(riskClass)).findAny().isPresent()) {
 
-			for(String curveName : curveIndexNames) setExactDeltaCache(riskClass, curveName, time, modelCache, isMarketRateSensi);
+			for(String curveName : curveIndexNames) {
+				setExactDeltaCache(riskClass, curveName, time, modelCache, isMarketRateSensi);
+			}
 
 		}
 
