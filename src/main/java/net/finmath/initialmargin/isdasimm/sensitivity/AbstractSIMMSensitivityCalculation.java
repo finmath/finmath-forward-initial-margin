@@ -192,7 +192,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface[] doCalculateDeltaSensitivitiesIR(AbstractSIMMProduct product,
+	public RandomVariableInterface[] getSensitivitiesIRMarketRates(AbstractSIMMProduct product,
 			String curveIndexName, 
 			double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{

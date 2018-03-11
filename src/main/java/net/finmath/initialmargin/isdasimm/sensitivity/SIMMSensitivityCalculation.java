@@ -71,7 +71,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 		case EXACT:  
 
-			maturityBucketSensis = doCalculateDeltaSensitivitiesIR(product, curveIndexName, evaluationTime, model);           
+			maturityBucketSensis = getSensitivitiesIRMarketRates(product, curveIndexName, evaluationTime, model);           
 
 			break;
 
@@ -116,7 +116,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
 
 		//@Todo: Distinguish different risk classes. Works currently only for "InterestRate"
-		return doCalculateDeltaSensitivitiesIR(product, curveIndexName, evaluationTime, model);
+		return getSensitivitiesIRMarketRates(product, curveIndexName, evaluationTime, model);
 
 	}
 
