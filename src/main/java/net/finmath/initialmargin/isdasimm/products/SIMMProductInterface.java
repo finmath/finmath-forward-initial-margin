@@ -6,16 +6,17 @@ import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
-// 13.01.2018
-/** The interface to be implemented by all products whose initial margin (MVA) we are interested in, i.e. all classes 
- *  extending <code> AbstractSIMMProduct </code>.
+
+/**
+ * The interface to be implemented by all products whose initial margin (MVA) we are interested in, i.e. all classes 
+ * extending <code> AbstractSIMMProduct </code>.
  * 
  * @author Mario Viehmann
- *
  */
 public interface SIMMProductInterface {
 
-	/**Calculate the forward initial margin with AAD 
+	/**
+	 * Calculate the forward initial margin with AAD 
 	 * 
 	 * @param evaluationTime The forward initial margin time
 	 * @param model The LIBOR market model 
@@ -24,7 +25,8 @@ public interface SIMMProductInterface {
 	 */
 	public RandomVariableInterface getInitialMargin(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String calculationCCY) throws CalculationException;
 
-	/**Returns the sensitivity of the SIMMProduct w.r.t the specified parameters if a sensitivity is available.
+	/**
+	 * Returns the sensitivity of the SIMMProduct w.r.t the specified parameters if a sensitivity is available.
 	 * This function will be called by the <code> SIMMSchemeIRDelta </code>.
 	 * 
 	 * @param productClass The SIMM product class of this product (RatesFx etc.)
@@ -66,8 +68,9 @@ public interface SIMMProductInterface {
 	 */
 	public RandomVariableInterface[] getOISModelSensitivities(String riskClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
-	/** Calculates the delta sensitivities w.r.t. the numeraire at all times the numeraire is used in the 
-	 *  valuation of the product. This method is only used if SensitivityMode.ExactConsideringDependecies is enabled.
+	/**
+	 * Calculates the delta sensitivities w.r.t. the numeraire at all times the numeraire is used in the 
+	 * valuation of the product. This method is only used if SensitivityMode.ExactConsideringDependecies is enabled.
 	 *  
 	 * @param riskClass The risk class to be considered
 	 * @param evaluationTime The time of evaluation 
