@@ -25,7 +25,7 @@ import net.finmath.stochastic.RandomVariableInterface;
  * This class contains some functions and methods which we need to calculate forward initial margin.
  * 
  * @author Mario Viehmann
- * @author Chrisitan Fries
+ * @author Christian Fries
  *
  */
 public abstract class AbstractSIMMSensitivityCalculation {
@@ -42,6 +42,11 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		 * Melting on SIMM maturity buckets
 		 */
 		MELTINGSIMMBUCKETS,
+
+		/**
+		 * Melting on Swaprates on fine maturity buckets
+		 */
+		MELTINGSWAPRATEBUCKETS,
 
 		/**
 		 * Melting on LIBOR buckets
@@ -71,7 +76,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 */
 	public enum WeightMode{
 		/**
-		 * Sets dL/dS(t=0) for all forward IM times, i.e. leave the weight adjustment dL/dS constant
+		 * Sets dL/dS(t=0) for all forward IM times, i.e. leave the weight adjustment dL/dS constant.
 		 */
 		CONSTANT,
 
@@ -142,9 +147,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
 
 
-	/** This function calculates the exact delta sensitivities as in SensitivityMode.Exact. The function is used for melting or 
-	 *  interpolation where the sensitivity mode is not SensitivityMode.Exact but we still want to calculate exact sensitivities 
-	 *  at certain times.
+	/**
+	 * This function calculates the exact delta sensitivities as in SensitivityMode.Exact. The function is used for melting or 
+	 * interpolation where the sensitivity mode is not SensitivityMode.Exact but we still want to calculate exact sensitivities 
+	 * at certain times.
 	 * 
 	 * @param product The product
 	 * @param curveIndexName The name of the curve
@@ -162,7 +168,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			double evaluationTime, 
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
 
-	/** Get the sensitivities using sensitivity melting on SIMM Buckets or LIBOR buckets depending on the SensitivityMode.
+	/**
+	 * Get the sensitivities using sensitivity melting on SIMM Buckets or LIBOR buckets depending on the SensitivityMode.
 	 * 
 	 * @param product The product whose sensitivities are melted
 	 * @param sensitivities 
@@ -179,7 +186,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException;
 
 
-	/**Calculate the sensitivities dV/dS with respect to all swap rates (market rates) for given product and curve. 
+	/**
+	 * Calculate the sensitivities dV/dS with respect to all swap rates (market rates) for given product and curve. 
 	 * This applies to the risk class Interest Rates only. 
 	 * The Model-To-Market-Rate sensitivity transformation is done in this function.
 	 * 
