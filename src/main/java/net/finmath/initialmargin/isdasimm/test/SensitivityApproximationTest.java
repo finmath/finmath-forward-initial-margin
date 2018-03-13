@@ -33,7 +33,12 @@ public class SensitivityApproximationTest {
 	final static boolean isPrintProfile = false;
 	final static double fundingSpread = 0.005; // For MVA
 
-	public static enum TestProductType {Swaps, Swaptions, BermudanCallable, BermudanCancelable};
+	public static enum TestProductType {
+		SWAPS,
+		SWAPTIONS,
+		BERMUDANCALLABLE,
+		BERMUDANCANCELABLE
+	};
 
 	public static void main(String[] args) throws CalculationException{
 
@@ -68,25 +73,25 @@ public class SensitivityApproximationTest {
 		int[] numberOfPeriods = null;
 
 		// Select TestProducts
-		TestProductType testProductType = TestProductType.BermudanCallable;
+		TestProductType testProductType = TestProductType.SWAPS;
 		// Select sensitivity transformation mode
-		WeightMode weightMode = WeightMode.CONSTANT;
+		WeightMode weightMode = WeightMode.TIMEDEPENDENT;
 		// Define further parameters
 		boolean isConsiderOISSensis     = true;
 		double interpolationStep = 1.0;
 
 		// Specify test products
 		switch(testProductType){
-		case Swaps: 
+		case SWAPS: 
 			exerciseDates = new double[] {0.0};
 			numberOfPeriods = new int[] {10,20,30,40};
 			break;
-		case Swaptions: 
+		case SWAPTIONS: 
 			exerciseDates = new double[] {5.0, 10.0};
 			numberOfPeriods = new int[]  {4, 8, 10, 12, 16};
 			break;
-		case BermudanCallable: 
-		case BermudanCancelable:
+		case BERMUDANCALLABLE: 
+		case BERMUDANCANCELABLE:
 			exerciseDates = new double[] {5.0, 8.0, 10.0};
 			numberOfPeriods = new int[]  {20};
 			break;
@@ -140,6 +145,7 @@ public class SensitivityApproximationTest {
 				// 2) Melting (on SIMM buckets)
 				long timeStartMelting = System.currentTimeMillis();
 				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGSIMMBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+//				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGLIBORBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation
@@ -205,7 +211,7 @@ public class SensitivityApproximationTest {
 
 		switch(type){
 
-		case Swaps: 
+		case SWAPS: 
 
 			// 1) Swap Input
 			double     startTime            = 0.0;	// Exercise date
@@ -225,7 +231,7 @@ public class SensitivityApproximationTest {
 			}
 			break;
 
-		case Swaptions:
+		case SWAPTIONS:
 
 			for(int i=0; i<exerciseDates.length; i++){
 				for(int j= 0; j<periodNumber.length; j++){
@@ -254,7 +260,7 @@ public class SensitivityApproximationTest {
 			}
 			break;
 
-		case BermudanCallable:
+		case BERMUDANCALLABLE:
 
 			for(int i=0; i<exerciseDates.length; i++){
 				for(int j= 0; j<periodNumber.length; j++){
@@ -288,7 +294,7 @@ public class SensitivityApproximationTest {
 			}
 			break;
 
-		case BermudanCancelable:
+		case BERMUDANCANCELABLE:
 
 			for(int i=0; i<exerciseDates.length; i++){
 				for(int j= 0; j<periodNumber.length; j++){
