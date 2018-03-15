@@ -28,7 +28,6 @@ import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
-import net.finmath.montecarlo.interestrate.products.indices.LIBORIndexTest.CurveSetup;
 import net.finmath.stochastic.RandomVariableInterface;
 
 
