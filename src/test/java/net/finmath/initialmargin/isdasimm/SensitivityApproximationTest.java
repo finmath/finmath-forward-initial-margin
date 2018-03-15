@@ -1,10 +1,16 @@
 
-package net.finmath.initialmargin.isdasimm.test;
+package net.finmath.initialmargin.isdasimm;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.IntStream;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
@@ -17,14 +23,44 @@ import net.finmath.initialmargin.isdasimm.products.SIMMSwaption;
 import net.finmath.initialmargin.isdasimm.products.SIMMSwaption.DeliveryType;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
+import net.finmath.initialmargin.isdasimm.test.SIMMTest;
 import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.interestrate.products.indices.LIBORIndexTest.CurveSetup;
 import net.finmath.stochastic.RandomVariableInterface;
 
 
+/**
+ * @author Mario Viehmann
+ * @author Christian Fries
+ */
+@RunWith(Parameterized.class)
 public class SensitivityApproximationTest {	
+
+
+	/**
+	 * The parameters for this test, that is an error consisting of
+	 * { numberOfPaths, setup }.
+	 * 
+	 * @return Array of parameters.
+	 */
+	@Parameters(name="{0}-{1}")
+	public static Collection<Object[]> generateData()
+	{
+		return Arrays.asList(new Object[][] {
+			{ TestProductType.Swaps , WeightMode.TimeDependent },
+			{ TestProductType.Swaptions , WeightMode.TimeDependent },
+			{ TestProductType.BermudanCallable , WeightMode.TimeDependent },
+			{ TestProductType.BermudanCancelable , WeightMode.TimeDependent },
+			{ TestProductType.Swaps , WeightMode.Constant },
+			{ TestProductType.Swaptions , WeightMode.Constant },
+			{ TestProductType.BermudanCallable , WeightMode.Constant },
+			{ TestProductType.BermudanCancelable , WeightMode.Constant },
+		});
+	};
+
 	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
 
 	// Model Paths 
@@ -35,7 +71,24 @@ public class SensitivityApproximationTest {
 
 	public static enum TestProductType {Swaps, Swaptions, BermudanCallable, BermudanCancelable};
 
-	public static void main(String[] args) throws CalculationException{
+
+	// Selected TestProducts
+	private final TestProductType testProductType;
+	// Selected sensitivity transformation mode
+	private final WeightMode weightMode;
+
+	public static void main(String[] args) throws CalculationException {
+		new SensitivityApproximationTest(TestProductType.BermudanCallable, WeightMode.TimeDependent);
+	}
+
+	public SensitivityApproximationTest(TestProductType testProductType, WeightMode weightMode) {
+		super();
+		this.testProductType = testProductType;
+		this.weightMode = weightMode;
+	}
+
+	@Test
+	public void test() throws CalculationException {
 
 		/*
 		 * 
@@ -67,10 +120,6 @@ public class SensitivityApproximationTest {
 		double[] exerciseDates = null;
 		int[] numberOfPeriods = null;
 
-		// Select TestProducts
-		TestProductType testProductType = TestProductType.BermudanCallable;
-		// Select sensitivity transformation mode
-		WeightMode weightMode = WeightMode.Constant;
 		// Define further parameters
 		boolean isConsiderOISSensis     = true;
 		double interpolationStep = 1.0;
@@ -94,12 +143,15 @@ public class SensitivityApproximationTest {
 			break;
 		}
 
-        // Create test products
+		System.out.println("Product....................: " + testProductType.name());
+		System.out.println("Forward rate risk weight...: " + weightMode.name());
+		System.out.println("");
+
+		// Create test products
 		AbstractSIMMProduct[] products = createProducts(testProductType, exerciseDates, numberOfPeriods, forwardCurve, discountCurve);
 
 		// Execute test function
 		testSIMMProductApproximation(weightMode, products, exerciseDates, numberOfPeriods, forwardCurve, discountCurve, model, isConsiderOISSensis, interpolationStep);
-
 	}
 
 	public static void testSIMMProductApproximation(WeightMode weightMode, AbstractSIMMProduct[] product, double[] exerciseDates, 
@@ -188,11 +240,11 @@ public class SensitivityApproximationTest {
 				productIndex++;
 			}
 		}
-
-
+		
+		System.out.println("\n");
 	}
 
-	public static AbstractSIMMProduct[] createProducts(TestProductType type, double[] exerciseDates,int[] periodNumber, ForwardCurve forwardCurve, DiscountCurve discountCurve) throws CalculationException{
+	public static AbstractSIMMProduct[] createProducts(TestProductType type, double[] exerciseDates,int[] periodNumber, ForwardCurve forwardCurve, DiscountCurve discountCurve) throws CalculationException {
 
 		ArrayList<AbstractSIMMProduct> products = new ArrayList<>();
 		double[]   fixingDates;
@@ -203,7 +255,7 @@ public class SensitivityApproximationTest {
 		double[]   periodNotionals;
 		boolean[]   isPeriodStartDateExerciseDate;
 
-		switch(type){
+		switch(type) {
 
 		case Swaps: 
 
