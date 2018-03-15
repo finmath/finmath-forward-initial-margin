@@ -570,9 +570,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	public static RandomVariableInterface[][] getPseudoInverse(RandomVariableInterface[][] matrix, int numberOfPaths){
 
 		double[][][] inv = new double[matrix[0].length][matrix.length][numberOfPaths];
-		double[][] matrixOnPath = new double[matrix.length][matrix[0].length];
 		long start = System.currentTimeMillis();
 		IntStream.range(0, numberOfPaths).parallel().forEach(pathIndex -> {
+			double[][] matrixOnPath = new double[matrix.length][matrix[0].length];
 			for(int i=0;i<matrixOnPath.length;i++){
 				for(int j=0;j<matrixOnPath[0].length;j++){
 					matrixOnPath[i][j]=matrix[i][j]==null ? 0 : matrix[i][j].get(pathIndex);
