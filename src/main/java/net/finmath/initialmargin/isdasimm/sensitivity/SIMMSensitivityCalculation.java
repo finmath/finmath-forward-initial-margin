@@ -73,6 +73,9 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 			maturityBucketSensis = getSensitivitiesIRMarketRates(product, curveIndexName, evaluationTime, model);           
 
+			// Map sensitivities on SIMM buckets
+			maturityBucketSensis = mapSensitivitiesOnBuckets(maturityBucketSensis, "InterestRate" /*riskClass*/, null, model);	
+
 			break;
 
 		case EXACTCONSIDERINGDEPENDENCIES:
@@ -82,7 +85,6 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			break;
 
 		case INTERPOLATION:           
-
 			maturityBucketSensis = getInterpolatedSensitivities(product, riskClass, curveIndexName, evaluationTime, model);
 
 			break;               
@@ -150,6 +152,11 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		// Get sensitivities to melt if not provided as input to the function
 		if(sensitivities == null) {
 			sensitivities = product.getExactDeltaFromCache(meltingZeroTime, riskClass, curveIndexName, isMarketRateSensi);	
+
+			if(sensitivityMode==SensitivityMode.MELTINGSIMMBUCKETS) {
+				// Map sensitivities on SIMM buckets
+				sensitivities = mapSensitivitiesOnBuckets(sensitivities, "InterestRate" /*riskClass*/, null, model);	
+			}
 		}
 
 		switch(sensitivityMode){
@@ -221,7 +228,12 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 		// Get Sensitivities from exactDeltaCache 
 		RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
+		// Map sensitivities on SIMM buckets
+		initialSensitivities = mapSensitivitiesOnBuckets(initialSensitivities, "InterestRate" /*riskClass*/, null, model);	
+		
 		RandomVariableInterface[] finalSensitivities   = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
+		// Map sensitivities on SIMM buckets
+		finalSensitivities = mapSensitivitiesOnBuckets(finalSensitivities, "InterestRate" /*riskClass*/, null, model);	
 
 		// Perform linear interpolation
 		double deltaT = finalTime-initialTime;

@@ -233,8 +233,6 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			throw new IllegalArgumentException("Unknow curve: " + curveIndexName);
 		}
 
-		// Map sensitivities on SIMM buckets
-		dVdS = mapSensitivitiesOnBuckets(dVdS, "InterestRate" /*riskClass*/, null, model);	
 		return dVdS;
 	}
 
