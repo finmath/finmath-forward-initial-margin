@@ -497,11 +497,14 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * Return the days of the risk factors on the LIBOR Buckets for a given model. Needed for mapping sensitivities
 	 * on LIBOR Buckets to SIMM Buckets
 	 * 
+	 * @TODO (Code review by CF) Method only works for equidistant vectors. Vector LiborPeriodDiscretization needs to be used from its end, not from it start.
+	 * @BUG (Code review by CF) Method only works for equidistant vectors. Vector LiborPeriodDiscretization needs to be used from its end, not from it start.
+	 * 
 	 * @param sensis The vector of Sensitivities on LIBOR Buckets
 	 * @param model The LIBOR Market Model
 	 * @return The vector of times of the risk factors (in days)
 	 */
-	public static int[] riskFactorDaysLibor(RandomVariableInterface[] sensis, LIBORModelMonteCarloSimulationInterface model){
+	public static int[] riskFactorDaysLibor(RandomVariableInterface[] sensis, LIBORModelMonteCarloSimulationInterface model) {
 
 		int[] riskFactorDays = new int[sensis.length];
 		// act/365 as default daycount convention
