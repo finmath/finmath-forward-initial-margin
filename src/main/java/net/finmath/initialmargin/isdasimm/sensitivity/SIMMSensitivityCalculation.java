@@ -63,7 +63,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			String riskClass, 
 			String curveIndexName,
 			double evaluationTime, 
-			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
+			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		RandomVariableInterface[] maturityBucketSensis = null;
 
@@ -90,6 +90,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			break;               
 
 		case MELTINGSIMMBUCKETS:   // Melting on SIMM Buckets
+		case MELTINGSWAPRATEBUCKETS:   // Melting on SIMM Buckets
 		case MELTINGLIBORBUCKETS:  // Melting on Libor Buckets
 			// The time of the exact sensitivities being melted: Initial Melting Time    
 			double initialMeltingTime = evaluationTime < product.getMeltingResetTime() ? 0 : product.getMeltingResetTime();
@@ -112,7 +113,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		return maturityBucketSensis;
 	}
 
-	
+
 	@Override
 	public RandomVariableInterface[] getExactDeltaSensitivities(AbstractSIMMProduct product, String curveIndexName, String riskClass,
 			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
@@ -161,7 +162,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 		switch(sensitivityMode){
 		case MELTINGSIMMBUCKETS: // Melting of market-rate sensitivities
-
+		{
 			int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};	
 
 			// Get new riskFactor times
@@ -177,25 +178,54 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			for(int i=0;i<meltedSensis.length;i++){
 				meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-meltingZeroTime))/(double)riskFactorsSIMM[i+firstIndex]);
 			}
-			break;  
+		}
+		break;  
+
+		case MELTINGSWAPRATEBUCKETS: // Melting of market-rate sensitivities
+		{
+			int[] riskFactorDaysLIBOR = riskFactorDaysLibor(sensitivities, model);
+
+			// Get new riskFactor times
+			riskFactorDays = Arrays.stream(riskFactorDaysLIBOR).filter(n -> n > (int)Math.round(365*(evaluationTime-meltingZeroTime))).map(n -> n-(int)Math.round(365*(evaluationTime-meltingZeroTime))).toArray();
+
+			// Find first bucket later than evaluationTime
+			int firstIndex = IntStream.range(0, riskFactorDaysLIBOR.length)
+					.filter(i -> riskFactorDaysLIBOR[i]>(int)Math.round(365*(evaluationTime-meltingZeroTime))).findFirst().getAsInt();
+
+			//Calculate melted sensitivities
+			meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
+
+			for(int i=0;i<meltedSensis.length;i++){
+				meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-meltingZeroTime))/(double)riskFactorDaysLIBOR[i+firstIndex]);
+			}
+
+			// Map sensitivities on SIMM buckets
+			meltedSensis = mapSensitivitiesOnBuckets(meltedSensis, "InterestRate" /*riskClass*/, null, model);	
+		}
+		break;  
 
 		case MELTINGLIBORBUCKETS: // Melting of model sensitivities with subsequent mapping to market-rate sensitivities
+		{
 			// First index of Libor at evaluation time given the initial melting time
 			int liborIndexAtInitialMeltingTime = model.getLiborPeriodIndex(meltingZeroTime);
 			liborIndexAtInitialMeltingTime = liborIndexAtInitialMeltingTime < 0 ? -liborIndexAtInitialMeltingTime-1 : liborIndexAtInitialMeltingTime;
 			int liborIndexAtEval = model.getLiborPeriodIndex(evaluationTime);
 			int oisIndex = (liborIndexAtEval < 0 && curveIndexName == "OIS") ? 1 : 0;
 			liborIndexAtEval = liborIndexAtEval < 0 ? -liborIndexAtEval-2 : liborIndexAtEval;
-			firstIndex = liborIndexAtEval-liborIndexAtInitialMeltingTime+oisIndex;
+			int firstIndex = liborIndexAtEval-liborIndexAtInitialMeltingTime+oisIndex;
 			// Retain all libor sensis after eval
 			meltedSensis = ArrayUtils.subarray(sensitivities, firstIndex, sensitivities.length);
 			// Map model sensis to market rate sensis
 			meltedSensis = curveIndexName == "Libor6m" ? mapLiborToMarketRateSensitivities(evaluationTime, meltedSensis, model) :
 				mapOISBondToMarketRateSensitivities(evaluationTime, meltedSensis, model);
-			break;
-		default: break;
 		}
-		
+		break;
+		default:
+		{
+			throw new IllegalArgumentException();
+		}
+		}
+
 		return mapSensitivitiesOnBuckets(meltedSensis, riskClass, riskFactorDays, model); 
 	}
 
@@ -230,7 +260,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
 		// Map sensitivities on SIMM buckets
 		initialSensitivities = mapSensitivitiesOnBuckets(initialSensitivities, "InterestRate" /*riskClass*/, null, model);	
-		
+
 		RandomVariableInterface[] finalSensitivities   = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
 		// Map sensitivities on SIMM buckets
 		finalSensitivities = mapSensitivitiesOnBuckets(finalSensitivities, "InterestRate" /*riskClass*/, null, model);	

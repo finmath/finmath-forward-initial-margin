@@ -237,7 +237,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	}
 
 
-	/**Calculate the sensitivities of the value of a product w.r.t. swap rates given the OIS bond sensitivities dV/dP^{OIS}.
+	/**
+	 * Calculate the sensitivities of the value of a product w.r.t. swap rates given the OIS bond sensitivities dV/dP^{OIS}.
 	 * This is the mapping of OIS bond sensitivities dV/dP^{OIS} to (SIMM) model sensitivities dV/dS^{OIS}.
 	 *  
 	 * @param evaluationTime The time of evaluation

@@ -190,14 +190,14 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 		if(evaluationTime!=lastEvaluationTime) clearMaps();  // Clear the deltaSensitivity Map. It needs to be reset at each time step.
 
-		if(productClass==this.productClass && Arrays.asList(this.riskClass).contains(riskClass)){
+		if(productClass==this.productClass && Arrays.asList(this.riskClass).contains(riskClass)) {
 
-			switch(riskType){
+			switch(riskType) {
 			case("delta"): 
 				switch(riskClass){
 				case("InterestRate"):
 
-					if(Arrays.asList(curveIndexNames).contains(curveIndexName) && bucketKey==this.currency){
+					if(Arrays.asList(curveIndexNames).contains(curveIndexName) && bucketKey==this.currency) {
 						// There exists a sensitivity. Check if the sensitivities (on all maturityBuckets) have already been calculated for given riskClass and riskType)
 
 						if(!deltaAtTime.containsKey(riskClass) || !deltaAtTime.get(riskClass).stream().filter(n-> n.containsKey(curveIndexName)).findAny().isPresent()){
@@ -224,7 +224,10 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 							}					    					        					          
 						}
 						result = deltaAtTime.get(riskClass).stream().filter(n -> n.containsKey(curveIndexName)).findFirst().get().get(curveIndexName).get(maturityBucket);			                  
-					} else result = new RandomVariable(0.0); // There exists no delta Sensi for risk Class InterestRate
+					}
+					else {
+						result = new RandomVariable(0.0); // There exists no delta Sensi for risk Class InterestRate
+					}
 				break;
 				// @Todo Add sensitivity calculation for the subsequent cases
 				case("CreditQ"): 
@@ -266,7 +269,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		return this.numeraireAdjustmentMap;
 	}
 
-	
+
 	@Override
 	public Map<Long, RandomVariableInterface> getGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
@@ -339,7 +342,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	}
 
-	
+
 	/** Calculate the forward derivatives of the product w.r.t. the LIBORs at a given evaluation time t.
 	 *  These derivatives are not w.r.t. the LIBORs on the LIBOR period discretization, but w.r.t. the general LIBORs 
 	 *  L(t+i\Delta_T,t+(i+1)\Delta_T;t). This function is called by the subclasses in the overridden functions
@@ -383,7 +386,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	}
 
-	
+
 	/** Calculate the sensitivities w.r.t. the OIS Bonds: dV/dP. These sensitivities are calculated using the numeraire adjustments at future 
 	 *  discount times (times at which the model has called the <code> getNumeraire </code> function of the <code> LIBORMarketModel </code>.
 	 *  The function calculates the AAD derivatives dV/dA i.e. w.r.t. the adjustments at the future discount times and converts them into 
@@ -465,7 +468,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	}
 
-	
+
 	/** Clear the time dependent delta cache and the vega sensitivity. 
 	 *  This is performed always upon change of the evaluation time of initial margin.
 	 */
@@ -474,7 +477,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		//this.vegaSensitivity = null;
 	}
 
-	
+
 	@Override
 	public RandomVariableInterface[] getExactDeltaFromCache(double time, String riskClass, String curveIndexName, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException{
 
@@ -515,23 +518,23 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	public String getProductClass(){
 		return this.productClass;
 	}
-	
+
 	public String[] getRiskClasses(){
 		return this.riskClass;
 	}
-	
+
 	public String[] getCurveIndexNames(){
 		return this.curveIndexNames;
 	}
-	
+
 	public String getCurrency(){
 		return this.currency;
 	}
-	
+
 	public boolean getHasOptionality(){
 		return this.hasOptionality;
 	}
-	
+
 	public String getBucketKey(){
 		return this.bucketKey;
 	}
@@ -575,8 +578,8 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getLiborPeriodDiscretization().getTime(nextLiborIndex-1);
 	}
-	
-	
+
+
 	public double getMVA(LIBORModelMonteCarloSimulationInterface model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException{
 		double finalMaturity = this.getFinalMaturity();
 		RandomVariableInterface forwardBond;
@@ -588,12 +591,12 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			initialMargin = getInitialMargin(i*timeStep, model, "EUR", sensitivityMode, weightMode, 1.0, false, true);
 			if(mvaMode == MVAMode.APPROXIMATION) initialMargin = initialMargin.average();
 			MVA = MVA.add(forwardBond.mult(initialMargin));		
-					
+
 		}	
 		return -MVA.getAverage();
 	}
-	
-	
+
+
 	//----------------------------------------------------------------------------------------------------------------------------------
 	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
 	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
