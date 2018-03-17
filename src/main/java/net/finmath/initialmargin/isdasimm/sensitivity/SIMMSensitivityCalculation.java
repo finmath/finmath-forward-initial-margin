@@ -14,19 +14,29 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
-/** This class performs linear sensitivity melting on SIMM buckets or LIBOR buckets (possibly with a reset of the 
- *  sensitivities to the true sensitivity values obtained by AAD). Moreover, linear interpolation of sensitivities 
- *  on the SIMM buckets may be done with this class.
+/**
+ * This class performs linear sensitivity melting of sensitivities.
+ * The melting is performed different sensitivity vectors
+ * <ul>
+ * 	<li>on market rate sensitivities given on SIMM buckets</li>
+ * 	<li>on market rate sensitivities given on model buckets</li>
+ * 	<li>on forward rate sensitivities given on model buckets</li>
+ * </ul>
+ * (possibly with a reset of the sensitivities to the true sensitivity values obtained by AAD).
+ * 
+ * Moreover, linear interpolation of sensitivities 
+ * on the SIMM buckets may be done with this class.
  * 
  * @author Mario Viehmann
- *
+ * @author Christian Fries
  */
 public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculation{
 
 	private double interpolationStep;
 	private LIBORModelMonteCarloSimulationInterface model;
 
-	/** Construct a SIMM sensitivity calculation scheme
+	/**
+	 * Construct a SIMM sensitivity calculation scheme
 	 * 
 	 * @param sensitivityMode The approximation method for sensitivities (Exact, Melting, Interpolation)
 	 * @param liborWeightMode The model-to-market-rate sensitivity transformation mode: Constant or Time Dependent weights
@@ -43,8 +53,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		this.model = model;
 	}
 
-
-	/** Construct a SIMM sensitivity calculation scheme which takes into consideration OIS sensitivities
+	/**
+	 * Construct a SIMM sensitivity calculation scheme which takes into consideration OIS sensitivities
 	 * 
 	 * @param sensitivityMode The approximation method for sensitivities (Exact, Melting, Interpolation)
 	 * @param liborWeightMode The model-to-market-rate sensitivity transformation mode: Constant or Time Dependent weights
@@ -56,7 +66,6 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 		this(sensitivityMode, liborWeightMode, interpolationStep, model, isUseAnalyticSwapSensitivities, true /*isConsiderOISSensitivities*/);
 	}
-
 
 	@Override
 	public RandomVariableInterface[] getDeltaSensitivities(AbstractSIMMProduct product,
@@ -113,7 +122,6 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		return maturityBucketSensis;
 	}
 
-
 	@Override
 	public RandomVariableInterface[] getExactDeltaSensitivities(AbstractSIMMProduct product, String curveIndexName, String riskClass,
 			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
@@ -123,8 +131,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 	}
 
-
-	/**Linear melting of the sensitivities given on the SIMM Buckets or Libor Buckets (dependig on the SensitivityMode).
+	/**
+	 * Linear melting of the sensitivities given on the SIMM Buckets or Libor Buckets (dependig on the SensitivityMode).
 	 * The melting on SIMM Buckets is perfromed linearly such that the time zero sensitivities on bucket with maturity 
 	 * N years have vanished after N years. After N years, half of the sensitivities which are originally on the 2N year 
 	 * bucket will have moved onto the N year bucket. Melting on the Libor Buckets means going forward in time while holding
@@ -161,7 +169,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		}
 
 		switch(sensitivityMode){
-		case MELTINGSIMMBUCKETS: // Melting of market-rate sensitivities
+		case MELTINGSIMMBUCKETS: // Melting of market-rate sensitivities on SIMM Buckets
 		{
 			int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};	
 
@@ -181,7 +189,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		}
 		break;  
 
-		case MELTINGSWAPRATEBUCKETS: // Melting of market-rate sensitivities
+		case MELTINGSWAPRATEBUCKETS: // Melting of market-rate sensitivities on model buckets
 		{
 			int[] riskFactorDaysLIBOR = riskFactorDaysLibor(sensitivities, model);
 
@@ -189,18 +197,14 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			riskFactorDays = Arrays.stream(riskFactorDaysLIBOR).filter(n -> n > (int)Math.round(365*(evaluationTime-meltingZeroTime))).map(n -> n-(int)Math.round(365*(evaluationTime-meltingZeroTime))).toArray();
 
 			// Find first bucket later than evaluationTime
-			int firstIndex = IntStream.range(0, riskFactorDaysLIBOR.length)
-					.filter(i -> riskFactorDaysLIBOR[i]>(int)Math.round(365*(evaluationTime-meltingZeroTime))).findFirst().getAsInt();
+			int firstIndex = IntStream.range(0, riskFactorDaysLIBOR.length).filter(i -> riskFactorDaysLIBOR[i]>(int)Math.round(365*(evaluationTime-meltingZeroTime))).findFirst().getAsInt();
 
 			//Calculate melted sensitivities
 			meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
 
-			for(int i=0;i<meltedSensis.length;i++){
+ 			for(int i=0;i<meltedSensis.length;i++){
 				meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-meltingZeroTime))/(double)riskFactorDaysLIBOR[i+firstIndex]);
 			}
-
-			// Map sensitivities on SIMM buckets
-			meltedSensis = mapSensitivitiesOnBuckets(meltedSensis, "InterestRate" /*riskClass*/, null, model);	
 		}
 		break;  
 
@@ -229,10 +233,9 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		return mapSensitivitiesOnBuckets(meltedSensis, riskClass, riskFactorDays, model); 
 	}
 
-
-
-	/** Interpolates sensitivities on SIMM buckets linearly between two exact sensitivities obtained by AAD. 
-	 *  Information of future sensitivities (after evaluation time) is used. 
+	/**
+	 * Interpolates sensitivities on SIMM buckets linearly between two exact sensitivities obtained by AAD. 
+	 * Information of future sensitivities (after evaluation time) is used. 
 	 * 
 	 * @param product The product whose sensitivities are interpolated
 	 * @param riskClass The risk class of the product 
@@ -278,18 +281,16 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		}
 
 		return interpolatedSensis;
-
 	}
 
-	/** Returns the interpolation time step, i.e. the length of equidistant intervals of points at which we 
-	 *  calculate the exact AAD sensitivities
+	/**
+	 * Returns the interpolation time step, i.e. the length of equidistant intervals of points at which we 
+	 * calculate the exact AAD sensitivities
 	 * 
 	 * @return The interpolation step size
 	 */
 	public double getInterpolationStep(){
 		return this.interpolationStep;
 	}
-
-
 }
 
