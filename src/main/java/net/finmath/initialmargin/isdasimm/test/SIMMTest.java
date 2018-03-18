@@ -451,7 +451,7 @@ public class SIMMTest {
 	
 	public static  LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(boolean isUseTenorRefinement,
 										AbstractRandomVariableFactory randomVariableFactory,
-										int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurve forwardCurve) throws CalculationException {
+										int numberOfPaths, int numberOfFactors, DiscountCurveInterface discountCurve, ForwardCurveInterface forwardCurve) throws CalculationException {
 
 		/*
 		 * Create a simulation time discretization
