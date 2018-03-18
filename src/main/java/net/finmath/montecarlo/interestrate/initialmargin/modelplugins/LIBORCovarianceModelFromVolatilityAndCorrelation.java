@@ -7,8 +7,6 @@ package net.finmath.montecarlo.interestrate.initialmargin.modelplugins;
 
 import java.util.Arrays;
 
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.stochastic.RandomVariableInterface;

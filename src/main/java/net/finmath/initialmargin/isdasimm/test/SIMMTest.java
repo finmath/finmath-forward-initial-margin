@@ -10,11 +10,11 @@ import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel;
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel.CalibrationItem;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModelInterface;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelInterface;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel.CalibrationItem;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.SwaptionSimple;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
@@ -41,11 +41,11 @@ import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDi
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.BlendedLocalVolatilityModel;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
+import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.LIBORVolatilityModelPiecewiseConstant;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModelExponentialDecay;
-import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
-import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.LIBORVolatilityModelPiecewiseConstant;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
@@ -451,7 +451,7 @@ public class SIMMTest {
 	
 	public static  LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(boolean isUseTenorRefinement,
 										AbstractRandomVariableFactory randomVariableFactory,
-										int numberOfPaths, int numberOfFactors, DiscountCurveInterface discountCurve, ForwardCurveInterface forwardCurve) throws CalculationException {
+										int numberOfPaths, int numberOfFactors, DiscountCurveInterface discountCurve, ForwardCurve forwardCurve) throws CalculationException {
 
 		/*
 		 * Create a simulation time discretization
