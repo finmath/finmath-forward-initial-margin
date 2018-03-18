@@ -441,6 +441,43 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		return getPseudoInverse(dLdL, model.getNumberOfPaths());
 	}
 
+	/**
+	 * Performs rebucketing of sensitivities to a given bucket structure by linear interpolation 
+	 * (Source: Master Thesis of Jamal Issa, modified).
+	 * 
+	 * @param sensitivities The sensitivities wrt swap rates dV/dS
+	 * @param riskFactorDays The number of days corresponding to the sensitivities
+	 * @param riskFactorDaysTarget Target bucket structure.
+	 * @param model The LIBOR Market Model
+	 * @return The sensitivities on the target buckets.
+	 */
+	public static RandomVariableInterface[] mapSensitivitiesOnBuckets(RandomVariableInterface[] sensitivities, int[] riskFactorDays, int[] riskFactorDaysTarget, LIBORModelMonteCarloSimulationInterface model){
+		RandomVariableInterface[] sensitivitiesTarget = new RandomVariableInterface[riskFactorDaysTarget.length];
+		for(int i = 0;i<sensitivitiesTarget.length;i++) sensitivitiesTarget[i] = new RandomVariable(0.0);
+
+		int counter = 0;
+		for(int simmFactor =0; simmFactor<riskFactorDaysTarget.length;simmFactor++) {
+			for(int i = counter; i<sensitivities.length; i++) {
+				if(riskFactorDays[i] < riskFactorDaysTarget[0]) {
+					sensitivitiesTarget[0] = sensitivitiesTarget[0].add(sensitivities[i]);
+					counter++;
+				}
+				else if(riskFactorDays[i] >= riskFactorDaysTarget[riskFactorDaysTarget.length-1]){
+					sensitivitiesTarget[sensitivitiesTarget.length-1] = sensitivitiesTarget[sensitivitiesTarget.length-1].add(sensitivities[i]);
+				}
+				else if(riskFactorDays[i] >= riskFactorDaysTarget[simmFactor] && riskFactorDays[i] < riskFactorDaysTarget[simmFactor+1]) {
+					sensitivitiesTarget[simmFactor] = sensitivitiesTarget[simmFactor].addProduct(sensitivities[i],((double)(riskFactorDaysTarget[simmFactor+1] - riskFactorDays[i]) / (riskFactorDaysTarget[simmFactor+1]-riskFactorDaysTarget[simmFactor])));
+					sensitivitiesTarget[simmFactor+1] = sensitivitiesTarget[simmFactor+1].addProduct(sensitivities[i],((double)(riskFactorDays[i]-riskFactorDaysTarget[simmFactor]) / (riskFactorDaysTarget[simmFactor+1]-riskFactorDaysTarget[simmFactor])));
+					counter++;
+				}							
+				else {
+					break;
+				}
+			}
+		}
+
+		return sensitivitiesTarget;
+	}
 
 	/**
 	 * Performs rebucketing of sensitivities to the SIMM buckets by linear interpolation 
@@ -455,45 +492,12 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	public static RandomVariableInterface[] mapSensitivitiesOnBuckets(RandomVariableInterface[] sensitivities, String riskClass, int[] riskFactorDays, LIBORModelMonteCarloSimulationInterface model){
 		//rebucketing to SIMM structure(buckets: 2w, 1m, 3m, 6m, 1y, 2y, 3y, 5y, 10y, 15y, 20y, 30y)	
 		int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};	
-		RandomVariableInterface[] deltaSIMM = new RandomVariableInterface[riskFactorsSIMM.length];
-		for(int i = 0;i<deltaSIMM.length;i++) deltaSIMM[i] = new RandomVariable(0.0);
-
+		
 		if(riskFactorDays==null) riskFactorDays = riskFactorDaysLibor(sensitivities, model);
-		int counter = 0;
-		for(int simmFactor =0; simmFactor<riskFactorsSIMM.length;simmFactor++){
-			for(int i = counter; i<sensitivities.length; i++){
 
-
-				if(riskFactorDays[i] < riskFactorsSIMM[0]){
-					deltaSIMM[0] = deltaSIMM[0].add(sensitivities[i]);
-					counter++;
-				}
-				else{
-					if(riskFactorDays[i] >= riskFactorsSIMM[riskFactorsSIMM.length-1]){
-						deltaSIMM[deltaSIMM.length-1] = deltaSIMM[deltaSIMM.length-1].add(sensitivities[i]);
-					}
-
-					else{
-						if(riskFactorDays[i] >= riskFactorsSIMM[simmFactor] && riskFactorDays[i] < riskFactorsSIMM[simmFactor+1]){
-
-							deltaSIMM[simmFactor] = deltaSIMM[simmFactor].addProduct(sensitivities[i],((double)(riskFactorsSIMM[simmFactor+1] - riskFactorDays[i]) / (riskFactorsSIMM[simmFactor+1]-riskFactorsSIMM[simmFactor])));
-							deltaSIMM[simmFactor+1] = deltaSIMM[simmFactor+1].addProduct(sensitivities[i],((double)(riskFactorDays[i]-riskFactorsSIMM[simmFactor]) / (riskFactorsSIMM[simmFactor+1]-riskFactorsSIMM[simmFactor])));
-							counter++;
-						}							
-						else{
-							break;
-						}
-					}
-
-				}
-			}
-
-		}
-
-		return deltaSIMM;		
-
+		return mapSensitivitiesOnBuckets(sensitivities, riskFactorDays, riskFactorsSIMM, model);
 	}
-
+	
 	/**
 	 * Return the days of the risk factors on the LIBOR Buckets for a given model. Needed for mapping sensitivities
 	 * on LIBOR Buckets to SIMM Buckets
