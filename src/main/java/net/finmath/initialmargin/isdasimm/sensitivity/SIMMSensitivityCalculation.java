@@ -155,7 +155,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			RandomVariableInterface[] sensitivities, double meltingZeroTime,
 			double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException{
 
-		boolean isMarketRateSensi = sensitivityMode==SensitivityMode.MELTINGSIMMBUCKETS ? true : false;
+		boolean isMarketRateSensi = (sensitivityMode==SensitivityMode.MELTINGSIMMBUCKETS || sensitivityMode==SensitivityMode.MELTINGSWAPRATEBUCKETS) ? true : false;
 		RandomVariableInterface[] meltedSensis=null;
 		int[] riskFactorDays=null;
 		// Get sensitivities to melt if not provided as input to the function
@@ -202,7 +202,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			//Calculate melted sensitivities
 			meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
 
- 			for(int i=0;i<meltedSensis.length;i++){
+			for(int i=0;i<meltedSensis.length;i++) {
 				meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-meltingZeroTime))/(double)riskFactorDaysLIBOR[i+firstIndex]);
 			}
 		}
