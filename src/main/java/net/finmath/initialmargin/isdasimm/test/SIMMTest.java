@@ -450,15 +450,21 @@ public class SIMMTest {
 
 	
 	public static  LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(boolean isUseTenorRefinement,
+			AbstractRandomVariableFactory randomVariableFactory,
+			int numberOfPaths, int numberOfFactors, DiscountCurveInterface discountCurve, ForwardCurve forwardCurve) throws CalculationException {
+		return createLIBORMarketModel(isUseTenorRefinement, randomVariableFactory, numberOfPaths, numberOfFactors, discountCurve, forwardCurve, 0.1);
+	}
+	
+	public static  LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(boolean isUseTenorRefinement,
 										AbstractRandomVariableFactory randomVariableFactory,
-										int numberOfPaths, int numberOfFactors, DiscountCurveInterface discountCurve, ForwardCurve forwardCurve) throws CalculationException {
+										int numberOfPaths, int numberOfFactors, DiscountCurveInterface discountCurve, ForwardCurve forwardCurve, double simulationTimeDt) throws CalculationException {
 
 		/*
 		 * Create a simulation time discretization
 		 */
 		// If simulation time is below libor time, exceptions will be hard to track.
 		double lastTime	= 30.0;
-		double dt		= 0.1;
+		double dt		= simulationTimeDt;
 		TimeDiscretization timeDiscretization = new TimeDiscretization(0.0, (int) (lastTime / dt), dt);
 		
 		/*
@@ -513,7 +519,9 @@ public class SIMMTest {
 		0.005,
 		0.005};
 		
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory,timeDiscretization, liborPeriodDiscretization, new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), /*new double[]{0.01}*/volatility,false);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory,timeDiscretization, liborPeriodDiscretization, new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), volatility, false);
+//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory,timeDiscretization, liborPeriodDiscretization, new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), /*new double[]{0.01}*/volatility, false);
+//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory,timeDiscretization, liborPeriodDiscretization, new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.00}, false);
 				
 		// Create a correlation model
 		LIBORCorrelationModel correlationModel = new LIBORCorrelationModelExponentialDecay(timeDiscretization, liborPeriodDiscretization, numberOfFactors, 0.04 /*correlationDecayParameter*/, false);

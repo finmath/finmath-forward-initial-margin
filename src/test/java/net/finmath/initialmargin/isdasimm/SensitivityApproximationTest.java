@@ -63,7 +63,8 @@ public class SensitivityApproximationTest {
 	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
 
 	// Model Paths 
-	final static int numberOfPaths = 100;
+	final static int numberOfPaths = 100; // Use 1000 or more for results in publication.
+	final static double simulationTimeDt = 0.25;		// Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
 	final static double notional = 100;
 	final static boolean isPrintProfile = false;
 	final static double fundingSpread = 0.005; // For MVA
@@ -82,7 +83,8 @@ public class SensitivityApproximationTest {
 	private final WeightMode weightMode;
 
 	public static void main(String[] args) throws CalculationException {
-		new SensitivityApproximationTest(TestProductType.BERMUDANCALLABLE, WeightMode.TIMEDEPENDENT);
+		SensitivityApproximationTest sat = new SensitivityApproximationTest(TestProductType.BERMUDANCALLABLE, WeightMode.TIMEDEPENDENT);
+		sat.test();
 	}
 
 	public SensitivityApproximationTest(TestProductType testProductType, WeightMode weightMode) {
@@ -98,7 +100,7 @@ public class SensitivityApproximationTest {
 		 * 
 		 *  Create a Libor market Model
 		 *  
-		 */
+		 */		
 		AbstractRandomVariableFactory randomVariableFactory = SIMMTest.createRandomVariableFactoryAAD();
 
 		// Curve Data as of December 8, 2017
@@ -119,7 +121,8 @@ public class SensitivityApproximationTest {
 
 		LIBORModelMonteCarloSimulationInterface model = SIMMTest.createLIBORMarketModel(false,randomVariableFactory,numberOfPaths, 1 /*numberOfFactors*/, 
 				discountCurve,
-				forwardCurve);
+				forwardCurve,
+				simulationTimeDt);
 
 		double[] exerciseDates = null;
 		int[] numberOfPeriods = null;
@@ -155,13 +158,13 @@ public class SensitivityApproximationTest {
 		AbstractSIMMProduct[] products = createProducts(testProductType, exerciseDates, numberOfPeriods, forwardCurve, discountCurve);
 
 		// Execute test function
-		testSIMMProductApproximation(weightMode, products, exerciseDates, numberOfPeriods, forwardCurve, discountCurve, model, isConsiderOISSensis, interpolationStep);
+		testSIMMProductApproximation(weightMode, products, exerciseDates, numberOfPeriods, forwardCurve, discountCurve, model, isConsiderOISSensis, interpolationStep, simulationTimeDt);
 	}
 
 	public static void testSIMMProductApproximation(WeightMode weightMode, AbstractSIMMProduct[] product, double[] exerciseDates, 
-			int[] numberOfPeriods, ForwardCurve forwardCurve, DiscountCurve discountCurve, LIBORModelMonteCarloSimulationInterface model, boolean isConsiderOISSensis, double interpolationStep) throws CalculationException{
+			int[] numberOfPeriods, ForwardCurve forwardCurve, DiscountCurve discountCurve, LIBORModelMonteCarloSimulationInterface model, boolean isConsiderOISSensis, double interpolationStep, double simulationTimeDt) throws CalculationException{
 
-		double  timeStep = 0.1;
+		double  timeStep = simulationTimeDt;
 		boolean isUseAnalyticSwapSensis = false;
 
 		if(weightMode==WeightMode.TIMEDEPENDENT) System.out.println("Exercise in Y" + "\t" + "NumberSwapPeriods" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpolation" + "\t" + "MVA Exact" + "\t" + "MVA Deviation Melting" + "\t" + "MVA Deviation Interpolation" + "\t" + "Deterministic Rates MVA");
@@ -196,8 +199,8 @@ public class SensitivityApproximationTest {
 				// 2) Melting (on SIMM buckets)
 				long timeStartMelting = System.currentTimeMillis();
 				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGSIMMBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
-//				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGSWAPRATEBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
-//				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGLIBORBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				//				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGSWAPRATEBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				//				for(int i=0;i<finalIMTime/timeStep+1;i++) initialMargin[1][i] = product[productIndex].getInitialMargin(i*timeStep, model, "EUR", SensitivityMode.MELTINGLIBORBUCKETS, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
 				// 3) Interpolation
@@ -246,7 +249,7 @@ public class SensitivityApproximationTest {
 				productIndex++;
 			}
 		}
-		
+
 		System.out.println("\n");
 	}
 
