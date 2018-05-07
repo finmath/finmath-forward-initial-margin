@@ -131,8 +131,8 @@ public class SensitivityApproximationTest {
 		// Specify test products
 		switch(testProductType){
 		case SWAPS: 
-			exerciseDates = new double[] {0.0};
-			numberOfPeriods = new int[] {10,20,30,40};
+			exerciseDates = new double[] { 0.0 };
+			numberOfPeriods = new int[] { 10, 20, 25, 30, 40 };
 			break;
 		case SWAPTIONS: 
 			exerciseDates = new double[] {5.0, 10.0};
