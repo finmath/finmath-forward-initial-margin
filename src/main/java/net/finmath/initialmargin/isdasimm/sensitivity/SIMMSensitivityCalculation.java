@@ -82,6 +82,13 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 			maturityBucketSensis = getSensitivitiesIRMarketRates(product, curveIndexName, evaluationTime, model);           
 
+			boolean isPrintDebugSensiVector = false;
+			if(isPrintDebugSensiVector) {
+				System.out.print("E " + evaluationTime + "\t");
+				for(int i=0; i<maturityBucketSensis.length; i++) System.out.print(maturityBucketSensis[i].getAverage() + "\t");
+				System.out.print("\n");
+			}
+
 			// Map sensitivities on SIMM buckets
 			maturityBucketSensis = mapSensitivitiesOnBuckets(maturityBucketSensis, "InterestRate" /*riskClass*/, null, model);	
 
@@ -202,8 +209,15 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			//Calculate melted sensitivities
 			meltedSensis = new RandomVariableInterface[sensitivities.length-firstIndex];
 
-			for(int i=0;i<meltedSensis.length;i++) {
+			for(int i=0;i<meltedSensis.length;i++){
 				meltedSensis[i]=sensitivities[i+firstIndex].mult(1.0-(double)Math.round(365*(evaluationTime-meltingZeroTime))/(double)riskFactorDaysLIBOR[i+firstIndex]);
+			}
+
+			boolean isPrintDebugSensiVector = false;
+			if(isPrintDebugSensiVector) {
+				System.out.print("M " + evaluationTime + "\t");
+				for(int i=0; i<meltedSensis.length; i++) System.out.print(meltedSensis[i].get(0) + "\t");
+				System.out.print("\n");
 			}
 		}
 		break;  

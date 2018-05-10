@@ -10,15 +10,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.AbstractNotional;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.AbstractProductComponent;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.AccruingNotional;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.Period;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.components.ProductCollection;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.AbstractIndex;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.FixedCoupon;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.indices.LinearCombinationIndex;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.components.AbstractNotional;
+import net.finmath.montecarlo.interestrate.products.components.AbstractProductComponent;
+import net.finmath.montecarlo.interestrate.products.components.AccruingNotional;
+import net.finmath.montecarlo.interestrate.products.components.Period;
+import net.finmath.montecarlo.interestrate.products.components.ProductCollection;
+import net.finmath.montecarlo.interestrate.products.indices.AbstractIndex;
+import net.finmath.montecarlo.interestrate.products.indices.FixedCoupon;
+import net.finmath.montecarlo.interestrate.products.indices.LinearCombinationIndex;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleInterface;
 
@@ -112,6 +113,6 @@ public class SwapLeg extends AbstractLIBORMonteCarloProduct {
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		return components.getValue(evaluationTime, model);
+		return components.getValue(evaluationTime, (net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface) model);
 	}
 }

@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.functions.AnalyticFormulas;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.SwaptionAnalyticApproximation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.products.SwaptionSimple;
 import net.finmath.marketdata.model.AnalyticModelInterface;
@@ -26,8 +25,9 @@ import net.finmath.marketdata.products.SwapAnnuity;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
-import net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
+import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.model.AbstractModel;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
@@ -136,7 +136,7 @@ import net.finmath.time.TimeDiscretizationInterface;
  * @see net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel The abstract covariance model plug ins.
  * @see net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric A parametic covariance model including a generic calibration algorithm.
  */
-public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelInterface {
+public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelInterface, net.finmath.montecarlo.interestrate.LIBORMarketModelInterface {
 
 	public enum Driftapproximation	{ EULER, LINE_INTEGRAL, PREDICTOR_CORRECTOR }
 	public enum Measure				{ SPOT, TERMINAL }
@@ -304,7 +304,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 				calibrationWeights[i]		= calibrationItems[i].calibrationWeight;
 			}
 
-			this.covarianceModel    = covarianceModelParametric.getCloneCalibrated(this, calibrationProducts, calibrationTargetValues, calibrationWeights, calibrationParameters);
+			this.covarianceModel    = covarianceModelParametric.getCloneCalibrated((net.finmath.montecarlo.interestrate.LIBORMarketModelInterface)this, calibrationProducts, calibrationTargetValues, calibrationWeights, calibrationParameters);
 		}
 
 		numeraires = new ConcurrentHashMap<Integer, RandomVariableInterface>();
