@@ -29,6 +29,7 @@
 		</developer>
 		<developer>
 			<id>pekola</id>
+			<name>Peter Kohl-Landgraf</name>
 			<timezone>1</timezone>
 		</developer>
 	</developers>
@@ -79,4 +80,11 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<scm>
+		<url>https://github.com/finmath/finmath-forward-initial-margin</url>
+		<connection>scm:git:https://github.com/finmath/finmath-forward-initial-margin.git</connection>
+		<developerConnection>scm:git:https://github.com/finmath/finmath-forward-initial-margin.git</developerConnection>
+	</scm>
+
 </project>
