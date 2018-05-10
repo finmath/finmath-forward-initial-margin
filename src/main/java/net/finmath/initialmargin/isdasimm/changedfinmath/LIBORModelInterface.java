@@ -12,8 +12,8 @@ import net.finmath.exception.CalculationException;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
+ * @author Mario Viehmann
  * @author Christian Fries
- *
  */
 public interface LIBORModelInterface extends net.finmath.montecarlo.interestrate.LIBORModelInterface {
 
