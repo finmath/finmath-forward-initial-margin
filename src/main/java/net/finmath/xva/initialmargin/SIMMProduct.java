@@ -1,13 +1,14 @@
 package net.finmath.xva.initialmargin;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -48,39 +49,29 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct {
 		if (evaluationTime > marginCalculationTime) {
 			return model.getRandomVariableForConstant(0.0);
 		}
-		RandomVariableInterface SIMMValue = null;
-		for (String productClass : SIMMParameter.getProductClassKeys()) {
-			RandomVariableInterface SIMMProductValue = this.getSIMMForProductClass(productClass, evaluationTime, model);
-			SIMMValue = SIMMValue == null ? SIMMProductValue : SIMMValue.add(SIMMProductValue);
 
-		}
+		RandomVariableInterface SIMMValue = Arrays.stream(SIMMParameter.getProductClassKeys())
+				.map(productClass -> getSIMMForProductClass(productClass, evaluationTime, model))
+				.filter(Objects::nonNull)
+				.reduce(RandomVariableInterface::add)
+				.orElse(model.getRandomVariableForConstant(0.0));
+
 		System.out.println("SIMMProduct: SIMMValue at " + DecimalFormat.getNumberInstance().format(evaluationTime) + ": " + DecimalFormat.getCurrencyInstance().format(SIMMValue.getAverage()));
 		RandomVariableInterface SIMMValueAfterThreshold = this.thresholdAmount != 0.0 ? SIMMValue.sub(this.thresholdAmount).floor(0.0) : SIMMValue;
 		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
-		return SIMMValueAfterThreshold.mult(numeraireAtEval);
+		RandomVariableInterface numeraireAtFlow = model.getNumeraire(marginCalculationTime);
+		return SIMMValueAfterThreshold.mult(numeraireAtEval).div(numeraireAtFlow);
 	}
-
 
 	public RandomVariableInterface getSIMMForProductClass(String productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
 		Set<String> riskClassList = helper.getRiskClassKeysForProductClass(productClass, evaluationTime);
 
-		RandomVariableInterface[] contributions = new RandomVariableInterface[SIMMParameter.getRiskClassKeys().length];
-		int i = 0;
-		int pathDim = model.getNumberOfPaths();
-		for (String iRiskClass : SIMMParameter.getRiskClassKeys()) {
-			if (riskClassList.contains(iRiskClass)) {
-				RandomVariableInterface iIM = this.getSIMMForRiskClass(iRiskClass, productClass, evaluationTime, model);
-				contributions[i] = iIM;
-			} else
-				contributions[i] = new RandomVariable(evaluationTime, pathDim, 0.0);
-			i++;
-		}
-
-		RandomVariableInterface simmProductClass = helper.getVarianceCovarianceAggregation(contributions, parameterSet.CrossRiskClassCorrelationMatrix);
-		return simmProductClass;
+		RandomVariableInterface[] contributions = Arrays.stream(SIMMParameter.getRiskClassKeys())
+				.map(riskClass -> riskClassList.contains(riskClass) ? getSIMMForRiskClass(riskClass, productClass, evaluationTime, model) : model.getRandomVariableForConstant(0.0))
+				.toArray(RandomVariableInterface[]::new);
+		return SIMMHelper.getVarianceCovarianceAggregation(contributions, parameterSet.CrossRiskClassCorrelationMatrix);
 	}
-
 
 	public RandomVariableInterface getSIMMForRiskClass(String riskClassKey, String productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		RandomVariableInterface deltaMargin = this.getDeltaMargin(riskClassKey, productClass, evaluationTime, model);
@@ -104,7 +95,6 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct {
 		}
 		return deltaMargin;
 	}
-
 
 	public RandomVariableInterface getVegaMargin(String riskClassKey, String productClassKey, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		SIMMProductNonIRDeltaVega VegaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClassKey, productClassKey, SIMMParameter.RiskType.Vega.name(), this.parameterSet, this.calculationCCY, evaluationTime);
