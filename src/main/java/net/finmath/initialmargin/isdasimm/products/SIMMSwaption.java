@@ -98,7 +98,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 			if(sensitivityCalculationScheme.isUseAnalyticSwapSensitivities){
 
 				// Calculate sensis analytically
-				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Indices");
+				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");
 				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime);
 				swapSensis = Arrays.stream(swapSensis).map(n->n.mult(indicator)).toArray(RandomVariableInterface[]::new);
 				return swapSensis;
@@ -218,7 +218,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	
 	
 	//----------------------------------------------------------------------------------------------------------------------------------
-	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Indices dependence
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
 	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
 	//----------------------------------------------------------------------------------------------------------------------------------
 

@@ -107,7 +107,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 		case MELTINGSIMMBUCKETS:   // Melting on SIMM Buckets
 		case MELTINGSWAPRATEBUCKETS:   // Melting on SIMM Buckets
-		case MELTINGLIBORBUCKETS:  // Melting on Indices Buckets
+		case MELTINGLIBORBUCKETS:  // Melting on Libor Buckets
 			// The time of the exact sensitivities being melted: Initial Melting Time    
 			double initialMeltingTime = evaluationTime < product.getMeltingResetTime() ? 0 : product.getMeltingResetTime();
 
@@ -139,12 +139,12 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	}
 
 	/**
-	 * Linear melting of the sensitivities given on the SIMM Buckets or Indices Buckets (dependig on the SensitivityMode).
+	 * Linear melting of the sensitivities given on the SIMM Buckets or Libor Buckets (dependig on the SensitivityMode).
 	 * The melting on SIMM Buckets is perfromed linearly such that the time zero sensitivities on bucket with maturity 
 	 * N years have vanished after N years. After N years, half of the sensitivities which are originally on the 2N year 
-	 * bucket will have moved onto the N year bucket. Melting on the Indices Buckets means going forward in time while holding
-	 * the Indices Bucket Sensitivities constant. The sensitivities are "melting" as less and less Indices Buckets are taken into
-	 * account. The remaining Indices Buckets are converted into market-rate sensitivities and then allocated linearly onto the SIMM Buckets.
+	 * bucket will have moved onto the N year bucket. Melting on the Libor Buckets means going forward in time while holding
+	 * the Libor Bucket Sensitivities constant. The sensitivities are "melting" as less and less Libor Buckets are taken into
+	 * account. The remaining Libor Buckets are converted into market-rate sensitivities and then allocated linearly onto the SIMM Buckets. 
 	 * 
 	 * @param product The product whose sensitivities we melt
 	 * @param sensitivities The sensitivities on SIMM buckets or LiborPeriodDiscretization to be melted
@@ -224,7 +224,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 		case MELTINGLIBORBUCKETS: // Melting of model sensitivities with subsequent mapping to market-rate sensitivities
 		{
-			// First index of Indices at evaluation time given the initial melting time
+			// First index of Libor at evaluation time given the initial melting time
 			int liborIndexAtInitialMeltingTime = model.getLiborPeriodIndex(meltingZeroTime);
 			liborIndexAtInitialMeltingTime = liborIndexAtInitialMeltingTime < 0 ? -liborIndexAtInitialMeltingTime-1 : liborIndexAtInitialMeltingTime;
 			int liborIndexAtEval = model.getLiborPeriodIndex(evaluationTime);
@@ -255,7 +255,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	 * @param riskClass The risk class of the product 
 	 * @param curveIndexName The name of the index curve 
 	 * @param evaluationTime The time of evaluation
-	 * @param model The Indices market model
+	 * @param model The Libor market model
 	 * @return The interpolated sensitivities on SIMM buckets at evaluation time
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException

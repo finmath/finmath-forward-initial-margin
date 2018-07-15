@@ -50,7 +50,7 @@ public class InitialMarginRegressionTest {
     	 // Volatility Parameter 
     	 double volatilityParameter = 0.2;
     	 
-    	 // Create Indices market model
+    	 // Create Libor market model 
      	 DiscountCurve discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("discountCurve",
      			                                                                                 new double[] {0.5 , 1.0, 2.0, 5.0, 30.0} /*times*/,
                                                                                                  new double[] {0.996 , 0.995, 0.994, 0.993, 0.98} /*discountFactors*/);

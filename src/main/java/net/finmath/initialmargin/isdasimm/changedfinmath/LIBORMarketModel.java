@@ -554,7 +554,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 	public RandomVariableInterface getNumeraire(double time) throws CalculationException {
 		
 		// Uncomment if numeraire sensitivity should be calculated for all requested numeraire times rather than numeraires on
-		// Indices Period Discrezization
+		// Libor Period Discrezization
 		
 //		Map<Double, RandomVariableInterface> numeraireCache = numeraireCacheReference != null ? numeraireCacheReference.get() : null;
 //		if(numeraireCache == null) {
@@ -851,11 +851,11 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 
 	}
 	
-	/**Returns the forward bond P(T;t) from on the OIS curve for a given Indices market model
+	/**Returns the forward bond P(T;t) from on the OIS curve for a given Libor market model
 	 * 
 	 * @param T The maturity of the forward bond 
 	 * @param t The inception of the forward bond
-	 * @param model The Indices market model
+	 * @param model The Libor market model
 	 * @return The forward bond P(T;t) on the OIS curve
 	 * @throws CalculationException
 	 */

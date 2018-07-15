@@ -22,7 +22,7 @@ public class RiskWeightCalibrationTest {
 	public static void main(String[] args) throws CalculationException{
 
 		/*
-		 *  Create a Indices market Model
+		 *  Create a Libor market Model
 		 */
 
 		AbstractRandomVariableFactory randomVariableFactory = SIMMTest.createRandomVariableFactoryAAD();

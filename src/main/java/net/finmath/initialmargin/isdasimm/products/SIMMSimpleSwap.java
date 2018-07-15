@@ -60,14 +60,14 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 	}
 
 
-	/** Calculate Swap Sensitivities dV/dL (Indices) or dV/dP (OIS) analytically for a Swap
+	/** Calculate Swap Sensitivities dV/dL (Libor) or dV/dP (OIS) analytically for a Swap 
 	 * 
 	 * @param evaluationTime The time of evaluation
 	 * @param fixingDates The fixing times of the swap floating leg
 	 * @param swapRates The swap rates. May be <code> null <code> (only relevant for derivative w.r.t. discount curve).
 	 * @param periodLength The constant period length of this swap
 	 * @param model The LIBOR model used for simulation of the Libors
-	 * @param withRespectTo "Indices" or "OIS"
+	 * @param withRespectTo "Libor" or "OIS"
 	 * @return
 	 * @throws CalculationException
 	 */
@@ -85,13 +85,13 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 		int periodIndex = new TimeDiscretization(fixingDates).getTimeIndexNearestLessOrEqual(evaluationTime); 
 		periodIndex = periodIndex < 0 ? 0 : periodIndex;
 
-		// firstLiborIndex: Index of the Indices on the first period of the swap
+		// firstLiborIndex: Index of the Libor on the first period of the swap
 		int currentLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(evaluationTime);
 		int firstLiborIndex   = fixingDates[0] > evaluationTime ? model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(fixingDates[0]):currentLiborIndex;
 
 		switch(withRespectTo){
 
-		case("Indices"):
+		case("Libor"):
 
 			int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		int numberOfRemainingLibors = model.getNumberOfLibors()- nextLiborIndex;
@@ -158,7 +158,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 
 		if(sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 
-			RandomVariableInterface[] swapSensis = getAnalyticSensitivities(evaluationTime, model.getLiborPeriodDiscretization().getTimeStep(0), model, "Indices");
+			RandomVariableInterface[] swapSensis = getAnalyticSensitivities(evaluationTime, model.getLiborPeriodDiscretization().getTimeStep(0), model, "Libor");
 			return swapSensis;
 		}
 
@@ -238,7 +238,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 	
 	
 	//----------------------------------------------------------------------------------------------------------------------------------
-	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Indices dependence
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
 	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
 	//----------------------------------------------------------------------------------------------------------------------------------
 

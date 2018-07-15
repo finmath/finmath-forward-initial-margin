@@ -722,11 +722,11 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	}
 	
-	/**Returns the forward bond P(T;t) from on the OIS curve for a given Indices market model
+	/**Returns the forward bond P(T;t) from on the OIS curve for a given Libor market model
 	 * 
 	 * @param T The maturity of the forward bond 
 	 * @param t The inception of the forward bond
-	 * @param model The Indices market model
+	 * @param model The Libor market model
 	 * @return The forward bond P(T;t) on the OIS curve
 	 * @throws CalculationException
 	 */

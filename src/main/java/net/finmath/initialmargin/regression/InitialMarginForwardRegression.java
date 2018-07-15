@@ -91,7 +91,7 @@ public class InitialMarginForwardRegression {
 	/** Calculates the forecast of the variance of the clean portfolio value change over the marginal period of risk for a given time point.
 	 * 
 	 * @param forwardVaRTime The time for which the variance of the clean portfolio value change over the marginal period of risk is calculated
-	 * @param model Interface implementing the Indices Market Model
+	 * @param model Interface implementing the Libor Market Model 
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
@@ -148,7 +148,7 @@ public class InitialMarginForwardRegression {
 	/** Calculates the forecast of the variance of the clean portfolio value change over the marginal period of risk for all time points on a time discretization.
 	 * 
 	 * @param forwardVaRTimes The times for which the variance of the clean portfolio value change over the marginal period of risk is calculated
-	 * @param model Interface implementing the Indices Market Model
+	 * @param model Interface implementing the Libor Market Model 
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
@@ -193,7 +193,7 @@ public class InitialMarginForwardRegression {
 	private RandomVariableInterface[] getRegressionBasisFunctions(double forwardVaRTime,
 			LIBORModelMonteCarloSimulationInterface model
 			) throws CalculationException {
-		// If Indices for last CF is not yet fixed
+		// If Libor for last CF is not yet fixed
 		RandomVariableInterface NPV = portfolio.getValue(forwardVaRTime, model); 
 		double lastFixingTime = model.getLiborPeriodDiscretization().getTime(model.getLiborPeriodDiscretization().getTimeIndex(portfolio.getInitialLifeTime())-1);
 		if(forwardVaRTime < lastFixingTime){ 
@@ -231,7 +231,7 @@ public class InitialMarginForwardRegression {
 	}
 
 
-	/** Provides basis functions based on Indices rates for the calculation of the future portfolio value V(t)
+	/** Provides basis functions based on Libor rates for the calculation of the future portfolio value V(t)
 	 * 
 	 * @param forwardVaRTime the time at which the value at risk regression is performed
 	 * @param model 
