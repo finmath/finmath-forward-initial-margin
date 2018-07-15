@@ -98,7 +98,7 @@ public class SensitivityApproximationTest {
 
 		/*
 		 * 
-		 *  Create a Libor market Model
+		 *  Create a Indices market Model
 		 *  
 		 */		
 		AbstractRandomVariableFactory randomVariableFactory = SIMMTest.createRandomVariableFactoryAAD();

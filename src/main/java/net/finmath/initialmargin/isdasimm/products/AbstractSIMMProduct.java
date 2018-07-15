@@ -597,12 +597,12 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 
 	//----------------------------------------------------------------------------------------------------------------------------------
-	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Indices dependence
 	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
 	//----------------------------------------------------------------------------------------------------------------------------------
 
 	/** Calculate the forward derivatives of the product w.r.t. the Numeraires at a given evaluation time.
-	 *  These derivatives are w.r.t. the numeraires on the Libor period discretization.
+	 *  These derivatives are w.r.t. the numeraires on the Indices period discretization.
 	 *  This function is called by the subclasses in the overridden functions
 	 *  <code> getValueNumeraireSensitivities </code>.
 	 * 

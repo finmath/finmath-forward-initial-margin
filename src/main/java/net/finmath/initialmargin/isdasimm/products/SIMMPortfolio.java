@@ -47,7 +47,7 @@ public class SIMMPortfolio {
 	/**Calculate the forward initial margin of the portfolio.
 	 * 
 	 * @param evaluationTime The forward initial margin time
-	 * @param model The Libor market model
+	 * @param model The Indices market model
 	 * @param calculationCCY The currency in which the IM is calculated
 	 * @param sensitivityMode The method to be used for sensitivity calculation (Exact, LinearMelting or Interpolation)
 	 * @param liborWeightMode The method to be used for converting the libor sensitivities to swap sensitivities (Constant or Stochastic)
@@ -67,7 +67,7 @@ public class SIMMPortfolio {
 	/**Calculate the forward initial margin of the portfolio.
 	 * 
 	 * @param evaluationTime The forward initial margin time
-	 * @param model The Libor market model
+	 * @param model The Indices market model
 	 * @param calculationCCY The currency in which the IM is calculated
 	 * @param sensitivityMode The method to be used for sensitivity calculation (Exact, LinearMelting or Interpolation)
 	 * @param liborWeightMode The method to be used for converting the libor sensitivities to swap sensitivities (Constant or Stochastic)

@@ -50,7 +50,7 @@ public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.mon
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 
 	/**
-	 * Returns the forward bond P(T;t) from on the OIS curve for a given Libor market model
+	 * Returns the forward bond P(T;t) from on the OIS curve for a given Indices market model
 	 * @param T The maturity of the forward bond 
 	 * @param t The inception of the forward bond
 	 * @return The forward bond P(T;t) on the OIS curve

@@ -113,7 +113,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			case Callable:
 
 				// Calculate sensis analytically
-				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");				  			
+				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Indices");
 
 				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 
@@ -291,7 +291,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			swapSensitivityMap.put("OIS", swapSensisOIS);
 
 			// Get forward curve sensis
-			RandomVariableInterface[] swapSensisLibor = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "Libor");				  
+			RandomVariableInterface[] swapSensisLibor = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "Indices");
 
 			if(meltingMode==SensitivityMode.MELTINGSIMMBUCKETS){
 				// Calculate dV/dS = dV/dL * dL/dS
@@ -365,7 +365,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 
 	//----------------------------------------------------------------------------------------------------------------------------------
-	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Libor dependence
+	// Additional method for the case SensitivityMode.ExactConsideringDependencies, i.e. correct OIS-Indices dependence
 	// NOT USED IN THE THESIS! PRELIMINARY TRIAL
 	//----------------------------------------------------------------------------------------------------------------------------------
 
