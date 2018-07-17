@@ -97,15 +97,15 @@ public class SIMMHelper {
 		if (!riskTypeString.equals("vega") ) {
 			Map<String, Set<String> > mapRiskClassRiskFactorKeys = new HashMap<>();
 			//        if ( riskTypeString.equals("delta")) {
-				riskClassKeys.stream().forEach(riskClass -> {
-					Set<String> riskFactors = tradeSet.stream()
-							.flatMap(
-									trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k -> k!=null &&  k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
-									).distinct().collect(Collectors.toSet());
-					mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
-				});
-				return mapRiskClassRiskFactorKeys;
-				//        }
+			riskClassKeys.stream().forEach(riskClass -> {
+				Set<String> riskFactors = tradeSet.stream()
+						.flatMap(
+								trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k -> k!=null &&  k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
+								).distinct().collect(Collectors.toSet());
+				mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
+			});
+			return mapRiskClassRiskFactorKeys;
+			//        }
 		}
 		else{
 			Map<String,Set<String> >     mapRiskClassRiskFactorKeys = new HashMap<>();
