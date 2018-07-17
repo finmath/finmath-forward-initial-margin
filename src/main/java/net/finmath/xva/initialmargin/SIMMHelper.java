@@ -17,8 +17,6 @@ public class SIMMHelper {
 		this.tradeSet = tradeSet.stream().map(trade->(SIMMTradeSpecification)trade).collect(Collectors.toSet());
 	}
 
-
-
 	public  static RandomVariableInterface getVarianceCovarianceAggregation(RandomVariableInterface[] contributions, Double[][] correlationMatrix){
 		int i = 0;
 		RandomVariableInterface value = null;
