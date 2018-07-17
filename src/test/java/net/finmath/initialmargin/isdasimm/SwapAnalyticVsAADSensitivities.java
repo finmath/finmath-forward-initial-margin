@@ -55,7 +55,7 @@ public class SwapAnalyticVsAADSensitivities {
 	@Test
 	public void testAADVsAnalyticSensis() throws CalculationException{ 
 
-		// Create a Libor market Model
+		// Create a Indices market Model
 		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
 		DiscountCurve discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("discountCurve",
 				new double[] {0.5 , 1.0, 2.0, 5.0, 30.0} /*times*/,
