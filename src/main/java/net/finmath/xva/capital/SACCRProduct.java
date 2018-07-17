@@ -1,4 +1,4 @@
-package xva.capital;
+package net.finmath.xva.capital;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
