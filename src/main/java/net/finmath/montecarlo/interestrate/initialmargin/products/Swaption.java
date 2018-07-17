@@ -23,12 +23,12 @@ import net.finmath.time.TimeDiscretizationInterface;
 
 /**
  * Implements the valuation of a swaption under a LIBORModelMonteCarloSimulationSIMMInterface
- * 
+ *
  * Important: If the LIBOR Market Model is a multi-curve model in the sense that the
  * numeraire is not calculated from the forward curve, then this valuation does
  * assume that the basis deterministic. For the valuation of a fully generalize swaption,
  * you have to use the <code>Option</code> component on a <code>Swap</code>.
- * 
+ *
  * @author Christian Fries
  * @version 1.3
  */
@@ -38,13 +38,13 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 	private double[]   paymentDates;	// Vector of payment dates (same length as fixing dates)
 	private double[]   periodLengths;	// Vector of payment dates (same length as fixing dates)
 	private double[]   swaprates;		// Vector of strikes
-	
+
 	private final double notional;
 	RandomVariableInterface exerciseIndicator;
-	
+
 	/**
 	 * Create a swaption.
-	 * 
+	 *
 	 * @param exerciseDate Vector of exercise dates.
 	 * @param fixingDates Vector of fixing dates.
 	 * @param paymentDates Vector of payment dates (must have same length as fixing dates).
@@ -59,12 +59,12 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 		this.periodLengths = periodLengths;
 		this.swaprates = swaprates;
 		this.notional = notional;
-	
+
 	}
 
 	/**
 	 * Create a swaption.
-	 * 
+	 *
 	 * @param exerciseDate Vector of exercise dates.
 	 * @param fixingDates Vector of fixing dates.
 	 * @param paymentDates Vector of payment dates (must have same length as fixing dates).
@@ -87,7 +87,7 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 
 	/**
 	 * Creates a swaption using a TimeDiscretization
-	 * 
+	 *
 	 * @param exerciseDate Exercise date.
 	 * @param swapTenor Object specifying period start and end dates.
 	 * @param swaprate Strike.
@@ -118,7 +118,7 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 	 * This method returns the value random variable of the product within the specified model, evaluated at a given evalutationTime.
 	 * Note: For a lattice this is often the value conditional to evalutationTime, for a Monte-Carlo simulation this is the (sum of) value discounted to evaluation time.
 	 * Cashflows prior evaluationTime are not considered.
-	 * 
+	 *
 	 * @param evaluationTime The time on which this products value should be observed.
 	 * @param model The model used to price the product.
 	 * @return The random variable representing the value of the product discounted to evaluation time
@@ -127,8 +127,8 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationSIMMInterface model) throws CalculationException {
 		RandomVariableInterface values;
-		
-		
+
+
 		/*
 		 * Calculate value of the swap at exercise date on each path (beware of perfect foresight - all rates are simulationTime=exerciseDate)
 		 */
@@ -141,7 +141,9 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 			double paymentDate	= paymentDates[period];
 			double swaprate		= swaprates[period];
 
-			if(paymentDate <= evaluationTime) break;
+			if(paymentDate <= evaluationTime) {
+				break;
+			}
 
 			double periodLength	= periodLengths != null ? periodLengths[period] : paymentDate - fixingDate;
 
@@ -173,14 +175,14 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 
 			// Discount back to beginning of period
 			valueOfSwapAtExerciseDate = valueOfSwapAtExerciseDate.discount(libor, paymentDate - discountingDate).mult(discountingAdjustment);
-		}		
+		}
 		/*
 		 * Calculate swaption value
 		 */
 		exerciseIndicator = valueOfSwapAtExerciseDate.barrier(valueOfSwapAtExerciseDate.mult(-1.0), new RandomVariable(0.0), new RandomVariable(1.0));
 		values = valueOfSwapAtExerciseDate.floor(0.0);
 		RandomVariableInterface	numeraire				= model.getNumeraire(exerciseDate);
-		
+
 		RandomVariableInterface	monteCarloProbabilities	= model.getMonteCarloWeights(exerciseDate);
 		values = values.div(numeraire).mult(monteCarloProbabilities);
 
@@ -188,14 +190,14 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 		RandomVariableInterface	monteCarloProbabilitiesAtZero	= model.getMonteCarloWeights(evaluationTime);
 		values = values.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
 		return values;
-		}
-		
-	
+	}
+
+
 
 	/**
 	 * This method returns the value of the product using a Black-Scholes model for the swap rate
 	 * The model is determined by a discount factor curve and a swap rate volatility.
-	 * 
+	 *
 	 * @param forwardCurve The forward curve on which to value the swap.
 	 * @param swaprateVolatility The Black volatility.
 	 * @return Value of this product
@@ -219,6 +221,7 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return super.toString()
 				+ "\n" + "exerciseDate: " + exerciseDate
@@ -230,34 +233,36 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 	public double getExerciseDate(){
 		return this.exerciseDate;
 	}
-	
-	
+
+
 	public RandomVariableInterface getExerciseIndicator(LIBORModelMonteCarloSimulationSIMMInterface model) throws CalculationException{
-		if(this.exerciseIndicator==null) this.exerciseIndicator = new RandomVariable(1.0).barrier(new RandomVariable(getValue(exerciseDate, model).mult(-1.0)), new RandomVariable(0.0), new RandomVariable(1.0));
+		if(this.exerciseIndicator==null) {
+			this.exerciseIndicator = new RandomVariable(1.0).barrier(new RandomVariable(getValue(exerciseDate, model).mult(-1.0)), new RandomVariable(0.0), new RandomVariable(1.0));
+		}
 		return this.exerciseIndicator;
 	}
-	
+
 	public double[]  getFixingDates(){
 		return this.fixingDates;
-	};		
-	
+	};
+
 	public double[] getPaymentDates(){
 		return this.paymentDates;
-	};	
-	
+	};
+
 	public double[] getPeriodLengths(){
 		return this.periodLengths;
 	};
-	
+
 	public double[] getSwaprates(){
 		return this.swaprates;
 	};
-	
+
 	public double getNotional(){
 		return this.notional;
 	}
-	
-	
 
-	
+
+
+
 }

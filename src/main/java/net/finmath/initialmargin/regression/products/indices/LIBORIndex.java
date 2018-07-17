@@ -14,20 +14,20 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * A forward rate index for a given period start offset (offset from fixing) and period length.
- * 
+ *
  * @author Christian Fries
  */
 public class LIBORIndex extends AbstractIndex {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private final double periodStartOffset;
 	private final double periodLength;
-    
+
 
 	/**
 	 * Creates a forward rate index for a given period start offset (offset from fixing) and period length.
-	 * 
+	 *
 	 * @param name The name of an index. Used to map an index on a curve.
 	 * @param periodStartOffset An offset added to the fixing to define the period start.
 	 * @param periodLength The period length
@@ -40,7 +40,7 @@ public class LIBORIndex extends AbstractIndex {
 
 	/**
 	 * Creates a forward rate index for a given period start offset (offset from fixing) and period length.
-	 * 
+	 *
 	 * @param periodStartOffset An offset added to the fixing to define the period start.
 	 * @param periodLength The period length
 	 */
@@ -55,11 +55,11 @@ public class LIBORIndex extends AbstractIndex {
 		RandomVariableInterface forwardRate = model.getLIBOR(evaluationTime, evaluationTime+periodStartOffset, evaluationTime+periodStartOffset+periodLength);
 		return forwardRate;
 	}
-	
+
 
 	/**
 	 * Returns the periodStartOffset as an act/365 daycount.
-	 * 
+	 *
 	 * @return the periodStartOffset
 	 */
 	public double getPeriodStartOffset() {
@@ -68,7 +68,7 @@ public class LIBORIndex extends AbstractIndex {
 
 	/**
 	 * Returns the tenor encoded as an pseudo act/365 daycount fraction.
-	 * 
+	 *
 	 * @return the periodLength The tenor as an act/365 daycount fraction.
 	 */
 	public double getPeriodLength() {
@@ -88,14 +88,14 @@ public class LIBORIndex extends AbstractIndex {
 				+ ", periodLength=" + periodLength + ", toString()="
 				+ super.toString() + "]";
 	}
-	
+
 	// INSERTED
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
 		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime,fixingTime), fixingTime+periodStartOffset, fixingTime+periodStartOffset+periodLength);
-		return forwardRate; 
+		return forwardRate;
 	}
 
 	@Override

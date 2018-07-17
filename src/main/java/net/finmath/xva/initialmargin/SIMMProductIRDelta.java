@@ -1,5 +1,9 @@
 package net.finmath.xva.initialmargin;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
@@ -7,10 +11,6 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SimmSensitivityCoordinate;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 	final SIMMParameter.RiskClass riskClassKey = SIMMParameter.RiskClass.InterestRate;
@@ -32,6 +32,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 
 	}
 
+	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
 		if (this.currencyKeys.size() == 0)
@@ -54,10 +55,12 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 
 		double singleCorrelation = parameterSet.IRCorrelationCrossCurrency;
 		Double[][] correlationMatrix = new Double[this.currencyKeys.size()][this.currencyKeys.size()];
-		for (i = 0; i < currencyKeys.size(); i++)
+		for (i = 0; i < currencyKeys.size(); i++) {
 			for (int j = 0; j < currencyKeys.size(); j++)
-				if (i != j)
+				if (i != j) {
 					correlationMatrix[i][j] = getParameterG(concentrationFactors[i], concentrationFactors[j]).getAverage() * singleCorrelation;
+				}
+		}
 		RandomVariableInterface VarCovar = helper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
 
@@ -104,12 +107,13 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 		int dimensionTotal = nTenors * curveKeys.length + 2;
 		RandomVariableInterface[] contributions = new RandomVariableInterface[dimensionTotal];
 
-		for (int iCurve = 0; iCurve < curveKeys.length; iCurve++)
+		for (int iCurve = 0; iCurve < curveKeys.length; iCurve++) {
 			for (int iTenor = 0; iTenor < nTenors; iTenor++) {
 				String curveKey = curveKeys[iCurve];
 				RandomVariableInterface iBucketSensi = this.getWeightedNetSensitivity(iTenor, iCurve, curveKey, bucketKey, netSensitivities, concentrationRiskFactor, evaluationTime, model);
 				contributions[iCurve * nTenors + iTenor] = iBucketSensi;
 			}
+		}
 
 		RandomVariableInterface inflationSensi = this.getWeightedNetSensitivity(0, 0, SIMMParameter.inflationKey, bucketKey, netSensitivities, concentrationRiskFactor, evaluationTime, model);
 		RandomVariableInterface ccyBasisSensi = this.getWeightedNetSensitivity(0, 0, SIMMParameter.ccyBasisKey, bucketKey, netSensitivities, concentrationRiskFactor, evaluationTime, model);
@@ -137,7 +141,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 			RandomVariableInterface netSensi = netSensitivities[iIndex][iRateTenor];
 			return netSensi != null ?
 					netSensi.mult(riskWeight).mult(concentrationRiskFactor) :
-					new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
+						new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
 		} else { /* Inflation or CCYBasis*/
 			riskWeight = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(SIMMParameter.RiskClass.InterestRate).get(indexName)[0][0];
 
@@ -178,8 +182,9 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 			for (int iTenor = 0; iTenor < parameterSet.IRMaturityBuckets.length; iTenor++) {
 				String key = curveKeys[iIndex];
 				RandomVariableInterface summand = getWeightedNetSensitivity(iTenor, iIndex, key, bucketKey, netSensitivities, concentrationRiskFactor, evaluationTime, model);
-				if (summand != null)
+				if (summand != null) {
 					aggregatedSensi = aggregatedSensi != null ? aggregatedSensi.add(summand) : new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
+				}
 			}
 		}
 		RandomVariableInterface inflationSensi = this.getWeightedNetSensitivity(0, 0, SIMMParameter.inflationKey, bucketKey, netSensitivities, concentrationRiskFactor, evaluationTime, model);
@@ -195,13 +200,16 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 			for (int iTenor = 0; iTenor < parameterSet.IRMaturityBuckets.length; iTenor++) {
 				String key = curveKeys[iIndex];
 				RandomVariableInterface summand = netSensitivities[iIndex][iTenor];
-				if (summand != null)
+				if (summand != null) {
 					sensitivitySum = sensitivitySum != null ? sensitivitySum.add(summand) : new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
+				}
 			}
 		}
 		RandomVariableInterface inflationSensi = this.simmSensitivitivityProvider.getSIMMSensitivity(new SimmSensitivityCoordinate(this.productClassKey, this.riskClassKey.name(), this.riskTypeKey, bucketKey, "", "inflation"), evaluationTime, model);
 		if (sensitivitySum != null && inflationSensi != null)
+		{
 			sensitivitySum = sensitivitySum.add(inflationSensi); // Inflation Sensi are included in Sum, CCYBasis not
+		}
 
 		Optional<Map.Entry<String, String>> optional = parameterSet.IRCurrencyMap.entrySet().stream().filter(entry -> entry.getKey().contains(bucketKey)).findAny();
 		String currencyMapKey;

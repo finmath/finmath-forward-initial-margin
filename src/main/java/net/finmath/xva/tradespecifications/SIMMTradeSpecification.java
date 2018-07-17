@@ -1,11 +1,9 @@
 package net.finmath.xva.tradespecifications;
 
-import net.finmath.modelling.Product;
-import net.finmath.xva.initialmargin.SIMMParameter;
-
-
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import net.finmath.xva.initialmargin.SIMMParameter;
 
 public class SIMMTradeSpecification {
 	private double notional;

@@ -15,7 +15,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Implements the valuation of a swap under a LIBORModelMonteCarloSimulationInterface
- * 
+ *
  * @author Christian Fries
  * @version 1.2
  */
@@ -26,10 +26,10 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 
 	private final boolean isPayFix;
 	private double[] notional = null;
-	
+
 	/**
 	 * Create a swap.
-	 * 
+	 *
 	 * @param fixingDates Vector of fixing dates
 	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
 	 * @param swaprates Vector of strikes (must have same length as fixing dates)
@@ -50,11 +50,11 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 		this.notional = new double[swaprates.length];
 		Arrays.fill(this.notional, constantNotional);
 	}
-	
-	
+
+
 	/**
 	 * Create a swap.
-	 * 
+	 *
 	 * @param fixingDates Vector of fixing dates
 	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
 	 * @param swaprates Vector of strikes (must have same length as fixing dates)
@@ -77,7 +77,7 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 
 	/**
 	 * Create a swap.
-	 * 
+	 *
 	 * @param fixingDates Vector of fixing dates
 	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
 	 * @param swaprates Vector of strikes (must have same length as fixing dates)
@@ -90,10 +90,10 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 			double notional) {
 		this(fixingDates, paymentDates, swaprates, true, notional);
 	}
-	
+
 	/**
 	 * Create a swap.
-	 * 
+	 *
 	 * @param fixingDates Vector of fixing dates
 	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
 	 * @param swaprates Vector of strikes (must have same length as fixing dates)
@@ -111,11 +111,11 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 	 * This method returns the value random variable of the product within the specified model, evaluated at a given evalutationTime.
 	 * Note: For a lattice this is often the value conditional to evalutationTime, for a Monte-Carlo simulation this is the (sum of) value discounted to evaluation time.
 	 * Cashflows prior evaluationTime are not considered.
-	 * 
+	 *
 	 * @param evaluationTime The time on which this products value should be observed.
 	 * @param model The model used to price the product.
 	 * @return The random variable representing the value of the product discounted to evaluation time
-	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method. 
+	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -128,12 +128,16 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 			double swaprate 		= swaprates[period];
 			double periodLength		= paymentDate - fixingDate;
 
-			if(paymentDate < evaluationTime) continue;
+			if(paymentDate < evaluationTime) {
+				continue;
+			}
 
 			// Get random variables
 			RandomVariableInterface libor	= model.getLIBOR(fixingDate, fixingDate, paymentDate);
 			RandomVariableInterface payoff	= libor.sub(swaprate).mult(periodLength).mult(notional[period]);
-			if(!isPayFix) payoff = payoff.mult(-1.0);
+			if(!isPayFix) {
+				payoff = payoff.mult(-1.0);
+			}
 
 			RandomVariableInterface numeraire				= model.getNumeraire(paymentDate);
 			RandomVariableInterface monteCarloProbabilities	= model.getMonteCarloWeights(paymentDate);
@@ -156,27 +160,27 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 				+ "\n" + "paymentDates: " + Arrays.toString(paymentDates)
 				+ "\n" + "swaprates: " + Arrays.toString(swaprates);
 	}
-	
+
 	public double getStartTime(){
 		return this.fixingDates[0];
 	}
-	
+
 	public double[] getFixingDates(){
 		return this.fixingDates;
 	}
-	
+
 	public double getNotional(){
 		return this.notional[0];
 	}
-	
+
 	public double[] getSwapRates(){
 		return this.swaprates;
 	}
-	
+
 	public double[] getPaymentDates(){
 		return this.paymentDates;
 	}
-	
+
 	public double[] getPeriodLengths(){
 		double[] periodLengths = new double[paymentDates.length];
 		periodLengths = IntStream.range(0, periodLengths.length).mapToDouble(i -> paymentDates[i]-fixingDates[i]).toArray();

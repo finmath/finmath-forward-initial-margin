@@ -17,7 +17,7 @@ import net.finmath.stochastic.RandomVariableInterface;
  * Implements convenient methods for a LIBOR market model,
  * based on a given <code>LIBORMarketModel</code> model
  * and <code>AbstractLogNormalProcess</code> process.
- * 
+ *
  * @author Christian Fries
  * @version 0.7
  */
@@ -28,7 +28,7 @@ public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimu
 
 	/**
 	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORMarketModel and an AbstractProcess.
-	 * 
+	 *
 	 * @param model The LIBORMarketModel.
 	 * @param process The process.
 	 */
@@ -42,7 +42,7 @@ public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimu
 
 	/**
 	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORModelInterface.
-	 * 
+	 *
 	 * @param model The LIBORModelInterface.
 	 */
 	public LIBORModelMonteCarloSimulationSIMM(LIBORModelSIMMInterface model) {
@@ -50,18 +50,18 @@ public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimu
 		this.model		= model;
 	}
 
-	
-	
-	@Override 
+
+
+	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
 		return model.getNumeraireAdjustmentMap();
 	}
-	
+
 	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
 		return model.getNumeraireOISAdjustmentFactor(time);
 	}
-	
+
 	@Override
 	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException{
 		return model.getForwardBondLibor(T, t);
@@ -71,12 +71,13 @@ public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimu
 	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
 		return model.getForwardBondOIS(T, t);
 	}
-	
+
 	@Override
 	public AbstractRandomVariableFactory getRandomVariableFactory(){
 		return model.getRandomVariableFactory();
 	}
 
+	@Override
 	public LIBORModelSIMMInterface getModel() {
 		return model;
 	}

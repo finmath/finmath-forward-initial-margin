@@ -21,7 +21,7 @@ import net.finmath.time.TimeDiscretizationInterface;
 /**
  * Implements the valuation of a simplified (idealized) swaption under a
  * LIBORModelMonteCarloSimulationInterface
- * 
+ *
  * @author Christian Fries
  * @version 1.2
  */
@@ -69,7 +69,7 @@ public class SwaptionSimple extends AbstractLIBORMonteCarloProduct {
 	 * This method returns the value random variable of the product within the specified model, evaluated at a given evalutationTime.
 	 * Note: For a lattice this is often the value conditional to evalutationTime, for a Monte-Carlo simulation this is the (sum of) value discounted to evaluation time.
 	 * Cashflows prior evaluationTime are not considered.
-	 * 
+	 *
 	 * @param evaluationTime The time on which this products value should be observed.
 	 * @param model The model used to price the product.
 	 * @return The random variable representing the value of the product discounted to evaluation time
@@ -104,10 +104,8 @@ public class SwaptionSimple extends AbstractLIBORMonteCarloProduct {
 		else if(valueUnit == ValueUnit.INTEGRATEDNORMALVARIANCE) {
 			double volatility = AnalyticFormulas.bachelierOptionImpliedVolatility(parSwaprate, optionMaturity, strikeSwaprate, swapAnnuity, value.getAverage());
 			return model.getRandomVariableForConstant(volatility * volatility * optionMaturity);
-		}
-		else {
+		} else
 			throw new UnsupportedOperationException("Provided valueUnit not implemented.");
-		}
 	}
 
 	@Override

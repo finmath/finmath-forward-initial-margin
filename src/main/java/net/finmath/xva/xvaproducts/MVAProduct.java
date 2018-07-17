@@ -1,5 +1,9 @@
 package net.finmath.xva.xvaproducts;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
@@ -8,10 +12,6 @@ import net.finmath.time.TimeDiscretizationInterface;
 import net.finmath.xva.initialmargin.SIMMProduct;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Calculates the margin valuation adjustments by calculating the initial margins on a time discretization and integrating them.

@@ -1,15 +1,15 @@
 package net.finmath.xva.initialmargin;
 
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
-
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Calculates the initial margin as required by ISDA SIMM at a certain time.
@@ -28,10 +28,10 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct {
 		this.modality = modality;
 	}
 
+	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		if (evaluationTime > marginCalculationTime) {
+		if (evaluationTime > marginCalculationTime)
 			return model.getRandomVariableForConstant(0.0);
-		}
 
 		RandomVariableInterface SIMMValue = Arrays.stream(SIMMParameter.getProductClassKeys())
 				.map(productClass -> getSIMMForProductClass(productClass, evaluationTime, model))

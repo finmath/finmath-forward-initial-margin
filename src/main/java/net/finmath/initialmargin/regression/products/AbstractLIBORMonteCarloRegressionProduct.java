@@ -14,7 +14,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Base calls for product that need an AbstractLIBORMarketModel as base class
- * 
+ *
  * @author Christian Fries
  */
 public abstract class AbstractLIBORMonteCarloRegressionProduct extends AbstractLIBORMonteCarloProduct {
@@ -27,21 +27,21 @@ public abstract class AbstractLIBORMonteCarloRegressionProduct extends AbstractL
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public AbstractLIBORMonteCarloRegressionProduct() {
 		super(null);
 	}
-	
+
 	public abstract RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
-	
-	
+
+
 	public RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException{
 		return getCF(initialTime, finalTime, (LIBORModelMonteCarloSimulationInterface)model);
 
 	};
 
 
-	
+
 
 }

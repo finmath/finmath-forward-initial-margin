@@ -29,7 +29,7 @@ import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
- * 
+ *
  * @author Peter Kohl-Landgraf
  */
 public class CalculationSchemeInitialMarginISDA {
@@ -154,7 +154,7 @@ public class CalculationSchemeInitialMarginISDA {
 
 
 	/*
-	 *  Commencement of actual SIMM scheme 
+	 *  Commencement of actual SIMM scheme
 	 */
 
 	public Map<String,Double>   resultMap;
@@ -169,7 +169,7 @@ public class CalculationSchemeInitialMarginISDA {
 
 
 	// SIMM constructor
-	public CalculationSchemeInitialMarginISDA(SIMMPortfolio portfolio, 
+	public CalculationSchemeInitialMarginISDA(SIMMPortfolio portfolio,
 			//ParameterCollection parameterCollection, /* Uncomment this line if parameter collection constructor does not contain hard values */
 			String calculationCCY) throws CalculationException{
 		this.resultMap = new HashMap<>();
@@ -184,14 +184,20 @@ public class CalculationSchemeInitialMarginISDA {
 
 		for(int productIndex=0;productIndex<products.length;productIndex++){
 			String productClass = products[productIndex].getProductClass();
-			if(!relevantProductClasses.contains(productClass)) relevantProductClasses.add(productClass);
+			if(!relevantProductClasses.contains(productClass)) {
+				relevantProductClasses.add(productClass);
+			}
 			String[] curveIndex = products[productIndex].getCurveIndexNames();
 			for(int i=0;i<curveIndex.length;i++){
-				if(!relevantCurveIndices.contains(curveIndex[i])) relevantCurveIndices.add(curveIndex[i]);
+				if(!relevantCurveIndices.contains(curveIndex[i])) {
+					relevantCurveIndices.add(curveIndex[i]);
+				}
 			}
 			String[] riskClass = products[productIndex].getRiskClasses();
 			for(int i=0;i<riskClass.length;i++){
-				if(!relevantRiskClasses.contains(riskClass[i])) relevantRiskClasses.add(riskClass[i]);
+				if(!relevantRiskClasses.contains(riskClass[i])) {
+					relevantRiskClasses.add(riskClass[i]);
+				}
 			}
 		}
 		this.productClassKeys = relevantProductClasses.toArray(new String[relevantProductClasses.size()]);
@@ -250,8 +256,9 @@ public class CalculationSchemeInitialMarginISDA {
 
 	// for all times!
 	public Map<String,Double> getResultMap() throws CalculationException{
-		if (this.resultMap.entrySet().size()== 0)
+		if (this.resultMap.entrySet().size()== 0) {
 			this.getValue(0.0);
+		}
 		return this.resultMap;
 	}
 
@@ -269,9 +276,9 @@ public class CalculationSchemeInitialMarginISDA {
 			if ( riskClassList.contains(iRiskClass)) { // riskClassList == iRiskClass?
 				RandomVariableInterface iIM = this.getIMForRiskClass(iRiskClass, productClass, atTime);
 				contributions[i] = iIM;
-			}
-			else
+			} else {
 				contributions[i] = new RandomVariable(atTime,0.0);
+			}
 			i++;
 		}
 
@@ -418,10 +425,11 @@ public class CalculationSchemeInitialMarginISDA {
 			int j=0;
 			for (RandomVariableInterface contribution2 : contributions) {
 				RandomVariableInterface contribution = null;
-				if ( i!=j)
+				if ( i!=j) {
 					contribution= contribution1.mult(contribution2).mult(correlation);
-				else
+				} else {
 					contribution= contribution1.mult(contribution2);
+				}
 				value = value == null ? contribution : value.add(contribution);
 				j++;
 			}
@@ -437,10 +445,10 @@ public class CalculationSchemeInitialMarginISDA {
 
 		RandomVariableInterface isdasimmsensiofAllProducts = Stream.of(products).map(
 				product->{try{
-					return product.getSensitivity(productClassKey, 
-							riskClassKey, 
+					return product.getSensitivity(productClassKey,
+							riskClassKey,
 							maturityBucket, // only for IR and Credit risk class, null otherwise
-							riskFactor,     // CurveIndexName 
+							riskFactor,     // CurveIndexName
 							bucketKey,      // currency for IR otherwise null.
 							riskType, atTime);
 				}
@@ -485,7 +493,9 @@ public class CalculationSchemeInitialMarginISDA {
 		ArrayList<String> relevantBuckets = new ArrayList<String>();
 		for(int productIndex=0;productIndex<products.length;productIndex++){
 			String bucket = products[productIndex].getCurrency();
-			if(!relevantBuckets.contains(bucket)) relevantBuckets.add(bucket);
+			if(!relevantBuckets.contains(bucket)) {
+				relevantBuckets.add(bucket);
+			}
 		}
 		return relevantBuckets.toArray(new String[relevantBuckets.size()]);
 	}
@@ -493,7 +503,9 @@ public class CalculationSchemeInitialMarginISDA {
 
 	public double[] getRiskWeightsCalibrated(final LIBORModelMonteCarloSimulationInterface model, final SIMMSimpleSwap[] calibrationProducts, final double[] calibrationTargetValues, Map<String,Object> calibrationParameters) throws CalculationException {
 
-		if(calibrationParameters == null) calibrationParameters = new HashMap<String,Object>();
+		if(calibrationParameters == null) {
+			calibrationParameters = new HashMap<String,Object>();
+		}
 		Integer maxIterationsParameter	= (Integer)calibrationParameters.get("maxIterations");
 		Double	parameterStepParameter	= (Double)calibrationParameters.get("parameterStep");
 		Double	accuracyParameter		= (Double)calibrationParameters.get("accuracy");
@@ -518,8 +530,8 @@ public class CalculationSchemeInitialMarginISDA {
 		//int numberOfThreadsForProductValuation = 2 * Math.max(2, Runtime.getRuntime().availableProcessors());
 		final ExecutorService executor = null;//Executors.newFixedThreadPool(numberOfThreadsForProductValuation);
 
-		ObjectiveFunction calibrationError = new ObjectiveFunction() {			
-			// Calculate ISDA SIMM IM 
+		ObjectiveFunction calibrationError = new ObjectiveFunction() {
+			// Calculate ISDA SIMM IM
 			@Override
 			public void setValues(double[] parameters, double[] values) throws SolverException {
 
@@ -530,6 +542,7 @@ public class CalculationSchemeInitialMarginISDA {
 				for(int calibrationProductIndex=0; calibrationProductIndex<calibrationProducts.length; calibrationProductIndex++) {
 					final int workerCalibrationProductIndex = calibrationProductIndex;
 					Callable<Double> worker = new  Callable<Double>() {
+						@Override
 						public Double call() throws SolverException {
 							try {
 								return calibrationProducts[workerCalibrationProductIndex].getInitialMargin(0.0 /*evaluationTime*/, model, CalculationSchemeInitialMarginISDA.this).getAverage();
@@ -592,7 +605,7 @@ public class CalculationSchemeInitialMarginISDA {
 	////        Map<String,SensitivitySet> tradeSensitivityMap = Stream.of(tradeList).collect(Collectors.toMap(t->t,t->nettingset.getActiveProduct(t).getSensitivitySet(atTime)));
 	////
 	////        List<String> riskClassKeys = getRiskClassKeys(tradeSensitivityMap);
-	////        
+	////
 	//        List<String> riskClassKeys = new ArrayList<>(Arrays.asList(this.riskClassKeys));
 	//        if (!riskTypeString.equals("vega") ) {
 	//            Map<String, String[]> mapRiskClassRiskFactorKeys = new HashMap<>();

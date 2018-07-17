@@ -16,13 +16,13 @@ import net.finmath.time.ScheduleInterface;
 
 /**
  * Create a swap from schedules, notional, indices and spreads (fixed coupons).
- * 
+ *
  * The getValue method of this class simple returns
  * <code>
  * 	legReceiver.getValue(evaluationTime, model).sub(legPayer.getValue(evaluationTime, model))
  * </code>
  * where <code>legReceiver</code> and <code>legPayer</code> are {@link net.finmath.initialmargin.regression.products.SwapLeg}s.
- * 
+ *
  * @author Christian Fries
  */
 public class Swap extends AbstractLIBORMonteCarloProduct {
@@ -32,7 +32,7 @@ public class Swap extends AbstractLIBORMonteCarloProduct {
 
 	/**
 	 * Create a swap which values as <code>legReceiver - legPayer</code>.
-	 * 
+	 *
 	 * @param legReceiver The receiver leg.
 	 * @param legPayer The payer leg.
 	 */
@@ -44,7 +44,7 @@ public class Swap extends AbstractLIBORMonteCarloProduct {
 
 	/**
 	 * Create a swap from schedules, notional, indices and spreads (fixed coupons).
-	 * 
+	 *
 	 * @param notional The notional.
 	 * @param scheduleReceiveLeg The period schedule for the receiver leg.
 	 * @param indexReceiveLeg The index of the receiver leg, may be null if no index is received.
@@ -64,13 +64,15 @@ public class Swap extends AbstractLIBORMonteCarloProduct {
 		legPayer = new SwapLeg(schedulePayLeg, notional, indexPayLeg, spreadPayLeg, false);
 	}
 
-	
+
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		RandomVariableInterface value = legReceiver.getValue(evaluationTime, model);
-		if(legPayer != null) value = value.sub(legPayer.getValue(evaluationTime, model));
-		
+		if(legPayer != null) {
+			value = value.sub(legPayer.getValue(evaluationTime, model));
+		}
+
 		return value;
 	}
 }

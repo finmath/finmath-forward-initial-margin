@@ -9,7 +9,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 /**
  * Base class for a period. A period has references to the index (coupon) and the notional.
  * It provides the fixing date for the index, the period length, and the payment date.
- * 
+ *
  * @author Christian Fries
  * @version 1.1
  */
@@ -26,14 +26,16 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	private final AbstractProductComponent		index;
 	private final double						daycountFraction;
 
+	@Override
 	public abstract RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	@Override
 	public abstract RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	public abstract RandomVariableInterface getCoupon(LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Initialize basic properties of the period.
-	 * 
+	 *
 	 * @param periodStart The period start.
 	 * @param periodEnd The period end.
 	 * @param fixingDate The fixing date (as double).
@@ -58,7 +60,7 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	/**
 	 * Initialize basic properties of the period using the idealized
 	 * daycount faction <code>periodEnd-periodStart</code>.
-	 * 
+	 *
 	 * @param periodStart The period start.
 	 * @param periodEnd The period end.
 	 * @param fixingDate The fixing date (as double).
@@ -124,7 +126,7 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	 */
 	public double getDaycountFraction() {
 		return daycountFraction;
-	}    
+	}
 
 	@Override
 	public Set<String> queryUnderlyings() {
@@ -137,5 +139,5 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 				+ periodEnd + ", fixingDate=" + fixingDate + ", paymentDate="
 				+ paymentDate + ", notional=" + notional + ", index=" + index
 				+ ", daycountFraction=" + daycountFraction + "]";
-	}    
+	}
 }

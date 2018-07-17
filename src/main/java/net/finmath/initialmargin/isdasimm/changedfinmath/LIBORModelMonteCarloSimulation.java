@@ -19,7 +19,7 @@ import net.finmath.time.TimeDiscretizationInterface;
  * Implements convenient methods for a LIBOR market model,
  * based on a given <code>LIBORMarketModel</code> model
  * and <code>AbstractLogNormalProcess</code> process.
- * 
+ *
  * @author Christian Fries
  * @version 0.7
  */
@@ -29,7 +29,7 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 
 	/**
 	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORMarketModel and an AbstractProcess.
-	 * 
+	 *
 	 * @param model The LIBORMarketModel.
 	 * @param process The process.
 	 */
@@ -43,7 +43,7 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 
 	/**
 	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORModelInterface.
-	 * 
+	 *
 	 * @param model The LIBORModelInterface.
 	 */
 	public LIBORModelMonteCarloSimulation(LIBORModelInterface model) {
@@ -59,7 +59,9 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 	@Override
 	public RandomVariableInterface getMonteCarloWeights(double time) throws CalculationException {
 		int timeIndex = getTimeIndex(time);
-		if(timeIndex < 0) timeIndex = (-timeIndex-1)-1;
+		if(timeIndex < 0) {
+			timeIndex = (-timeIndex-1)-1;
+		}
 		return model.getProcess().getMonteCarloWeights(timeIndex);
 	}
 
@@ -107,7 +109,9 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 	public RandomVariableInterface[] getLIBORs(int timeIndex) throws CalculationException
 	{
 		RandomVariableInterface[] randomVariableVector = new RandomVariableInterface[getNumberOfComponents()];
-		for(int componentIndex=0; componentIndex<getNumberOfComponents(); componentIndex++)	randomVariableVector[componentIndex] = getLIBOR(timeIndex, componentIndex);
+		for(int componentIndex=0; componentIndex<getNumberOfComponents(); componentIndex++) {
+			randomVariableVector[componentIndex] = getLIBOR(timeIndex, componentIndex);
+		}
 
 		return randomVariableVector;
 	}
@@ -146,23 +150,23 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 	public RandomVariableInterface getNumeraire(double time) throws CalculationException {
 		return model.getNumeraire(time);
 	}
-	
-	
-	@Override 
+
+
+	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
 		return model.getNumeraireAdjustmentMap();
 	}
-	
+
 	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireCache() {
 		return model.getNumeraireCache();
 	}
-	
+
 	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
 		return model.getNumeraireOISAdjustmentFactor(time);
 	}
-	
+
 	@Override
 	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException{
 		return model.getForwardBondLibor(T, t);
@@ -172,7 +176,8 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
 		return model.getForwardBondOIS(T, t);
 	}
-	
+
+	@Override
 	public LIBORModelInterface getModel() {
 		return model;
 	}
@@ -180,15 +185,18 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 	/* (non-Javadoc)
 	 * @see net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface#getProcess()
 	 */
+	@Override
 	public AbstractProcessInterface getProcess() {
 		return model.getProcess();
 	}
 
+	@Override
 	public Object getCloneWithModifiedSeed(int seed) {
 		AbstractProcess process = (AbstractProcess) ((AbstractProcess)getProcess()).getCloneWithModifiedSeed(seed);
 		return new LIBORModelMonteCarloSimulation(model, process);
 	}
 
+	@Override
 	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException {
 		LIBORModelInterface modelClone = (LIBORModelInterface) model.getCloneWithModifiedData(dataModified);
 		if(dataModified.containsKey("discountCurve") && dataModified.size() == 1) {
@@ -196,15 +204,13 @@ public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimul
 			LIBORModelMonteCarloSimulation lmmSimClone = new LIBORModelMonteCarloSimulation(modelClone);
 			modelClone.setProcess(getProcess());		// Reuse process associated with other model
 			return lmmSimClone;
-		}
-		else {
+		} else
 			return new LIBORModelMonteCarloSimulation(modelClone, (AbstractProcess)getProcess().clone());
-		}
 	}
 
 	/**
 	 * Create a clone of this simulation modifying one of its properties (if any).
-	 * 
+	 *
 	 * @param entityKey The entity to modify.
 	 * @param dataModified The data which should be changed in the new model
 	 * @return Returns a clone of this model, where the specified part of the data is modified data (then it is no longer a clone :-)

@@ -18,11 +18,11 @@ import net.finmath.stochastic.RandomVariableInterface;
  */
 public interface TermStructureModelSIMMInterface extends TermStructureModelInterface {
 
-		
+
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
-	
+
 	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
-		
+
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 
 	RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException;

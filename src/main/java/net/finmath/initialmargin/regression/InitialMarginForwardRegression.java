@@ -13,9 +13,9 @@ import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
 /**
- * This class implements the Dynamic Initial Margin by Regression as described in 
+ * This class implements the Dynamic Initial Margin by Regression as described in
  * https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2911167
- * 
+ *
  * @author Mario Viehmann
  *
  */
@@ -28,12 +28,12 @@ public class InitialMarginForwardRegression {
 
 	private LIBORModelMonteCarloSimulationInterface model;
 	private Portfolio portfolio;
-    
+
 
 	public InitialMarginForwardRegression(Portfolio portfolio,
-										  LIBORModelMonteCarloSimulationInterface model,
-										  int polynomialOrder,
-										  String method){
+			LIBORModelMonteCarloSimulationInterface model,
+			int polynomialOrder,
+			String method){
 		this.model=model;
 		this.portfolio = portfolio;
 		this.polynomialOrder=polynomialOrder;
@@ -41,8 +41,8 @@ public class InitialMarginForwardRegression {
 	}
 
 
-	/** Calculate initial margin at for a given time. 
-	 * 
+	/** Calculate initial margin at for a given time.
+	 *
 	 * @param evaluationTime The time at which the initial margin is calculaed.
 	 * @return The initial margin of the portfolio.
 	 * @throws CalculationException
@@ -52,7 +52,7 @@ public class InitialMarginForwardRegression {
 		RandomVariableInterface variance;
 		double initialMargin = 0;
 
-		switch (method){	   
+		switch (method){
 
 		case LSQREGRESSION: // Least Square Regression
 
@@ -87,11 +87,11 @@ public class InitialMarginForwardRegression {
 		}
 		return initialMargin;
 	}
-	
+
 	/** Calculates the forecast of the variance of the clean portfolio value change over the marginal period of risk for a given time point.
-	 * 
+	 *
 	 * @param forwardVaRTime The time for which the variance of the clean portfolio value change over the marginal period of risk is calculated
-	 * @param model Interface implementing the Libor Market Model 
+	 * @param model Interface implementing the Libor Market Model
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
@@ -108,7 +108,7 @@ public class InitialMarginForwardRegression {
 
 
 	/**Calculates the clean portfolio value change, i.e. V(t+MPR)-V(t)+CF({t,t+MPR})
-	 * 
+	 *
 	 * @param time the time t at which the marginal period of risk (MPR) starts
 	 * @return The clean portfolio value change over the MPR
 	 * @throws CalculationException
@@ -122,7 +122,7 @@ public class InitialMarginForwardRegression {
 		RandomVariableInterface initialValue = portfolio.getValue(time, model);
 		initialValue = initialValue.sub(cashFlows);
 
-		if(time>0 && time < lastFixingTime) { 
+		if(time>0 && time < lastFixingTime) {
 
 			ConditionalExpectationEstimatorInterface condExpOperatorInitial = getConditionalExpectationEstimatorLibor(time, model);
 
@@ -144,11 +144,11 @@ public class InitialMarginForwardRegression {
 
 	}
 
-	
+
 	/** Calculates the forecast of the variance of the clean portfolio value change over the marginal period of risk for all time points on a time discretization.
-	 * 
+	 *
 	 * @param forwardVaRTimes The times for which the variance of the clean portfolio value change over the marginal period of risk is calculated
-	 * @param model Interface implementing the Libor Market Model 
+	 * @param model Interface implementing the Libor Market Model
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
@@ -166,7 +166,7 @@ public class InitialMarginForwardRegression {
 
 	/**
 	 * Return the conditional expectation estimator suitable for this product.
-	 * 
+	 *
 	 * @param forwardVaRTime The condition time.
 	 * @param model The model
 	 * @return The conditional expectation estimator suitable for this product
@@ -179,24 +179,24 @@ public class InitialMarginForwardRegression {
 		return condExpEstimator;
 	}
 
-	
+
 	/**
-	 * Provides basis funtions for the calculation of the forward variance which is the 
-	 * conditional expectation of the squared portfolio value change over the marginal period of risk 
+	 * Provides basis funtions for the calculation of the forward variance which is the
+	 * conditional expectation of the squared portfolio value change over the marginal period of risk
 	 * conditional on the NPV
-	 * 
+	 *
 	 * @param forwardVaRTime the time when the value at risk regression is performed
 	 * @param model The model
 	 * @return The basis functions based on the NPV of the portfolio under consideration in this class
-	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method. 
+	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	private RandomVariableInterface[] getRegressionBasisFunctions(double forwardVaRTime,
 			LIBORModelMonteCarloSimulationInterface model
 			) throws CalculationException {
 		// If Libor for last CF is not yet fixed
-		RandomVariableInterface NPV = portfolio.getValue(forwardVaRTime, model); 
+		RandomVariableInterface NPV = portfolio.getValue(forwardVaRTime, model);
 		double lastFixingTime = model.getLiborPeriodDiscretization().getTime(model.getLiborPeriodDiscretization().getTimeIndex(portfolio.getInitialLifeTime())-1);
-		if(forwardVaRTime < lastFixingTime){ 
+		if(forwardVaRTime < lastFixingTime){
 			// to get NPV at time t
 			ConditionalExpectationEstimatorInterface condExpEstimatorLibor = getConditionalExpectationEstimatorLibor(forwardVaRTime, model);
 			// State Variables: NPV of portfolio
@@ -217,7 +217,7 @@ public class InitialMarginForwardRegression {
 
 
 	/**Provides a conditional expectation estimator for the calculation of the future portfolio value V(t)
-	 * 
+	 *
 	 * @param forwardVaRTime the time at which the value at risk regression is performed
 	 * @param model
 	 * @return
@@ -232,9 +232,9 @@ public class InitialMarginForwardRegression {
 
 
 	/** Provides basis functions based on Libor rates for the calculation of the future portfolio value V(t)
-	 * 
+	 *
 	 * @param forwardVaRTime the time at which the value at risk regression is performed
-	 * @param model 
+	 * @param model
 	 * @return
 	 * @throws CalculationException
 	 */

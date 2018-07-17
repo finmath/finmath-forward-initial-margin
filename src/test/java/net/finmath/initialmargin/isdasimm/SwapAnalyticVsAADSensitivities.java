@@ -19,6 +19,7 @@ import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSim
 import net.finmath.initialmargin.regression.products.SimpleSwap;
 import net.finmath.initialmargin.regression.products.Swap;
 import net.finmath.initialmargin.regression.products.SwapLeg;
+import net.finmath.initialmargin.regression.products.components.AbstractNotional;
 import net.finmath.initialmargin.regression.products.components.Notional;
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.initialmargin.regression.products.indices.LIBORIndex;
@@ -38,7 +39,6 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelFrom
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.initialmargin.regression.products.components.AbstractNotional;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleGenerator;
@@ -53,7 +53,7 @@ public class SwapAnalyticVsAADSensitivities {
 	public  Map<Long,RandomVariableInterface> gradient;
 
 	@Test
-	public void testAADVsAnalyticSensis() throws CalculationException{ 
+	public void testAADVsAnalyticSensis() throws CalculationException{
 
 		// Create a Indices market Model
 		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
@@ -62,11 +62,11 @@ public class SwapAnalyticVsAADSensitivities {
 				new double[] {0.996 , 0.995, 0.994, 0.993, 0.98} /*discountFactors*/);
 
 		ForwardCurve  forwardCurve = ForwardCurve.createForwardCurveFromForwards("forwardCurve",
-				new double[] {0.5 , 1.0, 2.0, 5.0, 30.0}	/* fixings of the forward */,					                                                            
+				new double[] {0.5 , 1.0, 2.0, 5.0, 30.0}	/* fixings of the forward */,
 				new double[] {0.02, 0.02, 0.02, 0.02, 0.02},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(randomVariableFactory,20000/*numberOfPaths*/, 1 /*numberOfFactors*/, 
+		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(randomVariableFactory,20000/*numberOfPaths*/, 1 /*numberOfFactors*/,
 				discountCurve,
 				forwardCurve,0.0 /* Correlation */);
 
@@ -88,7 +88,7 @@ public class SwapAnalyticVsAADSensitivities {
 		// Fill Arrays
 		fixingDates  = IntStream.range(0, fixingDates.length).mapToDouble(i->startingTime+i*periodLength).toArray();
 		paymentDates = IntStream.range(0,paymentDates.length).mapToDouble(i->startingTime+(i+1)*periodLength).toArray();
-		Arrays.fill(swapRates, constantSwapRate); 
+		Arrays.fill(swapRates, constantSwapRate);
 
 		// Create Products
 		AbstractLIBORMonteCarloProduct simpleSwap = new SimpleSwap(fixingDates,paymentDates,swapRates, 1.0); //Notional 1
@@ -120,7 +120,7 @@ public class SwapAnalyticVsAADSensitivities {
 					rmse += sensisAAD[liborIndex].sub(sensisANA[liborIndex]).squared().average().sqrt().getAverage();
 					counter++;
 				}
-			} 
+			}
 
 		}
 		System.out.println("Rel. Error " + relError/counter);
@@ -130,22 +130,22 @@ public class SwapAnalyticVsAADSensitivities {
 
 
 	/** Calculate dV/dL
-	 * 
+	 *
 	 * @param evaluationTime
 	 * @param periodLength
 	 * @param paymentDates
 	 * @param model
 	 * @return
-	 * @throws CalculationException 
+	 * @throws CalculationException
 	 */
-	public  RandomVariableInterface[] getAnalyticSwapLiborSensitivities(double evaluationTime, 
-			double  periodLength, 
+	public  RandomVariableInterface[] getAnalyticSwapLiborSensitivities(double evaluationTime,
+			double  periodLength,
 			double[] fixingDates,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		MonteCarloConditionalExpectationRegression cOperator = getConditionalExpectationOperator(evaluationTime,model);
 		// Calculate forward sensitivities
-		int periodIndex = new TimeDiscretization(fixingDates).getTimeIndexNearestLessOrEqual(evaluationTime); 
+		int periodIndex = new TimeDiscretization(fixingDates).getTimeIndexNearestLessOrEqual(evaluationTime);
 		periodIndex = periodIndex < 0 ? 0 : periodIndex;
 		int firstLiborIndex = fixingDates[0] > evaluationTime ? model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(fixingDates[0]):model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(evaluationTime);
 		int numberOfRemainingLibors = getNumberOfRemainingLibors(evaluationTime,model);
@@ -156,10 +156,10 @@ public class SwapAnalyticVsAADSensitivities {
 
 		for(int liborIndex=currentLiborIndex;liborIndex<numberOfSensis+currentLiborIndex;liborIndex++){
 			int i = liborIndex < firstLiborIndex ? 0 : liborIndex-firstLiborIndex+1;
-			if(!(i>fixingDates.length-periodIndex || i==0) ){ //fixingDates[i-1]+periodLength<evaluationTime		
+			if(!(i>fixingDates.length-periodIndex || i==0) ){ //fixingDates[i-1]+periodLength<evaluationTime
 				// Actual Sensitivity Calculation: dV/dL = P(T,t)*periodLength
 				RandomVariableInterface numeraireAtPayment = model.getNumeraire(fixingDates[periodIndex+i-1]+periodLength);
-				sensis[liborIndex-currentLiborIndex]=numeraireAtEval.div(numeraireAtPayment).mult(periodLength).getConditionalExpectation(cOperator);			
+				sensis[liborIndex-currentLiborIndex]=numeraireAtEval.div(numeraireAtPayment).mult(periodLength).getConditionalExpectation(cOperator);
 
 			}
 		}
@@ -167,7 +167,7 @@ public class SwapAnalyticVsAADSensitivities {
 	}
 
 	/**Calculates the row vector dV/dL
-	 * 
+	 *
 	 * @param evaluationTime The time at which the forward sensistivity dVdL is calculated
 	 * @return The forward sensisivity dVdL (as a row vector)
 	 * @throws CalculationException
@@ -261,10 +261,11 @@ public class SwapAnalyticVsAADSensitivities {
 				double timeToMaturity = maturity - time;
 
 				double instVolatility;
-				if(timeToMaturity <= 0)
+				if(timeToMaturity <= 0) {
 					instVolatility = 0;				// This forward rate is already fixed, no volatility
-				else
+				} else {
 					instVolatility = 0.3 + 0.2 * Math.exp(-0.25 * timeToMaturity);
+				}
 
 				// Store
 				volatility[timeIndex][liborIndex] = instVolatility;

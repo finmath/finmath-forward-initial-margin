@@ -1,5 +1,10 @@
 package net.finmath.xva;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.stochastic.RandomVariableInterface;
@@ -13,11 +18,6 @@ import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensiti
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMTradeSensitivityProvider;
 import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Launcher {
 
@@ -37,7 +37,7 @@ public class Launcher {
 				.map(tradeSpec -> (SIMMSensitivityProviderInterface) new SIMMTradeSensitivityProvider(
 						new ModelSensitivitySimpleMeltingProvider(
 								new SensiProductSimpleSwapBpv(tradeSpec), tradeSpec.getMaxTimeToMaturity()
-						),
+								),
 						tradeSpec));
 
 		SIMMSensitivityProviderInterface portfolioSensiProvider = new SIMMPortfolioSensitivityProvider(tradeSensiProviders.collect(Collectors.toSet()));

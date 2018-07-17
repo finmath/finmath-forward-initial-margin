@@ -1,22 +1,23 @@
 package net.finmath.xva.sensiproducts;
 
-import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.MonteCarloSimulationInterface;
-import net.finmath.time.TimeDiscretization;
-import net.finmath.xva.tradespecifications.IRCurveSpec;
-import net.finmath.xva.tradespecifications.Indices;
-import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.stream.IntStream;
+
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-import java.util.stream.IntStream;
-
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.MonteCarloSimulationInterface;
+import net.finmath.time.TimeDiscretization;
+import net.finmath.xva.tradespecifications.IRCurveSpec;
+import net.finmath.xva.tradespecifications.Indices;
+import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 @RunWith(Theories.class)
 public class SensiProductSimpleSwapBpvTest {
@@ -42,9 +43,9 @@ public class SensiProductSimpleSwapBpvTest {
 
 	@Theory
 	public void getValue(@FromDataPoints("times") double maturity,
-						 @FromDataPoints("times") double evalTime,
-						 @FromDataPoints("irCurves") IRCurveSpec irCurve,
-						 @FromDataPoints("notionals") double notional) throws CalculationException {
+			@FromDataPoints("times") double evalTime,
+			@FromDataPoints("irCurves") IRCurveSpec irCurve,
+			@FromDataPoints("notionals") double notional) throws CalculationException {
 
 		SIMMTradeSpecification spec = new SIMMTradeSpecification(notional, maturity, irCurve);
 
