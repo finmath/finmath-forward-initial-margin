@@ -455,8 +455,12 @@ public class CalculationSchemeInitialMarginISDA {
 				catch(Exception e){ return null;
 				}
 				}).reduce(null, (e1, e2) -> {
-					if (e1 == null) return e2;
-					if (e2 == null) return e1;
+					if (e1 == null) {
+						return e2;
+					}
+					if (e2 == null) {
+						return e1;
+					}
 					return e1.add(e2);
 				});
 

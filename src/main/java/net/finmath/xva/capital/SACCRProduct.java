@@ -48,8 +48,9 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		if (evaluationTime> capitalReferenceTime)
+		if (evaluationTime> capitalReferenceTime) {
 			return model.getRandomVariableForConstant(0.0);
+		}
 
 		RandomVariableInterface V = this.getUnderlyingNetValue(evaluationTime,model);
 		RandomVariableInterface ReplacementCost = V.floor(0.0);
@@ -186,8 +187,9 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 					supervisoryFactor = 0.016;
 				} else if ( creditRating.equals("N/A") ) {
 					supervisoryFactor = 0.06;
-				} else
+				} else {
 					throw new RuntimeException("Underlying Credit Rating not def!");
+				}
 			}
 			effectiveNotional =  this.getEffectiveNotional(tradeCollection,evaluationTime);
 
@@ -211,18 +213,19 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 	// 183
 	public   	double		getSupervisoryCorrelation(SACCRTradeSpecification.tRegulatoryAssetClass assetClass)
 	{
-		if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .CreditSingleName )
+		if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .CreditSingleName ) {
 			return 0.5;
-		else if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .CreditIndex )
+		} else if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .CreditIndex ) {
 			return 0.8;
-		else if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .EquitySingleName )
+		} else if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .EquitySingleName ) {
 			return 0.5;
-		else if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .EquityIndex )
+		} else if(assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .EquityIndex ) {
 			return 0.8;
-		else if (assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .Commodity )
+		} else if (assetClass == SACCRTradeSpecification.tRegulatoryAssetClass .Commodity ) {
 			return 0.4;
-		else
+		} else {
 			throw new RuntimeException("getSupervisoryCreditCorrelation: Not defined");
+		}
 	}
 
 
@@ -284,9 +287,9 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 			double SD = Math.exp(-0.05 * startTime) - Math.exp(-0.05 * endTime );
 			SD = SD / 0.05;
 			return SD;
-		}
-		else
+		} else {
 			return 1.0;
+		}
 	}
 
 

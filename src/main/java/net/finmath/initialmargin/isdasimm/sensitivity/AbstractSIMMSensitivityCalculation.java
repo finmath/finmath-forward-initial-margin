@@ -253,7 +253,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			RandomVariableInterface[] dVdP, /*OIS bond sensitivities*/
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
-		if(dVdP==null) return zeroBucketsIR;
+		if(dVdP==null) {
+			return zeroBucketsIR;
+		}
 		RandomVariableInterface[] delta = new RandomVariableInterface[dVdP.length];
 		RandomVariableInterface[][] dPdS;
 		if(this.weightTransformationMethod == WeightMode.TIMEDEPENDENT){
@@ -329,7 +331,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 */
 	private RandomVariableInterface[][] getSensitivityWeightLIBOR(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
-		if(riskWeightMapLibor.containsKey(evaluationTime)) return riskWeightMapLibor.get(evaluationTime);
+		if(riskWeightMapLibor.containsKey(evaluationTime)) {
+			return riskWeightMapLibor.get(evaluationTime);
+		}
 
 		RandomVariableInterface[][] dLdS=null;
 		double liborPeriodLength = model.getLiborPeriodDiscretization().getTimeStep(0);
@@ -372,7 +376,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	private RandomVariableInterface[][] getSensitivityWeightOIS(double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
-		if(riskWeightMapOIS.containsKey(evaluationTime)) return riskWeightMapOIS.get(evaluationTime);
+		if(riskWeightMapOIS.containsKey(evaluationTime)) {
+			return riskWeightMapOIS.get(evaluationTime);
+		}
 
 		int numberOfBonds = getNumberOfRemainingLibors(evaluationTime, model);
 		double timeStep = model.getLiborPeriodDiscretization().getTimeStep(0);
@@ -551,7 +557,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	}
 
 	public static double getPreviousLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationInterface model){
-		if(evaluationTime==0) return 0.0;
+		if(evaluationTime==0) {
+			return 0.0;
+		}
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getLiborPeriodDiscretization().getTime(nextLiborIndex-1);
 	}
@@ -811,7 +819,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 */
 	private RandomVariableInterface[][] getModelToMarketRateJacobianMatrix(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
-		if(riskWeightMapJacobi.containsKey(evaluationTime)) return riskWeightMapJacobi.get(evaluationTime);
+		if(riskWeightMapJacobi.containsKey(evaluationTime)) {
+			return riskWeightMapJacobi.get(evaluationTime);
+		}
 
 		double periodLength = model.getLiborPeriodDiscretization().getTimeStep(0);
 		int numberOfPeriods = getNumberOfRemainingLibors(evaluationTime, model); // The number of full periodLengths until the time horizon of the model as of time "evaluationTime"

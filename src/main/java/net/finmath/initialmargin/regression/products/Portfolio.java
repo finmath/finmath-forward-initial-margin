@@ -79,8 +79,11 @@ public class Portfolio extends AbstractProductComponent {
 	public Portfolio(String currency, AbstractLIBORMonteCarloRegressionProduct[] products, double[] weights) {
 		super(currency);
 
-		for(AbstractLIBORMonteCarloProduct product : products) if(!currency.equals(product.getCurrency()))
-			throw new IllegalArgumentException("Product currencies do not match. Currency conversion (via model FX) is not supported yet.");
+		for(AbstractLIBORMonteCarloProduct product : products) {
+			if(!currency.equals(product.getCurrency())) {
+				throw new IllegalArgumentException("Product currencies do not match. Currency conversion (via model FX) is not supported yet.");
+			}
+		}
 
 		this.products = products;
 		this.weights = weights;
@@ -99,7 +102,9 @@ public class Portfolio extends AbstractProductComponent {
 			Set<String> productUnderlyingNames;
 			if(product instanceof AbstractProductComponent) {
 				productUnderlyingNames = ((AbstractProductComponent)product).queryUnderlyings();
-			} else												throw new IllegalArgumentException("Underlying cannot be queried for underlyings.");
+			} else {
+				throw new IllegalArgumentException("Underlying cannot be queried for underlyings.");
+			}
 
 			if(productUnderlyingNames != null) {
 				if(underlyingNames == null) {

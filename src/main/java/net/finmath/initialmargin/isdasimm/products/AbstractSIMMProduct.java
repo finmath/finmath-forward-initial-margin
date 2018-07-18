@@ -143,7 +143,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			boolean isUseAnalyticSwapSensis,
 			boolean isConsiderOISSensitivities) throws CalculationException{
 
-		if(evaluationTime >= getFinalMaturity()) return new RandomVariable(0.0);
+		if(evaluationTime >= getFinalMaturity()) {
+			return new RandomVariable(0.0);
+		}
 
 		if(this.modelCache==null || !model.equals(this.modelCache) || (sensitivityCalculationScheme!=null && (sensitivityMode !=sensitivityCalculationScheme.getSensitivityMode() || liborWeightMode !=sensitivityCalculationScheme.getWeightMode()))) { // At inception (t=0) or if the model is reset
 			setGradient(model); // Set the (new) gradient. The method setModel also clears the sensitivity maps and sets the model as modelCache.
@@ -164,7 +166,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			LIBORModelMonteCarloSimulationInterface model,
 			CalculationSchemeInitialMarginISDA simmScheme) throws CalculationException{
 
-		if(evaluationTime >= getFinalMaturity()) return new RandomVariable(0.0);
+		if(evaluationTime >= getFinalMaturity()) {
+			return new RandomVariable(0.0);
+		}
 
 		if(this.modelCache==null || !model.equals(this.modelCache) || sensitivityCalculationScheme!=null) { // At inception (t=0) or if the model is reset
 			setGradient(model); // Set the (new) gradient. The method setModel also clears the sensitivity maps and sets the model as modelCache.
@@ -187,7 +191,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 		RandomVariableInterface result = null;	RandomVariableInterface[] maturityBucketSensis; // Sensitivities mapped on the SIMM Buckets
 
-		if(!hasOptionality && riskType!="delta") return new RandomVariable(0.0);
+		if(!hasOptionality && riskType!="delta") {
+			return new RandomVariable(0.0);
+		}
 
 		if(evaluationTime!=lastEvaluationTime)
 		{
@@ -449,7 +455,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			}
 			dVdP = dVdPList.toArray(new RandomVariableInterface[0]);
 			discountTimes = ArrayUtils.toPrimitive(Arrays.stream(relevantDiscountTimes.toArray()).toArray(Double[]::new));
-			if(dVdP.length==0) return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
+			if(dVdP.length==0) {
+				return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
+			}
 		}
 
 		// Perform a log-linear interpolation of the discount factors to obtain dP(t_cf;t)/dP(t+i\Delta_T;t).
@@ -585,7 +593,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 
 	protected double getPreviousLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationInterface model){
-		if(evaluationTime==0) return 0.0;
+		if(evaluationTime==0) {
+			return 0.0;
+		}
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getLiborPeriodDiscretization().getTime(nextLiborIndex-1);
 	}

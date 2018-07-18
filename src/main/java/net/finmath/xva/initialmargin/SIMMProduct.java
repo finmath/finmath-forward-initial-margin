@@ -30,8 +30,9 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct {
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		if (evaluationTime > marginCalculationTime)
+		if (evaluationTime > marginCalculationTime) {
 			return model.getRandomVariableForConstant(0.0);
+		}
 
 		RandomVariableInterface SIMMValue = Arrays.stream(SIMMParameter.getProductClassKeys())
 				.map(productClass -> getSIMMForProductClass(productClass, evaluationTime, model))

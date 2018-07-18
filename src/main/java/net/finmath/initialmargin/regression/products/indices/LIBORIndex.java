@@ -51,7 +51,9 @@ public class LIBORIndex extends AbstractIndex {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
+		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
+			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
+		}
 		RandomVariableInterface forwardRate = model.getLIBOR(evaluationTime, evaluationTime+periodStartOffset, evaluationTime+periodStartOffset+periodLength);
 		return forwardRate;
 	}
@@ -93,7 +95,9 @@ public class LIBORIndex extends AbstractIndex {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
+		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
+			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
+		}
 		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime,fixingTime), fixingTime+periodStartOffset, fixingTime+periodStartOffset+periodLength);
 		return forwardRate;
 	}

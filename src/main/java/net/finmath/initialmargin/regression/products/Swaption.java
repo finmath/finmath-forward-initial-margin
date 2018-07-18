@@ -210,9 +210,11 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	 */
 	public double getValue(ForwardCurveInterface forwardCurve, double swaprateVolatility) {
 		double swaprate = swaprates[0];
-		for (double swaprate1 : swaprates)
-			if (swaprate1 != swaprate)
+		for (double swaprate1 : swaprates) {
+			if (swaprate1 != swaprate) {
 				throw new RuntimeException("Uneven swaprates not allows for analytical pricing.");
+			}
+		}
 
 		double[] swapTenor = new double[fixingDates.length+1];
 		System.arraycopy(fixingDates, 0, swapTenor, 0, fixingDates.length);
@@ -239,7 +241,9 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		if(finalTime<=exerciseDate) return new RandomVariable(0.0);
+		if(finalTime<=exerciseDate) {
+			return new RandomVariable(0.0);
+		}
 		if(swap == null) {
 			swap =  new SimpleSwap(fixingDates, paymentDates, swaprates, true, notional);
 		}

@@ -79,7 +79,9 @@ public class SwaptionSimple extends AbstractLIBORMonteCarloProduct {
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		RandomVariableInterface value = swaption.getValue(evaluationTime, model);
 
-		if(valueUnit == ValueUnit.VALUE) return value;
+		if(valueUnit == ValueUnit.VALUE) {
+			return value;
+		}
 
 		ForwardCurveInterface forwardCurve	 = model.getModel().getForwardRateCurve();
 		DiscountCurveInterface discountCurve = model.getModel().getAnalyticModel() != null ? model.getModel().getAnalyticModel().getDiscountCurve(forwardCurve.getDiscountCurveName()) : null;
@@ -104,8 +106,9 @@ public class SwaptionSimple extends AbstractLIBORMonteCarloProduct {
 		else if(valueUnit == ValueUnit.INTEGRATEDNORMALVARIANCE) {
 			double volatility = AnalyticFormulas.bachelierOptionImpliedVolatility(parSwaprate, optionMaturity, strikeSwaprate, swapAnnuity, value.getAverage());
 			return model.getRandomVariableForConstant(volatility * volatility * optionMaturity);
-		} else
+		} else {
 			throw new UnsupportedOperationException("Provided valueUnit not implemented.");
+		}
 	}
 
 	@Override

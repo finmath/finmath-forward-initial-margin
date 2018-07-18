@@ -69,8 +69,9 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 			// In this case we may re-use the underlying process
 			LIBORModelMonteCarloSimulation lmmSimClone = new LIBORModelMonteCarloSimulation(modelClone, getProcess());
 			return lmmSimClone;
-		} else
+		} else {
 			return new LIBORModelMonteCarloSimulation(modelClone, (AbstractProcess)getProcess().clone());
+		}
 	}
 
 	/**
@@ -81,6 +82,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 	 * @return Returns a clone of this model, where the specified part of the data is modified data (then it is no longer a clone :-)
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
+	@Override
 	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(String entityKey, Object dataModified) throws CalculationException
 	{
 		Map<String, Object> dataModifiedMap = new HashMap<String, Object>();

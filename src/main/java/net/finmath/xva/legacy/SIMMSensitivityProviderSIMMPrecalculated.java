@@ -37,8 +37,9 @@ public class SIMMSensitivityProviderSIMMPrecalculated {
 
 
 			return model.getRandomVariableForConstant(0.0);
-		} else
+		} else {
 			return model.getRandomVariableForConstant(0.0);
+		}
 
 	}
 }

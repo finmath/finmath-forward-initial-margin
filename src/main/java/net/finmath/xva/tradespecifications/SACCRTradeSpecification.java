@@ -89,8 +89,9 @@ public class SACCRTradeSpecification  {
 	}
 
 	public double getMaxNotional(double evaluationTime) {
-		if (this.getTimeToMaturity(evaluationTime) <= 0.0)
+		if (this.getTimeToMaturity(evaluationTime) <= 0.0) {
 			return 0.0;
+		}
 		if (this.periodStartTimes != null && this.periodStartTimes.length > 0) {
 			double maxNotional = 0.0;
 			for (int i = 0; i < this.periodEndTimes.length; i++) {
@@ -107,8 +108,9 @@ public class SACCRTradeSpecification  {
 	}
 
 	public double getAverageNotional(double evaluationTime) {
-		if (this.getTimeToMaturity(evaluationTime) <= 0.0)
+		if (this.getTimeToMaturity(evaluationTime) <= 0.0) {
 			return 0.0;
+		}
 		if (this.periodStartTimes != null && this.periodStartTimes.length > 0) {
 			double averageNotional = 0.0;
 			double sumTimeDiff = 0.0;
@@ -119,16 +121,19 @@ public class SACCRTradeSpecification  {
 					periodLength =
 							this.periodStartTimes[i] >= evaluationTime ? this.periodEndTimes[i] - this.periodStartTimes[i] : this.periodEndTimes[i] - evaluationTime;
 							periodLength = java.lang.Math.max(periodLength, 1.0E-12);
-							if (periodLength < 0.0)
+							if (periodLength < 0.0) {
 								throw new RuntimeException("getAverageNotional: Period Length should be positive");
+							}
 							averageNotional = averageNotional + periodLength * this.notionals[i];
 							sumTimeDiff += periodLength;
 				}
 			}
-			if (sumTimeDiff < 1.0E-12)
+			if (sumTimeDiff < 1.0E-12) {
 				return this.notionals[0];
-			if(sumTimeDiff == 0.0)
+			}
+			if(sumTimeDiff == 0.0) {
 				throw new RuntimeException("sumTimeDiff must not be 0.0");
+			}
 			averageNotional = averageNotional / sumTimeDiff;
 			return averageNotional;
 		}

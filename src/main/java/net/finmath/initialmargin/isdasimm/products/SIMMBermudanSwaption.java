@@ -174,8 +174,9 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			case Callable:
 
 				// Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
-				if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent())
+				if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()) {
 					return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
+				}
 
 				// Get Swap Sensitivities analytically
 				dVdP = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime,swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "OIS");

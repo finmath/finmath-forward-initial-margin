@@ -36,10 +36,12 @@ public class SIMMTradeSpecification {
 		}
 
 		static public double getMaturityBucket(String key) {
-			if (key.contains("y"))
+			if (key.contains("y")) {
 				return Double.parseDouble(key.replace("y", ""));
-			if (key.contains("m"))
+			}
+			if (key.contains("m")) {
 				return Double.parseDouble(key.replace("m", "")) / 12.0;
+			}
 			return key.contains("w") ? Double.parseDouble(key.replace("w", "")) / 52.0 : 0.0;
 		}
 
@@ -69,18 +71,30 @@ public class SIMMTradeSpecification {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 
 			SensitivityKey key = (SensitivityKey) o;
 
-			if (maturityBucketKey != null ? !maturityBucketKey.equals(key.maturityBucketKey) : key.maturityBucketKey != null)
+			if (maturityBucketKey != null ? !maturityBucketKey.equals(key.maturityBucketKey) : key.maturityBucketKey != null) {
 				return false;
-			if (riskFactorKey != null ? !riskFactorKey.equals(key.riskFactorKey) : key.riskFactorKey != null)
+			}
+			if (riskFactorKey != null ? !riskFactorKey.equals(key.riskFactorKey) : key.riskFactorKey != null) {
 				return false;
-			if (bucketKey != null ? !bucketKey.equals(key.bucketKey) : key.bucketKey != null) return false;
-			if (riskClass != null ? !riskClass.equals(key.riskClass) : key.riskClass != null) return false;
-			if (riskType != null ? !riskType.equals(key.riskType) : key.riskType != null) return false;
+			}
+			if (bucketKey != null ? !bucketKey.equals(key.bucketKey) : key.bucketKey != null) {
+				return false;
+			}
+			if (riskClass != null ? !riskClass.equals(key.riskClass) : key.riskClass != null) {
+				return false;
+			}
+			if (riskType != null ? !riskType.equals(key.riskType) : key.riskType != null) {
+				return false;
+			}
 			return productClass != null ? productClass.equals(key.productClass) : key.productClass == null;
 
 		}

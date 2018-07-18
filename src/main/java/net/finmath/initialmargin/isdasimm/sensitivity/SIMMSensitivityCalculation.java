@@ -290,7 +290,9 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		double deltaT = finalTime-initialTime;
 		double deltaTEval = evaluationTime-initialTime;
 
-		if(deltaT==0) return finalSensitivities;
+		if(deltaT==0) {
+			return finalSensitivities;
+		}
 
 		RandomVariableInterface[] interpolatedSensis = new RandomVariable[initialSensitivities.length];
 		for(int bucketIndex=0; bucketIndex<initialSensitivities.length; bucketIndex++){

@@ -485,7 +485,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 
 
 	private static CalibrationItem[] getCalibrationItems(TimeDiscretizationInterface liborPeriodDiscretization, ForwardCurveInterface forwardCurve, AbstractSwaptionMarketData swaptionMarketData, boolean isUseAnalyticApproximation) {
-		if(swaptionMarketData == null) return null;
+		if(swaptionMarketData == null) {
+			return null;
+		}
 
 		TimeDiscretizationInterface	optionMaturities		= swaptionMarketData.getOptionMaturities();
 		TimeDiscretizationInterface	tenor					= swaptionMarketData.getTenor();
@@ -584,7 +586,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 			// Interpolation of Numeraire: log linear interpolation.
 			int upperIndex = -timeIndex-1;
 			int lowerIndex = upperIndex-1;
-			if(lowerIndex < 0) throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			if(lowerIndex < 0) {
+				throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			}
 			double alpha = (time-getLiborPeriod(lowerIndex)) / (getLiborPeriod(upperIndex) - getLiborPeriod(lowerIndex));
 			RandomVariableInterface numeraire = getUnadjustedNumeraire(upperIndex).log().mult(alpha).add(getUnadjustedNumeraire(lowerIndex).log().mult(1.0-alpha)).exp();
 
@@ -637,7 +641,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 			// Interpolation of Numeraire: log linear interpolation.
 			int upperIndex = -timeIndex-1;
 			int lowerIndex = upperIndex-1;
-			if(lowerIndex < 0) throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			if(lowerIndex < 0) {
+				throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			}
 
 			double alpha = (time-getLiborPeriod(lowerIndex)) / (getLiborPeriod(upperIndex) - getLiborPeriod(lowerIndex));
 			RandomVariableInterface numeraire = getNumeraire(getLiborPeriod(upperIndex)).log().mult(alpha).add(getNumeraire(getLiborPeriod(lowerIndex)).log().mult(1.0-alpha)).exp();
@@ -684,8 +690,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 
 			if(measure == Measure.TERMINAL) {
 				firstLiborIndex	= getLiborPeriodIndex(time);
-				if(firstLiborIndex < 0)
+				if(firstLiborIndex < 0) {
 					throw new CalculationException("Simulation time discretization not part of forward rate tenor discretization.");
+				}
 
 				lastLiborIndex 	= liborPeriodDiscretization.getNumberOfTimeSteps()-1;
 			}
@@ -693,8 +700,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 				// Spot measure
 				firstLiborIndex	= 0;
 				lastLiborIndex	= getLiborPeriodIndex(time)-1;
-			} else
+			} else {
 				throw new CalculationException("Numeraire not implemented for specified measure.");
+			}
 
 			// The product
 			for(int liborIndex = firstLiborIndex; liborIndex<=lastLiborIndex; liborIndex++) {
@@ -745,8 +753,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 
 		if(measure == Measure.TERMINAL) {
 			firstLiborIndex	= getLiborPeriodIndex(time);
-			if(firstLiborIndex < 0)
+			if(firstLiborIndex < 0) {
 				throw new CalculationException("Simulation time discretization not part of forward rate tenor discretization.");
+			}
 
 			lastLiborIndex 	= liborPeriodDiscretization.getNumberOfTimeSteps()-1;
 		}
@@ -754,8 +763,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 			// Spot measure
 			firstLiborIndex	= 0;
 			lastLiborIndex	= getLiborPeriodIndex(time)-1;
-		} else
+		} else {
 			throw new CalculationException("Numeraire not implemented for specified measure.");
+		}
 
 		// The product
 		for(int liborIndex = firstLiborIndex; liborIndex<=lastLiborIndex; liborIndex++) {
@@ -805,7 +815,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 
 	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
-		if(numeraireAdjustmentCache.containsKey(time)) return numeraireAdjustmentCache.get(time);
+		if(numeraireAdjustmentCache.containsKey(time)) {
+			return numeraireAdjustmentCache.get(time);
+		}
 
 		// Get unadjusted Numeraire
 		int timeIndex = getLiborPeriodIndex(time);
@@ -815,7 +827,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 			// Interpolation of Numeraire: log linear interpolation.
 			int upperIndex = -timeIndex-1;
 			int lowerIndex = upperIndex-1;
-			if(lowerIndex < 0) throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			if(lowerIndex < 0) {
+				throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			}
 
 			double alpha = (time-getLiborPeriod(lowerIndex)) / (getLiborPeriod(upperIndex) - getLiborPeriod(lowerIndex));
 			numeraireUnadjusted = getUnadjustedNumeraire(upperIndex).log().mult(alpha).add(getUnadjustedNumeraire(lowerIndex).log().mult(1.0-alpha)).exp();
@@ -843,7 +857,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 		int firstLiborIndex = getLiborPeriodIndex(t);
 		int lastLiborIndex  = getLiborPeriodIndex(T);
 
-		if(firstLiborIndex==lastLiborIndex) return getLIBOR(t, t, T).mult(T-t).add(1.0).pow(-1.0);
+		if(firstLiborIndex==lastLiborIndex) {
+			return getLIBOR(t, t, T).mult(T-t).add(1.0).pow(-1.0);
+		}
 
 		int initialIndex = firstLiborIndex < 0 ? -firstLiborIndex-1 : firstLiborIndex;
 		int finalIndex = lastLiborIndex < 0 ? - lastLiborIndex-2 : lastLiborIndex;
@@ -1104,7 +1120,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 			return libor;
 		}
 
-		if(periodStartIndex < 0 || periodEndIndex < 0) throw new AssertionError("LIBOR requested outside libor discretization points and interpolation was not performed.");
+		if(periodStartIndex < 0 || periodEndIndex < 0) {
+			throw new AssertionError("LIBOR requested outside libor discretization points and interpolation was not performed.");
+		}
 
 		// If time is beyond fixing, use the fixing time.
 		time = Math.min(time, periodStart);
@@ -1118,7 +1136,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 		}
 
 		// If this is a model primitive then return it
-		if(periodStartIndex+1==periodEndIndex) return getLIBOR(timeIndex, periodStartIndex);
+		if(periodStartIndex+1==periodEndIndex) {
+			return getLIBOR(timeIndex, periodStartIndex);
+		}
 
 		// The requested LIBOR is not a model primitive. We need to calculate it (slow!)
 		RandomVariableInterface accrualAccount = null; //=randomVariableFactory.createRandomVariable(1.0);
@@ -1161,8 +1181,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 	 */
 	@Override
 	public double getLiborPeriod(int timeIndex) {
-		if(timeIndex >= liborPeriodDiscretization.getNumberOfTimes() || timeIndex < 0)
+		if(timeIndex >= liborPeriodDiscretization.getNumberOfTimes() || timeIndex < 0) {
 			throw new ArrayIndexOutOfBoundsException("Index for LIBOR period discretization out of bounds: " + timeIndex + ".");
+		}
 		return liborPeriodDiscretization.getTime(timeIndex);
 	}
 
@@ -1315,8 +1336,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 		if(dataModified.containsKey("discountCurve")) {
 			discountCurve = (DiscountCurveInterface)dataModified.get("discountCurve");
 		}
-		if(dataModified.containsKey("forwardRateShift"))
+		if(dataModified.containsKey("forwardRateShift")) {
 			throw new RuntimeException("Forward rate shift clone currently disabled.");
+		}
 		if(dataModified.containsKey("randomVariableFactory")) {
 			randomVariableFactory = (AbstractRandomVariableFactory)dataModified.get("randomVariableFactory");
 		}

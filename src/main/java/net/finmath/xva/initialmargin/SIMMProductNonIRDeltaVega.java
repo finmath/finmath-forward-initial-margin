@@ -73,9 +73,9 @@ public class SIMMProductNonIRDeltaVega {
 
 			RandomVariableInterface VarCovar = helper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
-			if (VarCovar == null)
+			if (VarCovar == null) {
 				return deltaMargin;
-			else {
+			} else {
 				/*Adjustment on Diagonal*/
 				VarCovar = VarCovar.squared();
 				RandomVariableInterface SSumSQ = null;
@@ -176,11 +176,12 @@ public class SIMMProductNonIRDeltaVega {
 			for (int i = 0; i < activeRiskFactorKeys.length; i++) {
 				String iRiskFactorKey = activeRiskFactorKeys[i];
 				weightedNetSensitivitesArray[i] = netSensitivityMap.get(iRiskFactorKey);
-				for (int j = 0; j < activeRiskFactorKeys.length; j++)
+				for (int j = 0; j < activeRiskFactorKeys.length; j++) {
 					if (i != j) {
 						String jRiskFactorKey = activeRiskFactorKeys[j];
 						correlationMatrix[i][j] = getParameterF(concentrationFactors.get(iRiskFactorKey), concentrationFactors.get(jRiskFactorKey)).getAverage() * correlation;
 					}
+				}
 
 			}
 			aggregatedSensi = helper.getVarianceCovarianceAggregation(weightedNetSensitivitesArray, correlationMatrix);
@@ -278,25 +279,29 @@ public class SIMMProductNonIRDeltaVega {
 				riskWeight = riskWeight * historicalVolaRatio;
 			}
 			return riskWeight;
-		} else
+		} else {
 			return 1.0;
+		}
 
 	}
 
 	public RandomVariableInterface getNetSensitivity(String riskFactorKey, String bucketKey, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-		if (riskClassKey.equals(SIMMParameter.RiskClass.FX)) /* Sensitivities against Calculation CCY should be zero*/
-			if (this.calculationCCY.equals(riskFactorKey) && riskFactorKey.length() == 3)
+		if (riskClassKey.equals(SIMMParameter.RiskClass.FX)) {
+			if (this.calculationCCY.equals(riskFactorKey) && riskFactorKey.length() == 3) {
 				return new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
-		if (riskClassKey.equals(SIMMParameter.RiskClass.CreditQ) || riskClassKey.equals(SIMMParameter.RiskClass.CreditNonQ))
+			}
+		}
+		if (riskClassKey.equals(SIMMParameter.RiskClass.CreditQ) || riskClassKey.equals(SIMMParameter.RiskClass.CreditNonQ)) {
 			return Arrays.stream(this.parameterSet.CreditMaturityBuckets).map(maturityBucket -> this.simmSensitivitivityProvider.getSIMMSensitivity(new SimmSensitivityCoordinate(this.productClassKey, this.riskClassKey.name(), this.riskTypeKey.name(), bucketKey, maturityBucket, riskFactorKey), evaluationTime, model)).reduce((r1, r2) -> r1.add(r2)).orElseGet(() -> new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0));
-		else {
-			if (this.riskTypeKey.equals(SIMMParameter.RiskType.Delta))
+		} else {
+			if (this.riskTypeKey.equals(SIMMParameter.RiskType.Delta)) {
 				return this.simmSensitivitivityProvider.getSIMMSensitivity(new SimmSensitivityCoordinate(this.productClassKey, this.riskClassKey.name(), this.riskTypeKey.name(), bucketKey, "", riskFactorKey), evaluationTime, model);
-			else if (this.riskTypeKey.equals(SIMMParameter.RiskType.Vega) && riskFactorKey.equals(SIMMParameter.inflationKey))
+			} else if (this.riskTypeKey.equals(SIMMParameter.RiskType.Vega) && riskFactorKey.equals(SIMMParameter.inflationKey)) {
 				return this.simmSensitivitivityProvider.getSIMMSensitivity(new SimmSensitivityCoordinate(this.productClassKey, this.riskClassKey.name(), this.riskTypeKey.name(), bucketKey, "", riskFactorKey), evaluationTime, model);
-			else
+			} else {
 				return Arrays.stream(this.parameterSet.IRMaturityBuckets).map(maturityBucket -> this.simmSensitivitivityProvider.getSIMMSensitivity(new SimmSensitivityCoordinate(this.productClassKey, this.riskClassKey.name(), this.riskTypeKey.name(), bucketKey, maturityBucket, riskFactorKey), evaluationTime, model)).reduce((r1, r2) -> r1.add(r2)).orElseGet(() -> new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0));
+			}
 		}
 	}
 

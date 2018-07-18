@@ -35,8 +35,9 @@ public class SIMMHelper {
 			}
 			i++;
 		}
-		if ( value==null)
+		if ( value==null) {
 			return null;
+		}
 		value = value.sqrt();
 		return value;
 	}

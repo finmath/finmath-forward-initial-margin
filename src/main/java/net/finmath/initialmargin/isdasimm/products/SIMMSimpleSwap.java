@@ -101,7 +101,9 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 		Arrays.fill(sensis, new RandomVariable(0.0));
 
 		// return zero if evaluationTime > last payment date
-		if(evaluationTime>=fixingDates[fixingDates.length-1]+periodLength) return sensis;
+		if(evaluationTime>=fixingDates[fixingDates.length-1]+periodLength) {
+			return sensis;
+		}
 
 		// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
 		for(int liborIndex=currentLiborIndex;liborIndex<numberOfSensis+currentLiborIndex;liborIndex++){
@@ -119,7 +121,9 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 			numberOfSensis = fixingDates.length-periodIndex;
 
 		// return zero if evaluationTime > last payment date, i.e. if numberOfSensis <= 0
-		if(numberOfSensis <= 0) return new RandomVariableInterface[]{new RandomVariable(0.0)};
+		if(numberOfSensis <= 0) {
+			return new RandomVariableInterface[]{new RandomVariable(0.0)};
+		}
 
 		sensis = new RandomVariableInterface[numberOfSensis];
 		int timeIndex = model.getTimeIndex(evaluationTime);
@@ -178,8 +182,9 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 		if(sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 
 			// Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
-			if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent())
+			if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()) {
 				return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
+			}
 
 			dVdP = getAnalyticSensitivities(evaluationTime, model.getLiborPeriodDiscretization().getTimeStep(0), model, "OIS");
 

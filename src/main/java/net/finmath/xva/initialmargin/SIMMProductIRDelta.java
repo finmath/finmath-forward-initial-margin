@@ -35,8 +35,9 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-		if (this.currencyKeys.size() == 0)
+		if (this.currencyKeys.size() == 0) {
 			return new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
+		}
 
 		RandomVariableInterface[] S1Contributions = new RandomVariableInterface[this.currencyKeys.size()];
 		RandomVariableInterface[] KContributions = new RandomVariableInterface[this.currencyKeys.size()];
@@ -56,10 +57,11 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 		double singleCorrelation = parameterSet.IRCorrelationCrossCurrency;
 		Double[][] correlationMatrix = new Double[this.currencyKeys.size()][this.currencyKeys.size()];
 		for (i = 0; i < currencyKeys.size(); i++) {
-			for (int j = 0; j < currencyKeys.size(); j++)
+			for (int j = 0; j < currencyKeys.size(); j++) {
 				if (i != j) {
 					correlationMatrix[i][j] = getParameterG(concentrationFactors[i], concentrationFactors[j]).getAverage() * singleCorrelation;
 				}
+			}
 		}
 		RandomVariableInterface VarCovar = helper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
@@ -153,8 +155,9 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 					netSensi = netSensi.mult(concentrationRiskFactor);
 				}
 				return netSensi;
-			} else
+			} else {
 				return null;
+			}
 		}
 	}
 

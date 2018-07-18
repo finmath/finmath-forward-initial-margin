@@ -45,9 +45,9 @@ public class SIMMSensitivityProviderSIMMSwapBPV  {
 			double notional = notionalMap.get(curveIndexName);
 			double bpvProxyAtZero = effectiveMaturity*notional/10000.;
 			return new RandomVariable(evaluationTime,model.getNumberOfPaths(),bpvProxyAtZero);
-		}
-		else
+		} else {
 			return model.getRandomVariableForConstant(0.0);
+		}
 
 	}
 

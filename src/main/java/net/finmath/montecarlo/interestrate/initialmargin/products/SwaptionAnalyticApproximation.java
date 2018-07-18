@@ -109,8 +109,11 @@ public class SwaptionAnalyticApproximation extends AbstractLIBORMonteCarloSIMMPr
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationSIMMInterface model) {
 		AbstractModelInterface modelBase = model.getModel();
-		if(modelBase instanceof LIBORMarketModelSIMMInterface) return getValues(evaluationTime, (LIBORMarketModelSIMMInterface)modelBase);
-		else throw new IllegalArgumentException("This product requires a simulation where the underlying model is of type LIBORMarketModelInterface.");
+		if(modelBase instanceof LIBORMarketModelSIMMInterface) {
+			return getValues(evaluationTime, (LIBORMarketModelSIMMInterface)modelBase);
+		} else {
+			throw new IllegalArgumentException("This product requires a simulation where the underlying model is of type LIBORMarketModelInterface.");
+		}
 	}
 
 	/**
@@ -125,7 +128,9 @@ public class SwaptionAnalyticApproximation extends AbstractLIBORMonteCarloSIMMPr
 	 * @TODO make initial values an arg and use evaluation time.
 	 */
 	public RandomVariableInterface getValues(double evaluationTime, LIBORMarketModelSIMMInterface model) {
-		if(evaluationTime > 0) throw new RuntimeException("Forward start evaluation currently not supported.");
+		if(evaluationTime > 0) {
+			throw new RuntimeException("Forward start evaluation currently not supported.");
+		}
 
 		double swapStart    = swapTenor[0];
 		double swapEnd      = swapTenor[swapTenor.length-1];
@@ -152,12 +157,16 @@ public class SwaptionAnalyticApproximation extends AbstractLIBORMonteCarloSIMMPr
 		}
 
 		// Return integratedSwapRateVariance if requested
-		if(valueUnit == ValueUnit.INTEGRATEDVARIANCE) return new RandomVariable(evaluationTime, integratedSwapRateVariance);
+		if(valueUnit == ValueUnit.INTEGRATEDVARIANCE) {
+			return new RandomVariable(evaluationTime, integratedSwapRateVariance);
+		}
 
 		double volatility		= Math.sqrt(integratedSwapRateVariance / swapStart);
 
 		// Return integratedSwapRateVariance if requested
-		if(valueUnit == ValueUnit.VOLATILITY) return new RandomVariable(evaluationTime, volatility);
+		if(valueUnit == ValueUnit.VOLATILITY) {
+			return new RandomVariable(evaluationTime, volatility);
+		}
 
 		// Use black formula for swaption to calculate the price
 		double parSwaprate		= net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), model.getForwardRateCurve(), model.getDiscountCurve());
@@ -192,8 +201,9 @@ public class SwaptionAnalyticApproximation extends AbstractLIBORMonteCarloSIMMPr
 					&& liborPeriodDiscretization == cachedLogSwaprateDerivativeTimeDiscretization.get()
 					&& discountCurveInterface == cachedLogSwaprateDerivativeDiscountCurve.get()
 					&& forwardCurveInterface == cachedLogSwaprateDerivativeForwardCurve.get()
-					)
+					) {
 				return cachedLogSwaprateDerivative;
+			}
 			cachedLogSwaprateDerivativeTimeDiscretization = new WeakReference<TimeDiscretizationInterface>(liborPeriodDiscretization);
 			cachedLogSwaprateDerivativeDiscountCurve = new WeakReference<DiscountCurveInterface>(discountCurveInterface);
 			cachedLogSwaprateDerivativeForwardCurve = new WeakReference<ForwardCurveInterface>(forwardCurveInterface);

@@ -85,7 +85,9 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 	@Override
 	public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time) {
-		if(deliveryType == DeliveryType.Physical && time >= swaption.getExerciseDate()) return this.swap;
+		if(deliveryType == DeliveryType.Physical && time >= swaption.getExerciseDate()) {
+			return this.swap;
+		}
 		return this.swaption;
 	}
 
@@ -125,8 +127,9 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 		if(deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()){
 
 			// Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
-			if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent())
+			if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()) {
 				return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
+			}
 
 			if(sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 

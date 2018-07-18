@@ -37,8 +37,9 @@ public class MarginSchemeIRDelta {
 
 	public RandomVariableInterface getValue(double atTime){
 
-		if (this.bucketKeys.length==0)
+		if (this.bucketKeys.length==0) {
 			return new RandomVariable(atTime,this.calculationSchemeInitialMarginISDA.getPathDimension(),0.0);
+		}
 
 		RandomVariableInterface[] S1Contributions = new RandomVariableInterface[this.bucketKeys.length];
 		RandomVariableInterface[] KContributions = new RandomVariableInterface[this.bucketKeys.length];
@@ -63,10 +64,11 @@ public class MarginSchemeIRDelta {
 		double singleCorrelation = calculationSchemeInitialMarginISDA.getParameterCollection().IRCorrelationCrossCurrency;
 		correlationMatrix = new Double[this.bucketKeys.length][this.bucketKeys.length];
 		for (i = 0; i< bucketKeys.length;i++) {
-			for (int j = 0; j< bucketKeys.length;j++)
+			for (int j = 0; j< bucketKeys.length;j++) {
 				if ( i!=j) {
 					correlationMatrix[i][j] = getParameterG(concentrationFactors[i],concentrationFactors[j]).getAverage()*singleCorrelation;
 				}
+			}
 		}
 		VarCovar = CalculationSchemeInitialMarginISDA.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
@@ -155,10 +157,11 @@ public class MarginSchemeIRDelta {
 			Double[] riskWeights = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("InterestRate").get(currencyMapKey)[0];
 			riskWeight = riskWeights[iRateTenor];
 			RandomVariableInterface netSensi =  netSensitivities[iIndex][iRateTenor];
-			if (netSensi!=null)
+			if (netSensi!=null) {
 				return netSensi.mult(riskWeight).mult(concentrationRiskFactor);
-			else
+			} else {
 				return new RandomVariable(atTime,this.calculationSchemeInitialMarginISDA.getPathDimension(),0.0);
+			}
 		}
 		else { /* Inflation or CCYBasis*/
 			riskWeight = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("InterestRate").get(indexName)[0][0];
@@ -171,9 +174,9 @@ public class MarginSchemeIRDelta {
 					netSensi = netSensi.mult(concentrationRiskFactor);
 				}
 				return  netSensi;
-			}
-			else
+			} else {
 				return null;
+			}
 		}
 	}
 
