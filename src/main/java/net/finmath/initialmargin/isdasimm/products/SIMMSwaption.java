@@ -6,13 +6,13 @@ import java.util.Map;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.SimpleSwap;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.Swaption;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.SimpleSwap;
+import net.finmath.montecarlo.interestrate.products.Swaption;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /** This class describes a Swaption for SIMM initial margin (MVA) calculation.
@@ -72,7 +72,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, true /*hasOptionality*/);
 
-		this.swaption = new Swaption(exerciseDate,fixingDates,paymentDates,swapRates,notional);
+		this.swaption = new Swaption(exerciseDate,fixingDates,paymentDates, null, swapRates,notional);
 		this.deliveryType = deliveryType;
 		if(deliveryType==DeliveryType.Physical){
 
