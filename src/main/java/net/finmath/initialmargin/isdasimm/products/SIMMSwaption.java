@@ -149,7 +149,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 
 	@Override
-	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// @TODO Implement proper caching
 		if(exerciseIndicator==null) {
 			exerciseIndicator = swaption.getExerciseIndicator(modelCache);

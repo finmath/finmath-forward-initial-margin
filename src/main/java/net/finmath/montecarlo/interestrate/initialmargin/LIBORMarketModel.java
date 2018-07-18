@@ -1131,14 +1131,10 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	@Override
 	public Object clone() {
-		try {
-			Map<String, Object> properties = new HashMap<String, Object>();
-			properties.put("measure",		measure.name());
-			properties.put("stateSpace",	stateSpace.name());
-			return new LIBORMarketModel(getLiborPeriodDiscretization(), getAnalyticModel(), getForwardRateCurve(), discountCurve, randomVariableFactory, covarianceModel, new CalibrationItem[0], properties);
-		} catch (CalculationException e) {
-			return null;
-		}
+		Map<String, Object> properties = new HashMap<String, Object>();
+		properties.put("measure",		measure.name());
+		properties.put("stateSpace",	stateSpace.name());
+		return new LIBORMarketModel(getLiborPeriodDiscretization(), getAnalyticModel(), getForwardRateCurve(), discountCurve, randomVariableFactory, covarianceModel, new CalibrationItem[0], properties);
 	}
 
 	@Override
