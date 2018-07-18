@@ -9,11 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.BrownianMotionInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.time.TimeDiscretizationInterface;
 
 /**
  * Implements convenient methods for a LIBOR market model,
@@ -23,186 +22,52 @@ import net.finmath.time.TimeDiscretizationInterface;
  * @author Christian Fries
  * @version 0.7
  */
-public class LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimulationInterface {
+public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimulationInterface {
 
-	private final LIBORModelInterface model;
 
-	/**
-	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORMarketModel and an AbstractProcess.
-	 *
-	 * @param model The LIBORMarketModel.
-	 * @param process The process.
-	 */
-	public LIBORModelMonteCarloSimulation(LIBORModelInterface model, AbstractProcess process) {
-		super();
-		this.model		= model;
-
-		this.model.setProcess(process);
-		process.setModel(model);
+	public LIBORModelMonteCarloSimulation(LIBORModelInterface model, AbstractProcessInterface process) {
+		// @TODO Cast can be removed with 3.2.15 of finmath-lib
+		super(model, (AbstractProcess)process);
 	}
-
-	/**
-	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORModelInterface.
-	 *
-	 * @param model The LIBORModelInterface.
-	 */
-	public LIBORModelMonteCarloSimulation(LIBORModelInterface model) {
-		super();
-		this.model		= model;
-	}
-
-	@Override
-	public RandomVariableInterface getMonteCarloWeights(int timeIndex) throws CalculationException {
-		return model.getProcess().getMonteCarloWeights(timeIndex);
-	}
-
-	@Override
-	public RandomVariableInterface getMonteCarloWeights(double time) throws CalculationException {
-		int timeIndex = getTimeIndex(time);
-		if(timeIndex < 0) {
-			timeIndex = (-timeIndex-1)-1;
-		}
-		return model.getProcess().getMonteCarloWeights(timeIndex);
-	}
-
-	@Override
-	public int getNumberOfFactors() {
-		return model.getProcess().getNumberOfFactors();
-	}
-
-	@Override
-	public int getNumberOfPaths() {
-		return model.getProcess().getNumberOfPaths();
-	}
-
-	@Override
-	public double getTime(int timeIndex) {
-		return model.getProcess().getTime(timeIndex);
-	}
-
-	@Override
-	public TimeDiscretizationInterface getTimeDiscretization() {
-		return model.getProcess().getTimeDiscretization();
-	}
-
-	@Override
-	public int getTimeIndex(double time) {
-		return model.getProcess().getTimeIndex(time);
-	}
-
-	@Override
-	public RandomVariableInterface getRandomVariableForConstant(double value) {
-		return model.getRandomVariableForConstant(value);
-	}
-
-	@Override
-	public BrownianMotionInterface getBrownianMotion() {
-		return (BrownianMotionInterface)model.getProcess().getStochasticDriver();
-	}
-
-	@Override
-	public RandomVariableInterface getLIBOR(int timeIndex, int liborIndex) throws CalculationException {
-		return model.getLIBOR(timeIndex, liborIndex);
-	}
-
-	@Override
-	public RandomVariableInterface[] getLIBORs(int timeIndex) throws CalculationException
-	{
-		RandomVariableInterface[] randomVariableVector = new RandomVariableInterface[getNumberOfComponents()];
-		for(int componentIndex=0; componentIndex<getNumberOfComponents(); componentIndex++) {
-			randomVariableVector[componentIndex] = getLIBOR(timeIndex, componentIndex);
-		}
-
-		return randomVariableVector;
-	}
-
-	@Override
-	public RandomVariableInterface getLIBOR(double time, double periodStart, double periodEnd) throws CalculationException
-	{
-		return model.getLIBOR(time, periodStart, periodEnd);
-	}
-
-	@Override
-	public double getLiborPeriod(int timeIndex) {
-		return model.getLiborPeriod(timeIndex);
-	}
-
-	@Override
-	public TimeDiscretizationInterface getLiborPeriodDiscretization() {
-		return model.getLiborPeriodDiscretization();
-	}
-
-	@Override
-	public int getLiborPeriodIndex(double time) {
-		return model.getLiborPeriodIndex(time);
-	}
-
-	public int getNumberOfComponents() {
-		return model.getNumberOfComponents();
-	}
-
-	@Override
-	public int getNumberOfLibors() {
-		return model.getNumberOfLibors();
-	}
-
-	@Override
-	public RandomVariableInterface getNumeraire(double time) throws CalculationException {
-		return model.getNumeraire(time);
-	}
-
 
 	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
-		return model.getNumeraireAdjustmentMap();
+		return ((LIBORMarketModelInterface) getModel()).getNumeraireAdjustmentMap();
 	}
 
 	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireCache() {
-		return model.getNumeraireCache();
+		return ((LIBORMarketModelInterface) getModel()).getNumeraireCache();
 	}
 
 	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
-		return model.getNumeraireOISAdjustmentFactor(time);
+		return ((LIBORMarketModelInterface) getModel()).getNumeraireOISAdjustmentFactor(time);
 	}
 
 	@Override
 	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException{
-		return model.getForwardBondLibor(T, t);
+		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
 	}
 
 	@Override
 	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
-		return model.getForwardBondOIS(T, t);
+		return ((LIBORMarketModelInterface) getModel()).getForwardBondOIS(T, t);
 	}
 
-	@Override
-	public LIBORModelInterface getModel() {
-		return model;
-	}
-
-	/* (non-Javadoc)
-	 * @see net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface#getProcess()
-	 */
-	@Override
-	public AbstractProcessInterface getProcess() {
-		return model.getProcess();
-	}
 
 	@Override
 	public Object getCloneWithModifiedSeed(int seed) {
 		AbstractProcess process = (AbstractProcess) ((AbstractProcess)getProcess()).getCloneWithModifiedSeed(seed);
-		return new LIBORModelMonteCarloSimulation(model, process);
+		return new LIBORModelMonteCarloSimulation(getModel(), process);
 	}
 
 	@Override
 	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException {
-		LIBORModelInterface modelClone = (LIBORModelInterface) model.getCloneWithModifiedData(dataModified);
+		LIBORModelInterface modelClone = (LIBORModelInterface) getModel().getCloneWithModifiedData(dataModified);
 		if(dataModified.containsKey("discountCurve") && dataModified.size() == 1) {
 			// In this case we may re-use the underlying process
-			LIBORModelMonteCarloSimulation lmmSimClone = new LIBORModelMonteCarloSimulation(modelClone);
-			modelClone.setProcess(getProcess());		// Reuse process associated with other model
+			LIBORModelMonteCarloSimulation lmmSimClone = new LIBORModelMonteCarloSimulation(modelClone, getProcess());
 			return lmmSimClone;
 		} else
 			return new LIBORModelMonteCarloSimulation(modelClone, (AbstractProcess)getProcess().clone());
