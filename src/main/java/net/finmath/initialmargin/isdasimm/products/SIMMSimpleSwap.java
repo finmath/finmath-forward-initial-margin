@@ -204,7 +204,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 
 
 	@Override
-	public RandomVariableInterface getExerciseIndicator(double time) {
+	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) {
 		return new RandomVariable(1.0);
 	}
 
@@ -216,7 +216,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 
 
 	@Override
-	public double getMeltingResetTime(){
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model){
 		return 0; // No Reset
 	}
 

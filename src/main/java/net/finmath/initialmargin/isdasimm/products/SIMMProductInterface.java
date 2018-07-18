@@ -87,7 +87,7 @@ public interface SIMMProductInterface {
 	 * @return The exercise indicator
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface getExerciseIndicator(double time) throws CalculationException;
+	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/** Set the conditional expectation operator for this product at a given time. We need the
 	 *  conditional expectation operator for the calculation of forward sensitivities.
@@ -114,10 +114,12 @@ public interface SIMMProductInterface {
 
 	/** Returns the time at which the sensitivities are reset to the true sensitivities in case of Melting.
 	 *  E.g. we may reset the sensitivities for a swaption with physical delivery at maturity.
+	 * @param model 
 	 *
 	 * @return The time of sensitivity reset for melting.
+	 * @throws CalculationException 
 	 */
-	public double getMeltingResetTime();
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/** Get the exact delta sensitivities from cache <code> exactDeltaCache </code>: Return for a given time, index curve, risk class and model (class variable) the sensitivities of the product.
 	 *  calculated by AAD or analytically. The sensitivities may be later obtained from the map instead of being re-calculated over and over.

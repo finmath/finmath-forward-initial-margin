@@ -101,7 +101,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 				// Calculate sensis analytically
 				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");
-				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime);
+				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model);
 				swapSensis = Arrays.stream(swapSensis).map(n->n.mult(indicator)).toArray(RandomVariableInterface[]::new);
 				return swapSensis;
 
@@ -134,7 +134,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 			if(sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 
 				dVdP = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime,swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "OIS");
-				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime);
+				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model);
 				dVdP = Arrays.stream(dVdP).map(n->n.mult(indicator)).toArray(RandomVariableInterface[]::new);
 				futureDiscountTimes = Arrays.stream(swap.getPaymentDates()).filter(n -> n > evaluationTime).toArray();
 
@@ -150,7 +150,8 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 
 	@Override
-	public RandomVariableInterface getExerciseIndicator(double time) throws CalculationException {
+	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		// @TODO Implement proper caching
 		if(exerciseIndicator==null) {
 			exerciseIndicator = swaption.getExerciseIndicator(modelCache);
 		}
@@ -165,7 +166,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 
 	@Override
-	public double getMeltingResetTime(){
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model){
 		return swaption.getExerciseDate();
 	}
 
@@ -177,7 +178,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 		RandomVariableInterface indicator = new RandomVariable(1.0);
 		if(evaluationTime>=swaption.getExerciseDate())
 		{
-			indicator = getExerciseIndicator(evaluationTime); // 1 if exercised on this path
+			indicator = getExerciseIndicator(evaluationTime, model); // 1 if exercised on this path
 		}
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
@@ -211,7 +212,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	private void setSwapGradient() throws CalculationException{
 		if(!super.isGradientOfDeliveryProduct){
 			// Calculate the product value as of time 0.
-			RandomVariableInterface indicator = getExerciseIndicator(swaption.getExerciseDate()+0.0001);
+			RandomVariableInterface indicator = getExerciseIndicator(swaption.getExerciseDate()+0.0001, null);
 			RandomVariableDifferentiableInterface productValue =
 					(RandomVariableDifferentiableInterface) swap.getValue(0.0, modelCache).mult(indicator);
 			// Get the map of numeraire adjustments used specifically for this product

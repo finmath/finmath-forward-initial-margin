@@ -111,14 +111,14 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		case MELTINGSWAPRATEBUCKETS:   // Melting on SIMM Buckets
 		case MELTINGLIBORBUCKETS:  // Melting on Libor Buckets
 			// The time of the exact sensitivities being melted: Initial Melting Time
-			double initialMeltingTime = evaluationTime < product.getMeltingResetTime() ? 0 : product.getMeltingResetTime();
+			double initialMeltingTime = evaluationTime < product.getMeltingResetTime(model) ? 0 : product.getMeltingResetTime(model);
 
 			// The sensitivities obtained from getMeltedSensitivities are always on SIMM buckets
 			maturityBucketSensis = getMeltedSensitivities(product, null /*given sensitivities*/, initialMeltingTime, evaluationTime, curveIndexName, riskClass);
 
 			if(product instanceof SIMMBermudanSwaption) {
 
-				maturityBucketSensis = ((SIMMBermudanSwaption)product).changeMeltedSensitivitiesOnExercisedPaths(evaluationTime, curveIndexName, maturityBucketSensis);
+				maturityBucketSensis = ((SIMMBermudanSwaption)product).changeMeltedSensitivitiesOnExercisedPaths(evaluationTime, model, curveIndexName, maturityBucketSensis);
 			}
 
 			break;
@@ -274,8 +274,8 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		// time of initial and final sensitivities
 		TimeDiscretizationInterface exactSensiTimes = new TimeDiscretization(0,50,interpolationStep);
 		int initialIndex = exactSensiTimes.getTimeIndexNearestLessOrEqual(evaluationTime);
-		double initialTime = (exactSensiTimes.getTime(initialIndex) <= product.getMeltingResetTime()) && (exactSensiTimes.getTime(initialIndex+1) > product.getMeltingResetTime()) ? product.getMeltingResetTime() : exactSensiTimes.getTime(initialIndex);
-		double finalTime   = initialTime < product.getMeltingResetTime() ? Math.min(product.getMeltingResetTime(),exactSensiTimes.getTime(initialIndex+1)) : exactSensiTimes.getTime(initialIndex+1);
+		double initialTime = (exactSensiTimes.getTime(initialIndex) <= product.getMeltingResetTime(model)) && (exactSensiTimes.getTime(initialIndex+1) > product.getMeltingResetTime(model)) ? product.getMeltingResetTime(model) : exactSensiTimes.getTime(initialIndex);
+		double finalTime   = initialTime < product.getMeltingResetTime(model) ? Math.min(product.getMeltingResetTime(model),exactSensiTimes.getTime(initialIndex+1)) : exactSensiTimes.getTime(initialIndex+1);
 
 		// Get Sensitivities from exactDeltaCache
 		RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
