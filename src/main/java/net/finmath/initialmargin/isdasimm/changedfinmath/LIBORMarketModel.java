@@ -314,7 +314,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 				calibrationWeights[i]		= calibrationItems[i].calibrationWeight;
 			}
 
-			this.covarianceModel    = covarianceModelParametric.getCloneCalibrated((net.finmath.montecarlo.interestrate.LIBORMarketModelInterface)this, calibrationProducts, calibrationTargetValues, calibrationWeights, calibrationParameters);
+			this.covarianceModel    = covarianceModelParametric.getCloneCalibrated(this, calibrationProducts, calibrationTargetValues, calibrationWeights, calibrationParameters);
 		}
 
 		numeraires = new ConcurrentHashMap<Integer, RandomVariableInterface>();

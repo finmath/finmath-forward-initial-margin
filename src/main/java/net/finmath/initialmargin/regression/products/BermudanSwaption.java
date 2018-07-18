@@ -179,7 +179,7 @@ public class BermudanSwaption extends AbstractLIBORMonteCarloRegressionProduct {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) {
 		return new RandomVariable(0.0);
 	}
 }

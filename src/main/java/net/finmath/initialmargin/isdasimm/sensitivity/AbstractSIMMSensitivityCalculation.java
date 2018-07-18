@@ -196,14 +196,12 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @param evaluationTime The time at which the initial margin is calculated
 	 * @param model The Libor market model
 	 * @return The sensitivities dV/dS i.e. with respect to swap rates.
-	 * @throws SolverException
-	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] getSensitivitiesIRMarketRates(AbstractSIMMProduct product,
 			String curveIndexName,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		RandomVariableInterface[] dVdS = null; // The vector of delta sensitivities on all SIMM buckets
 
@@ -687,15 +685,13 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @param evaluationTime The time at which the initial margin is calculated
 	 * @param model The Libor market model
 	 * @return The sensitivities dV/dS i.e. with respect to swap rates.
-	 * @throws SolverException
-	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
 	 *
 	 */
 	public RandomVariableInterface[] doCalculateDeltaSensitivitiesOISLiborDependence(AbstractSIMMProduct product,
 			String curveIndexName,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		RandomVariableInterface[] deltaSensitivitiesOfCurve = null;
 

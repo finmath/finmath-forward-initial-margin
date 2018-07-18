@@ -56,21 +56,21 @@ import net.finmath.time.daycount.DayCountConventionInterface;
 
 
 public class SIMMTest {
-	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
-	final static double upperQuantile = 0.025;
-	final static double lowerQuantile = 0.975;
+	static final DecimalFormat formatterTime	= new DecimalFormat("0.000");
+	static final double upperQuantile = 0.025;
+	static final double lowerQuantile = 0.975;
 
-	final static boolean isPrintAverage  = true;
-	final static boolean isPrintQuantile = false;
-	final static boolean isPrintPaths    = false;
+	static final boolean isPrintAverage  = true;
+	static final boolean isPrintQuantile = false;
+	static final boolean isPrintPaths    = false;
 
-	final static boolean isCalculatePortfolio = false;
-	final static boolean isCalculateSwap      = false;
-	final static boolean isCalculateSwaption  = false;
-	final static boolean isCalculateBermudan  = true;
+	static final boolean isCalculatePortfolio = false;
+	static final boolean isCalculateSwap      = false;
+	static final boolean isCalculateSwaption  = false;
+	static final boolean isCalculateBermudan  = true;
 
 	// Model Paths
-	final static int numberOfPaths = 500;//1000;
+	static final int numberOfPaths = 500;//1000;
 
 	public static void main(String[] args) throws CalculationException{
 
@@ -578,7 +578,7 @@ public class SIMMTest {
 
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
 
-		LIBORMarketModelInterface liborMarketModel = new LIBORMarketModel(liborPeriodDiscretization, new AnalyticModel(new CurveInterface[]{(DiscountCurveInterface)(new DiscountCurveFromForwardCurve(forwardCurve)), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
+		LIBORMarketModelInterface liborMarketModel = new LIBORMarketModel(liborPeriodDiscretization, new AnalyticModel(new CurveInterface[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
 
 		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
 	}
@@ -639,7 +639,7 @@ public class SIMMTest {
 		return properties;
 	}
 
-	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) throws CalculationException {
+	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) {
 		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
 	}
 

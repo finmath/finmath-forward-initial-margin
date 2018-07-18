@@ -22,7 +22,7 @@ public class SIMMSensitivityProviderSIMMSwapBPV  {
 	ModelSensitivityProviderInterface forwardSensitivityProvider;
 
 
-	public SIMMSensitivityProviderSIMMSwapBPV(ModelSensitivityProviderInterface forwardSensiProvider) throws Exception{
+	public SIMMSensitivityProviderSIMMSwapBPV(ModelSensitivityProviderInterface forwardSensiProvider) {
 
 		// BUILD UP MAP
 		// For Each Key: Build a ForwardSensitivityProvider

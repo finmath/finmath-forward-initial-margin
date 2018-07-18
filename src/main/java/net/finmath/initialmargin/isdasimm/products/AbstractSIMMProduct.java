@@ -50,7 +50,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		 * Exact calculation of MVA (stochastic exposures with stochastic discounting).
 		 */
 		EXACT
-	};
+	}
 
 	// Product classification within ISDA SIMM
 	private String   productClass;      // RatesFX, Credit,

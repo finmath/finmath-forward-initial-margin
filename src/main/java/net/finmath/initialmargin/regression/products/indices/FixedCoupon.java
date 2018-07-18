@@ -67,7 +67,7 @@ public class FixedCoupon extends AbstractIndex {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;
 	}

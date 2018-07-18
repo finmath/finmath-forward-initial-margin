@@ -289,7 +289,7 @@ public class SwaptionAnalyticApproximation extends AbstractLIBORMonteCarloSIMMPr
 		}
 	}
 
-	static public double[][][] getIntegratedLIBORCovariance(LIBORMarketModel model) {
+	public static double[][][] getIntegratedLIBORCovariance(LIBORMarketModel model) {
 		return model.getIntegratedLIBORCovariance();
 	}
 }

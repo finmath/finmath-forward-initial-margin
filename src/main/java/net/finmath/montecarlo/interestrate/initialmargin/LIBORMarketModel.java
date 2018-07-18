@@ -250,7 +250,6 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	 * @param covarianceModel The covariance model to use.
 	 * @param calibrationItems The vector of calibration items (a union of a product, target value and weight) for the objective function sum weight(i) * (modelValue(i)-targetValue(i).
 	 * @param properties Key value map specifying properties like <code>measure</code> and <code>stateSpace</code>.
-	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@SuppressWarnings("unchecked")
 	public LIBORMarketModel(
@@ -262,7 +261,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			AbstractLIBORCovarianceModel		covarianceModel,
 			CalibrationItem[]					calibrationItems,
 			Map<String, ?>						properties
-			) throws CalculationException {
+			) {
 
 		// Set some properties
 		if(properties != null && properties.containsKey("measure")) {

@@ -71,7 +71,7 @@ public class SIMMProductNonIRDeltaVega {
 				}
 			}
 
-			RandomVariableInterface VarCovar = helper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
+			RandomVariableInterface VarCovar = SIMMHelper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
 			if (VarCovar == null) {
 				return deltaMargin;
@@ -154,7 +154,7 @@ public class SIMMProductNonIRDeltaVega {
 					}
 				}
 			}
-			aggregatedSensi = helper.getVarianceCovarianceAggregation(contributionsReDim, correlationMatrix);
+			aggregatedSensi = SIMMHelper.getVarianceCovarianceAggregation(contributionsReDim, correlationMatrix);
 		} else {
 			Double correlation = 0.0;
 			if (riskClassKey.equals(SIMMParameter.RiskClass.FX)) {
@@ -184,7 +184,7 @@ public class SIMMProductNonIRDeltaVega {
 				}
 
 			}
-			aggregatedSensi = helper.getVarianceCovarianceAggregation(weightedNetSensitivitesArray, correlationMatrix);
+			aggregatedSensi = SIMMHelper.getVarianceCovarianceAggregation(weightedNetSensitivitesArray, correlationMatrix);
 
 		}
 

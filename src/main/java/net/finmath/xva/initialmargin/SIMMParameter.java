@@ -8,8 +8,8 @@ public class SIMMParameter {
 
 	}
 
-	final static public String   inflationKey = "inflation";
-	final static public String   ccyBasisKey = "ccybasis";
+	public static final String   inflationKey = "inflation";
+	public static final String   ccyBasisKey = "ccybasis";
 
 	public enum RiskType {
 		Delta,
@@ -63,8 +63,8 @@ public class SIMMParameter {
 
 	//    final public String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
 	//    final public String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
-	final public String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
-	final public String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
+	public final String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
+	public final String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
 	//    final public String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
 
 	//       final public Double             IRCorrelationCrossCurveIndex = 0.982;

@@ -39,11 +39,11 @@ import net.finmath.time.TimeDiscretization;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
 
 public class InitialMarginRegressionTest {
-	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
-	final static DecimalFormat formatterIM  	= new DecimalFormat("0.00000000000");
+	static final DecimalFormat formatterTime	= new DecimalFormat("0.000");
+	static final DecimalFormat formatterIM  	= new DecimalFormat("0.00000000000");
 
-	private final static int numberOfPaths		= 1000;
-	private final static int numberOfFactors	= 1;
+	private static final int numberOfPaths		= 1000;
+	private static final int numberOfFactors	= 1;
 
 	public static void main(String[] args) throws CalculationException{
 

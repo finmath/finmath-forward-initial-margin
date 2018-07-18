@@ -63,7 +63,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 				}
 			}
 		}
-		RandomVariableInterface VarCovar = helper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
+		RandomVariableInterface VarCovar = SIMMHelper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
 
 		/*Adjustment on Diagonal*/
@@ -83,7 +83,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 
 	private RandomVariableInterface[][] getNetSensitivityMatrix(String bucketKey, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		int nTenors = parameterSet.IRMaturityBuckets.length;
-		String[] curveKeys = parameterSet.getRateCurveKeys();
+		String[] curveKeys = SIMMParameter.getRateCurveKeys();
 		RandomVariableInterface[][] netSensitivities = new RandomVariableInterface[curveKeys.length][nTenors];
 		Set<String> activeCurveKeys = helper.getRiskClassRiskFactorMap(this.riskTypeKey, bucketKey, evaluationTime).get(this.riskClassKey);
 		for (int iCurve = 0; iCurve < curveKeys.length; iCurve++) {
@@ -104,7 +104,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 	private RandomVariableInterface getAggregatedSensitivityForBucket(String bucketKey, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
 		int nTenors = parameterSet.IRMaturityBuckets.length;
-		String[] curveKeys = parameterSet.getRateCurveKeys();
+		String[] curveKeys = SIMMParameter.getRateCurveKeys();
 
 		int dimensionTotal = nTenors * curveKeys.length + 2;
 		RandomVariableInterface[] contributions = new RandomVariableInterface[dimensionTotal];
@@ -124,7 +124,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 
 		Double[][] crossTenorCorrelation = parameterSet.MapRiskClassCorrelationIntraBucketMap.get(riskClassKey);
 
-		RandomVariableInterface aggregatedSensi = helper.getVarianceCovarianceAggregation(contributions, crossTenorCorrelation);
+		RandomVariableInterface aggregatedSensi = SIMMHelper.getVarianceCovarianceAggregation(contributions, crossTenorCorrelation);
 
 		return aggregatedSensi;
 	}
@@ -179,7 +179,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 
 	private RandomVariableInterface getWeightedSensitivitySum(String bucketKey, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		RandomVariableInterface aggregatedSensi = null;
-		String[] curveKeys = parameterSet.getRateCurveKeys();
+		String[] curveKeys = SIMMParameter.getRateCurveKeys();
 
 		for (int iIndex = 0; iIndex < curveKeys.length; iIndex++) {
 			for (int iTenor = 0; iTenor < parameterSet.IRMaturityBuckets.length; iTenor++) {
@@ -198,7 +198,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 
 	public RandomVariableInterface getConcentrationRiskFactor(String bucketKey, RandomVariableInterface[][] netSensitivities, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		RandomVariableInterface sensitivitySum = null;
-		String[] curveKeys = parameterSet.getRateCurveKeys();
+		String[] curveKeys = SIMMParameter.getRateCurveKeys();
 		for (int iIndex = 0; iIndex < curveKeys.length; iIndex++) {
 			for (int iTenor = 0; iTenor < parameterSet.IRMaturityBuckets.length; iTenor++) {
 				String key = curveKeys[iIndex];

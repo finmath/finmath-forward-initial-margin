@@ -31,7 +31,8 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	private SimpleSwap swap = null;
 
 	private Swaption swaption;
-	public enum DeliveryType {Physical, CashSettled};
+	public enum DeliveryType {Physical, CashSettled}
+
 	private DeliveryType deliveryType;
 
 
@@ -41,9 +42,8 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	 * @param deliveryType
 	 * @param curveIndexNames
 	 * @param currency
-	 * @throws CalculationException
 	 */
-	public SIMMSwaption(Swaption swaption, DeliveryType deliveryType, String[] curveIndexNames, String currency) throws CalculationException {
+	public SIMMSwaption(Swaption swaption, DeliveryType deliveryType, String[] curveIndexNames, String currency) {
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, true /*hasOptionality*/);
 		this.swaption = swaption;
 		this.deliveryType = deliveryType;
@@ -65,10 +65,9 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 	 * @param deliveryType
 	 * @param curveIndexNames
 	 * @param currency
-	 * @throws CalculationException
 	 */
 	public SIMMSwaption(double exerciseDate, double[] fixingDates, double[] paymentDates, double[] swapRates, double notional,
-			DeliveryType deliveryType, String[] curveIndexNames, String currency) throws CalculationException {
+			DeliveryType deliveryType, String[] curveIndexNames, String currency) {
 
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, true /*hasOptionality*/);
 
@@ -150,7 +149,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 
 	@Override
-	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) {
 		// @TODO Implement proper caching
 		if(exerciseIndicator==null) {
 			exerciseIndicator = swaption.getExerciseIndicator(modelCache);

@@ -35,7 +35,7 @@ public class SIMMTradeSpecification {
 			return SensitivityKey.getMaturityBucket(this.maturityBucketKey);
 		}
 
-		static public double getMaturityBucket(String key) {
+		public static double getMaturityBucket(String key) {
 			if (key.contains("y")) {
 				return Double.parseDouble(key.replace("y", ""));
 			}

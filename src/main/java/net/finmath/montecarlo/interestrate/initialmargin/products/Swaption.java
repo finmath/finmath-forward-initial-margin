@@ -246,19 +246,19 @@ public class Swaption extends AbstractLIBORMonteCarloSIMMProduct {
 
 	public double[]  getFixingDates(){
 		return this.fixingDates;
-	};
+	}
 
 	public double[] getPaymentDates(){
 		return this.paymentDates;
-	};
+	}
 
 	public double[] getPeriodLengths(){
 		return this.periodLengths;
-	};
+	}
 
 	public double[] getSwaprates(){
 		return this.swaprates;
-	};
+	}
 
 	public double getNotional(){
 		return this.notional;

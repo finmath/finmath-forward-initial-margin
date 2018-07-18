@@ -15,7 +15,7 @@ import net.finmath.xva.tradespecifications.SACCRTradeSpecification;
 
 public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 
-	final public static double      SACCRAlphaMultiplier = 1.4;
+	public static final double      SACCRAlphaMultiplier = 1.4;
 
 	Collection<SACCRTradeSpecification>   tradeCollection;
 	boolean     isCollateralized;

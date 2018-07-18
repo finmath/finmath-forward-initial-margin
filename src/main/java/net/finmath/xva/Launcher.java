@@ -34,7 +34,7 @@ public class Launcher {
 		tradeSet.add(trade2);
 
 		Stream<SIMMSensitivityProviderInterface> tradeSensiProviders = tradeSet.stream()
-				.map(tradeSpec -> (SIMMSensitivityProviderInterface) new SIMMTradeSensitivityProvider(
+				.map(tradeSpec -> new SIMMTradeSensitivityProvider(
 						new ModelSensitivitySimpleMeltingProvider(
 								new SensiProductSimpleSwapBpv(tradeSpec), tradeSpec.getMaxTimeToMaturity()
 								),

@@ -36,7 +36,8 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	private BermudanSwaption bermudan;
 
-	public enum ExerciseType {Callable, Cancelable};
+	public enum ExerciseType {Callable, Cancelable}
+
 	private ExerciseType exerciseType;
 	private Map<String, RandomVariableInterface[]> swapSensitivityMap = new HashMap<>(); // Cache for sensitivities of underlying swap
 
@@ -46,9 +47,8 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	 * @param bermudan
 	 * @param curveIndexNames
 	 * @param currency
-	 * @throws CalculationException
 	 */
-	public SIMMBermudanSwaption(BermudanSwaption bermudan, String[] curveIndexNames, String currency) throws CalculationException {
+	public SIMMBermudanSwaption(BermudanSwaption bermudan, String[] curveIndexNames, String currency) {
 
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, true /*hasOptionality*/);
 
@@ -72,12 +72,11 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	 * @param exerciseType
 	 * @param curveIndexNames
 	 * @param currency
-	 * @throws CalculationException
 	 */
 	public SIMMBermudanSwaption(double[] fixingDates, double[] periodLengths, double[] paymentDates, double[] periodNotionals,
-			double[] swapRates, boolean[] isPeriodStartDateExerciseDate, ExerciseType exerciseType, String[] curveIndexNames, String currency) throws CalculationException {
+			double[] swapRates, boolean[] isPeriodStartDateExerciseDate, ExerciseType exerciseType, String[] curveIndexNames, String currency) {
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, false /*hasOptionality*/);
-		boolean isCallable = exerciseType == ExerciseType.Callable ? true : false;
+		boolean isCallable = exerciseType == ExerciseType.Callable;
 		this.bermudan = new BermudanSwaption(isPeriodStartDateExerciseDate,fixingDates,periodLengths, paymentDates,periodNotionals,swapRates, isCallable);
 		this.exerciseType = exerciseType;
 		if(exerciseType==ExerciseType.Callable) {

@@ -85,16 +85,15 @@ public class LMMCalibrationTest{
 	 * Brute force Monte-Carlo calibration of swaptions.
 	 *
 	 * @throws CalculationException
-	 * @throws SolverException
 	 */
 	@Test
-	public void testATMSwaptionCalibration() throws CalculationException, SolverException {
+	public void testATMSwaptionCalibration() throws CalculationException {
 
 		final int numberOfPaths		= 1000;
 		final int numberOfFactors	= 1;
 
 		// Curve Data as of December 8, 2017
-		DiscountCurveInterface discountCurve = (DiscountCurveInterface) DiscountCurve.createDiscountCurveFromDiscountFactors("discountCurve",
+		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("discountCurve",
 				// Times
 				new double[] {0,0.02739726,0.065753425,0.095890411,0.178082192,0.254794521,0.345205479,0.421917808,0.506849315,0.594520548,0.673972603,0.764383562,0.843835616,0.926027397,1.01369863,1.254794521,1.512328767,2.01369863,3.010958904,4.010958904,5.010958904,6.010958904,7.019178082,8.016438356,9.01369863,10.01369863,11.01643836,12.02191781,15.01917808,18.02465753,20.02191781,25.02739726,30.03287671,40.04109589,50.04109589},
 				// Discount Factors
@@ -277,7 +276,7 @@ public class LMMCalibrationTest{
 		Assert.assertTrue(Math.abs(averageDeviation) < 1E-3);
 	}
 
-	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) throws CalculationException {
+	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) {
 		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
 	}
 

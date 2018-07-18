@@ -77,10 +77,9 @@ class SimulationStub implements MonteCarloSimulationInterface {
 	 *
 	 * @param timeIndex Time index at which the process should be observed
 	 * @return A vector of positive weights which sums up to one
-	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getMonteCarloWeights(int timeIndex) throws CalculationException {
+	public RandomVariableInterface getMonteCarloWeights(int timeIndex) {
 		return null;
 	}
 
@@ -89,10 +88,9 @@ class SimulationStub implements MonteCarloSimulationInterface {
 	 *
 	 * @param time Time at which the process should be observed
 	 * @return A vector of positive weights which sums up to one
-	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getMonteCarloWeights(double time) throws CalculationException {
+	public RandomVariableInterface getMonteCarloWeights(double time) {
 		return null;
 	}
 
@@ -101,10 +99,9 @@ class SimulationStub implements MonteCarloSimulationInterface {
 	 *
 	 * @param dataModified The data which should be changed in the new model
 	 * @return Returns a clone of this model, with some data modified (then it is no longer a clone :-)
-	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public MonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException {
+	public MonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) {
 		return null;
 	}
 }

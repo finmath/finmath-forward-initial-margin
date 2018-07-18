@@ -27,7 +27,7 @@ public interface LIBORModelMonteCarloSimulationSIMMInterface extends LIBORModelM
 	 * Returns the map of <code> Double <code> (time) and <code> RandomVariableInterface <code> (numeraire Adjustment)
 	 * @return The numeraire adjustment map
 	 */
-	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
+	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 
 	/**
 	 * Returns the numeraire adjustment
@@ -59,7 +59,7 @@ public interface LIBORModelMonteCarloSimulationSIMMInterface extends LIBORModelM
 	 *
 	 * @return The random variable factory of this model
 	 */
-	public AbstractRandomVariableFactory getRandomVariableFactory();
+	AbstractRandomVariableFactory getRandomVariableFactory();
 
 
 }

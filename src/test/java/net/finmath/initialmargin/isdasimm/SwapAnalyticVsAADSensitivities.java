@@ -47,8 +47,8 @@ import net.finmath.time.TimeDiscretization;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
 
 public class SwapAnalyticVsAADSensitivities {
-	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
-	final static DecimalFormat formatterSensi 	= new DecimalFormat("0.000000000");
+	static final DecimalFormat formatterTime	= new DecimalFormat("0.000");
+	static final DecimalFormat formatterSensi 	= new DecimalFormat("0.000000000");
 
 	public  Map<Long,RandomVariableInterface> gradient;
 
@@ -234,7 +234,7 @@ public class SwapAnalyticVsAADSensitivities {
 
 		DiscountCurveInterface appliedDiscountCurve;
 		if(discountCurve==null) {
-			appliedDiscountCurve = (DiscountCurveInterface) new DiscountCurveFromForwardCurve(forwardCurve);
+			appliedDiscountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
 		} else {
 			appliedDiscountCurve = discountCurve;
 		}

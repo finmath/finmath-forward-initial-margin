@@ -58,23 +58,23 @@ public class SensitivityApproximationTest {
 			{ TestProductType.BERMUDANCALLABLE , WeightMode.CONSTANT },
 			{ TestProductType.BERMUDANCANCELABLE , WeightMode.CONSTANT },
 		});
-	};
+	}
 
-	final static DecimalFormat formatterTime	= new DecimalFormat("0.000");
+	static final DecimalFormat formatterTime	= new DecimalFormat("0.000");
 
 	// Model Paths
-	final static int numberOfPaths = 100; // Use 1000 or more for results in publication.
-	final static double simulationTimeDt = 0.25;		// Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
-	final static double notional = 100;
-	final static boolean isPrintProfile = false;
-	final static double fundingSpread = 0.005; // For MVA
+	static final int numberOfPaths = 100; // Use 1000 or more for results in publication.
+	static final double simulationTimeDt = 0.25;		// Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
+	static final double notional = 100;
+	static final boolean isPrintProfile = false;
+	static final double fundingSpread = 0.005; // For MVA
 
-	public static enum TestProductType {
+	public enum TestProductType {
 		SWAPS,
 		SWAPTIONS,
 		BERMUDANCALLABLE,
 		BERMUDANCANCELABLE
-	};
+	}
 
 
 	// Selected TestProducts
@@ -152,7 +152,7 @@ public class SensitivityApproximationTest {
 
 		System.out.println("Product....................: " + testProductType.name());
 		System.out.println("Forward rate risk weight...: " + weightMode.name());
-		System.out.println("");
+		System.out.println();
 
 		// Create test products
 		AbstractSIMMProduct[] products = createProducts(testProductType, exerciseDates, numberOfPeriods, forwardCurve, discountCurve);

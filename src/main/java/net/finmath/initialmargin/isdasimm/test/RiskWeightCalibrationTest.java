@@ -16,7 +16,7 @@ import net.finmath.time.TimeDiscretization;
 
 public class RiskWeightCalibrationTest {
 
-	public final static int numberOfPaths = 100;
+	public static final int numberOfPaths = 100;
 	public static final String[]  IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
 
 	public static void main(String[] args) throws CalculationException{
@@ -93,7 +93,7 @@ public class RiskWeightCalibrationTest {
 
 	}
 
-	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) throws CalculationException {
+	public static double getParSwaprate(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, double[] swapTenor) {
 		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
 	}
 }

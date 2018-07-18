@@ -39,9 +39,7 @@ public abstract class AbstractLIBORMonteCarloRegressionProduct extends AbstractL
 	public RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException{
 		return getCF(initialTime, finalTime, (LIBORModelMonteCarloSimulationInterface)model);
 
-	};
-
-
+	}
 
 
 }

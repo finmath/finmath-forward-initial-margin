@@ -22,7 +22,7 @@ import net.finmath.time.TimeDiscretizationInterface;
 public class InitialMarginForwardRegression {
 	private final double confidenceLevel = 0.99;
 	private final double MPR = 10.0/250.0;       // The Marginal Period of Risk: 10 Days
-	private enum Method {SIMPLE, LSQREGRESSION}; // The Method to calculate Initial Margin
+	private enum Method {SIMPLE, LSQREGRESSION} // The Method to calculate Initial Margin
 	private Method method;
 	private int polynomialOrder;                 // The order of the regression polynomial
 

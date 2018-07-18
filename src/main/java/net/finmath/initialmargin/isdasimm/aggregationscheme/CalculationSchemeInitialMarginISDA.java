@@ -124,11 +124,11 @@ public class CalculationSchemeInitialMarginISDA {
 
 		public Map<String,String>       MapFXCategory;
 
-		final public String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
-		final public String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
-		final public String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
-		final public String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
-		final public String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
+		public final String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
+		public final String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
+		public final String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
+		public final String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
+		public final String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
 
 		public Double             IRCorrelationCrossCurrency = .27;
 
@@ -171,7 +171,7 @@ public class CalculationSchemeInitialMarginISDA {
 	// SIMM constructor
 	public CalculationSchemeInitialMarginISDA(SIMMPortfolio portfolio,
 			//ParameterCollection parameterCollection, /* Uncomment this line if parameter collection constructor does not contain hard values */
-			String calculationCCY) throws CalculationException{
+			String calculationCCY) {
 		this.resultMap = new HashMap<>();
 		this.calculationCCY = calculationCCY;
 		this.products = portfolio.getProducts();
@@ -207,7 +207,7 @@ public class CalculationSchemeInitialMarginISDA {
 	}
 
 	// SIMM constructor
-	public CalculationSchemeInitialMarginISDA(AbstractSIMMProduct product, String calculationCCY) throws CalculationException{
+	public CalculationSchemeInitialMarginISDA(AbstractSIMMProduct product, String calculationCCY) {
 		this.resultMap = new HashMap<>();
 		this.calculationCCY = calculationCCY;
 		this.parameterCollection = new ParameterCollection();
@@ -229,7 +229,7 @@ public class CalculationSchemeInitialMarginISDA {
 	}
 
 	// SIMM constructor (for calibration only)
-	public CalculationSchemeInitialMarginISDA(String calculationCCY) throws CalculationException{
+	public CalculationSchemeInitialMarginISDA(String calculationCCY) {
 		this.resultMap = new HashMap<>();
 		this.calculationCCY = calculationCCY;
 		this.parameterCollection = new ParameterCollection();
@@ -547,7 +547,7 @@ public class CalculationSchemeInitialMarginISDA {
 					final int workerCalibrationProductIndex = calibrationProductIndex;
 					Callable<Double> worker = new  Callable<Double>() {
 						@Override
-						public Double call() throws SolverException {
+						public Double call() {
 							try {
 								return calibrationProducts[workerCalibrationProductIndex].getInitialMargin(0.0 /*evaluationTime*/, model, CalculationSchemeInitialMarginISDA.this).getAverage();
 							} catch (CalculationException e) {
