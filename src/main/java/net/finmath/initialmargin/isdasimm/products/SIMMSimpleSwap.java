@@ -75,10 +75,17 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 			double[] fixingDates,
 			double[] swapRates, /* Only relevant for OIS derivative*/
 			double   periodLength,
-			double   notional,
+			double[] notional,
 			LIBORModelMonteCarloSimulationInterface model,
-			String withRespectTo) throws CalculationException{
+			String withRespectTo) throws CalculationException
+	{
 
+		/*
+		 * Check notionals
+		 */
+		double constantNotional = notional[0];
+		for(double periodNotional : notional) if(periodNotional != constantNotional) throw new IllegalArgumentException("Currently only constant notionals are supported");
+		
 		RandomVariableInterface[] sensis = null;
 
 		// periodIndex: Index of the swap period at evaluationTime
@@ -137,7 +144,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct{
 		}
 		break;
 		}
-		sensis = Arrays.stream(sensis).map(n->n.mult(notional)).toArray(RandomVariableInterface[]::new);
+		sensis = Arrays.stream(sensis).map(n->n.mult(notional[0])).toArray(RandomVariableInterface[]::new);
 		return sensis;
 	}
 

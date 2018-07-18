@@ -1,5 +1,5 @@
 /*
- * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
+ * (c) Copyright Christian P. Fries, Germany. Contact: email@christian-fries.de.
  *
  * Created on 15.02.2004
  */
@@ -20,37 +20,12 @@ import net.finmath.stochastic.RandomVariableInterface;
  * @version 1.2
  */
 public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
-	private final double[] fixingDates;	// Vector of fixing dates
+	private final double[] fixingDates;		// Vector of fixing dates
 	private final double[] paymentDates;	// Vector of payment dates (same length as fixing dates)
 	private final double[] swaprates;		// Vector of strikes
 
 	private final boolean isPayFix;
-	private double[] notional = null;
-
-	/**
-	 * Create a swap.
-	 *
-	 * @param fixingDates Vector of fixing dates
-	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
-	 * @param swaprates Vector of strikes (must have same length as fixing dates)
-	 * @param isPayFix If true, the swap is receive float - pay fix, otherwise its receive fix - pay float.
-	 * @param constantNotional The constant notional
-	 */
-	public SimpleSwap(
-			double[] fixingDates,
-			double[] paymentDates,
-			double[] swaprates,
-			boolean isPayFix,
-			double constantNotional) {
-		super();
-		this.fixingDates = fixingDates;
-		this.paymentDates = paymentDates;
-		this.swaprates = swaprates;
-		this.isPayFix = isPayFix;
-		this.notional = new double[swaprates.length];
-		Arrays.fill(this.notional, constantNotional);
-	}
-
+	private final double[] notional;		// Vector of notionals
 
 	/**
 	 * Create a swap.
@@ -74,6 +49,31 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 		this.isPayFix = isPayFix;
 		this.notional = notional;
 	}
+
+	/**
+	 * Create a swap.
+	 *
+	 * @param fixingDates Vector of fixing dates
+	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
+	 * @param swaprates Vector of strikes (must have same length as fixing dates)
+	 * @param isPayFix If true, the swap is receive float - pay fix, otherwise its receive fix - pay float.
+	 * @param notional The constant notional
+	 */
+	public SimpleSwap(
+			double[] fixingDates,
+			double[] paymentDates,
+			double[] swaprates,
+			boolean isPayFix,
+			double notional) {
+		super();
+		this.fixingDates = fixingDates;
+		this.paymentDates = paymentDates;
+		this.swaprates = swaprates;
+		this.isPayFix = isPayFix;
+		this.notional = new double[swaprates.length];
+		Arrays.fill(this.notional, notional);
+	}
+
 
 	/**
 	 * Create a swap.
@@ -105,6 +105,22 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 			double[] swaprates,
 			double[] notional) {
 		this(fixingDates, paymentDates, swaprates, true, notional);
+	}
+
+	/**
+	 * Create a swap.
+	 *
+	 * @param fixingDates Vector of fixing dates
+	 * @param paymentDates Vector of payment dates (must have same length as fixing dates)
+	 * @param swaprates Vector of strikes (must have same length as fixing dates)
+	 * @deprecated
+	 */
+	@Deprecated
+	public SimpleSwap(
+			double[] fixingDates,
+			double[] paymentDates,
+			double[] swaprates) {
+		this(fixingDates, paymentDates, swaprates, true, 1.0);
 	}
 
 	/**
@@ -169,8 +185,8 @@ public class SimpleSwap extends AbstractLIBORMonteCarloProduct {
 		return this.fixingDates;
 	}
 
-	public double getNotional(){
-		return this.notional[0];
+	public double[] getNotional(){
+		return this.notional;
 	}
 
 	public double[] getSwapRates(){

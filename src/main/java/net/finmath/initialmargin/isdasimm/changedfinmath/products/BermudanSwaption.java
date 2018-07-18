@@ -1,5 +1,5 @@
 /*
- * (c) Copyright Christian P. Fries, Germany. All rights reserved. Contact: email@christian-fries.de.
+ * (c) Copyright Christian P. Fries, Germany. Contact: email@christian-fries.de.
  *
  * Created on 11.03.2006
  */
@@ -17,7 +17,7 @@ import net.finmath.stochastic.ConditionalExpectationEstimatorInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
- * Implements the valuation of a cancelable swap under a <code>LIBORModelMonteCarloSimulationInterface</code>
+ * Implements the valuation of a Bermudan swaption under a <code>LIBORModelMonteCarloSimulationInterface</code>
  *
  * @author Christian Fries
  * @version 1.2
@@ -116,13 +116,13 @@ public class BermudanSwaption extends AbstractLIBORMonteCarloProduct {
 			if(isCallable) {
 				valuesUnderlying = valuesUnderlying.add(payoff);
 			}
-			if(!isCallable)
+			else
 			{
-				values = values.add(payoff); // calcelable
+				values = values.add(payoff); // cancelable
 			}
 
 			if(isPeriodStartDateExerciseDate[period]) {
-				RandomVariableInterface triggerValuesDiscounted = values.sub(valuesUnderlying); // 0
+				RandomVariableInterface triggerValuesDiscounted = values.sub(valuesUnderlying);
 
 				// Remove foresight through condition expectation
 				ConditionalExpectationEstimatorInterface conditionalExpectationOperator = getConditionalExpectationEstimator(fixingDate, model);
@@ -178,7 +178,7 @@ public class BermudanSwaption extends AbstractLIBORMonteCarloProduct {
 	 */
 	private RandomVariableInterface[] getRegressionBasisFunctions(double fixingDate, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<RandomVariableInterface>();
+		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<>();
 
 		// Constant
 		// @TODO Use non differentiable
