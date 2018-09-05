@@ -10,13 +10,13 @@ import net.finmath.stochastic.RandomVariableInterface;
 public interface LIBORMarketModelSIMMInterface extends LIBORMarketModelInterface {//, LIBORModelSIMMInterface{
 
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
-	
+
 	AbstractRandomVariableFactory getRandomVariableFactory();
-	
+
 	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
-	
+
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 
 	RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException;
-	
+
 }

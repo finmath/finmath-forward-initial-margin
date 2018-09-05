@@ -12,7 +12,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Base class for products requiring an MonteCarloSimulationInterface for valuation.
- * 
+ *
  * @author Christian Fries
  */
 public abstract class AbstractMonteCarloRegressionProduct extends AbstractMonteCarloProduct {
@@ -24,7 +24,7 @@ public abstract class AbstractMonteCarloRegressionProduct extends AbstractMonteC
 	public AbstractMonteCarloRegressionProduct() {
 		this(null);
 	}
-	
+
 	public abstract RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException;
 
 }

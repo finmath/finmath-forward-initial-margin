@@ -1,32 +1,21 @@
 package net.finmath.initialmargin.isdasimm.changedfinmath;
 
-import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
+import java.util.Map;
 
-public interface LIBORMarketModelInterface extends LIBORModelInterface {
+import net.finmath.exception.CalculationException;
+import net.finmath.stochastic.RandomVariableInterface;
 
-	/**
-	 * Return the libor covariance model.
-	 * 
-	 * @return The covariance model.
-	 */
-	AbstractLIBORCovarianceModel getCovarianceModel();
+public interface LIBORMarketModelInterface extends net.finmath.montecarlo.interestrate.LIBORMarketModelInterface {
 
-	/**
-	 * Create a new object implementing LIBORMarketModelInterface, using the new covariance model.
-	 * 
-	 * @param calibrationCovarianceModel The new covariance model.
-	 * @return A new object implementing LIBORMarketModelInterface, using the new covariance model.
-	 */
-	LIBORMarketModelInterface getCloneWithModifiedCovarianceModel(AbstractLIBORCovarianceModel calibrationCovarianceModel);
+	// Added by Mario Viehmann
 
-	/**
-	 * Returns the integrated instantaneous log-forward rate covariance, i.e.,
-	 * \( \int_{0}^{t_i} \mathrm{d} \log(L_{j}) \mathrm{d} \log(L_{k}) \mathrm{d}t \).
-	 * 
-	 * The array returned has the parametrization [i][j][k], i.e.,
-	 * <code>integratedLIBORCovariance[timeIndex][componentIndex1][componentIndex2]</code>.
-	 * 
-	 * @return The integrated instantaneous log-LIBOR covariance.
-	 */
-	double[][][] getIntegratedLIBORCovariance();
+	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
+
+	Map<Double, RandomVariableInterface> getNumeraireCache();
+
+	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
+
+	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
+
+	RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException;
 }

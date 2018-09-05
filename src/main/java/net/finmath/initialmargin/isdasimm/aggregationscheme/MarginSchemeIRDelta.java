@@ -63,10 +63,13 @@ public class MarginSchemeIRDelta {
 
 		double singleCorrelation = calculationSchemeInitialMarginISDA.getParameterCollection().IRCorrelationCrossCurrency;
 		correlationMatrix = new Double[this.bucketKeys.length][this.bucketKeys.length];
-		for (i = 0; i< bucketKeys.length;i++)
-			for (int j = 0; j< bucketKeys.length;j++)
-				if ( i!=j)
+		for (i = 0; i< bucketKeys.length;i++) {
+			for (int j = 0; j< bucketKeys.length;j++) {
+				if ( i!=j) {
 					correlationMatrix[i][j] = getParameterG(concentrationFactors[i],concentrationFactors[j]).getAverage()*singleCorrelation;
+				}
+			}
+		}
 		VarCovar = CalculationSchemeInitialMarginISDA.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
 
@@ -96,7 +99,7 @@ public class MarginSchemeIRDelta {
 			String curveKey = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iCurve];
 
 			for (int iTenor = 0; iTenor < nTenors; iTenor++) {
-				String maturityBucketKey = calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets[iTenor];               
+				String maturityBucketKey = calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets[iTenor];
 				netSensitivities[iCurve][iTenor] = calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, maturityBucketKey, curveKey, bucketKey, "delta", atTime);
 			}
 
@@ -113,13 +116,14 @@ public class MarginSchemeIRDelta {
 		int dimensionTotal=nTenors*nCurves+2;
 		RandomVariableInterface[] contributions = new RandomVariableInterface[dimensionTotal];
 
-		for (int iCurve = 0; iCurve <nCurves; iCurve++)
+		for (int iCurve = 0; iCurve <nCurves; iCurve++) {
 			for (int iTenor = 0; iTenor <nTenors; iTenor++)
 			{
 				String curveKey = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iCurve];
 				RandomVariableInterface iBucketSensi = this.getWeightedNetSensitivity(iTenor, iCurve,curveKey, bucketKey,netSensitivities,concentrationRiskFactor, atTime);
 				contributions[iCurve*nTenors+iTenor] = iBucketSensi;
 			}
+		}
 
 		RandomVariableInterface inflationSensi = this.getWeightedNetSensitivity(0,0,"inflation",bucketKey,netSensitivities,concentrationRiskFactor,atTime);
 		RandomVariableInterface ccyBasisSensi = this.getWeightedNetSensitivity(0,0,"ccybasis",bucketKey,netSensitivities,concentrationRiskFactor,atTime);
@@ -144,19 +148,20 @@ public class MarginSchemeIRDelta {
 		{
 			Optional<Map.Entry<String, String>> optional = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurrencyMap.entrySet().stream().filter(entry -> entry.getKey().contains(bucketKey)).findAny();
 			String currencyMapKey;
-			if (!optional.isPresent())
+			if (!optional.isPresent()) {
 				currencyMapKey = "High_Volatility_Currencies";
-			else
+			} else {
 				currencyMapKey = optional.get().getValue();
+			}
 			currencyMapKey = currencyMapKey.replace("_Traded", "").replace("_Well", "").replace("_Less", "");
 			Double[] riskWeights = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("InterestRate").get(currencyMapKey)[0];
 			riskWeight = riskWeights[iRateTenor];
 			RandomVariableInterface netSensi =  netSensitivities[iIndex][iRateTenor];
 			if (netSensi!=null) {
 				return netSensi.mult(riskWeight).mult(concentrationRiskFactor);
-			}
-			else
+			} else {
 				return new RandomVariable(atTime,this.calculationSchemeInitialMarginISDA.getPathDimension(),0.0);
+			}
 		}
 		else { /* Inflation or CCYBasis*/
 			riskWeight = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("InterestRate").get(indexName)[0][0];
@@ -169,9 +174,9 @@ public class MarginSchemeIRDelta {
 					netSensi = netSensi.mult(concentrationRiskFactor);
 				}
 				return  netSensi;
-			}
-			else
+			} else {
 				return null;
+			}
 		}
 	}
 
@@ -199,8 +204,9 @@ public class MarginSchemeIRDelta {
 			for (int iTenor = 0; iTenor < calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets.length; iTenor++) {
 				String key = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iIndex];
 				RandomVariableInterface summand = getWeightedNetSensitivity(iTenor,iIndex, key, bucketKey,netSensitivities,concentrationRiskFactor, atTime);
-				if (summand !=null)
+				if (summand !=null) {
 					aggregatedSensi = aggregatedSensi == null ? aggregatedSensi = summand : aggregatedSensi.add(summand);
+				}
 			}
 		}
 		RandomVariableInterface inflationSensi = this.getWeightedNetSensitivity(0,0,"inflation",bucketKey,netSensitivities,concentrationRiskFactor,atTime);
@@ -215,20 +221,24 @@ public class MarginSchemeIRDelta {
 			for (int iTenor = 0; iTenor < calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets.length; iTenor++) {
 				String key = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iIndex];
 				RandomVariableInterface summand = netSensitivities[iIndex][iTenor];//calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey,this.riskClassKey,iTenor,key,bucketKey,"delta",atTime);//"ccybasis",bucketKey,"delta",atTime);//getWeightedNetSensitivity(iTenor, key, bucketKey, atTime);
-				if (summand !=null)
+				if (summand !=null) {
 					sensitivitySum = sensitivitySum == null ? sensitivitySum = summand : sensitivitySum.add(summand);
+				}
 			}
 		}
 		RandomVariableInterface inflationSensi = calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey,this.riskClassKey,"","inflation",bucketKey,"delta",atTime);
 		if ( sensitivitySum !=null && inflationSensi !=null)
+		{
 			sensitivitySum = sensitivitySum.add(inflationSensi); // Inflation Sensi are included in Sum, CCYBasis not
+		}
 
 		Optional<Map.Entry<String,String> > optional = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurrencyMap.entrySet().stream().filter(entry->entry.getKey().contains(bucketKey)).findAny();
 		String currencyMapKey;
-		if (!optional.isPresent())
+		if (!optional.isPresent()) {
 			currencyMapKey="High_Volatility_Currencies";
-		else
+		} else {
 			currencyMapKey = optional.get().getValue();
+		}
 
 		double concentrationThreshold = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassThresholdMap.get(this.riskTypeKey).get(riskClassKey).get(currencyMapKey)[0][0];
 		RandomVariableInterface CR = (sensitivitySum.abs().div(concentrationThreshold)).sqrt();

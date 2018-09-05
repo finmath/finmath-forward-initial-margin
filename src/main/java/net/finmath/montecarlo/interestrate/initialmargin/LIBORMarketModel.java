@@ -59,10 +59,10 @@ import net.finmath.time.TimeDiscretizationInterface;
  *	</li>
  * 	<li>
  * 		The class allows to configure a discounting curve (e.g.&nbsp;for "OIS discounting") using a simple deterministic zero spread.
- * 		In this case, the numeraire \( N(t) \) is adjusted by \( \exp( \int_0^t -\lambda(\tau) d\tau ) \). 
+ * 		In this case, the numeraire \( N(t) \) is adjusted by \( \exp( \int_0^t -\lambda(\tau) d\tau ) \).
  *	</li>
  * </ul>
- * 
+ *
  * <br>
  * The class specifies a LIBOR market model, that is
  * <i>L<sub>j</sub> = f(Y<sub>j</sub>) </i> where
@@ -123,11 +123,11 @@ import net.finmath.time.TimeDiscretizationInterface;
  * <br>
  * The main task of this class is to calculate the risk-neutral drift and the
  * corresponding numeraire given the covariance model.
- * 
+ *
  * The calibration of the covariance structure is not part of this class. For the calibration
  * of parametric models of the instantaneous covariance see
  * {@link net.finmath.montecarlo.interestrate.initialmargin.modelplugins.AbstractLIBORCovarianceModelParametric#getCloneCalibrated(LIBORMarketModelInterface, AbstractLIBORMonteCarloRegressionProduct[], double[], double[], Map)}.
- * 
+ *
  * @author Christian Fries
  * @version 1.2
  * @see net.finmath.montecarlo.process.AbstractProcessInterface The interface for numerical schemes.
@@ -241,7 +241,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	 *			</ul>
 	 *		</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param liborPeriodDiscretization The discretization of the interest rate curve into forward rates (tenor structure).
 	 * @param analyticModel The associated analytic model of this model (containing the associated market data objects like curve).
 	 * @param forwardRateCurve The initial values for the forward rates.
@@ -250,7 +250,6 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	 * @param covarianceModel The covariance model to use.
 	 * @param calibrationItems The vector of calibration items (a union of a product, target value and weight) for the objective function sum weight(i) * (modelValue(i)-targetValue(i).
 	 * @param properties Key value map specifying properties like <code>measure</code> and <code>stateSpace</code>.
-	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@SuppressWarnings("unchecked")
 	public LIBORMarketModel(
@@ -262,15 +261,23 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			AbstractLIBORCovarianceModel		covarianceModel,
 			CalibrationItem[]					calibrationItems,
 			Map<String, ?>						properties
-			) throws CalculationException {
+			) {
 
 		// Set some properties
-		if(properties != null && properties.containsKey("measure"))					measure		= Measure.valueOf(((String)properties.get("measure")).toUpperCase());
-		if(properties != null && properties.containsKey("stateSpace"))				stateSpace	= StateSpace.valueOf(((String)properties.get("stateSpace")).toUpperCase());
-		if(properties != null && properties.containsKey("liborCap"))				liborCap	= (Double)properties.get("liborCap");
+		if(properties != null && properties.containsKey("measure")) {
+			measure		= Measure.valueOf(((String)properties.get("measure")).toUpperCase());
+		}
+		if(properties != null && properties.containsKey("stateSpace")) {
+			stateSpace	= StateSpace.valueOf(((String)properties.get("stateSpace")).toUpperCase());
+		}
+		if(properties != null && properties.containsKey("liborCap")) {
+			liborCap	= (Double)properties.get("liborCap");
+		}
 
 		Map<String,Object> calibrationParameters = null;
-		if(properties != null && properties.containsKey("calibrationParameters"))	calibrationParameters	= (Map<String,Object>)properties.get("calibrationParameters");
+		if(properties != null && properties.containsKey("calibrationParameters")) {
+			calibrationParameters	= (Map<String,Object>)properties.get("calibrationParameters");
+		}
 
 		this.liborPeriodDiscretization	= liborPeriodDiscretization;
 		this.curveModel					= analyticModel;
@@ -280,7 +287,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 		this.covarianceModel		= covarianceModel;
 
 		double[] times = new double[liborPeriodDiscretization.getNumberOfTimeSteps()];
-		for(int i=0; i<times.length; i++) times[i] = liborPeriodDiscretization.getTime(i);
+		for(int i=0; i<times.length; i++) {
+			times[i] = liborPeriodDiscretization.getTime(i);
+		}
 
 		// Perform calibration, if data is given
 		if(calibrationItems != null && calibrationItems.length > 0) {
@@ -302,7 +311,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 				calibrationWeights[i]		= calibrationItems[i].calibrationWeight;
 			}
 
-//			this.covarianceModel    = covarianceModelParametric.getCloneCalibrated(this, calibrationProducts, calibrationTargetValues, calibrationWeights, calibrationParameters);
+			//			this.covarianceModel    = covarianceModelParametric.getCloneCalibrated(this, calibrationProducts, calibrationTargetValues, calibrationWeights, calibrationParameters);
 		}
 
 		numeraires = new ConcurrentHashMap<Integer, RandomVariableInterface>();
@@ -312,7 +321,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	/**
 	 * Creates a LIBOR Market Model for given covariance.
-	 * 
+	 *
 	 * @param liborPeriodDiscretization The discretization of the interest rate curve into forward rates (tenor structure).
 	 * @param forwardRateCurve The initial values for the forward rates.
 	 * @param discountCurve The discount curve to use. This will create an LMM model with a deterministic zero-spread discounting adjustment.
@@ -329,10 +338,10 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 		this(liborPeriodDiscretization, forwardRateCurve, discountCurve, randomVariableFactory, covarianceModel, new CalibrationItem[0], null);
 	}
 
-	
+
 	/**
 	 * Creates a LIBOR Market Model for given covariance.
-	 * 
+	 *
 	 * @param liborPeriodDiscretization The discretization of the interest rate curve into forward rates (tenor structure).
 	 * @param forwardRateCurve The initial values for the forward rates.
 	 * @param discountCurve The discount curve to use. This will create an LMM model with a deterministic zero-spread discounting adjustment.
@@ -361,7 +370,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	/**
 	 * Creates a LIBOR Market Model for given covariance.
-	 * 
+	 *
 	 * @param liborPeriodDiscretization The discretization of the interest rate curve into forward rates (tenor structure).
 	 * @param forwardRateCurve The initial values for the forward rates.
 	 * @param discountCurve The discount curve to use. This will create an LMM model with a deterministic zero-spread discounting adjustment.
@@ -447,7 +456,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	 *			</ul>
 	 *		</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param liborPeriodDiscretization The discretization of the interest rate curve into forward rates (tenor structure).
 	 * @param forwardRateCurve The initial values for the forward rates.
 	 * @param discountCurve The discount curve to use. This will create an LMM model with a deterministic zero-spread discounting adjustment.
@@ -468,12 +477,14 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 		this(liborPeriodDiscretization, null, forwardRateCurve, discountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
 	}
 
-	
+
 
 
 
 	private static CalibrationItem[] getCalibrationItems(TimeDiscretizationInterface liborPeriodDiscretization, ForwardCurveInterface forwardCurve, AbstractSwaptionMarketData swaptionMarketData, boolean isUseAnalyticApproximation) {
-		if(swaptionMarketData == null) return null;
+		if(swaptionMarketData == null) {
+			return null;
+		}
 
 		TimeDiscretizationInterface	optionMaturities		= swaptionMarketData.getOptionMaturities();
 		TimeDiscretizationInterface	tenor					= swaptionMarketData.getTenor();
@@ -487,8 +498,12 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 				double exerciseDate	= optionMaturities.getTime(exerciseIndex);
 				double swapLength	= tenor.getTime(tenorIndex);
 
-				if(liborPeriodDiscretization.getTimeIndex(exerciseDate) < 0) continue;
-				if(liborPeriodDiscretization.getTimeIndex(exerciseDate+swapLength) <= liborPeriodDiscretization.getTimeIndex(exerciseDate)) continue;
+				if(liborPeriodDiscretization.getTimeIndex(exerciseDate) < 0) {
+					continue;
+				}
+				if(liborPeriodDiscretization.getTimeIndex(exerciseDate+swapLength) <= liborPeriodDiscretization.getTimeIndex(exerciseDate)) {
+					continue;
+				}
 
 				int numberOfPeriods = (int)(swapLength / swapPeriodLength);
 
@@ -539,11 +554,11 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	/**
 	 * Return the numeraire at a given time.
-	 * 
+	 *
 	 * The numeraire is provided for interpolated points. If requested on points which are not
 	 * part of the tenor discretization, the numeraire uses a linear interpolation of the reciprocal
 	 * value. See ISBN 0470047224 for details.
-	 * 
+	 *
 	 * @param time Time time <i>t</i> for which the numeraire should be returned <i>N(t)</i>.
 	 * @return The numeraire at the specified time as <code>RandomVariableInterface</code>
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
@@ -556,16 +571,18 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			// Interpolation of Numeraire: log linear interpolation.
 			int upperIndex = -timeIndex-1;
 			int lowerIndex = upperIndex-1;
-			if(lowerIndex < 0) throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			if(lowerIndex < 0) {
+				throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			}
 			double alpha = (time-getLiborPeriod(lowerIndex)) / (getLiborPeriod(upperIndex) - getLiborPeriod(lowerIndex));
 			RandomVariableInterface numeraire = getUnadjustedNumeraire(upperIndex).log().mult(alpha).add(getUnadjustedNumeraire(lowerIndex).log().mult(1.0-alpha)).exp();
 
-			// Adjust for discounting, i.e. funding or collateralization 
-			if(discountCurve != null) {							
+			// Adjust for discounting, i.e. funding or collateralization
+			if(discountCurve != null) {
 				if(!numeraireAdjustmentCache.containsKey(time)){
-				   RandomVariableInterface deterministicNumeraireAdjustment = getRandomVariableForConstant(numeraire.pow(-1.0).getAverage()).div(discountCurve.getDiscountFactor(time));
-				   numeraireAdjustmentCache.put(time, deterministicNumeraireAdjustment);
-				}				
+					RandomVariableInterface deterministicNumeraireAdjustment = getRandomVariableForConstant(numeraire.pow(-1.0).getAverage()).div(discountCurve.getDiscountFactor(time));
+					numeraireAdjustmentCache.put(time, deterministicNumeraireAdjustment);
+				}
 				numeraire = numeraire.mult(numeraireAdjustmentCache.get(time));
 			}
 
@@ -578,24 +595,26 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			numerairesProcess = getProcess();
 		}
 
-		// Check if numeraire is part of the cache		
-		if(numeraires.get(timeIndex) == null) doCalculateNumeraire(timeIndex);
-		RandomVariableInterface numeraire = numeraires.get(timeIndex);
-		
-		//Adjust for discounting, i.e. funding or collateralization				
-		if(discountCurve != null) {
-							
-			if(!numeraireAdjustmentCache.containsKey(time)){
-			   RandomVariableInterface deterministicNumeraireAdjustment = getRandomVariableForConstant(numeraire.pow(-1.0).getAverage()).div(discountCurve.getDiscountFactor(time));
-			   numeraireAdjustmentCache.put(time, deterministicNumeraireAdjustment);
-			}
-			
-				numeraire = numeraire.mult(numeraireAdjustmentCache.get(time));
+		// Check if numeraire is part of the cache
+		if(numeraires.get(timeIndex) == null) {
+			doCalculateNumeraire(timeIndex);
 		}
-			
+		RandomVariableInterface numeraire = numeraires.get(timeIndex);
+
+		//Adjust for discounting, i.e. funding or collateralization
+		if(discountCurve != null) {
+
+			if(!numeraireAdjustmentCache.containsKey(time)){
+				RandomVariableInterface deterministicNumeraireAdjustment = getRandomVariableForConstant(numeraire.pow(-1.0).getAverage()).div(discountCurve.getDiscountFactor(time));
+				numeraireAdjustmentCache.put(time, deterministicNumeraireAdjustment);
+			}
+
+			numeraire = numeraire.mult(numeraireAdjustmentCache.get(time));
+		}
+
 		return numeraire;
 	}
-	
+
 	private void doCalculateNumeraire(int timeIndex) throws CalculationException{ // Unadjusted numeraires
 		double time = getLiborPeriod(timeIndex);
 
@@ -617,12 +636,11 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			// Spot measure
 			firstLiborIndex	= 0;
 			lastLiborIndex	= getLiborPeriodIndex(time)-1;
-		}
-		else {
+		} else {
 			throw new CalculationException("Numeraire not implemented for specified measure.");
 		}
 
-		// The product 
+		// The product
 		for(int liborIndex = firstLiborIndex; liborIndex<=lastLiborIndex; liborIndex++) {
 			RandomVariableInterface libor = getLIBOR(getTimeIndex(Math.min(time,liborPeriodDiscretization.getTime(liborIndex))), liborIndex);
 
@@ -634,12 +652,12 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			else {
 				numeraire = numeraire.discount(libor, periodLength);
 			}
-			
+
 		}
-		
+
 		numeraires.put(timeIndex, numeraire);
 	}
-	
+
 	private RandomVariableInterface getUnadjustedNumeraire(int timeIndex) throws CalculationException{
 		/*
 		 * Check if numeraire cache is values (i.e. process did not change)
@@ -648,23 +666,27 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			numeraires.clear();
 			numerairesProcess = getProcess();
 		}
-		
+
 		if(numeraires.get(timeIndex)==null) {
 			doCalculateNumeraire(timeIndex);
 		}
-		
+
 		return numeraires.get(timeIndex);
 	}
-	
-	
+
+
+	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
 		return this.numeraireAdjustmentCache;
 	}
-	
-	 
+
+
+	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
-		if(numeraireAdjustmentCache.containsKey(time)) return numeraireAdjustmentCache.get(time);
-		
+		if(numeraireAdjustmentCache.containsKey(time)) {
+			return numeraireAdjustmentCache.get(time);
+		}
+
 		// Get unadjusted Numeraire
 		int timeIndex = getLiborPeriodIndex(time);
 		RandomVariableInterface numeraireUnadjusted;
@@ -673,74 +695,80 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			// Interpolation of Numeraire: log linear interpolation.
 			int upperIndex = -timeIndex-1;
 			int lowerIndex = upperIndex-1;
-			if(lowerIndex < 0) throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			if(lowerIndex < 0) {
+				throw new IllegalArgumentException("Numeraire requested for time " + time + ". Unsupported");
+			}
 
-			double alpha = (time-getLiborPeriod(lowerIndex)) / (getLiborPeriod(upperIndex) - getLiborPeriod(lowerIndex));  
+			double alpha = (time-getLiborPeriod(lowerIndex)) / (getLiborPeriod(upperIndex) - getLiborPeriod(lowerIndex));
 			numeraireUnadjusted = getUnadjustedNumeraire(upperIndex).log().mult(alpha).add(getUnadjustedNumeraire(lowerIndex).log().mult(1.0-alpha)).exp();
-					
+
 		} else {
 			numeraireUnadjusted = getUnadjustedNumeraire(timeIndex);
 		}
-		
+
 		RandomVariableInterface adjustment = getRandomVariableForConstant(numeraireUnadjusted.invert().getAverage()).div(discountCurve.getDiscountFactor(time));
-		
-	    return adjustment;
+
+		return adjustment;
 	}
-	
-	
+
+
 	/** Calculate P(T;t) directly from Libors without using conditional expectation
-	 * 
+	 *
 	 * @param T final time
-	 * @param t initial time 
+	 * @param t initial time
 	 * @return P(T;t)
-	 * @throws CalculationException 
+	 * @throws CalculationException
 	 */
+	@Override
 	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException{
-		
+
 		int firstLiborIndex = getLiborPeriodIndex(t);
 		int lastLiborIndex  = getLiborPeriodIndex(T);
-		
-		if(firstLiborIndex==lastLiborIndex) return getLIBOR(t, t, T).mult(T-t).add(1.0).invert();
-		
+
+		if(firstLiborIndex==lastLiborIndex) {
+			return getLIBOR(t, t, T).mult(T-t).add(1.0).invert();
+		}
+
 		int initialIndex = firstLiborIndex < 0 ? -firstLiborIndex-1 : firstLiborIndex;
 		int finalIndex = lastLiborIndex < 0 ? - lastLiborIndex-2 : lastLiborIndex;
-		
+
 		double firstLiborTime = getLiborPeriod(initialIndex);
 		double lastLiborTime  = getLiborPeriod(finalIndex);
 		RandomVariableInterface bond = new RandomVariable(1.0);
-		
+
 		RandomVariableInterface firstBond =  firstLiborIndex < 0 ? getLIBOR(t, t, firstLiborTime).mult(firstLiborTime-t).add(1.0).invert() : new RandomVariable(1.0);
 		RandomVariableInterface lastBond  =  lastLiborIndex < 0 ? getLIBOR(t, lastLiborTime,T).mult(T-lastLiborTime).add(1.0).invert() : new RandomVariable(1.0);
-		
+
 		for(int i = initialIndex; i<finalIndex; i++){
 			double liborPeriodLength = getLiborPeriod(i+1)-getLiborPeriod(i);
 			RandomVariableInterface factor = getLIBOR(getTimeDiscretization().getTimeIndexNearestLessOrEqual(t), i).mult(liborPeriodLength).add(1.0).invert();
 			bond = bond.mult(factor);
 		}
-		
+
 		return bond.mult(firstBond).mult(lastBond);
 
 	}
-	
+
 	/**Returns the forward bond P(T;t) from on the OIS curve for a given Libor market model
-	 * 
-	 * @param T The maturity of the forward bond 
+	 *
+	 * @param T The maturity of the forward bond
 	 * @param t The inception of the forward bond
 	 * @param model The Libor market model
 	 * @return The forward bond P(T;t) on the OIS curve
 	 * @throws CalculationException
 	 */
+	@Override
 	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
-		
+
 		// Get bondOIS = P^OIS(T;t) = P^L(T;t)*a_t/a_T
 		RandomVariableInterface adjustment_t = getNumeraireOISAdjustmentFactor(t);
 		RandomVariableInterface adjustment_T = getNumeraireOISAdjustmentFactor(T);
-		
+
 		return getForwardBondLibor(T,t).mult(adjustment_t).div(adjustment_T);
 	}
 
-	
-	
+
+
 	@Override
 	public RandomVariableInterface[] getInitialState() {
 		double[] liborInitialStates = new double[liborPeriodDiscretization.getNumberOfTimeSteps()];
@@ -760,7 +788,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	/**
 	 * Return the complete vector of the drift for the time index timeIndex, given that current state is realizationAtTimeIndex.
 	 * The drift will be zero for rates being already fixed.
-	 * 
+	 *
 	 * The method currently provides the drift for either <code>Measure.SPOT</code> or <code>Measure.TERMINAL</code> - depending how the
 	 * model object was constructed. For <code>Measure.TERMINAL</code> the j-th entry of the return value is the random variable
 	 * \[
@@ -772,15 +800,15 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	 * \]
 	 * where \( \lambda_{j} \) is the vector for factor loadings for the j-th component of the stochastic process (that is, the diffusion part is
 	 * \( \sum_{k=1}^m \lambda_{j,k} \mathrm{d}W_{k} \)).
-	 * 
+	 *
 	 * Note: The scalar product of the factor loadings determines the instantaneous covariance. If the model is written in log-coordinates (using exp as a state space transform), we find
 	 * \(\lambda_{j} \cdot \lambda_{l} = \sum_{k=1}^m \lambda_{j,k} \lambda_{l,k} = \sigma_{j} \sigma_{l} \rho_{j,l} \).
 	 * If the model is written without a state space transformation (in its orignial coordinates) then \(\lambda_{j} \cdot \lambda_{l} = \sum_{k=1}^m \lambda_{j,k} \lambda_{l,k} = L_{j} L_{l} \sigma_{j} \sigma_{l} \rho_{j,l} \).
-	 * 
-	 * 
+	 *
+	 *
 	 * @see net.finmath.montecarlo.interestrate.LIBORMarketModel#getNumeraire(double) The calculation of the drift is consistent with the calculation of the numeraire in <code>getNumeraire</code>.
 	 * @see net.finmath.montecarlo.interestrate.LIBORMarketModel#getFactorLoading(int, int, RandomVariableInterface[]) The factor loading \( \lambda_{j,k} \).
-	 * 
+	 *
 	 * @param timeIndex Time index <i>i</i> for which the drift should be returned <i>&mu;(t<sub>i</sub>)</i>.
 	 * @param realizationAtTimeIndex Time current forward rate vector at time index <i>i</i> which should be used in the calculation.
 	 * @return The drift vector &mu;(t<sub>i</sub>) as <code>RandomVariable[]</code>
@@ -789,7 +817,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	public RandomVariableInterface[] getDrift(int timeIndex, RandomVariableInterface[] realizationAtTimeIndex, RandomVariableInterface[] realizationPredictor) {
 		double	time				= getTime(timeIndex);
 		int		firstLiborIndex		= this.getLiborPeriodIndex(time)+1;
-		if(firstLiborIndex<0) firstLiborIndex = -firstLiborIndex-1 + 1;
+		if(firstLiborIndex<0) {
+			firstLiborIndex = -firstLiborIndex-1 + 1;
+		}
 
 		RandomVariableInterface		zero	= getRandomVariableForConstant(0.0);
 
@@ -811,7 +841,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 				RandomVariableInterface		libor			= realizationAtTimeIndex[componentIndex];
 				RandomVariableInterface		oneStepMeasureTransform = getRandomVariableForConstant(periodLength).discount(libor, periodLength);
 
-				if(stateSpace == StateSpace.LOGNORMAL) oneStepMeasureTransform = oneStepMeasureTransform.mult(libor);
+				if(stateSpace == StateSpace.LOGNORMAL) {
+					oneStepMeasureTransform = oneStepMeasureTransform.mult(libor);
+				}
 
 				RandomVariableInterface[]	factorLoading   	= getFactorLoading(timeIndex, componentIndex, realizationAtTimeIndex);
 				for(int factorIndex=0; factorIndex<getNumberOfFactors(); factorIndex++) {
@@ -827,7 +859,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 				RandomVariableInterface libor			= realizationAtTimeIndex[componentIndex];
 				RandomVariableInterface oneStepMeasureTransform = getRandomVariableForConstant(periodLength).discount(libor, periodLength);
 
-				if(stateSpace == StateSpace.LOGNORMAL) oneStepMeasureTransform = oneStepMeasureTransform.mult(libor);
+				if(stateSpace == StateSpace.LOGNORMAL) {
+					oneStepMeasureTransform = oneStepMeasureTransform.mult(libor);
+				}
 
 				RandomVariableInterface[]	factorLoading   	= getFactorLoading(timeIndex, componentIndex, realizationAtTimeIndex);
 				for(int factorIndex=0; factorIndex<getNumberOfFactors(); factorIndex++) {
@@ -858,9 +892,13 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	public RandomVariableInterface applyStateSpaceTransform(int componentIndex, RandomVariableInterface randomVariable) {
 		RandomVariableInterface value = randomVariable;
 
-		if(stateSpace == StateSpace.LOGNORMAL)	value = value.exp();
+		if(stateSpace == StateSpace.LOGNORMAL) {
+			value = value.exp();
+		}
 
-		if(!Double.isInfinite(liborCap)) value = value.cap(liborCap);
+		if(!Double.isInfinite(liborCap)) {
+			value = value.cap(liborCap);
+		}
 
 		return value;
 	}
@@ -869,7 +907,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 	public RandomVariableInterface applyStateSpaceTransformInverse(int componentIndex, RandomVariableInterface randomVariable) {
 		RandomVariableInterface value = randomVariable;
 
-		if(stateSpace == StateSpace.LOGNORMAL)	value = value.log();
+		if(stateSpace == StateSpace.LOGNORMAL) {
+			value = value.log();
+		}
 
 		return value;
 	}
@@ -948,7 +988,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 			return libor;
 		}
 
-		if(periodStartIndex < 0 || periodEndIndex < 0) throw new AssertionError("LIBOR requested outside libor discretization points and interpolation was not performed.");
+		if(periodStartIndex < 0 || periodEndIndex < 0) {
+			throw new AssertionError("LIBOR requested outside libor discretization points and interpolation was not performed.");
+		}
 
 		// If time is beyond fixing, use the fixing time.
 		time = Math.min(time, periodStart);
@@ -962,7 +1004,9 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 		}
 
 		// If this is a model primitive then return it
-		if(periodStartIndex+1==periodEndIndex) return getLIBOR(timeIndex, periodStartIndex);
+		if(periodStartIndex+1==periodEndIndex) {
+			return getLIBOR(timeIndex, periodStartIndex);
+		}
 
 		// The requested LIBOR is not a model primitive. We need to calculate it (slow!)
 		RandomVariableInterface accrualAccount = null; //=randomVariableFactory.createRandomVariable(1.0);
@@ -1087,14 +1131,10 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	@Override
 	public Object clone() {
-		try {
-			Map<String, Object> properties = new HashMap<String, Object>();
-			properties.put("measure",		measure.name());
-			properties.put("stateSpace",	stateSpace.name());
-			return new LIBORMarketModel(getLiborPeriodDiscretization(), getAnalyticModel(), getForwardRateCurve(), discountCurve, randomVariableFactory, covarianceModel, new CalibrationItem[0], properties);
-		} catch (CalculationException e) {
-			return null;
-		}
+		Map<String, Object> properties = new HashMap<String, Object>();
+		properties.put("measure",		measure.name());
+		properties.put("stateSpace",	stateSpace.name());
+		return new LIBORMarketModel(getLiborPeriodDiscretization(), getAnalyticModel(), getForwardRateCurve(), discountCurve, randomVariableFactory, covarianceModel, new CalibrationItem[0], properties);
 	}
 
 	@Override
@@ -1102,8 +1142,8 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 		return curveModel;
 	}
 
-	
-	
+
+
 
 	@Override
 	public ForwardCurveInterface getForwardRateCurve() {
@@ -1112,7 +1152,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelS
 
 	/**
 	 * Return the swaption market data used for calibration (if any, may be null).
-	 * 
+	 *
 	 * @return The swaption market data used for calibration (if any, may be null).
 	 */
 	public AbstractSwaptionMarketData getSwaptionMarketData() {

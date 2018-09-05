@@ -1,5 +1,5 @@
 /**
- * The function getCF() has been added to these products. Swap is special: Here we 
+ * The function getCF() has been added to these products. Swap is special: Here we
  */
 /**
  * @author Mario Viehmann

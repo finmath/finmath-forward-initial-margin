@@ -14,7 +14,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * A linear combination index paying scaling1 * index1(t) + scaling2 * index2(t)
- * 
+ *
  * @author Christian Fries
  */
 public class LinearCombinationIndex extends AbstractIndex {
@@ -26,15 +26,15 @@ public class LinearCombinationIndex extends AbstractIndex {
 	private double scaling1;
 	private double scaling2;
 
-    /**
-     * Create a linear combination index paying scaling1 * index1(t) + scaling2 * index2(t)
-     * 
-     * @param scaling1 Scaling for first index.
-     * @param index1 First index.
-     * @param scaling2 Scaling for second index.
-     * @param index2 Second index.
-     */
-    public LinearCombinationIndex(double scaling1, AbstractProductComponent index1, double scaling2, AbstractProductComponent index2) {
+	/**
+	 * Create a linear combination index paying scaling1 * index1(t) + scaling2 * index2(t)
+	 *
+	 * @param scaling1 Scaling for first index.
+	 * @param index1 First index.
+	 * @param scaling2 Scaling for second index.
+	 * @param index2 Second index.
+	 */
+	public LinearCombinationIndex(double scaling1, AbstractProductComponent index1, double scaling2, AbstractProductComponent index2) {
 		super();
 		this.scaling1	= scaling1;
 		this.index1		= index1;
@@ -42,15 +42,15 @@ public class LinearCombinationIndex extends AbstractIndex {
 		this.index2		= index2;
 	}
 
-    @Override
-    public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-    	return index1.getValue(evaluationTime, model).mult(scaling1)
-    			.addProduct(index2.getValue(evaluationTime, model),scaling2);
-    }
+	@Override
+	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		return index1.getValue(evaluationTime, model).mult(scaling1)
+				.addProduct(index2.getValue(evaluationTime, model),scaling2);
+	}
 
 	/**
 	 * Returns the index 1.
-	 * 
+	 *
 	 * @return the index 1.
 	 */
 	public AbstractProductComponent getIndex1() {
@@ -59,7 +59,7 @@ public class LinearCombinationIndex extends AbstractIndex {
 
 	/**
 	 * Returns the index 2.
-	 * 
+	 *
 	 * @return the index 2
 	 */
 	public AbstractProductComponent getIndex2() {
@@ -68,7 +68,7 @@ public class LinearCombinationIndex extends AbstractIndex {
 
 	/**
 	 * Returns the scaling 1.
-	 * 
+	 *
 	 * @return the scaling 1
 	 */
 	public double getScaling1() {
@@ -77,7 +77,7 @@ public class LinearCombinationIndex extends AbstractIndex {
 
 	/**
 	 * Returns the scaling 2.
-	 * 
+	 *
 	 * @return the scaling 2
 	 */
 	public double getScaling2() {
@@ -89,8 +89,11 @@ public class LinearCombinationIndex extends AbstractIndex {
 		Set<String> underlyingNames			= index1.queryUnderlyings();
 		Set<String>	underlyingNames2		= index2.queryUnderlyings();
 		if(underlyingNames2 != null) {
-			if(underlyingNames != null)	underlyingNames.addAll(underlyingNames2);
-			else						underlyingNames = underlyingNames2;
+			if(underlyingNames != null) {
+				underlyingNames.addAll(underlyingNames2);
+			} else {
+				underlyingNames = underlyingNames2;
+			}
 		}
 		return underlyingNames;
 	}
@@ -105,7 +108,7 @@ public class LinearCombinationIndex extends AbstractIndex {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -11,37 +11,37 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Base class for notional classes.
- * 
+ *
  * @author Christian Fries
  */
 public interface AbstractNotional {
 
 	/**
 	 * Returns the currency string of this notional.
-	 * 
+	 *
 	 * @return the currency
 	 */
-	public String getCurrency();
+	String getCurrency();
 
 	/**
 	 * Calculates the notional at the start of a period, given a period.
 	 * Example: The notional can be independent of the period (constant running notional) or depending on the period (accruing notional).
-	 * 
+	 *
 	 * @param period Period.
 	 * @param model The model against we are evaluation.
 	 * @return The notional for the given period as of period start.
-	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method. 
+	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
-	public abstract RandomVariableInterface getNotionalAtPeriodStart(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	RandomVariableInterface getNotionalAtPeriodStart(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Calculates the notional at the end of a period, given a period.
 	 * Example: The notional can be independent of the period (constant running notional) or depending on the period (accruing notional).
-	 * 
+	 *
 	 * @param period Period.
 	 * @param model The model against we are evaluation.
 	 * @return The notional for the given period as of period end.
-	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method. 
+	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
-	public abstract RandomVariableInterface getNotionalAtPeriodEnd(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	RandomVariableInterface getNotionalAtPeriodEnd(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 }

@@ -5,7 +5,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.initialmargin.SIMMProduct;
-import net.finmath.xva.sensiproducts.SensiProductSimpleSwapBPV;
+import net.finmath.xva.sensiproducts.SensiProductSimpleSwapBpv;
 import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivitySimpleMeltingProvider;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMPortfolioSensitivityProvider;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
@@ -34,7 +34,7 @@ public class Launcher {
         Stream<SIMMSensitivityProviderInterface> tradeSensiProviders = tradeSet.stream()
                 .map(tradeSpec -> (SIMMSensitivityProviderInterface) new SIMMTradeSensitivityProvider(
                         new ModelSensitivitySimpleMeltingProvider(
-                                new SensiProductSimpleSwapBPV(tradeSpec), tradeSpec.getMaxTimeToMaturity()
+                                new SensiProductSimpleSwapBpv(tradeSpec), tradeSpec.getMaxTimeToMaturity()
                         ),
                         tradeSpec));
 

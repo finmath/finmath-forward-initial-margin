@@ -1,12 +1,9 @@
 package net.finmath.xva.tradespecifications;
 
-import net.finmath.modelling.Product;
 import net.finmath.xva.initialmargin.SIMMParameter;
 
-
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SIMMTradeSpecification {
 
@@ -48,6 +45,8 @@ public class SIMMTradeSpecification {
     }
 
 
-
-
+    public IRCurveSpec getIRCurve() {
+        //TODO implement
+        return null;
+    }
 }

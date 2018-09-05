@@ -18,12 +18,12 @@ public class AccruingNotional implements AbstractNotional {
 
 	AbstractNotional	previousPeriodNotional;
 	AbstractPeriod		previousPeriod;
-	
+
 	/**
 	 * Creates a notion where the notional of the period start is calculated as
 	 * the notional of the previous period's period end and the notional at period end
 	 * is calculated as being accrued via getCoupon on the current period.
-	 * 
+	 *
 	 * @param previousPeriodNotional The notional of the previous period.
 	 * @param previousPeriod The previous period.
 	 */

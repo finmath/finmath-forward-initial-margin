@@ -8,19 +8,19 @@ import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.BermudanSwaption;
-import net.finmath.initialmargin.isdasimm.changedfinmath.products.SimpleSwap;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.BermudanSwaption;
+import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /** This class describes a Bermudan Swaption for SIMM initial margin (MVA) calculation.
  *  Both exercise types "Callable" and "Cancelable" are supported.
- * 
+ *
  * @author Mario Viehmann
  *
  */
@@ -36,23 +36,23 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	private BermudanSwaption bermudan;
 
-	public enum ExerciseType {Callable, Cancelable};
+	public enum ExerciseType {Callable, Cancelable}
+
 	private ExerciseType exerciseType;
 	private Map<String, RandomVariableInterface[]> swapSensitivityMap = new HashMap<>(); // Cache for sensitivities of underlying swap
 
 
 	/** Construct a bermudan swaption as a product for the SIMM. Initial margin and MVA can be calculated for this product.
-	 * 
+	 *
 	 * @param bermudan
 	 * @param curveIndexNames
 	 * @param currency
-	 * @throws CalculationException
 	 */
-	public SIMMBermudanSwaption(BermudanSwaption bermudan, String[] curveIndexNames, String currency) throws CalculationException {
+	public SIMMBermudanSwaption(BermudanSwaption bermudan, String[] curveIndexNames, String currency) {
 
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, true /*hasOptionality*/);
 
-		this.bermudan = bermudan;	    
+		this.bermudan = bermudan;
 		this.exerciseType = bermudan.getIsCallable() ? ExerciseType.Callable : ExerciseType.Cancelable;
 		if(exerciseType==ExerciseType.Callable) {
 			this.swap = bermudan.getSwap();
@@ -62,7 +62,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 
 	/** Construct a bermudan swaption as a product for the SIMM. Initial margin and MVA can be calculated for this product.
-	 * 
+	 *
 	 * @param fixingDates
 	 * @param periodLengths
 	 * @param paymentDates
@@ -72,12 +72,11 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	 * @param exerciseType
 	 * @param curveIndexNames
 	 * @param currency
-	 * @throws CalculationException
 	 */
 	public SIMMBermudanSwaption(double[] fixingDates, double[] periodLengths, double[] paymentDates, double[] periodNotionals,
-			double[] swapRates, boolean[] isPeriodStartDateExerciseDate, ExerciseType exerciseType, String[] curveIndexNames, String currency) throws CalculationException {
+			double[] swapRates, boolean[] isPeriodStartDateExerciseDate, ExerciseType exerciseType, String[] curveIndexNames, String currency) {
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, false /*hasOptionality*/);
-		boolean isCallable = exerciseType == ExerciseType.Callable ? true : false;
+		boolean isCallable = exerciseType == ExerciseType.Callable;
 		this.bermudan = new BermudanSwaption(isPeriodStartDateExerciseDate,fixingDates,periodLengths, paymentDates,periodNotionals,swapRates, isCallable);
 		this.exerciseType = exerciseType;
 		if(exerciseType==ExerciseType.Callable) {
@@ -101,29 +100,36 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 		RandomVariableInterface[] bermudanSensis = super.getLiborModelSensitivities(evaluationTime, model);
 
 		// Set exercise indicator
-		RandomVariableInterface[] indicatorOrig = new RandomVariableInterface[]{getExerciseIndicator(evaluationTime)};
+		RandomVariableInterface[] indicatorOrig = new RandomVariableInterface[]{ getExerciseIndicator(evaluationTime, model) };
 		RandomVariableInterface[] indicator = indicatorOrig.clone();
 		indicator[0] = indicator[0].sub(0.5); // i.e. -0.5: not exercised, 0.5: exercised
 
+		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
+		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(evaluationTime, model).get("exerciseTime");
+
 		// Set sensitivities on exercised paths
-		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
+		if(evaluationTime >= exerciseTime.getMin()){
 
 			switch(exerciseType){
 
 			case Callable:
 
 				// Calculate sensis analytically
-				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");				  			
+				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");
 
 				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 
 					// Set sensis of not exercised paths to zero
-					for(int i=0; i<bermudanSensis.length;i++) bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0],swapSensis[i],new RandomVariable(0.0));
+					for(int i=0; i<bermudanSensis.length;i++) {
+						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0],swapSensis[i],new RandomVariable(0.0));
+					}
 
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
-					for(int i=0; i<bermudanSensis.length;i++) bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+					for(int i=0; i<bermudanSensis.length;i++) {
+						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+					}
 
 				}
 
@@ -132,13 +138,15 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			case Cancelable:
 
 				// Set the sensitivities on exercised paths to zero
-				for(int i=0; i<bermudanSensis.length;i++) bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+				for(int i=0; i<bermudanSensis.length;i++) {
+					bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+				}
 
 				break;
 
 			default:
 				break;
-			}		
+			}
 		}
 
 		return bermudanSensis;
@@ -146,7 +154,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 
 	@Override
-	public RandomVariableInterface[] getOISModelSensitivities(String riskClass, 
+	public RandomVariableInterface[] getOISModelSensitivities(String riskClass,
 			double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
@@ -156,37 +164,44 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 		RandomVariableInterface[] bermudanSensis = super.getOISModelSensitivities(evaluationTime, futureDiscountTimes, dVdP /* null => use AAD*/, riskClass, model);
 
 		// Set exercise indicator
-		RandomVariableInterface[] indicatorOrig = new RandomVariableInterface[]{getExerciseIndicator(evaluationTime)};
+		RandomVariableInterface[] indicatorOrig = new RandomVariableInterface[]{ getExerciseIndicator(evaluationTime, model) };
 		RandomVariableInterface[] indicator = indicatorOrig.clone();
 		indicator[0] = indicator[0].sub(0.5); // i.e. -0.5: not exercised, 0.5: exercised
 
-		// Set sensitivities on exercised paths 
-		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
+		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
+		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(evaluationTime, model).get("exerciseTime");
+
+		// Set sensitivities on exercised paths
+		if(evaluationTime >= exerciseTime.getMin()){
 
 			switch(exerciseType){
 
 			case Callable:
 
 				// Return zero if evaluationTime is later than the last time where an adjustment is available (i.e. the last time where a cash flow occurred)
-				if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()){
-					return AbstractSIMMSensitivityCalculation.zeroBucketsIR;  										   		
+				if(!Arrays.stream(swap.getPaymentDates()).filter(time -> time > evaluationTime).findAny().isPresent()) {
+					return AbstractSIMMSensitivityCalculation.zeroBucketsIR;
 				}
 
-				// Get Swap Sensitivities analytically		
+				// Get Swap Sensitivities analytically
 				dVdP = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime,swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "OIS");
 				futureDiscountTimes = Arrays.stream(swap.getPaymentDates()).filter(n -> n > evaluationTime).toArray();
-				RandomVariableInterface[] swapSensis = getOISModelSensitivities(evaluationTime, futureDiscountTimes, dVdP, riskClass, model);		    
+				RandomVariableInterface[] swapSensis = getOISModelSensitivities(evaluationTime, futureDiscountTimes, dVdP, riskClass, model);
 
 				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 
 					// Set sensis of not exercised paths to zero
-					for(int i=0; i<bermudanSensis.length;i++) bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0],swapSensis[i],new RandomVariable(0.0));
+					for(int i=0; i<bermudanSensis.length;i++) {
+						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0],swapSensis[i],new RandomVariable(0.0));
+					}
 
 
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
-					for(int i=0; i<bermudanSensis.length;i++) bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+					for(int i=0; i<bermudanSensis.length;i++) {
+						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+					}
 
 				}
 
@@ -195,7 +210,9 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			case Cancelable:
 
 				// Set the sensitivities on exercised paths to zero
-				for(int i=0; i<bermudanSensis.length;i++) bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+				for(int i=0; i<bermudanSensis.length;i++) {
+					bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+				}
 
 				break;
 
@@ -209,11 +226,12 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	}
 
 
-	/** This function sets the sensitivities on the exercised paths to either swap sensitivities (for a Callable) 
+	/** This function sets the sensitivities on the exercised paths to either swap sensitivities (for a Callable)
 	 *  or to zero (for a Cancelable). This is necessary as the melting function in class <code> SIMMSensitivityCalculation <code>
-	 *  does not know on which paths we have already exercised. 
-	 * 
+	 *  does not know on which paths we have already exercised.
+	 *
 	 * @param evaluationTime The time of evaluation
+	 * @param model 
 	 * @param curveIndexName The name of the curve
 	 * @param meltedBermudanSensis The bermudan sensitivities obtained by melting at evaluation time.
 	 * @return The true melted bermudan sensitivities considering the paths on which we have exercised.
@@ -221,11 +239,14 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
 	 */
-	public RandomVariableInterface[] changeMeltedSensitivitiesOnExercisedPaths(double evaluationTime, String curveIndexName, RandomVariableInterface[] meltedBermudanSensis) throws CalculationException, SolverException, CloneNotSupportedException{
+	public RandomVariableInterface[] changeMeltedSensitivitiesOnExercisedPaths(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String curveIndexName, RandomVariableInterface[] meltedBermudanSensis) throws CalculationException, SolverException, CloneNotSupportedException{
 
-		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
+		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
+		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(evaluationTime, model).get("exerciseTime");
 
-			RandomVariableInterface indicator = getExerciseIndicator(evaluationTime).sub(0.5);
+		if(evaluationTime >= exerciseTime.getMin()){
+
+			RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model).sub(0.5);
 
 			switch(exerciseType){
 
@@ -241,12 +262,16 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 
 					// Set sensis of not exercised paths to zero
-					for(int i=0; i<meltedBermudanSensis.length;i++) meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator,meltedSwapSensis[i],new RandomVariable(0.0));
+					for(int i=0; i<meltedBermudanSensis.length;i++) {
+						meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator,meltedSwapSensis[i],new RandomVariable(0.0));
+					}
 
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
-					for(int i=0; i<meltedBermudanSensis.length;i++) meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, meltedSwapSensis[i], meltedBermudanSensis[i]);
+					for(int i=0; i<meltedBermudanSensis.length;i++) {
+						meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, meltedSwapSensis[i], meltedBermudanSensis[i]);
+					}
 
 				}
 
@@ -254,7 +279,9 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 			case Cancelable:
 				// Set sensis on exercised paths to zero
-				for(int i=0;i <meltedBermudanSensis.length;i++) meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, new RandomVariable(0.0), meltedBermudanSensis[i]);
+				for(int i=0;i <meltedBermudanSensis.length;i++) {
+					meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, new RandomVariable(0.0), meltedBermudanSensis[i]);
+				}
 
 				break;
 
@@ -268,9 +295,9 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	}
 
-	
+
 	/** Get the sensitivities of the underlying swap. This function is called when melting sensitivities at each time step.
-	 * 
+	 *
 	 * @param curveIndexName The name of the curve
 	 * @return The sensitivities of the underlying swap from the cache "swapSensitivityMap".
 	 * @throws CalculationException
@@ -280,10 +307,10 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 		SensitivityMode meltingMode = sensitivityCalculationScheme.getSensitivityMode();
 		if(!swapSensitivityMap.containsKey(curveIndexName)){
 			double evaluationTime = swap.getStartTime();
-			// Get OIS Sensis	
+			// Get OIS Sensis
 			RandomVariableInterface[] dVdP = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime,swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "OIS");
 			double[] futureDiscountTimes = Arrays.stream(swap.getPaymentDates()).filter(n -> n > evaluationTime).toArray();
-			RandomVariableInterface[] swapSensisOIS = getOISModelSensitivities(evaluationTime, futureDiscountTimes, dVdP, "InterestRate", modelCache);		    
+			RandomVariableInterface[] swapSensisOIS = getOISModelSensitivities(evaluationTime, futureDiscountTimes, dVdP, "InterestRate", modelCache);
 			if(meltingMode==SensitivityMode.MELTINGSIMMBUCKETS) { // Melting on SIMM Buckets
 				swapSensisOIS =  sensitivityCalculationScheme.mapOISBondToMarketRateSensitivities(evaluationTime, swapSensisOIS, modelCache);
 				swapSensisOIS =  AbstractSIMMSensitivityCalculation.mapSensitivitiesOnBuckets(swapSensisOIS, SIMMSimpleSwap.riskClass[0], null, modelCache);
@@ -291,27 +318,28 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 			swapSensitivityMap.put("OIS", swapSensisOIS);
 
 			// Get forward curve sensis
-			RandomVariableInterface[] swapSensisLibor = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "Libor");				  
+			RandomVariableInterface[] swapSensisLibor = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), modelCache.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), modelCache, "Libor");
 
 			if(meltingMode==SensitivityMode.MELTINGSIMMBUCKETS){
 				// Calculate dV/dS = dV/dL * dL/dS
-				swapSensisLibor = sensitivityCalculationScheme.mapLiborToMarketRateSensitivities(evaluationTime, swapSensisLibor, modelCache);  
+				swapSensisLibor = sensitivityCalculationScheme.mapLiborToMarketRateSensitivities(evaluationTime, swapSensisLibor, modelCache);
 				// Map Sensitivities on SIMM Buckets
 				swapSensisLibor = AbstractSIMMSensitivityCalculation.mapSensitivitiesOnBuckets(swapSensisLibor, "InterestRate" /*riskClass*/, null, modelCache);
 			}
 
 			swapSensitivityMap.put("Libor6m", swapSensisLibor);
 
-		} 
+		}
 
 		return swapSensitivityMap.get(curveIndexName);
 	}
 
 
 	@Override
-	public RandomVariableInterface getExerciseIndicator(double time) throws CalculationException {
-		RandomVariableInterface indicator = bermudan.getLastValuationExerciseTime();
-		indicator = indicator.barrier(new RandomVariable(indicator.sub(time+0.00001)), new RandomVariable(0.0), new RandomVariable(1.0));
+	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
+		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(time, model).get("exerciseTime");
+		RandomVariableInterface indicator = exerciseTime.barrier(new RandomVariable(exerciseTime.sub(time+0.00001)), new RandomVariable(0.0), new RandomVariable(1.0));
 		return indicator;
 	}
 
@@ -321,15 +349,17 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	}
 
 	@Override
-	public double getMeltingResetTime(){
-		return bermudan.getLastValuationExerciseTime().getMin();
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
+		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
+		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(0, model).get("exerciseTime");
+		return exerciseTime.getMin();
 	}
 
 	@Override
 	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException{
 
 		// Bermudan Swaption: Set paths on which we have already exercised to zero.
-		RandomVariableInterface indicator = getExerciseIndicator(evaluationTime).barrier(new RandomVariable(getExerciseIndicator(evaluationTime).sub(0.5)), new RandomVariable(0.0), new RandomVariable(1.0));	    
+		RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model).barrier(new RandomVariable(getExerciseIndicator(evaluationTime, model).sub(0.5)), new RandomVariable(0.0), new RandomVariable(1.0));
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
 		RandomVariableInterface[] regressor = new RandomVariableInterface[2];
@@ -340,7 +370,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	}
 
-	
+
 	private static ArrayList<RandomVariableInterface> getRegressionBasisFunctions(RandomVariableInterface[] libors, int order, RandomVariableInterface indicator) {
 		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<RandomVariableInterface>();
 		// Create basis functions - here: 1, S, S^2, S^3, S^4
@@ -358,7 +388,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 	public ExerciseType getExerciseType(){
 		return this.exerciseType;
 	}
-	
+
 	public void clearSwapSensitivityMap(){
 		swapSensitivityMap.clear();
 	}
@@ -376,21 +406,24 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 		RandomVariableInterface[] bermudanSensis = getValueNumeraireSensitivitiesAAD(evaluationTime, model);
 
 		// Set exercise indicator
-		RandomVariableInterface[] indicator = new RandomVariableInterface[]{getExerciseIndicator(evaluationTime)}.clone();
+		RandomVariableInterface[] indicator = new RandomVariableInterface[]{getExerciseIndicator(evaluationTime, model)}.clone();
 		indicator[0] = indicator[0].sub(0.5); // i.e. -0.5: not exercised, 0.5: exercised
 
-		// Set sensitivities on exercised paths 
-		if(evaluationTime >= bermudan.getLastValuationExerciseTime().getMin()){
+		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
+		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(0, model).get("exerciseTime");
+		
+		// Set sensitivities on exercised paths
+		if(evaluationTime >= exerciseTime.getMin()){
 
 			switch(exerciseType){
 
 			case Callable:
 
-				RandomVariableInterface[] swapSensis = SIMMSwap.getValueNumeraireSensitivities(evaluationTime, model);		    
+				RandomVariableInterface[] swapSensis = SIMMSwap.getValueNumeraireSensitivities(evaluationTime, model);
 
 				if(evaluationTime>=bermudan.getExerciseTimes()[bermudan.getExerciseTimes().length-1]) {
 
-					// Set sensis of not exercised paths to zero		    	  
+					// Set sensis of not exercised paths to zero
 					IntStream.range(0,bermudanSensis.length).forEach(i->{bermudanSensis[i]=
 							bermudanSensis[i].barrier(indicator[0], swapSensis[i], new RandomVariable(0.0));
 					});

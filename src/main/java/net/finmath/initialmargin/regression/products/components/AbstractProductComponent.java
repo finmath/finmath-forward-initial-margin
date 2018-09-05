@@ -22,48 +22,49 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Base class for product components.
- * 
+ *
  * Product components are small functions mapping a vector of
  * random variables to a random variable.
- * 
+ *
  * Components are numeraire adjusted and can be valued on its own.
- * 
+ *
  * @author Christian Fries
  */
 public abstract class AbstractProductComponent extends AbstractLIBORMonteCarloRegressionProduct  implements Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -916286619811716575L;
-	
+
 	protected static ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			10 + Runtime.getRuntime().availableProcessors(),
 			100 + 2*Runtime.getRuntime().availableProcessors(),
 			10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
-		@Override
-		public Thread newThread(Runnable runnable) {
-			Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-			thread.setDaemon(true);
-			return thread;
-		}
-	});
+				@Override
+				public Thread newThread(Runnable runnable) {
+					Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
 
 	public AbstractProductComponent(String currency) {
 		super(currency);
 	}
-	
+
 	public AbstractProductComponent() {
 		this(null);
 	}
 
 	/**
 	 * Returns a set of underlying names referenced by this product component (i.e., required for valuation) or null if none.
-	 * 
+	 *
 	 * @return A set of underlying names referenced by this product component (i.e., required for valuation) or null if none.
 	 */
 	public abstract Set<String> queryUnderlyings();
 
+	@Override
 	public Map<String, Object> getValues(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		RandomVariableInterface value = this.getValue(evaluationTime, model);
 		Map<String, Object> result = new HashMap<String, Object>();
@@ -71,13 +72,13 @@ public abstract class AbstractProductComponent extends AbstractLIBORMonteCarloRe
 		return result;
 	}
 
-	
+
 	// INSERTED
 	public abstract RandomVariableInterface getValue(double evaluationTime, double fixingDate,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
-	
 
-	
+
+
 
 
 }
