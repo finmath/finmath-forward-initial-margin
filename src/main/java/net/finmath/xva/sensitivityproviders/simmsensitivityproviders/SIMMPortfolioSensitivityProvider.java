@@ -4,7 +4,7 @@ import java.util.Set;
 
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 /**
  * Composes the sensitivities obtained by underlying sensitivity providers into a single one.
@@ -28,7 +28,7 @@ public class SIMMPortfolioSensitivityProvider implements SIMMSensitivityProvider
 	 * @return The sum of the sensitivities in this portfolio.
 	 */
 	@Override
-	public RandomVariableInterface getSIMMSensitivity(SIMMSensitivityKey coordinate, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariableInterface getSIMMSensitivity(Simm2Coordinate coordinate, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		return underlyingSensiProviders.stream()
 				.map(u -> u.getSIMMSensitivity(coordinate, evaluationTime, model))
 				.reduce(RandomVariableInterface::add).orElse(model.getRandomVariableForConstant(0.0));

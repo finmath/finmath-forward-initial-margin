@@ -1,21 +1,21 @@
-package net.finmath.xva.tradespecifications;
+package net.finmath.xva.coordinates.simm2;
 
 import net.finmath.xva.initialmargin.SIMMParameter;
 
-public class SIMMSensitivityKey {
+public class Simm2Coordinate {
     private String maturityBucketKey;
     private String riskFactorKey;
     private String bucketKey;
     private SIMMParameter.RiskClass riskClass;
-    private SIMMParameter.RiskType riskType;
+    private MarginType marginType;
     private SIMMParameter.ProductClass productClass;
 
-    public SIMMSensitivityKey(String maturityBucket, String riskFactorID, String bucketID, String riskClass, String riskType, String productClass) {
+    public Simm2Coordinate(String maturityBucket, String riskFactorID, String bucketID, String riskClass, String riskType, String productClass) {
         this.maturityBucketKey = maturityBucket;
         this.riskFactorKey = riskFactorID;
         this.bucketKey = bucketID;
         this.riskClass = SIMMParameter.RiskClass.valueOf(riskClass);
-        this.riskType = SIMMParameter.RiskType.valueOf(riskType);
+        this.marginType = MarginType.valueOf(riskType);
         this.productClass = SIMMParameter.ProductClass.valueOf(productClass);
     }
 
@@ -47,8 +47,8 @@ public class SIMMSensitivityKey {
         return riskClass;
     }
 
-    public SIMMParameter.RiskType getRiskType() {
-        return riskType;
+    public MarginType getRiskType() {
+        return marginType;
     }
 
     public SIMMParameter.ProductClass getProductClass() {
@@ -60,7 +60,7 @@ public class SIMMSensitivityKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SIMMSensitivityKey key = (SIMMSensitivityKey) o;
+        Simm2Coordinate key = (Simm2Coordinate) o;
 
         if (maturityBucketKey != null ? !maturityBucketKey.equals(key.maturityBucketKey) : key.maturityBucketKey != null)
             return false;
@@ -68,7 +68,7 @@ public class SIMMSensitivityKey {
             return false;
         if (bucketKey != null ? !bucketKey.equals(key.bucketKey) : key.bucketKey != null) return false;
         if (riskClass != null ? !riskClass.equals(key.riskClass) : key.riskClass != null) return false;
-        if (riskType != null ? !riskType.equals(key.riskType) : key.riskType != null) return false;
+        if (marginType != null ? !marginType.equals(key.marginType) : key.marginType != null) return false;
         return productClass != null ? productClass.equals(key.productClass) : key.productClass == null;
 
     }
@@ -79,7 +79,7 @@ public class SIMMSensitivityKey {
         result = 31 * result + (riskFactorKey != null ? riskFactorKey.hashCode() : 0);
         result = 31 * result + (bucketKey != null ? bucketKey.hashCode() : 0);
         result = 31 * result + (riskClass != null ? riskClass.hashCode() : 0);
-        result = 31 * result + (riskType != null ? riskType.hashCode() : 0);
+        result = 31 * result + (marginType != null ? marginType.hashCode() : 0);
         result = 31 * result + (productClass != null ? productClass.hashCode() : 0);
         return result;
     }

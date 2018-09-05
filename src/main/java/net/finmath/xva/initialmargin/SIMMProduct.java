@@ -5,6 +5,7 @@ import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 
 import java.text.DecimalFormat;
@@ -95,7 +96,7 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct{
     public RandomVariableInterface      getDeltaMargin(String riskClassKey,String productClassKey, double evaluationTime, LIBORModelMonteCarloSimulationInterface model){
         RandomVariableInterface deltaMargin = null;
 
-        String riskTypeKey = SIMMParameter.RiskType.Delta.name();
+        String riskTypeKey = MarginType.DELTA.name();
         if ( riskClassKey.equals(SIMMParameter.RiskClass.InterestRate.name()))
         {
             SIMMProductIRDelta DeltaScheme = new SIMMProductIRDelta(this.simmSensitivityProvider,productClassKey,this.parameterSet,evaluationTime);
@@ -110,7 +111,7 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct{
 
 
     public RandomVariableInterface      getVegaMargin(String riskClassKey,String productClassKey,double evaluationTime, LIBORModelMonteCarloSimulationInterface model){
-        SIMMProductNonIRDeltaVega VegaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider,riskClassKey,productClassKey, SIMMParameter.RiskType.Vega.name(),this.parameterSet,this.calculationCCY,evaluationTime);
+        SIMMProductNonIRDeltaVega VegaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider,riskClassKey,productClassKey, MarginType.VEGA.name(),this.parameterSet,this.calculationCCY,evaluationTime);
         return VegaScheme.getValue(evaluationTime,model);
     }
 

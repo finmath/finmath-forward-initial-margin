@@ -1,5 +1,6 @@
 package net.finmath.xva.tradespecifications;
 
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.initialmargin.SIMMParameter;
 
 import java.util.Set;
@@ -9,7 +10,7 @@ public class SIMMTradeSpecification {
 
 
 
-    Set<SIMMSensitivityKey> sensitivityKeySet;
+    Set<Simm2Coordinate> sensitivityKeySet;
 
     public SIMMTradeSpecification(double notional, double maturity, String IRCurveKey){
 
@@ -40,7 +41,7 @@ public class SIMMTradeSpecification {
         return "";
     }
 
-    public Set<SIMMSensitivityKey> getSensitivityKeySet(double evaluationTime) {
+    public Set<Simm2Coordinate> getSensitivityKeySet(double evaluationTime) {
         return sensitivityKeySet;
     }
 

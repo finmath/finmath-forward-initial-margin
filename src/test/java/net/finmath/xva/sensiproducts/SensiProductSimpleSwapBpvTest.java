@@ -47,7 +47,7 @@ public class SensiProductSimpleSwapBpvTest {
 			@FromDataPoints("irCurves") IRCurveSpec irCurve,
 			@FromDataPoints("notionals") double notional) throws CalculationException {
 
-		SIMMTradeSpecification spec = new SIMMTradeSpecification(notional, maturity, irCurve);
+		SIMMTradeSpecification spec = new SIMMTradeSpecification(notional, maturity, irCurve.getName());
 
 		assertThat(new SensiProductSimpleSwapBpv(spec).getValue(evalTime, (getDummyModel())).getAverage(),
 				is(closeTo(0.0001 * notional * irCurve.getPeriodLength() / irCurve.getDayInYears(), 1E-6)));

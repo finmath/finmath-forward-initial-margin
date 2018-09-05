@@ -1,8 +1,8 @@
 package net.finmath.xva.beans;
 
 import com.google.gson.annotations.SerializedName;
-import net.finmath.xva.initialmargin.SIMMParameter;
-import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
+import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 public class CRIFSensititivityBean {
     public static class CRIFSensiBean{
@@ -43,22 +43,22 @@ public class CRIFSensititivityBean {
             return Counterparty;
         }
 
-        public SIMMSensitivityKey getSensitivityKey(){
-            SIMMSensitivityKey key = null;
+        public Simm2Coordinate getSensitivityKey(){
+            Simm2Coordinate key = null;
             if (RiskType.contains("IR") && !RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey(Label1, Label2, Qualifier, "InterestRate", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Label2, Qualifier, "InterestRate", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("IR") && RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey(Label1, Label2, Qualifier, "InterestRate", SIMMParameter.RiskType.Vega.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Label2, Qualifier, "InterestRate", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Equity") && !RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey("None", Qualifier, Bucket, "Equity", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate("None", Qualifier, Bucket, "Equity", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Equity") && RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey(Label1, Qualifier, Bucket, "Equity", SIMMParameter.RiskType.Vega.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "Equity", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Commodity") && !RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey("None", Qualifier, Bucket, "Commodity", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate("None", Qualifier, Bucket, "Commodity", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Commodity") && RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey(Label1, Qualifier, Bucket, "Commodity", SIMMParameter.RiskType.Vega.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "Commodity", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("FX") && !RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey("None", Qualifier, "0", "FX", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate("None", Qualifier, "0", "FX", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("FX") && RiskType.contains("Vol")) {
                 if (Qualifier.length() == 6) {
                     String ccy1 = Qualifier.substring(0, 3);
@@ -67,19 +67,19 @@ public class CRIFSensititivityBean {
                         Qualifier = ccy2 + ccy1;
                     }
                 }
-                key = new SIMMSensitivityKey(Label1, Qualifier, "0", "FX", SIMMParameter.RiskType.Vega.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, "0", "FX", MarginType.VEGA.name(), ProductClass);
             } else if (RiskType.contains("CreditQ"))
-                key = new SIMMSensitivityKey(Label1, Qualifier, Bucket, "CreditQ", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CreditQ", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("CreditNonQ"))
-                key = new SIMMSensitivityKey(Label1, Qualifier, Bucket, "CreditNonQ", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CreditNonQ", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Credit") && RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey(Label1, Qualifier, Bucket, "CreditQ", SIMMParameter.RiskType.Vega.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CreditQ", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Inflation") && !RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey("None", "inflation", Qualifier, "InterestRate", SIMMParameter.RiskType.Delta.name(), ProductClass);
+                key = new Simm2Coordinate("None", "inflation", Qualifier, "InterestRate", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Inflation") && RiskType.contains("Vol"))
-                key = new SIMMSensitivityKey("None", "inflation", Qualifier, "InterestRate", SIMMParameter.RiskType.Vega.name(), ProductClass);
+                key = new Simm2Coordinate("None", "inflation", Qualifier, "InterestRate", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("XCcy"))
-                key = new SIMMSensitivityKey("None", "ccybasis", Qualifier, "InterestRate", SIMMParameter.RiskType.Delta.name(), ProductClass);return key;
+                key = new Simm2Coordinate("None", "ccybasis", Qualifier, "InterestRate", MarginType.DELTA.name(), ProductClass);return key;
 
         }
 

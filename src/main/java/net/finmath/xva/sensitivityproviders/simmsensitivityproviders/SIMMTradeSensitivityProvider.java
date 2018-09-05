@@ -3,7 +3,7 @@ package net.finmath.xva.sensitivityproviders.simmsensitivityproviders;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivityProviderInterface;
-import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 public class SIMMTradeSensitivityProvider implements SIMMSensitivityProviderInterface {
@@ -24,7 +24,7 @@ public class SIMMTradeSensitivityProvider implements SIMMSensitivityProviderInte
         return simmTradeSpecification;
     }
 
-    public RandomVariableInterface getSIMMSensitivity(SIMMSensitivityKey key, // null if riskClass is not IR
+    public RandomVariableInterface getSIMMSensitivity(Simm2Coordinate key, // null if riskClass is not IR
                                                       double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
         /*

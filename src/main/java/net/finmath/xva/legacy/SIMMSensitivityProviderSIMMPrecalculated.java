@@ -3,8 +3,7 @@ package net.finmath.xva.legacy;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivityProviderInterface;
-import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
-import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,7 +14,7 @@ public class SIMMSensitivityProviderSIMMPrecalculated {
 
     ModelSensitivityProviderInterface forwardSensitivityProvider;
 
-    Map<SIMMSensitivityKey, Double> sensitivityMap;
+    Map<Simm2Coordinate, Double> sensitivityMap;
 
     protected RandomVariableInterface getSIMMSensitivity(String productClass,
                                                       String riskClass,
@@ -25,14 +24,14 @@ public class SIMMSensitivityProviderSIMMPrecalculated {
                                                       String curveIndexName, // null if riskClass is not IR
                                                       double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-        Optional<SIMMSensitivityKey> optional = sensitivityMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
+        Optional<Simm2Coordinate> optional = sensitivityMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
         if (optional.isPresent()) {
 
             double externalProvidedSensitivity = sensitivityMap.get(optional.get());
             Map<String,RandomVariableInterface> sensitivityMap = null;
-            /*if (SIMMParameter.RiskType.valueOf(riskType).equals(SIMMParameter.RiskType.Delta))
+            /*if (SIMMParameter.MarginType.valueOf(riskType).equals(SIMMParameter.MarginType.DELTA))
                 sensitivityMap = forwardSensitivityProvider.getDeltaSensitivity(evaluationTime,model);
-            else if (SIMMParameter.RiskType.valueOf(riskType).equals(SIMMParameter.RiskType.Vega))
+            else if (SIMMParameter.MarginType.valueOf(riskType).equals(SIMMParameter.MarginType.VEGA))
                 sensitivityMap = forwardSensitivityProvider.getVegaSensitivities(evaluationTime,model);*/
 
 

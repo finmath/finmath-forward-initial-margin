@@ -21,7 +21,7 @@ public class MVAProduct extends AbstractLIBORMonteCarloProduct {
 
 	public MVAProduct(SIMMSensitivityProviderInterface sensitivityProvider, SimmModality modality, TimeDiscretizationInterface times) {
 		initialMargins = IntStream.range(0, times.getNumberOfTimes())
-				.mapToObj(timeIndex -> new SIMMProduct(times.getTime(timeIndex), sensitivityProvider, modality))
+				.mapToObj(timeIndex -> new SIMMProduct(times.getTime(timeIndex), sensitivityProvider, null, "EUR", 0.0, null))
 				.collect(Collectors.toSet());
 	}
 

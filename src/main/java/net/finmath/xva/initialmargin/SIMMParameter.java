@@ -35,12 +35,6 @@ public class SIMMParameter {
     final static public String   inflationKey = "inflation";
     final static public String   ccyBasisKey = "ccybasis";
 
-    public enum RiskType {
-        Delta,
-        Vega,
-        Curvature
-    }
-
     public enum ProductClass {
         RatesFX,
         Credit,

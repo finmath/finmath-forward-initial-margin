@@ -2,8 +2,7 @@ package net.finmath.xva.initialmargin;
 
 
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
-import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +11,9 @@ import java.util.stream.Collectors;
 
 public class SIMMHelper {
 
-    Set<SIMMSensitivityKey> keySet;
+    Set<Simm2Coordinate> keySet;
 
-    public  SIMMHelper(Set<SIMMSensitivityKey> keySet){
+    public  SIMMHelper(Set<Simm2Coordinate> keySet){
         this.keySet = keySet;
         //this.tradeSet = tradeSet.stream().map(trade->(SIMMTradeSpecification)trade).collect(Collectors.toSet());
     }
