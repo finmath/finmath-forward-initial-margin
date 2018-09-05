@@ -24,13 +24,13 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct{
                        SIMMSensitivityProviderInterface simmSensitivityProvider,
                        SIMMParameter parameterSet,
                        String calculationCCY,
-                       double thresholdAmount){
+                       double thresholdAmount, SIMMHelper helper){
         this.marginCalculationTime = marginCalculationTime;
         this.thresholdAmount = thresholdAmount;
         this.calculationCCY = calculationCCY;
         this.parameterSet = parameterSet;
         this.simmSensitivityProvider = simmSensitivityProvider;
-        this.helper = null;//new SIMMHelper(simmSensitivityProvider.getTradeSpecs());
+        this.helper = helper;
     }
 
 

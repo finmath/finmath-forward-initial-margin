@@ -5,6 +5,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
+import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 import java.util.Map;
@@ -87,9 +88,10 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
             if ( activeCurveKeys.contains(curveKey)) {
                 for (int iTenor = 0; iTenor < nTenors; iTenor++) {
                     String maturityBucketKey = parameterSet.IRMaturityBuckets[iTenor];
-                    Set<SIMMTradeSpecification> selectedTrades = helper.getTadeSelection(productClassKey,riskClassKey.name(),evaluationTime);
+                    //Set<SIMMTradeSpecification> selectedTrades = helper.getTadeSelection(productClassKey,riskClassKey.name(),evaluationTime);
+                    SIMMSensitivityKey key = new SIMMSensitivityKey(maturityBucketKey,curveKey,bucketKey,riskClassKey.name(),riskTypeKey,productClassKey);
 
-                    netSensitivities[iCurve][iTenor] = this.simmSensitivitivityProvider.getSIMMSensitivity(this.productClassKey,this.riskClassKey.name(),this.riskTypeKey,bucketKey,maturityBucketKey,curveKey,evaluationTime,model);//thiscalculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, iTenor, curveKey, bucketKey, "delta", atTime);
+                    netSensitivities[iCurve][iTenor] = this.simmSensitivitivityProvider.getSIMMSensitivity(key,evaluationTime,model);//thiscalculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, iTenor, curveKey, bucketKey, "delta", atTime);
                 }
             }
         }
@@ -147,8 +149,10 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
         else { /* Inflation or CCYBasis*/
             riskWeight = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(SIMMParameter.RiskClass.InterestRate).get(indexName)[0][0];
 
+
             String maturityBucketKey = this.parameterSet.IRMaturityBuckets[iRateTenor];
-            RandomVariableInterface netSensi =  this.simmSensitivitivityProvider.getSIMMSensitivity(this.productClassKey,this.riskClassKey.name(),this.riskTypeKey,bucketKey,maturityBucketKey, indexName, evaluationTime,model);
+            SIMMSensitivityKey key = new SIMMSensitivityKey(maturityBucketKey,indexName,bucketKey,riskClassKey.name(),riskTypeKey,productClassKey);
+            RandomVariableInterface netSensi =  this.simmSensitivitivityProvider.getSIMMSensitivity(key, evaluationTime,model);
             if (netSensi!=null)
             {
                 netSensi = netSensi.mult(riskWeight);
@@ -208,7 +212,9 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
                     sensitivitySum = sensitivitySum != null ? sensitivitySum.add(summand) : new RandomVariable(evaluationTime,model.getNumberOfPaths(),0.0);
             }
         }
-        RandomVariableInterface inflationSensi = this.simmSensitivitivityProvider.getSIMMSensitivity(this.productClassKey,this.riskClassKey.name(),this.riskTypeKey,bucketKey,"","inflation",evaluationTime,model);
+
+        SIMMSensitivityKey key = new SIMMSensitivityKey("","inflation",bucketKey,riskClassKey.name(),riskTypeKey,productClassKey);
+        RandomVariableInterface inflationSensi = this.simmSensitivitivityProvider.getSIMMSensitivity(key,evaluationTime,model);
         if ( sensitivitySum !=null && inflationSensi !=null)
             sensitivitySum = sensitivitySum.add(inflationSensi); // Inflation Sensi are included in Sum, CCYBasis not
 

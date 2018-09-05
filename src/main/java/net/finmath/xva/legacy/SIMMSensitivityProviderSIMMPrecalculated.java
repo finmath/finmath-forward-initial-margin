@@ -3,6 +3,7 @@ package net.finmath.xva.legacy;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivityProviderInterface;
+import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 import java.util.Map;
@@ -14,7 +15,7 @@ public class SIMMSensitivityProviderSIMMPrecalculated {
 
     ModelSensitivityProviderInterface forwardSensitivityProvider;
 
-    Map<SIMMTradeSpecification.SensitivityKey, Double> sensitivityMap;
+    Map<SIMMSensitivityKey, Double> sensitivityMap;
 
     protected RandomVariableInterface getSIMMSensitivity(String productClass,
                                                       String riskClass,
@@ -24,7 +25,7 @@ public class SIMMSensitivityProviderSIMMPrecalculated {
                                                       String curveIndexName, // null if riskClass is not IR
                                                       double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-        Optional<SIMMTradeSpecification.SensitivityKey> optional = sensitivityMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
+        Optional<SIMMSensitivityKey> optional = sensitivityMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
         if (optional.isPresent()) {
 
             double externalProvidedSensitivity = sensitivityMap.get(optional.get());

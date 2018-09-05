@@ -2,6 +2,7 @@ package net.finmath.xva.sensitivityproviders.simmsensitivityproviders;
 
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
 
 import java.util.Set;
 
@@ -13,9 +14,9 @@ public class SIMMPortfolioSensitivityProvider implements SIMMSensitivityProvider
     }
 
     @Override
-    public RandomVariableInterface getSIMMSensitivity(String productClass, String riskClass, String riskType, String bucketKey, String maturityBucket, String curveIndexName, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+    public RandomVariableInterface getSIMMSensitivity(SIMMSensitivityKey key, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
         return underlyingSensiProviders.stream()
-                .map(u -> u.getSIMMSensitivity(productClass, riskClass, riskType, bucketKey, maturityBucket, curveIndexName, evaluationTime, model))
+                .map(u -> u.getSIMMSensitivity(key, evaluationTime, model))
                 .reduce(RandomVariableInterface::add).orElse(model.getRandomVariableForConstant(0.0));
     }
 }

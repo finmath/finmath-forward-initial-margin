@@ -7,6 +7,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivityProviderInterface;
 import net.finmath.xva.initialmargin.SIMMParameter;
+import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 import java.util.Map;
@@ -20,7 +21,7 @@ public class SIMMSensitivityProviderSIMMSwapBPV  {
     final SIMMParameter.RiskClass riskClass = SIMMParameter.RiskClass.InterestRate;
     final SIMMParameter.RiskType riskType = SIMMParameter.RiskType.Delta;
 
-    Map<SIMMTradeSpecification.SensitivityKey,Double> notionalMap;
+    Map<SIMMSensitivityKey,Double> notionalMap;
 
     ModelSensitivityProviderInterface forwardSensitivityProvider;
 
@@ -42,7 +43,7 @@ public class SIMMSensitivityProviderSIMMSwapBPV  {
     {
 
 
-        Optional<SIMMTradeSpecification.SensitivityKey> optional = notionalMap.keySet().stream().filter(key->key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
+        Optional<SIMMSensitivityKey> optional = notionalMap.keySet().stream().filter(key->key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
         if (optional.isPresent()){
             double effectiveMaturity = 0.0;//maturityMap.get(curveIndexName);
             double notional = notionalMap.get(curveIndexName);

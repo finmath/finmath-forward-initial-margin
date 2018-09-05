@@ -2,6 +2,7 @@ package net.finmath.xva.initialmargin;
 
 
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.xva.tradespecifications.SIMMSensitivityKey;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 import java.util.HashMap;
@@ -11,10 +12,11 @@ import java.util.stream.Collectors;
 
 public class SIMMHelper {
 
-    Set<SIMMTradeSpecification> tradeSet;
+    Set<SIMMSensitivityKey> keySet;
 
-    public  SIMMHelper(Set<SIMMTradeSpecification> tradeSet){
-        this.tradeSet = tradeSet.stream().map(trade->(SIMMTradeSpecification)trade).collect(Collectors.toSet());
+    public  SIMMHelper(Set<SIMMSensitivityKey> keySet){
+        this.keySet = keySet;
+        //this.tradeSet = tradeSet.stream().map(trade->(SIMMTradeSpecification)trade).collect(Collectors.toSet());
     }
 
 
@@ -44,35 +46,30 @@ public class SIMMHelper {
     }
 
 
-    public Set<SIMMTradeSpecification> getTadeSelection(String productClassKey, String riskClassKey, double evaluationTime){
-        return tradeSet.stream().filter(trade->trade.getSensitivityKeySet(evaluationTime).stream()
-                .filter(sensitivityKey -> sensitivityKey.getProductClass().equals(productClassKey) && sensitivityKey.getRiskClass().equals(riskClassKey)).findAny().isPresent()).collect(Collectors.toSet());
-    }
+    /*public Set<SIMMTradeSpecification> getTadeSelection(String productClassKey, String riskClassKey, double evaluationTime){
+        return this.keySet.stream()
+                .filter(sensitivityKey -> sensitivityKey.getProductClass().equals(productClassKey) && sensitivityKey.getRiskClass().equals(riskClassKey)).collect(Collectors.toSet());
+
+    }*/
 
     public Set<String>   getProductClassKeys(double evaluationTime)
     {
-        Set<String> riskClasses = tradeSet.stream()
-                .flatMap(
-                        trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k->k!=null).map(k-> k.getProductClass().name())
-                ).distinct().collect(Collectors.toSet());
+        Set<String> riskClasses =this.keySet.stream().filter(k->k!=null).map(k-> k.getProductClass().name())
+                .distinct().collect(Collectors.toSet());
         return riskClasses;
     }
 
     public Set<String>   getRiskClassKeysForProductClass(String productClassKey, double evaluationTime)
     {
-        Set<String> riskClasses = tradeSet.stream()
-                .flatMap(
-                        trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k->k!=null).filter(k->k.getProductClass().equals(productClassKey)).map(k-> k.getRiskClass().name())
-                ).distinct().collect(Collectors.toSet());
+        Set<String> riskClasses = this.keySet.stream().filter(k->k!=null).filter(k->k.getProductClass().equals(productClassKey)).map(k-> k.getRiskClass().name()).distinct().collect(Collectors.toSet());
+
         return riskClasses;
     }
 
     public Set<String>   getRiskClassKeys(double evaluationTime)
     {
-        Set<String> riskClasses = tradeSet.stream()
-                .flatMap(
-                        trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k->k!=null).map(k-> k.getRiskClass().name())
-                ).distinct().collect(Collectors.toSet());
+        Set<String> riskClasses = this.keySet.stream().filter(k->k!=null).map(k-> k.getRiskClass().name()).distinct().collect(Collectors.toSet());
+
         return riskClasses;
     }
 
@@ -81,10 +78,8 @@ public class SIMMHelper {
         Set<String> riskClassKeys = getRiskClassKeys(evaluationTime);
         Map<String,Set<String> >     mapRiskClassBucketKeys = new HashMap<>();
         riskClassKeys.stream().forEach(riskClass ->{
-            Set<String> riskFactors = tradeSet.stream()
-                    .flatMap(
-                            trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(  k->  k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString)).map(k->k.getBucketKey())
-                    ).distinct().collect(Collectors.toSet());
+            Set<String> riskFactors = this.keySet.stream().filter(  k->  k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString)).map(k->k.getBucketKey()).distinct().collect(Collectors.toSet());
+
             mapRiskClassBucketKeys.put(riskClass,riskFactors);
         });
         return mapRiskClassBucketKeys;
@@ -98,10 +93,7 @@ public class SIMMHelper {
             Map<String, Set<String> > mapRiskClassRiskFactorKeys = new HashMap<>();
 //        if ( riskTypeString.equals("delta")) {
             riskClassKeys.stream().forEach(riskClass -> {
-                Set<String> riskFactors = tradeSet.stream()
-                        .flatMap(
-                                trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k -> k!=null &&  k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
-                        ).distinct().collect(Collectors.toSet());
+                Set<String> riskFactors = this.keySet.stream().filter(k -> k!=null &&  k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey()).distinct().collect(Collectors.toSet());
                 mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
             });
             return mapRiskClassRiskFactorKeys;
@@ -111,17 +103,13 @@ public class SIMMHelper {
             Map<String,Set<String> >     mapRiskClassRiskFactorKeys = new HashMap<>();
             riskClassKeys.stream().forEach(riskClass -> {
                 if ( riskClass.equals("InterestRate") ) {
-                    Set<String> riskFactors = tradeSet.stream()
-                            .flatMap(
-                                    trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k -> k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
-                            ).distinct().collect(Collectors.toSet());
+                    Set<String> riskFactors = this.keySet.stream().filter(k -> k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
+                            .distinct().collect(Collectors.toSet());
                     mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
                 }
                 else{
-                    Set<String> riskFactors = tradeSet.stream()
-                            .flatMap(
-                                    trade -> trade.getSensitivityKeySet(evaluationTime).stream().filter(k ->  k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
-                            ).distinct().collect(Collectors.toSet());
+                    Set<String> riskFactors = this.keySet.stream().filter(k ->  k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
+                            .distinct().collect(Collectors.toSet());
                     mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
                 }
             });

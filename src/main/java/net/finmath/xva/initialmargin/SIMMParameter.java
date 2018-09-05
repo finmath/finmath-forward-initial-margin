@@ -1,11 +1,35 @@
 package net.finmath.xva.initialmargin;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class SIMMParameter {
     public SIMMParameter(){
 
+    }
+
+    public SIMMParameter(String jsonString){
+        Gson gson = new Gson();
+        Map<String, String> map = gson.fromJson(jsonString,new HashMap<String,String>().getClass());
+        CrossRiskClassCorrelationMatrix = gson.fromJson(map.get("CrossRiskClassCorrelationMatrix"),(new Double[0][0]).getClass());
+        MapFXCategory = gson.fromJson(map.get("MapFXCategory"),(new HashMap<String,String>()).getClass());
+        MapHistoricalVolaRatio = gson.fromJson(map.get("MapHistoricalVolaRatio"),(new HashMap<String,String>()).getClass());
+        ProductClassKeys = gson.fromJson(map.get("ProductClassKeys"),String[].class);
+        RiskClassKeys = gson.fromJson(map.get("RiskClassKeys"),String[].class);
+        CreditMaturityBuckets = gson.fromJson(map.get("CreditMaturityBuckets"),String[].class);
+        IRMaturityBuckets = gson.fromJson(map.get("IRMaturityBuckets"),String[].class);
+        IRCurveIndexNames = gson.fromJson(map.get("IRCurveIndexNames"),String[].class);
+        MapRiskClassThresholdMap = gson.fromJson(map.get("MapRiskClassThresholdMap"),new HashMap<String,Map<String,Double[][]> >().getClass());
+        IRCorrelationCrossCurrency = gson.fromJson(map.get("IRCorrelationCrossCurrency"),Double.class);
+        IRCurrencyMap = gson.fromJson(map.get("IRCurrencyMap"),(new HashMap<String,String>()).getClass());
+
+        MapRiskClassCorrelationIntraBucketMap = gson.fromJson(map.get("MapRiskClassCorrelationIntraBucketMap"),(new HashMap<RiskClass,Double[][] >()).getClass());
+        MapRiskClassCorrelationCrossBucketMap = gson.fromJson(map.get("MapRiskClassCorrelationCrossBucketMap"),(new HashMap<RiskClass,Double[][] >()).getClass());
+        MapRiskClassThresholdMap = gson.fromJson(map.get("MapRiskClassThresholdMap"),(new HashMap<String,Map<String,Double[][]> >()).getClass());
+        MapRiskClassRiskweightMap = gson.fromJson(map.get("MapRiskClassRiskweightMap"),(new HashMap<String,Map<String,Double[][]> >()).getClass());
     }
 
     final static public String   inflationKey = "inflation";
@@ -61,11 +85,11 @@ public class SIMMParameter {
 
     public Map<String,Double>       MapHistoricalVolaRatio;
 
-//    final public String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
-//    final public String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
-    final public String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
-    final public String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
-//    final public String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
+    public String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
+    public String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
+    public String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
+    public String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
+    public String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
 
     //       final public Double             IRCorrelationCrossCurveIndex = 0.982;
     public Double             IRCorrelationCrossCurrency;// = .27;
