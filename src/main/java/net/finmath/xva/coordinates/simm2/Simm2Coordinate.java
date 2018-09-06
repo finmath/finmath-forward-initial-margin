@@ -1,7 +1,7 @@
 package net.finmath.xva.coordinates.simm2;
 
 public class Simm2Coordinate {
-	private String maturityBucketKey;
+	private Vertex vertex;
 	private String riskFactorKey;
 	private String bucketKey;
 	private RiskClass riskClass;
@@ -10,11 +10,11 @@ public class Simm2Coordinate {
 
 	@Deprecated
 	public Simm2Coordinate(String maturityBucket, String riskFactorID, String bucketID, String riskClass, String riskType, String productClass) {
-		this(maturityBucket, riskFactorID, bucketID, RiskClass.valueOf(riskClass), MarginType.valueOf(riskType), ProductClass.valueOf(productClass));
+		this(Vertex.parseCrifTenor(maturityBucket), riskFactorID, bucketID, RiskClass.valueOf(riskClass), MarginType.valueOf(riskType), ProductClass.valueOf(productClass));
 	}
 
-	public Simm2Coordinate(String maturityBucketKey, String riskFactorKey, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
-		this.maturityBucketKey = maturityBucketKey;
+	public Simm2Coordinate(Vertex vertex, String riskFactorKey, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
+		this.vertex = vertex;
 		this.riskFactorKey = riskFactorKey;
 		this.bucketKey = bucketKey;
 		this.riskClass = riskClass;
@@ -22,20 +22,8 @@ public class Simm2Coordinate {
 		this.productClass = productClass;
 	}
 
-	public double getMaturityBucket() {
-		return getMaturityBucket(this.maturityBucketKey);
-	}
-
-	static public double getMaturityBucket(String key) {
-		if (key.contains("y"))
-			return Double.parseDouble(key.replace("y", ""));
-		if (key.contains("m"))
-			return Double.parseDouble(key.replace("m", "")) / 12.0;
-		return key.contains("w") ? Double.parseDouble(key.replace("w", "")) / 52.0 : 0.0;
-	}
-
-	public String getMaturityBucketKey() {
-		return maturityBucketKey;
+	public Vertex getVertex() {
+		return vertex;
 	}
 
 	public String getRiskFactorKey() {
@@ -65,7 +53,7 @@ public class Simm2Coordinate {
 
 		Simm2Coordinate key = (Simm2Coordinate) o;
 
-		if (maturityBucketKey != null ? !maturityBucketKey.equals(key.maturityBucketKey) : key.maturityBucketKey != null)
+		if (vertex != null ? !vertex.equals(key.vertex) : key.vertex != null)
 			return false;
 		if (riskFactorKey != null ? !riskFactorKey.equals(key.riskFactorKey) : key.riskFactorKey != null)
 			return false;
@@ -77,7 +65,7 @@ public class Simm2Coordinate {
 
 	@Override
 	public int hashCode() {
-		int result = maturityBucketKey != null ? maturityBucketKey.hashCode() : 0;
+		int result = vertex != null ? vertex.hashCode() : 0;
 		result = 31 * result + (riskFactorKey != null ? riskFactorKey.hashCode() : 0);
 		result = 31 * result + (bucketKey != null ? bucketKey.hashCode() : 0);
 		result = 31 * result + (riskClass != null ? riskClass.hashCode() : 0);
