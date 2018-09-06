@@ -2,179 +2,186 @@ package net.finmath.xva.beans;
 
 import com.google.gson.annotations.SerializedName;
 import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 public class CRIFSensititivityBean {
-    public static class CRIFSensiBean{
+	public static class CRIFSensiBean {
 
-        @SerializedName("Counterparty")
-        String Counterparty;
-        @SerializedName("TradeID")
-        String TradeID;
+		@SerializedName("Counterparty")
+		String counterparty;
+		@SerializedName("TradeID")
+		String tradeId;
 
-        @SerializedName("ProductClass")
-        String ProductClass;
+		@SerializedName("ProductClass")
+		String productClass;
 
-        @SerializedName("RiskType")
-        String RiskType;
+		@SerializedName("RiskType")
+		String riskType;
 
-        @SerializedName("Qualifier")
-        String Qualifier;
+		@SerializedName("qualifier")
+		String qualifier;
 
-        @SerializedName("Bucket")
-        String Bucket;
+		@SerializedName("Bucket")
+		String bucket;
 
-        @SerializedName("Label1")
-        String Label1;
+		@SerializedName("Label1")
+		String label1;
 
-        @SerializedName("Label2")
-        String Label2;
+		@SerializedName("Label2")
+		String label2;
 
-        @SerializedName("Amount")
-        Double Amount;
+		@SerializedName("Amount")
+		Double amount;
 
-        @SerializedName("AmountCCY")
-        String AmountCCY;
+		@SerializedName("AmountCCY")
+		String amountCcy;
 
-        @SerializedName("AmountUSD")
-        Double AmountUSD;
+		@SerializedName("AmountUSD")
+		Double amountUsd;
 
-        public String getCounterparty() {
-            return Counterparty;
-        }
+		public String getCounterparty() {
+			return counterparty;
+		}
 
-        public Simm2Coordinate getSensitivityKey(){
-            Simm2Coordinate key = null;
-            if (RiskType.contains("IR") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Label2, Qualifier, "INTEREST_RATE", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("IR") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Label2, Qualifier, "INTEREST_RATE", MarginType.VEGA.name(), ProductClass);
-            else if (RiskType.contains("Equity") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", Qualifier, Bucket, "EQUITY", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("Equity") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "EQUITY", MarginType.VEGA.name(), ProductClass);
-            else if (RiskType.contains("Commodity") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", Qualifier, Bucket, "COMMODITY", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("Commodity") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "COMMODITY", MarginType.VEGA.name(), ProductClass);
-            else if (RiskType.contains("FX") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", Qualifier, "0", "FX", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("FX") && RiskType.contains("Vol")) {
-                if (Qualifier.length() == 6) {
-                    String ccy1 = Qualifier.substring(0, 3);
-                    String ccy2 = Qualifier.substring(3, 6);
-                    if (ccy2.compareTo(ccy1) > 0) {
-                        Qualifier = ccy2 + ccy1;
-                    }
-                }
-                key = new Simm2Coordinate(Label1, Qualifier, "0", "FX", MarginType.VEGA.name(), ProductClass);
-            } else if (RiskType.contains("CreditQ"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CREDIT_Q", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("CreditNonQ"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CREDIT_NON_Q", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("Credit") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CREDIT_Q", MarginType.VEGA.name(), ProductClass);
-            else if (RiskType.contains("Inflation") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", "inflation", Qualifier, "INTEREST_RATE", MarginType.DELTA.name(), ProductClass);
-            else if (RiskType.contains("Inflation") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", "inflation", Qualifier, "INTEREST_RATE", MarginType.VEGA.name(), ProductClass);
-            else if (RiskType.contains("XCcy"))
-                key = new Simm2Coordinate("None", "ccybasis", Qualifier, "INTEREST_RATE", MarginType.DELTA.name(), ProductClass);return key;
+		public Simm2Coordinate getSensitivityKey() {
+			Simm2Coordinate key = null;
+			if (riskType.contains("IR") && !riskType.contains("Vol"))
+				key = new Simm2Coordinate(label1, label2, qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("IR") && riskType.contains("Vol"))
+				key = new Simm2Coordinate(label1, label2, qualifier, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
+			else if (riskType.contains("Equity") && !riskType.contains("Vol"))
+				key = new Simm2Coordinate("None", qualifier, bucket, RiskClass.EQUITY, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("Equity") && riskType.contains("Vol"))
+				key = new Simm2Coordinate(label1, qualifier, bucket, RiskClass.EQUITY, MarginType.VEGA, getParsedProductClass());
+			else if (riskType.contains("Commodity") && !riskType.contains("Vol"))
+				key = new Simm2Coordinate("None", qualifier, bucket, RiskClass.COMMODITY, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("Commodity") && riskType.contains("Vol"))
+				key = new Simm2Coordinate(label1, qualifier, bucket, RiskClass.COMMODITY, MarginType.VEGA, getParsedProductClass());
+			else if (riskType.contains("FX") && !riskType.contains("Vol"))
+				key = new Simm2Coordinate("None", qualifier, "0", RiskClass.FX, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("FX") && riskType.contains("Vol")) {
+				if (qualifier.length() == 6) {
+					String ccy1 = qualifier.substring(0, 3);
+					String ccy2 = qualifier.substring(3, 6);
+					if (ccy2.compareTo(ccy1) > 0) {
+						qualifier = ccy2 + ccy1;
+					}
+				}
+				key = new Simm2Coordinate(label1, qualifier, "0", RiskClass.FX, MarginType.VEGA, getParsedProductClass());
+			} else if (riskType.contains("CreditQ"))
+				key = new Simm2Coordinate(label1, qualifier, bucket, RiskClass.CREDIT_Q, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("CreditNonQ"))
+				key = new Simm2Coordinate(label1, qualifier, bucket, RiskClass.CREDIT_NON_Q, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("Credit") && riskType.contains("Vol"))
+				key = new Simm2Coordinate(label1, qualifier, bucket, RiskClass.CREDIT_Q, MarginType.VEGA, getParsedProductClass());
+			else if (riskType.contains("Inflation") && !riskType.contains("Vol"))
+				key = new Simm2Coordinate("None", "inflation", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			else if (riskType.contains("Inflation") && riskType.contains("Vol"))
+				key = new Simm2Coordinate("None", "inflation", qualifier, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
+			else if (riskType.contains("XCcy"))
+				key = new Simm2Coordinate("None", "ccybasis", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			return key;
 
-        }
+		}
 
-        public CRIFSensiBean(String counterparty, String tradeID, String productClass, String riskType, String qualifier, String bucket, String label1, String label2, Double amount, String amountCCY, Double amountUSD) {
-            Counterparty = counterparty;
-            TradeID = tradeID;
-            ProductClass = productClass;
-            RiskType = riskType;
-            Qualifier = qualifier;
-            Bucket = bucket;
-            Label1 = label1;
-            Label2 = label2;
-            Amount = amount;
-            AmountCCY = amountCCY;
-            AmountUSD = amountUSD;
-        }
+		public CRIFSensiBean(String counterparty, String tradeId, String productClass, String riskType, String qualifier, String bucket, String label1, String label2, Double amount, String amountCcy, Double amountUsd) {
+			this.counterparty = counterparty;
+			this.tradeId = tradeId;
+			this.productClass = productClass;
+			this.riskType = riskType;
+			this.qualifier = qualifier;
+			this.bucket = bucket;
+			this.label1 = label1;
+			this.label2 = label2;
+			this.amount = amount;
+			this.amountCcy = amountCcy;
+			this.amountUsd = amountUsd;
+		}
 
-        public String getTradeID() {
-            return TradeID;
-        }
+		public String getTradeId() {
+			return tradeId;
+		}
 
-        public void setTradeID(String tradeID) {
-            TradeID = tradeID;
-        }
+		public void setTradeId(String tradeId) {
+			this.tradeId = tradeId;
+		}
 
-        public String getProductClass() {
-            return ProductClass;
-        }
+		public String getProductClass() {
+			return productClass;
+		}
 
-        public void setProductClass(String productClass) {
-            ProductClass = productClass;
-        }
+		public ProductClass getParsedProductClass() {
+			return ProductClass.parseCrifProductClass(productClass);
+		}
 
-        public String getRiskType() {
-            return RiskType;
-        }
+		public void setProductClass(String productClass) {
+			this.productClass = productClass;
+		}
 
-        public void setRiskType(String riskType) {
-            RiskType = riskType;
-        }
+		public String getRiskType() {
+			return riskType;
+		}
 
-        public String getQualifier() {
-            return Qualifier;
-        }
+		public void setRiskType(String riskType) {
+			this.riskType = riskType;
+		}
 
-        public void setQualifier(String qualifier) {
-            Qualifier = qualifier;
-        }
+		public String getQualifier() {
+			return qualifier;
+		}
 
-        public String getBucket() {
-            return Bucket;
-        }
+		public void setQualifier(String qualifier) {
+			this.qualifier = qualifier;
+		}
 
-        public void setBucket(String bucket) {
-            Bucket = bucket;
-        }
+		public String getBucket() {
+			return bucket;
+		}
 
-        public String getLabel1() {
-            return Label1;
-        }
+		public void setBucket(String bucket) {
+			this.bucket = bucket;
+		}
 
-        public void setLabel1(String label1) {
-            Label1 = label1;
-        }
+		public String getLabel1() {
+			return label1;
+		}
 
-        public String getLabel2() {
-            return Label2;
-        }
+		public void setLabel1(String label1) {
+			this.label1 = label1;
+		}
 
-        public void setLabel2(String label2) {
-            Label2 = label2;
-        }
+		public String getLabel2() {
+			return label2;
+		}
 
-        public Double getAmount() {
-            return Amount;
-        }
+		public void setLabel2(String label2) {
+			this.label2 = label2;
+		}
 
-        public void setAmount(Double amount) {
-            Amount = amount;
-        }
+		public Double getAmount() {
+			return amount;
+		}
 
-        public String getAmountCCY() {
-            return AmountCCY;
-        }
+		public void setAmount(Double amount) {
+			this.amount = amount;
+		}
 
-        public void setAmountCCY(String amountCCY) {
-            AmountCCY = amountCCY;
-        }
+		public String getAmountCcy() {
+			return amountCcy;
+		}
 
-        public Double getAmountUSD() {
-            return AmountUSD;
-        }
+		public void setAmountCcy(String amountCcy) {
+			this.amountCcy = amountCcy;
+		}
 
-        public void setAmountUSD(Double amountUSD) {
-            AmountUSD = amountUSD;
-        }
-    }
+		public Double getAmountUsd() {
+			return amountUsd;
+		}
+
+		public void setAmountUsd(Double amountUsd) {
+			this.amountUsd = amountUsd;
+		}
+	}
 }
