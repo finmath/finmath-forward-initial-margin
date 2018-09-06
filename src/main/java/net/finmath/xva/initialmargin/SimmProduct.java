@@ -45,11 +45,15 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	public RandomVariableInterface getSimmForProductClass(ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		Set<String> riskClassList = helper.getRiskClassKeysForProductClass(productClass.name(), evaluationTime);
+		Set<RiskClass> riskClassList = helper.getRiskClassesForProductClass(productClass, evaluationTime);
 
 		RandomVariableInterface[] contributions = Arrays.stream(RiskClass.values()).map(rc -> {
-			if (riskClassList.contains(rc.name())) {
-				return getSimmForRiskClass(rc, productClass, evaluationTime, model);
+			if (riskClassList.contains(rc)) {
+				try {
+					return getSimmForRiskClass(rc, productClass, evaluationTime, model);
+				} catch (CalculationException e) {
+					throw new RuntimeException(e);
+				}
 			}
 
 			return model.getRandomVariableForConstant(0.0);
@@ -59,27 +63,25 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		return simmProductClass;
 	}
 
-	public RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return getDeltaMargin(riskClass, productClass, evaluationTime, model).add(
 				getVegaMargin(riskClass, productClass, evaluationTime, model));
 	}
 
-	public RandomVariableInterface getDeltaMargin(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		RandomVariableInterface deltaMargin = null;
+	public RandomVariableInterface getDeltaMargin(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		return getDeltaScheme(riskClass, productClass, evaluationTime).getValue(evaluationTime, model);
+	}
 
-		String riskTypeKey = MarginType.DELTA.name();
+	private AbstractLIBORMonteCarloProduct getDeltaScheme(RiskClass riskClass, ProductClass productClass, double evaluationTime) { ;
 		if (riskClass == RiskClass.INTEREST_RATE) {
-			SIMMProductIRDelta DeltaScheme = new SIMMProductIRDelta(this.simmSensitivityProvider, productClass.name(), this.getModality().getParameterSet(), evaluationTime);
-			deltaMargin = DeltaScheme.getValue(evaluationTime, model);
-		} else {
-			SIMMProductNonIRDeltaVega DeltaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass.name(), productClass.name(), riskTypeKey, this.getModality().getParameterSet(), this.getModality().getCalculationCurrency(), evaluationTime);
-			deltaMargin = DeltaScheme.getValue(evaluationTime, model);
+			return new SIMMProductIRDelta(this.simmSensitivityProvider, productClass.name(), this.getModality().getParameterSet(), evaluationTime);
 		}
-		return deltaMargin;
+
+		return new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.DELTA, modality, evaluationTime);
 	}
 
 	public RandomVariableInterface getVegaMargin(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		SIMMProductNonIRDeltaVega VegaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass.name(), productClass.name(), MarginType.VEGA.name(), this.getModality().getParameterSet(), this.getModality().getCalculationCurrency(), evaluationTime);
+		SIMMProductNonIRDeltaVega VegaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.VEGA, getModality(), evaluationTime);
 		return VegaScheme.getValue(evaluationTime, model);
 	}
 

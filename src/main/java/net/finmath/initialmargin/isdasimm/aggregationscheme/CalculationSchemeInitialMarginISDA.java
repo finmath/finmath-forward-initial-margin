@@ -567,7 +567,7 @@ public class CalculationSchemeInitialMarginISDA {
 	////        String[] tradeList = nettingset.getActiveProductKeys();
 	////        Map<String,SensitivitySet> tradeSensitivityMap = Stream.of(tradeList).collect(Collectors.toMap(t->t,t->nettingset.getActiveProduct(t).getSensitivitySet(atTime)));
 	////
-	////        List<String> riskClassKeys = getRiskClassKeys(tradeSensitivityMap);
+	////        List<String> riskClassKeys = getAvailableRiskClasses(tradeSensitivityMap);
 	////
 	//        List<String> riskClassKeys = new ArrayList<>(Arrays.asList(this.riskClassKeys));
 	//        if (!riskTypeString.equals("vega") ) {

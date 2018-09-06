@@ -2,8 +2,10 @@ package net.finmath.xva.initialmargin;
 
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
@@ -13,34 +15,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SIMMProductNonIRDeltaVega {
-	String calculationCCY;
-	String productClassKey;
-	RiskClass riskClassKey;
+public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
+	private SimmModality modality;
+	ProductClass productClass;
+	RiskClass riskClass;
 	String[] activeBucketKeys;
-	MarginType riskTypeKey;
+	MarginType marginType;
 	final SIMMHelper helper;
-	final SIMMParameter parameterSet;
 	private SIMMSensitivityProviderInterface simmSensitivitivityProvider;
 
 	public SIMMProductNonIRDeltaVega(SIMMSensitivityProviderInterface simmSensitivitivityProvider,
-									 String riskClassKey,
-									 String productClassKey,
-									 String riskTypeKey, SIMMParameter parameterSet, String calculationCCY, double atTime) {
-		this.calculationCCY = calculationCCY;
+									 RiskClass riskClass,
+									 ProductClass productClass,
+									 MarginType marginType, SimmModality modality, double atTime) {
+		this.modality = modality;
 		this.helper = null;//new SIMMHelper(simmSensitivitivityProvider.getTradeSpecs());
-		this.parameterSet = parameterSet;
 		this.simmSensitivitivityProvider = simmSensitivitivityProvider;
-		this.riskClassKey = RiskClass.valueOf(riskClassKey);
-		this.productClassKey = productClassKey;
-		this.riskTypeKey = MarginType.valueOf(riskTypeKey);
-		this.activeBucketKeys = helper.getRiskClassBucketKeyMap(riskTypeKey, atTime).get(riskClassKey).stream().filter(e -> !e.equals("Residual")).toArray(String[]::new);
+		this.riskClass = riskClass;
+		this.productClass = productClass;
+		this.marginType = marginType;
+		this.activeBucketKeys = helper.getBucketsByRiskClass(this.marginType, atTime).get(riskClass).stream().filter(e -> !e.equals("Residual")).toArray(String[]::new);
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-		RandomVariableInterface deltaMargin = new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
-		Double[][] correlationMatrix = parameterSet.MapRiskClassCorrelationCrossBucketMap.get(this.riskClassKey);
+		RandomVariableInterface deltaMargin = model.getRandomVariableForConstant(0.0);
+		Double[][] correlationMatrix = getModality().getParameterSet().MapRiskClassCorrelationCrossBucketMap.get(this.riskClass);
 
 		int length = correlationMatrix.length == 1 ? this.activeBucketKeys.length : correlationMatrix.length;
 
@@ -50,7 +50,7 @@ public class SIMMProductNonIRDeltaVega {
 			for (int iBucket = 0; iBucket < activeBucketKeys.length; iBucket++) {
 				String bucketKey = null;
 				int bucketIndex = 0;
-				if (riskClassKey.equals(RiskClass.EQUITY) || riskClassKey.equals(RiskClass.COMMODITY)) {
+				if (riskClass.equals(RiskClass.EQUITY) || riskClass.equals(RiskClass.COMMODITY)) {
 					bucketKey = new Integer(activeBucketKeys[iBucket]).toString();
 					bucketIndex = Integer.parseInt(activeBucketKeys[iBucket]);
 				} else {
@@ -59,11 +59,11 @@ public class SIMMProductNonIRDeltaVega {
 				}
 
 				/*Check whether we have risk factors in that bucket*/
-				Set<String> activeRiskFactorKeys = helper.getRiskClassRiskFactorMap(this.riskTypeKey.name(), bucketKey, evaluationTime).get(riskClassKey);
+				Set<String> activeRiskFactorKeys = helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass);
 				if (activeRiskFactorKeys != null && activeRiskFactorKeys.size() > 0) {
 					Map<String, RandomVariableInterface> netSensitivityMap = this.getRiskFactorNetSensitivityMap(bucketKey, activeRiskFactorKeys, evaluationTime, model);
 					RandomVariableInterface K1 = getAggregatedSensitivityForBucket(bucketKey, netSensitivityMap, evaluationTime);
-					RandomVariableInterface sumWeigthedNetSensi = this.getRiskFactorWeightedNetSensitivityMap(bucketKey, netSensitivityMap, evaluationTime).values().stream().reduce((rv1, rv2) -> rv1.add(rv2)).orElseGet(() -> new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0));//this.getWeightedSensitivitySum(bucketKey, weightedNetSensitivities, evaluationTime);
+					RandomVariableInterface sumWeigthedNetSensi = this.getRiskFactorWeightedNetSensitivityMap(bucketKey, netSensitivityMap, evaluationTime).values().stream().reduce(RandomVariableInterface::add).orElseGet(() -> new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0));//this.getWeightedSensitivitySum(bucketKey, weightedNetSensitivities, evaluationTime);
 					RandomVariableInterface S1 = K1.barrier(sumWeigthedNetSensi.sub(K1), K1, sumWeigthedNetSensi);
 					RandomVariableInterface KNegative = K1.mult(-1);
 					S1 = S1.barrier(S1.sub(KNegative), S1, KNegative);
@@ -74,9 +74,9 @@ public class SIMMProductNonIRDeltaVega {
 
 			RandomVariableInterface VarCovar = helper.getVarianceCovarianceAggregation(S1Contributions, correlationMatrix);
 
-			if (VarCovar == null)
+			if (VarCovar == null) {
 				return deltaMargin;
-			else {
+			} else {
 				/*Adjustment on Diagonal*/
 				VarCovar = VarCovar.squared();
 				RandomVariableInterface SSumSQ = null;
@@ -93,9 +93,9 @@ public class SIMMProductNonIRDeltaVega {
 		}
 
 		/* RESIDUAL TERM*/
-		if (!this.riskClassKey.equals(RiskClass.FX)) {
+		if (!this.riskClass.equals(RiskClass.FX)) {
 			String bucketKey = "Residual";
-			Set<String> activeRiskFactorKeys = this.helper.getRiskClassRiskFactorMap(this.riskTypeKey.name(), bucketKey, evaluationTime).get(riskClassKey);
+			Set<String> activeRiskFactorKeys = this.helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass);
 			if (activeRiskFactorKeys != null && activeRiskFactorKeys.size() > 0) {
 				Map<String, RandomVariableInterface> netSensitivityMap = this.getRiskFactorNetSensitivityMap(bucketKey, activeRiskFactorKeys, evaluationTime, model);
 				Map<String, RandomVariableInterface> weightedNetSensitivityMap = this.getRiskFactorWeightedNetSensitivityMap(bucketKey, netSensitivityMap, evaluationTime);
@@ -114,55 +114,54 @@ public class SIMMProductNonIRDeltaVega {
 	private Map<String, RandomVariableInterface> getConcentrationFactorMap(String bucketKey, Map<String, RandomVariableInterface> riskFactorNetSensitivityMap, double atTime) {
 
 		return
-				riskFactorNetSensitivityMap.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> {
-					return this.getConcentrationRiskFactor(entry.getValue(), entry.getKey(), bucketKey, atTime);
-				}));
+				riskFactorNetSensitivityMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> this.getConcentrationRiskFactor(entry.getValue(), entry.getKey(), bucketKey, atTime)));
 	}
 
 	private Map<String, RandomVariableInterface> getRiskFactorWeightedNetSensitivityMap(String bucketKey, Map<String, RandomVariableInterface> riskFactorNetSensitivityMap, double evaluationTime) {
 
 		Map<String, RandomVariableInterface> concentrationFactors = this.getConcentrationFactorMap(bucketKey, riskFactorNetSensitivityMap, evaluationTime);
 
-		Map<String, RandomVariableInterface> weightedSensiMap = riskFactorNetSensitivityMap.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> {
+		return riskFactorNetSensitivityMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
 			RandomVariableInterface netSensi = entry.getValue();
 			RandomVariableInterface concentrationRiskFactor = concentrationFactors.get(entry.getKey());
 			return this.getWeightedNetSensitivity(netSensi, concentrationRiskFactor, entry.getKey(), bucketKey, evaluationTime);
 		}));
-
-		return weightedSensiMap;
 	}
 
 	private RandomVariableInterface getAggregatedSensitivityForBucket(String bucketKey, Map<String, RandomVariableInterface> netSensitivityMap, double evaluationTime) {
 		RandomVariableInterface aggregatedSensi = null;
 		Double[][] correlationMatrix = new Double[netSensitivityMap.size()][netSensitivityMap.size()];
 		Map<String, RandomVariableInterface> weightedNetSensitivityMap = this.getRiskFactorWeightedNetSensitivityMap(bucketKey, netSensitivityMap, evaluationTime);
-		String[] activeRiskFactorKeys = netSensitivityMap.keySet().stream().toArray(String[]::new);
-		if (riskClassKey.equals(RiskClass.INTEREST_RATE) && riskTypeKey.equals(MarginType.VEGA)) {
-			correlationMatrix = this.parameterSet.MapRiskClassCorrelationIntraBucketMap.get("InterestRate_Tenor");
+		String[] activeRiskFactorKeys = netSensitivityMap.keySet().toArray(new String[0]);
+		if (riskClass.equals(RiskClass.INTEREST_RATE) && marginType.equals(MarginType.VEGA)) {
+			correlationMatrix = getModality().getParameterSet().MapRiskClassCorrelationIntraBucketMap.get("InterestRate_Tenor");
 			RandomVariableInterface[] contributionsReDim = new RandomVariableInterface[correlationMatrix.length];
-			int nTenors = this.parameterSet.IRMaturityBuckets.length;
-			for (int iIndex = 0; iIndex < activeRiskFactorKeys.length; iIndex++)
+			int nTenors = getModality().getParameterSet().IRMaturityBuckets.length;
+			for (String activeRiskFactorKey : activeRiskFactorKeys) {
 				for (int i = 0; i < nTenors; i++) {
-					if (activeRiskFactorKeys[iIndex].equals(this.parameterSet.IRMaturityBuckets[i]))
-						contributionsReDim[i] = weightedNetSensitivityMap.get(activeRiskFactorKeys[iIndex]);
-					if (activeRiskFactorKeys[iIndex].equals(SIMMParameter.inflationKey))
-						contributionsReDim[contributionsReDim.length - 2] = weightedNetSensitivityMap.get(activeRiskFactorKeys[iIndex]);
+					if (activeRiskFactorKey.equals(getModality().getParameterSet().IRMaturityBuckets[i])) {
+						contributionsReDim[i] = weightedNetSensitivityMap.get(activeRiskFactorKey);
+					}
+					if (activeRiskFactorKey.equals(SIMMParameter.inflationKey)) {
+						contributionsReDim[contributionsReDim.length - 2] = weightedNetSensitivityMap.get(activeRiskFactorKey);
+					}
 				}
+			}
 			aggregatedSensi = helper.getVarianceCovarianceAggregation(contributionsReDim, correlationMatrix);
 		} else {
 			Double correlation = 0.0;
-			if (riskClassKey.equals(RiskClass.FX))
-				correlation = this.parameterSet.MapRiskClassCorrelationIntraBucketMap.get(this.riskClassKey)[0][0];
-			else if (riskClassKey.equals(RiskClass.CREDIT_Q) || riskClassKey.equals(RiskClass.CREDIT_NON_Q))
-				correlation = this.parameterSet.MapRiskClassCorrelationIntraBucketMap.get(this.riskClassKey)[0][1];
-			else {
+			if (riskClass.equals(RiskClass.FX)) {
+				correlation = getModality().getParameterSet().MapRiskClassCorrelationIntraBucketMap.get(this.riskClass)[0][0];
+			} else if (riskClass.equals(RiskClass.CREDIT_Q) || riskClass.equals(RiskClass.CREDIT_NON_Q)) {
+				correlation = getModality().getParameterSet().MapRiskClassCorrelationIntraBucketMap.get(this.riskClass)[0][1];
+			} else {
 				int bucketNr = 0;
 				try {
 					bucketNr = (int) Double.parseDouble(bucketKey);
-					correlation = this.parameterSet.MapRiskClassCorrelationIntraBucketMap.get(this.riskClassKey)[0][bucketNr];
+					correlation = getModality().getParameterSet().MapRiskClassCorrelationIntraBucketMap.get(this.riskClass)[0][bucketNr];
 				} catch (Exception e) {
-					bucketNr = this.parameterSet.MapRiskClassCorrelationIntraBucketMap.get(this.riskClassKey)[0].length - 1;
-					correlation = this.parameterSet.MapRiskClassCorrelationIntraBucketMap.get(this.riskClassKey)[0][bucketNr];
+					bucketNr = getModality().getParameterSet().MapRiskClassCorrelationIntraBucketMap.get(this.riskClass)[0].length - 1;
+					correlation = getModality().getParameterSet().MapRiskClassCorrelationIntraBucketMap.get(this.riskClass)[0][bucketNr];
 				}
 			}
 			Map<String, RandomVariableInterface> concentrationFactors = this.getConcentrationFactorMap(bucketKey, netSensitivityMap, evaluationTime);
@@ -170,11 +169,12 @@ public class SIMMProductNonIRDeltaVega {
 			for (int i = 0; i < activeRiskFactorKeys.length; i++) {
 				String iRiskFactorKey = activeRiskFactorKeys[i];
 				weightedNetSensitivitesArray[i] = netSensitivityMap.get(iRiskFactorKey);
-				for (int j = 0; j < activeRiskFactorKeys.length; j++)
+				for (int j = 0; j < activeRiskFactorKeys.length; j++) {
 					if (i != j) {
 						String jRiskFactorKey = activeRiskFactorKeys[j];
 						correlationMatrix[i][j] = getParameterF(concentrationFactors.get(iRiskFactorKey), concentrationFactors.get(jRiskFactorKey)).getAverage() * correlation;
 					}
+				}
 			}
 			aggregatedSensi = helper.getVarianceCovarianceAggregation(weightedNetSensitivitesArray, correlationMatrix);
 		}
@@ -187,11 +187,11 @@ public class SIMMProductNonIRDeltaVega {
 		try {
 			bucketIndex = (int) Double.parseDouble(bucketKey);
 		} catch (NumberFormatException e) {
-			bucketIndex = this.parameterSet.MapRiskClassRiskweightMap.get(this.riskTypeKey).get(riskClassKey).entrySet().iterator().next().getValue()[0].length - 1;
+			bucketIndex = getModality().getParameterSet().MapRiskClassRiskweightMap.get(this.marginType).get(riskClass).entrySet().iterator().next().getValue()[0].length - 1;
 		}
 		bucketIndex = Math.max(0, bucketIndex);
 
-		Double[][] riskWeights = this.parameterSet.MapRiskClassRiskweightMap.get(this.riskTypeKey).get(riskClassKey).entrySet().iterator().next().getValue();
+		Double[][] riskWeights = getModality().getParameterSet().MapRiskClassRiskweightMap.get(this.marginType).get(riskClass).entrySet().iterator().next().getValue();
 		double riskWeight = riskWeights[0][bucketIndex];
 
 		double riskWeightAdjustment = this.getRiskWeightAdjustment(bucketIndex);
@@ -209,8 +209,8 @@ public class SIMMProductNonIRDeltaVega {
 
 		double concentrationThreshold = 1.0E12;
 		int bucketIndex = 0;
-		if (riskClassKey.equals(RiskClass.FX)) {
-			Map<String, String> FXMap = this.parameterSet.MapFXCategory;
+		if (riskClass == RiskClass.FX) {
+			Map<String, String> FXMap = getModality().getParameterSet().MapFXCategory;
 			String category = null;
 			String defaultCategory = "Category3";
 			if (riskFactorKey.length() == 3) {
@@ -222,21 +222,22 @@ public class SIMMProductNonIRDeltaVega {
 				String category2 = FXMap.containsKey(str2) ? FXMap.get(str2) : defaultCategory;
 				category = category1 + "-" + category2;
 			}
-			concentrationThreshold = this.parameterSet.MapRiskClassThresholdMap.get(riskTypeKey).get(riskClassKey).get(category)[0][0];
+			concentrationThreshold = getModality().getParameterSet().MapRiskClassThresholdMap.get(marginType).get(riskClass).get(category)[0][0];
 		} else {
 			try {
 				bucketIndex = (int) Double.parseDouble(bucketKey);
-				concentrationThreshold = this.parameterSet.MapRiskClassThresholdMap.get(riskTypeKey).get(riskClassKey).entrySet().iterator().next().getValue()[0][bucketIndex];
+				concentrationThreshold = getModality().getParameterSet().MapRiskClassThresholdMap.get(marginType).get(riskClass).entrySet().iterator().next().getValue()[0][bucketIndex];
 			} catch (Exception e) {
 				if (bucketKey.equals("Residual")) { //!NumberUtils.isNumber(bucketKey))/*Usually RESIDUAL*/ {
-					bucketIndex = this.parameterSet.MapRiskClassThresholdMap.get(riskTypeKey).get(riskClassKey).entrySet().iterator().next().getValue()[0].length - 1;
-					concentrationThreshold = this.parameterSet.MapRiskClassThresholdMap.get(riskTypeKey).get(riskClassKey).entrySet().iterator().next().getValue()[0][bucketIndex];
+					bucketIndex = getModality().getParameterSet().MapRiskClassThresholdMap.get(marginType).get(riskClass).entrySet().iterator().next().getValue()[0].length - 1;
+					concentrationThreshold = getModality().getParameterSet().MapRiskClassThresholdMap.get(marginType).get(riskClass).entrySet().iterator().next().getValue()[0][bucketIndex];
 				} else {
-					String key = this.parameterSet.IRCurrencyMap.get(bucketKey);
-					if (key == null)
+					String key = getModality().getParameterSet().IRCurrencyMap.get(bucketKey);
+					if (key == null) {
 						key = "High_Volatility_Currencies";
+					}
 					try {
-						concentrationThreshold = this.parameterSet.MapRiskClassThresholdMap.get(riskTypeKey).get(riskClassKey).get(key)[0][0];
+						concentrationThreshold = getModality().getParameterSet().MapRiskClassThresholdMap.get(marginType).get(riskClass).get(key)[0][0];
 					} catch (Exception e1) {
 						concentrationThreshold = 1.0E12;
 					}
@@ -252,38 +253,44 @@ public class SIMMProductNonIRDeltaVega {
 	}
 
 	public double getRiskWeightAdjustment(int bucketIndex) {
-		if (this.riskTypeKey.equals(MarginType.VEGA) && (this.riskClassKey.equals(RiskClass.FX) || this.riskClassKey.equals(RiskClass.EQUITY) || this.riskClassKey.equals(RiskClass.COMMODITY))) {
-			Double[][] deltaRiskWeights = this.parameterSet.MapRiskClassRiskweightMap.get(MarginType.DELTA).get(riskClassKey).entrySet().iterator().next().getValue();
+		if (marginType == MarginType.VEGA && (riskClass == RiskClass.FX || riskClass == RiskClass.EQUITY) || riskClass == RiskClass.COMMODITY) {
+			Double[][] deltaRiskWeights = getModality().getParameterSet().MapRiskClassRiskweightMap.get(MarginType.DELTA).get(riskClass).entrySet().iterator().next().getValue();
 			double deltaRiskWeight = deltaRiskWeights[0][bucketIndex];
 			double riskWeight = deltaRiskWeight;
-			if (this.parameterSet.MapHistoricalVolaRatio.containsKey(this.riskClassKey)) {
-				double historicalVolaRatio = this.parameterSet.MapHistoricalVolaRatio.get(this.riskClassKey);
+			if (getModality().getParameterSet().MapHistoricalVolaRatio.containsKey(this.riskClass)) {
+				double historicalVolaRatio = getModality().getParameterSet().MapHistoricalVolaRatio.get(this.riskClass);
 				riskWeight = riskWeight * historicalVolaRatio;
 			}
 			return riskWeight;
-		} else
+		} else {
 			return 1.0;
+		}
 	}
 
 	public RandomVariableInterface getNetSensitivity(String riskFactorKey, String bucketKey, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-		if (riskClassKey.equals(RiskClass.FX)) /* Sensitivities against Calculation CCY should be zero*/
-			if (this.calculationCCY.equals(riskFactorKey) && riskFactorKey.length() == 3) {
-				return new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
-			}
-		if (riskClassKey.equals(RiskClass.CREDIT_Q) || riskClassKey.equals(RiskClass.CREDIT_NON_Q)) {
-
-			return Arrays.stream(this.parameterSet.CreditMaturityBuckets).map(maturityBucket -> this.simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate(maturityBucket, riskFactorKey, bucketKey, riskClassKey.name(), riskTypeKey.name(), productClassKey), evaluationTime, model)).reduce((r1, r2) -> r1.add(r2)).orElseGet(() -> new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0));
-		} else {
-
-			if (this.riskTypeKey.equals(MarginType.DELTA))
-				return this.simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate("", riskFactorKey, bucketKey, riskClassKey.name(), riskTypeKey.name(), productClassKey), evaluationTime, model);
-			else if (this.riskTypeKey.equals(MarginType.VEGA) && riskFactorKey.equals(SIMMParameter.inflationKey))
-				return this.simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate("", riskFactorKey, bucketKey, riskClassKey.name(), riskTypeKey.name(), productClassKey), evaluationTime, model);
-			else {
-
-				return Arrays.stream(this.parameterSet.IRMaturityBuckets).map(maturityBucket -> this.simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate(maturityBucket, riskFactorKey, bucketKey, riskClassKey.name(), riskTypeKey.name(), productClassKey), evaluationTime, model)).reduce((r1, r2) -> r1.add(r2)).orElseGet(() -> new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0));
+		if (riskClass == RiskClass.FX) /* Sensitivities against Calculation CCY should be zero*/ {
+			if (getModality().getCalculationCurrency().equals(riskFactorKey) && riskFactorKey.length() == 3) {
+				return model.getRandomVariableForConstant(0.0);
 			}
 		}
+		if (riskClass == RiskClass.CREDIT_Q || riskClass == RiskClass.CREDIT_NON_Q) {
+			return Arrays.stream(getModality().getParameterSet().getCreditVertices()).map(vertex -> this.simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate(vertex, riskFactorKey, bucketKey, riskClass, marginType, productClass), evaluationTime, model)).reduce(model.getRandomVariableForConstant(0.0),RandomVariableInterface::add);
+		} else {
+
+			if (marginType == MarginType.DELTA) {
+				return simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate(null, riskFactorKey, bucketKey, riskClass, marginType, productClass), evaluationTime, model);
+			} else if (marginType == MarginType.VEGA && riskFactorKey.equals(SIMMParameter.inflationKey)) {
+				return simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate(null, riskFactorKey, bucketKey, riskClass, marginType, productClass), evaluationTime, model);
+			} else {
+				return Arrays.stream(getModality().getParameterSet().getIRVertices()).
+						map(vertex -> simmSensitivitivityProvider.getSIMMSensitivity(new Simm2Coordinate(vertex, riskFactorKey, bucketKey, riskClass, marginType, productClass), evaluationTime, model)).
+						reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
+			}
+		}
+	}
+
+	public SimmModality getModality() {
+		return modality;
 	}
 }

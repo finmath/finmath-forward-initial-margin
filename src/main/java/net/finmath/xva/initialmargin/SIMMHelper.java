@@ -1,19 +1,21 @@
 package net.finmath.xva.initialmargin;
 
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SIMMHelper {
+	Set<Simm2Coordinate> coordinates;
 
-	Set<Simm2Coordinate> keySet;
-
-	public SIMMHelper(Set<Simm2Coordinate> keySet) {
-		this.keySet = keySet;
+	public SIMMHelper(Set<Simm2Coordinate> coordinates) {
+		this.coordinates = coordinates;
 		//this.tradeSet = tradeSet.stream().map(trade->(SIMMTradeSpecification)trade).collect(Collectors.toSet());
 	}
 
@@ -35,75 +37,48 @@ public class SIMMHelper {
 			}
 			i++;
 		}
-		if (value == null)
+		if (value == null) {
 			return null;
+		}
 		value = value.sqrt();
 		return value;
 	}
 
-
-    /*public Set<SIMMTradeSpecification> getTadeSelection(String productClassKey, String riskClassKey, double evaluationTime){
-        return this.keySet.stream()
-                .filter(sensitivityKey -> sensitivityKey.getProductClass().equals(productClassKey) && sensitivityKey.getRiskClass().equals(riskClassKey)).collect(Collectors.toSet());
-
-    }*/
-
-	public Set<String> getProductClassKeys(double evaluationTime) {
-		Set<String> riskClasses = this.keySet.stream().filter(k -> k != null).map(k -> k.getProductClass().name())
-				.distinct().collect(Collectors.toSet());
-		return riskClasses;
+	public Set<ProductClass> getAvailableProductClasses(double evaluationTime) {
+		return this.coordinates.stream().
+				filter(Objects::nonNull).
+				map(Simm2Coordinate::getProductClass).
+				collect(Collectors.toSet());
 	}
 
-	public Set<String> getRiskClassKeysForProductClass(String productClassKey, double evaluationTime) {
-		Set<String> riskClasses = this.keySet.stream().filter(k -> k != null).filter(k -> k.getProductClass().equals(productClassKey)).map(k -> k.getRiskClass().name()).distinct().collect(Collectors.toSet());
-
-		return riskClasses;
+	public Set<RiskClass> getRiskClassesForProductClass(ProductClass productClass, double evaluationTime) {
+		return coordinates.stream().
+				filter(Objects::nonNull).
+				filter(k -> k.getProductClass() == productClass).
+				map(Simm2Coordinate::getRiskClass).
+				collect(Collectors.toSet());
 	}
 
-	public Set<String> getRiskClassKeys(double evaluationTime) {
-		Set<String> riskClasses = this.keySet.stream().filter(k -> k != null).map(k -> k.getRiskClass().name()).distinct().collect(Collectors.toSet());
-
-		return riskClasses;
+	public Set<RiskClass> getAvailableRiskClasses(double evaluationTime) {
+		return this.coordinates.stream().
+				filter(Objects::nonNull).
+				map(Simm2Coordinate::getRiskClass).
+				collect(Collectors.toSet());
 	}
 
-	public Map<String, Set<String>> getRiskClassBucketKeyMap(String riskTypeString, double evaluationTime) {
-
-		Set<String> riskClassKeys = getRiskClassKeys(evaluationTime);
-		Map<String, Set<String>> mapRiskClassBucketKeys = new HashMap<>();
-		riskClassKeys.stream().forEach(riskClass -> {
-			Set<String> riskFactors = this.keySet.stream().filter(k -> k != null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString)).map(k -> k.getBucketKey()).distinct().collect(Collectors.toSet());
-
-			mapRiskClassBucketKeys.put(riskClass, riskFactors);
-		});
-		return mapRiskClassBucketKeys;
+	public Map<RiskClass, Set<String>> getBucketsByRiskClass(MarginType marginType, double evaluationTime) {
+		return coordinates.stream().
+				filter(Objects::nonNull).
+				filter(k -> k.getRiskType() == marginType).
+				collect(Collectors.groupingBy(Simm2Coordinate::getRiskClass,
+						Collectors.mapping(Simm2Coordinate::getBucketKey, Collectors.toSet())));
 	}
 
-	public Map<String, Set<String>> getRiskClassRiskFactorMap(String riskTypeString, String bucketKey, double evaluationTime) {
-
-		Set<String> riskClassKeys = getRiskClassKeys(evaluationTime);
-		if (!riskTypeString.equals("vega")) {
-			Map<String, Set<String>> mapRiskClassRiskFactorKeys = new HashMap<>();
-//        if ( riskTypeString.equals("delta")) {
-			riskClassKeys.stream().forEach(riskClass -> {
-				Set<String> riskFactors = this.keySet.stream().filter(k -> k != null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey()).distinct().collect(Collectors.toSet());
-				mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
-			});
-			return mapRiskClassRiskFactorKeys;
-//        }
-		} else {
-			Map<String, Set<String>> mapRiskClassRiskFactorKeys = new HashMap<>();
-			riskClassKeys.stream().forEach(riskClass -> {
-				if (riskClass.equals("INTEREST_RATE")) {
-					Set<String> riskFactors = this.keySet.stream().filter(k -> k != null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
-							.distinct().collect(Collectors.toSet());
-					mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
-				} else {
-					Set<String> riskFactors = this.keySet.stream().filter(k -> k != null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
-							.distinct().collect(Collectors.toSet());
-					mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);
-				}
-			});
-			return mapRiskClassRiskFactorKeys;
-		}
+	public Map<RiskClass, Set<String>> getRiskFactorKeysByRiskClass(MarginType riskTypeString, String bucketKey, double evaluationTime) {
+		return coordinates.stream().
+				filter(Objects::nonNull).
+				filter(k -> k.getRiskType() == riskTypeString && k.getBucketKey().equals(bucketKey)).
+				collect(Collectors.groupingBy(Simm2Coordinate::getRiskClass,
+						Collectors.mapping(Simm2Coordinate::getRiskFactorKey, Collectors.toSet())));
 	}
 }
