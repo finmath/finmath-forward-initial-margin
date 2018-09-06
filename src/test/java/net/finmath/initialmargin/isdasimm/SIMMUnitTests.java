@@ -12,7 +12,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.xva.beans.CRIFSensititivityBean;
+import net.finmath.xva.beans.CrifSensitivityBean;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.initialmargin.SIMMHelper;
 import net.finmath.xva.initialmargin.SIMMParameter;
@@ -42,9 +42,9 @@ public class SIMMUnitTests {
 
 			Gson gson = new Gson();
 			JsonReader reader = new JsonReader(new FileReader("crif.json"));
-			Type empTypeList = new TypeToken<Collection<CRIFSensititivityBean.CRIFSensiBean>>() {
+			Type empTypeList = new TypeToken<Collection<CrifSensitivityBean>>() {
 			}.getType();
-			List<CRIFSensititivityBean.CRIFSensiBean> test = gson.fromJson(reader, new TypeToken<List<CRIFSensititivityBean.CRIFSensiBean>>() {
+			List<CrifSensitivityBean> test = gson.fromJson(reader, new TypeToken<List<CrifSensitivityBean>>() {
 			}.getType());
 
 			List<String> counterpartyList = test.stream().map(entry -> entry.getCounterparty()).distinct().collect(Collectors.toList());
