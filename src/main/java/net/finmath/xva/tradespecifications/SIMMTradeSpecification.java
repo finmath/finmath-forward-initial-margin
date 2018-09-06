@@ -20,11 +20,11 @@ public class SIMMTradeSpecification {
 	}
 
 	public double getMaxTimeToMaturity() {
-		return 0.0;
+		return maturity;
 	}
 
 	public double getNotional() {
-		return 0.0;
+		return notional;
 	}
 
 	public ProductClass getProductClass() {
