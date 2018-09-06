@@ -1,9 +1,11 @@
 package net.finmath.xva.coordinates.simm2;
 
-public class Simm2Coordinate {
+import java.util.Objects;
+
+public final class Simm2Coordinate {
 	private Vertex vertex;
-	private String riskFactorKey;
-	private String bucketKey;
+	private String riskFactorKey;//~qualifier
+	private String bucketKey;//~label2
 	private RiskClass riskClass;
 	private MarginType marginType;
 	private ProductClass productClass;
@@ -65,12 +67,6 @@ public class Simm2Coordinate {
 
 	@Override
 	public int hashCode() {
-		int result = vertex != null ? vertex.hashCode() : 0;
-		result = 31 * result + (riskFactorKey != null ? riskFactorKey.hashCode() : 0);
-		result = 31 * result + (bucketKey != null ? bucketKey.hashCode() : 0);
-		result = 31 * result + (riskClass != null ? riskClass.hashCode() : 0);
-		result = 31 * result + (marginType != null ? marginType.hashCode() : 0);
-		result = 31 * result + (productClass != null ? productClass.hashCode() : 0);
-		return result;
+		return Objects.hash(vertex, riskFactorKey, bucketKey, riskClass,marginType, productClass);
 	}
 }
