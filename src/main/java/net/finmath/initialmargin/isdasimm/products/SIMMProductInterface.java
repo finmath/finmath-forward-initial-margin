@@ -26,7 +26,7 @@ public interface SIMMProductInterface {
 	RandomVariableInterface getInitialMargin(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String calculationCCY) throws CalculationException;
 
 	/**
-	 * Returns the sensitivity of the SIMMProduct w.r.t the specified parameters if a sensitivity is available.
+	 * Returns the sensitivity of the SimmProduct w.r.t the specified parameters if a sensitivity is available.
 	 * This function will be called by the <code> SIMMSchemeIRDelta </code>.
 	 *
 	 * @param productClass    The SIMM product class of this product (RatesFx etc.)

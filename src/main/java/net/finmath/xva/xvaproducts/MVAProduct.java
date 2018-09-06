@@ -5,7 +5,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
-import net.finmath.xva.initialmargin.SIMMProduct;
+import net.finmath.xva.initialmargin.SimmProduct;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 
@@ -17,11 +17,11 @@ import java.util.stream.IntStream;
  * Calculates the margin valuation adjustments by calculating the initial margins on a time discretization and integrating them.
  */
 public class MVAProduct extends AbstractLIBORMonteCarloProduct {
-	private Set<SIMMProduct> initialMargins;
+	private Set<SimmProduct> initialMargins;
 
 	public MVAProduct(SIMMSensitivityProviderInterface sensitivityProvider, SimmModality modality, TimeDiscretizationInterface times) {
 		initialMargins = IntStream.range(0, times.getNumberOfTimes())
-				.mapToObj(timeIndex -> new SIMMProduct(times.getTime(timeIndex), sensitivityProvider, null, "EUR", 0.0, null))
+				.mapToObj(timeIndex -> new SimmProduct(times.getTime(timeIndex), sensitivityProvider, new SimmModality(null, "EUR", 0.0)))
 				.collect(Collectors.toSet());
 	}
 

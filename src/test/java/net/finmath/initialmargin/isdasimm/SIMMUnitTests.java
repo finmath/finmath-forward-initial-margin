@@ -16,7 +16,8 @@ import net.finmath.xva.beans.CrifSensitivityBean;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.initialmargin.SIMMHelper;
 import net.finmath.xva.initialmargin.SIMMParameter;
-import net.finmath.xva.initialmargin.SIMMProduct;
+import net.finmath.xva.initialmargin.SimmModality;
+import net.finmath.xva.initialmargin.SimmProduct;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMCRIFSensititivityProvider;
 import org.junit.Test;
 
@@ -30,8 +31,6 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import static java.lang.System.exit;
-
-;
 
 public class SIMMUnitTests {
 
@@ -60,7 +59,7 @@ public class SIMMUnitTests {
 					SIMMCRIFSensititivityProvider provider = new SIMMCRIFSensititivityProvider(simmSensitivityKeyDoubleMap);
 					SIMMHelper helper = new SIMMHelper(provider.getSensitivitiyMap().keySet());
 
-					SIMMProduct simmProduct = new SIMMProduct(0.0, provider, parameter, "EUR", 0.0, helper);
+					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0));
 
 					RandomVariableInterface result = simmProduct.getValue(0.0, getDummySimulation());
 				} catch (Exception e) {
