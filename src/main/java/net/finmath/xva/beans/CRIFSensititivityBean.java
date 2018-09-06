@@ -20,7 +20,7 @@ public class CRIFSensititivityBean {
 		@SerializedName("RiskType")
 		String riskType;
 
-		@SerializedName("qualifier")
+		@SerializedName("Qualifier")
 		String qualifier;
 
 		@SerializedName("Bucket")
