@@ -10,6 +10,7 @@ import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensi
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMPortfolioSensitivityProvider;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMTradeSensitivityProvider;
+import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
 import java.util.HashSet;
@@ -25,8 +26,8 @@ public class Launcher {
         String calculationCCY = "EUR";
 
 
-        SIMMTradeSpecification trade = new SIMMTradeSpecification(1.0E6,10.0, "Libor6M");
-        SIMMTradeSpecification trade2 = new SIMMTradeSpecification(1.0E6,20.0, "Libor3M");
+        SIMMTradeSpecification trade = new SIMMTradeSpecification(1.0E6,10.0, Indices.getLibor("EUR", "6M"));
+        SIMMTradeSpecification trade2 = new SIMMTradeSpecification(1.0E6,20.0, Indices.getLibor("EUR", "3M"));
         Set<SIMMTradeSpecification> tradeSet = new HashSet<>();
         tradeSet.add(trade);
         tradeSet.add(trade2);

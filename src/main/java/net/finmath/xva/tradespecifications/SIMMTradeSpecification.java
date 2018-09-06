@@ -8,47 +8,46 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SIMMTradeSpecification {
+	private double notional;
+	private double maturity;
+	private IRCurveSpec irCurve;
+	private Set<Simm2Coordinate> sensitivityKeySet;
 
+	public SIMMTradeSpecification(double notional, double maturity, IRCurveSpec irCurve) {
+		this.notional = notional;
+		this.maturity = maturity;
+		this.irCurve = irCurve;
+	}
 
+	public double getMaxTimeToMaturity() {
+		return 0.0;
+	}
 
-    Set<Simm2Coordinate> sensitivityKeySet;
+	public double getNotional() {
+		return 0.0;
+	}
 
-    public SIMMTradeSpecification(double notional, double maturity, String IRCurveKey){
+	public SIMMParameter.ProductClass getProductClass() {
+		return sensitivityKeySet.stream().map(key -> key.getProductClass()).distinct().findAny().get();
+	}
 
-    }
+	public Set<RiskClass> getRiskClasses() {
+		return sensitivityKeySet.stream().map(key -> key.getRiskClass()).collect(Collectors.toSet());
+	}
 
-    public double   getMaxTimeToMaturity(){
-        return 0.0;
-    }
+	public Set<String> getRiskfactors() {
+		return this.sensitivityKeySet.stream().map(key -> key.getRiskFactorKey()).collect(Collectors.toSet());
+	}
 
-    public double    getNotional(){
-        return 0.0;
-    }
+	public String getTradeID() {
+		return "";
+	}
 
-    public SIMMParameter.ProductClass getProductClass(){
-        return sensitivityKeySet.stream().map(key->key.getProductClass()).distinct().findAny().get();
-    }
+	public Set<Simm2Coordinate> getSensitivityKeySet(double evaluationTime) {
+		return sensitivityKeySet;
+	}
 
-    public Set<RiskClass> getRiskClasses(){
-        return sensitivityKeySet.stream().map(key->key.getRiskClass()).collect(Collectors.toSet());
-    }
-
-
-    public Set<String>  getRiskfactors(){
-        return this.sensitivityKeySet.stream().map(key->key.getRiskFactorKey()).collect(Collectors.toSet());
-    }
-
-    public String    getTradeID(){
-        return "";
-    }
-
-    public Set<Simm2Coordinate> getSensitivityKeySet(double evaluationTime) {
-        return sensitivityKeySet;
-    }
-
-
-    public IRCurveSpec getIRCurve() {
-        //TODO implement
-        return null;
-    }
+	public IRCurveSpec getIRCurve() {
+		return irCurve;
+	}
 }
