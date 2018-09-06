@@ -46,13 +46,13 @@ public class CRIFSensititivityBean {
         public Simm2Coordinate getSensitivityKey(){
             Simm2Coordinate key = null;
             if (RiskType.contains("IR") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Label2, Qualifier, "InterestRate", MarginType.DELTA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Label2, Qualifier, "INTEREST_RATE", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("IR") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Label2, Qualifier, "InterestRate", MarginType.VEGA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Label2, Qualifier, "INTEREST_RATE", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Equity") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", Qualifier, Bucket, "Equity", MarginType.DELTA.name(), ProductClass);
+                key = new Simm2Coordinate("None", Qualifier, Bucket, "EQUITY", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Equity") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "Equity", MarginType.VEGA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "EQUITY", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Commodity") && !RiskType.contains("Vol"))
                 key = new Simm2Coordinate("None", Qualifier, Bucket, "Commodity", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Commodity") && RiskType.contains("Vol"))
@@ -69,17 +69,17 @@ public class CRIFSensititivityBean {
                 }
                 key = new Simm2Coordinate(Label1, Qualifier, "0", "FX", MarginType.VEGA.name(), ProductClass);
             } else if (RiskType.contains("CreditQ"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CreditQ", MarginType.DELTA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CREDIT_Q", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("CreditNonQ"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CreditNonQ", MarginType.DELTA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CREDIT_NON_Q", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Credit") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CreditQ", MarginType.VEGA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "CREDIT_Q", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Inflation") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", "inflation", Qualifier, "InterestRate", MarginType.DELTA.name(), ProductClass);
+                key = new Simm2Coordinate("None", "inflation", Qualifier, "INTEREST_RATE", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Inflation") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", "inflation", Qualifier, "InterestRate", MarginType.VEGA.name(), ProductClass);
+                key = new Simm2Coordinate("None", "inflation", Qualifier, "INTEREST_RATE", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("XCcy"))
-                key = new Simm2Coordinate("None", "ccybasis", Qualifier, "InterestRate", MarginType.DELTA.name(), ProductClass);return key;
+                key = new Simm2Coordinate("None", "ccybasis", Qualifier, "INTEREST_RATE", MarginType.DELTA.name(), ProductClass);return key;
 
         }
 

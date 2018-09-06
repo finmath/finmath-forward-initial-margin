@@ -4,6 +4,7 @@ import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
-    final SIMMParameter.RiskClass riskClassKey = SIMMParameter.RiskClass.InterestRate;
+    final RiskClass riskClassKey = RiskClass.INTEREST_RATE;
     final String            riskTypeKey = "DELTA";
     final String            productClassKey;
     final Set<String>       currencyKeys;
@@ -138,7 +139,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
             String currencyMapKey;
             currencyMapKey = !optional.isPresent() ? "High_Volatility_Currencies" : optional.get().getValue();
             currencyMapKey = currencyMapKey.replace("_Traded", "").replace("_Well", "").replace("_Less", "");
-            Double[] riskWeights = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(SIMMParameter.RiskClass.InterestRate).get(currencyMapKey)[0];
+            Double[] riskWeights = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(RiskClass.INTEREST_RATE).get(currencyMapKey)[0];
             riskWeight = riskWeights[iRateTenor];
             RandomVariableInterface netSensi =  netSensitivities[iIndex][iRateTenor];
             return netSensi != null ?
@@ -146,7 +147,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
                     new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
         }
         else { /* Inflation or CCYBasis*/
-            riskWeight = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(SIMMParameter.RiskClass.InterestRate).get(indexName)[0][0];
+            riskWeight = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(RiskClass.INTEREST_RATE).get(indexName)[0][0];
 
 
             String maturityBucketKey = this.parameterSet.IRMaturityBuckets[iRateTenor];

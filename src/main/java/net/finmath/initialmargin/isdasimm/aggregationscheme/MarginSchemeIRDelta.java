@@ -29,7 +29,7 @@ public class MarginSchemeIRDelta {
 	public MarginSchemeIRDelta(CalculationSchemeInitialMarginISDA calculationSchemeInitialMarginISDA,
 			String productClassKey){
 		this.calculationSchemeInitialMarginISDA = calculationSchemeInitialMarginISDA;
-		this.riskClassKey = "InterestRate";
+		this.riskClassKey = "INTEREST_RATE";
 		this.productClassKey = productClassKey;
 		// Only modification:
 		this.bucketKeys = calculationSchemeInitialMarginISDA.getInterestRateDeltaBucketKeys();
@@ -154,7 +154,7 @@ public class MarginSchemeIRDelta {
 				currencyMapKey = optional.get().getValue();
 			}
 			currencyMapKey = currencyMapKey.replace("_Traded", "").replace("_Well", "").replace("_Less", "");
-			Double[] riskWeights = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("InterestRate").get(currencyMapKey)[0];
+			Double[] riskWeights = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("INTEREST_RATE").get(currencyMapKey)[0];
 			riskWeight = riskWeights[iRateTenor];
 			RandomVariableInterface netSensi =  netSensitivities[iIndex][iRateTenor];
 			if (netSensi!=null) {
@@ -164,7 +164,7 @@ public class MarginSchemeIRDelta {
 			}
 		}
 		else { /* Inflation or CCYBasis*/
-			riskWeight = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("InterestRate").get(indexName)[0][0];
+			riskWeight = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("INTEREST_RATE").get(indexName)[0][0];
 			String maturityBucket = calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets[iRateTenor];
 			RandomVariableInterface netSensi =  calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey,this.riskClassKey,maturityBucket, indexName, bucketKey,this.riskTypeKey, atTime);
 			if (netSensi!=null)

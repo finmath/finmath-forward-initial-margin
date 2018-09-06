@@ -101,7 +101,7 @@ public class SIMMHelper {
         else{
             Map<String,Set<String> >     mapRiskClassRiskFactorKeys = new HashMap<>();
             riskClassKeys.stream().forEach(riskClass -> {
-                if ( riskClass.equals("InterestRate") ) {
+                if ( riskClass.equals("INTEREST_RATE") ) {
                     Set<String> riskFactors = this.keySet.stream().filter(k -> k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
                             .distinct().collect(Collectors.toSet());
                     mapRiskClassRiskFactorKeys.put(riskClass, riskFactors);

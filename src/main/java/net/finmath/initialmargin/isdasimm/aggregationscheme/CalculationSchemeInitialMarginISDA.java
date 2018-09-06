@@ -57,7 +57,7 @@ public class CalculationSchemeInitialMarginISDA {
 				}
 			}
 
-			this.MapRiskClassCorrelationIntraBucketMap.put("InterestRate", corrMatrix);
+			this.MapRiskClassCorrelationIntraBucketMap.put("INTEREST_RATE", corrMatrix);
 
 			// Set IR Currency Map
 			this.IRCurrencyMap = new HashMap<String,String>();
@@ -67,7 +67,7 @@ public class CalculationSchemeInitialMarginISDA {
 			value[0][0] = new Double(250000000);
 			innerMap.put("Regular_Volatility_Currencies", value); // or currency?
 			Map<String,Map<String, Double[][]>> secondMap=new HashMap<String,Map<String, Double[][]>>();
-			secondMap.put("InterestRate", innerMap);
+			secondMap.put("INTEREST_RATE", innerMap);
 			this.MapRiskClassThresholdMap.put("delta", secondMap);
 
 			// Set RiskClassRiskWeightMap
@@ -87,7 +87,7 @@ public class CalculationSchemeInitialMarginISDA {
 			value1[0] = ArrayUtils.toObject(new double[] {0.0018});
 			innerMap.put("ccybasis", value1); // or currency?
 			secondMap=new HashMap<String,Map<String, Double[][]>>();
-			secondMap.put("InterestRate", innerMap);
+			secondMap.put("INTEREST_RATE", innerMap);
 			this.MapRiskClassRiskweightMap.put("delta", secondMap);
 
 		}
@@ -99,7 +99,7 @@ public class CalculationSchemeInitialMarginISDA {
 			riskWeightsRegularCurrency = weights;
 			Double[][] value = new Double[1][riskWeightsRegularCurrency.length];
 			value[0] = ArrayUtils.toObject(riskWeightsRegularCurrency);
-			MapRiskClassRiskweightMap.get("delta").get("InterestRate").put("Regular_Volatility_Currencies", value);
+			MapRiskClassRiskweightMap.get("delta").get("INTEREST_RATE").put("Regular_Volatility_Currencies", value);
 		}
 
 		private final Double[][] correlationMatrixWithinSubCurve = new Double[][]{
@@ -124,8 +124,8 @@ public class CalculationSchemeInitialMarginISDA {
 
 		public Map<String,String>       MapFXCategory;
 
-		public final String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
-		public final String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
+		public final String[]           ProductClassKeys = {"RatesFX","Credit","EQUITY","COMMODITY"};
+		public final String[]           RiskClassKeys = {"INTEREST_RATE","CREDIT_Q","CREDIT_NON_Q","EQUITY","COMMODITY","FX"};
 		public final String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
 		public final String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
 		public final String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
@@ -303,25 +303,25 @@ public class CalculationSchemeInitialMarginISDA {
 	//        //                                        this.riskClassRiskWeightMap.get(riskClassKey),this.riskClassCorrelationMap.get(riskClassKey),this.riskClassThresholdMap.get(riskClassKey));
 	//
 	//        String riskType = "delta";
-	//        if ( riskClassKey.equals("InterestRate"))
+	//        if ( riskClassKey.equals("INTEREST_RATE"))
 	//        {
 	//            SIMMSchemeIRDelta DeltaScheme = new SIMMSchemeIRDelta(this,productClassKey);
 	//            deltaMargin = DeltaScheme.getValue(atTime);
 	//        }
-	//        /*else if ( riskClassKey.equals("CreditQ")){
-	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CreditQ",productClassKey,riskType);
+	//        /*else if ( riskClassKey.equals("CREDIT_Q")){
+	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CREDIT_Q",productClassKey,riskType);
 	//            deltaMargin = DeltaScheme.getValue(atTime);
 	//        }
-	//        else if ( riskClassKey.equals("CreditNonQ")){
-	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CreditNonQ",productClassKey,riskType);
+	//        else if ( riskClassKey.equals("CREDIT_NON_Q")){
+	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CREDIT_NON_Q",productClassKey,riskType);
 	//            deltaMargin = DeltaScheme.getValue(atTime);
 	//        }
-	//        else if ( riskClassKey.equals("Equity")){
-	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"Equity",productClassKey,riskType);
+	//        else if ( riskClassKey.equals("EQUITY")){
+	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"EQUITY",productClassKey,riskType);
 	//            deltaMargin = DeltaScheme.getValue(atTime);
 	//        }
-	//        else if ( riskClassKey.equals("Commodity")){
-	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"Commodity",productClassKey,riskType);
+	//        else if ( riskClassKey.equals("COMMODITY")){
+	//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"COMMODITY",productClassKey,riskType);
 	//            deltaMargin = DeltaScheme.getValue(atTime);
 	//        }
 	//        else if ( riskClassKey.equals("FX")){
@@ -351,25 +351,25 @@ public class CalculationSchemeInitialMarginISDA {
 		//                                        this.riskClassRiskWeightMap.get(riskClassKey),this.riskClassCorrelationMap.get(riskClassKey),this.riskClassThresholdMap.get(riskClassKey));
 
 		String riskType = "delta";
-		if ( riskClassKey.equals("InterestRate"))
+		if ( riskClassKey.equals("INTEREST_RATE"))
 		{
 			MarginSchemeIRDelta DeltaScheme = new MarginSchemeIRDelta(this,productClassKey);
 			deltaMargin = DeltaScheme.getValue(atTime);
 		}
-		//        else if ( riskClassKey.equals("CreditQ")){
-		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CreditQ",productClassKey,riskType);
+		//        else if ( riskClassKey.equals("CREDIT_Q")){
+		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CREDIT_Q",productClassKey,riskType);
 		//            deltaMargin = DeltaScheme.getValue(atTime);
 		//        }
-		//        else if ( riskClassKey.equals("CreditNonQ")){
-		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CreditNonQ",productClassKey,riskType);
+		//        else if ( riskClassKey.equals("CREDIT_NON_Q")){
+		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"CREDIT_NON_Q",productClassKey,riskType);
 		//            deltaMargin = DeltaScheme.getValue(atTime);
 		//        }
-		//        else if ( riskClassKey.equals("Equity")){
-		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"Equity",productClassKey,riskType);
+		//        else if ( riskClassKey.equals("EQUITY")){
+		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"EQUITY",productClassKey,riskType);
 		//            deltaMargin = DeltaScheme.getValue(atTime);
 		//        }
-		//        else if ( riskClassKey.equals("Commodity")){
-		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"Commodity",productClassKey,riskType);
+		//        else if ( riskClassKey.equals("COMMODITY")){
+		//            MarginSchemeDeltaVega DeltaScheme = new MarginSchemeDeltaVega(this,"COMMODITY",productClassKey,riskType);
 		//            deltaMargin = DeltaScheme.getValue(atTime);
 		//        }
 		//        else if ( riskClassKey.equals("FX")){
@@ -627,7 +627,7 @@ public class CalculationSchemeInitialMarginISDA {
 	//        else{
 	//            Map<String,String[]>     mapRiskClassRiskFactorKeys = new HashMap<>();
 	//            riskClassKeys.stream().forEach(riskClass -> {
-	//                if ( riskClass.equals("InterestRate") ) {
+	//                if ( riskClass.equals("INTEREST_RATE") ) {
 	//                    List<String> riskFactors = tradeSensitivityMap.keySet().stream()
 	//                            .flatMap(
 	//                                    key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k -> k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())

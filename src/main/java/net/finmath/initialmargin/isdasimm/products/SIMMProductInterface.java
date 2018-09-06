@@ -30,10 +30,10 @@ public interface SIMMProductInterface {
 	 * This function will be called by the <code> SIMMSchemeIRDelta </code>.
 	 *
 	 * @param productClass The SIMM product class of this product (RatesFx etc.)
-	 * @param riskClass The SIMM risk class of this product (InterestRate etc.)
+	 * @param riskClass The SIMM risk class of this product (INTEREST_RATE etc.)
 	 * @param curveIndexNames The name of the relevant curves for this product (OIS, Libor6m etc.)
 	 * @param currency The currency of this product
-	 * @param bucketKey The SIMM bucket key of this product (null for risk class InterestRate)
+	 * @param bucketKey The SIMM bucket key of this product (null for risk class INTEREST_RATE)
 	 * @param hasOptionality True if this product is not linear
 	 * @param evaluationTime The time of evaluation
 	 * @return The SIMM sensitivity of the product

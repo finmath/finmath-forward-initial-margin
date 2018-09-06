@@ -54,11 +54,11 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	// Product classification within ISDA SIMM
 	private String   productClass;      // RatesFX, Credit,
-	private String[] riskClass;         // InterestRate, CreditQ, CreditNonQ, Equity, Commodity
+	private String[] riskClass;         // INTEREST_RATE, CREDIT_Q, CREDIT_NON_Q, EQUITY, COMMODITY
 	private String[] curveIndexNames;   // e.g. OIS & Libor6m
 	private String   currency;
 	private boolean  hasOptionality;    // determines the relevance of vega and curvature risk (e.g. Swap has no curvature risk)
-	private String   bucketKey;         // can be null (e.g. in risk class InterestRate it is null because the bucket is given by the currency
+	private String   bucketKey;         // can be null (e.g. in risk class INTEREST_RATE it is null because the bucket is given by the currency
 
 	// Further variables
 	protected Map<Long, RandomVariableInterface> gradient = null;// Same for all evaluationTimes; Is reset for different products
@@ -85,7 +85,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 *  from this map. This map may - in contrast to the second map "exactDeltaCache" - contain interpolated sensitivities.
 	 */
 	private HashMap<String/*RiskClass*/,List<HashMap<String/*curveIndexName*/,
-	HashMap<String/*maturityBucket*/,RandomVariableInterface>>>> deltaAtTime = new HashMap<String,List<HashMap<String,HashMap<String,RandomVariableInterface>>>>(); // currently only for InterestRate riskClass
+	HashMap<String/*maturityBucket*/,RandomVariableInterface>>>> deltaAtTime = new HashMap<String,List<HashMap<String,HashMap<String,RandomVariableInterface>>>>(); // currently only for INTEREST_RATE riskClass
 
 	/**
 	 * The cache for the exact delta sensitivities as given by AAD (or analytic). Unlike the map
@@ -106,10 +106,10 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	/**Wraps an <code> AbstractLIBORMonteCarloProduct </code> into a product classified according to the SIMM methodology requirement.
 	 *
 	 * @param productClass The SIMM product class of this product (RatesFx etc.)
-	 * @param riskClass The SIMM risk class of this product (InterestRate etc.)
+	 * @param riskClass The SIMM risk class of this product (INTEREST_RATE etc.)
 	 * @param curveIndexNames The name of the relevant curves for this product (OIS, Libor6m etc.)
 	 * @param currency The currency of this product
-	 * @param bucketKey The SIMM bucket key of this product (null for risk class InterestRate)
+	 * @param bucketKey The SIMM bucket key of this product (null for risk class INTEREST_RATE)
 	 * @param hasOptionality True if this product is not linear
 	 */
 	public AbstractSIMMProduct(String   productClass,
@@ -205,7 +205,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			switch(riskType) {
 			case("delta"):
 				switch(riskClass){
-				case("InterestRate"):
+				case("INTEREST_RATE"):
 
 					if(Arrays.asList(curveIndexNames).contains(curveIndexName) && bucketKey==this.currency) {
 						// There exists a sensitivity. Check if the sensitivities (on all maturityBuckets) have already been calculated for given riskClass and riskType)
@@ -239,26 +239,26 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 						result = deltaAtTime.get(riskClass).stream().filter(n -> n.containsKey(curveIndexName)).findFirst().get().get(curveIndexName).get(maturityBucket);
 					}
 					else {
-						result = new RandomVariable(0.0); // There exists no delta Sensi for risk Class InterestRate
+						result = new RandomVariable(0.0); // There exists no delta Sensi for risk Class INTEREST_RATE
 					}
 				break;
 				// @Todo Add sensitivity calculation for the subsequent cases
-				case("CreditQ"):
-				case("CreditNonQ"):
+				case("CREDIT_Q"):
+				case("CREDIT_NON_Q"):
 				case("FX"):
-				case("Commodity"):
-				case("Equity"): result = null;
+				case("COMMODITY"):
+				case("EQUITY"): result = null;
 				} break;
 				// @Todo Add sensitivity calculation for the subsequent cases
 			case("vega"):
 			case("curvature"):
 				switch(riskClass){
-				case("InterestRate"): //if(vegaSensitivity!=null) vegaSensitivity = getVegaSensitivityIR(curveIndexNames, product, evaluationTime, model);
-				case("CreditQ"):
-				case("CreditNonQ"):
+				case("INTEREST_RATE"): //if(vegaSensitivity!=null) vegaSensitivity = getVegaSensitivityIR(curveIndexNames, product, evaluationTime, model);
+				case("CREDIT_Q"):
+				case("CREDIT_NON_Q"):
 				case("FX"):
-				case("Commodity"):
-				case("Equity"): result=null;
+				case("COMMODITY"):
+				case("EQUITY"): result=null;
 				}
 			}
 		}

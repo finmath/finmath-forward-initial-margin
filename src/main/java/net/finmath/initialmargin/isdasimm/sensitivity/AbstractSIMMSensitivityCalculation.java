@@ -220,7 +220,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 			if(isConsiderOISSensitivities) {
 
 				// Calculate dV/dS = dV/dP * dP/dS.
-				RandomVariableInterface[] dVdP = product.getOISModelSensitivities("InterestRate" /*riskClass*/,evaluationTime, model);
+				RandomVariableInterface[] dVdP = product.getOISModelSensitivities("INTEREST_RATE" /*riskClass*/,evaluationTime, model);
 
 				dVdS = mapOISBondToMarketRateSensitivities(evaluationTime, dVdP, model);
 
@@ -507,7 +507,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 */
 	public static RandomVariableInterface[] mapSensitivitiesOnBuckets(RandomVariableInterface[] sensitivities, String riskClass, int[] riskFactorDays, LIBORModelMonteCarloSimulationInterface model){
 		//rebucketing to SIMM structure(buckets: 2w, 1m, 3m, 6m, 1y, 2y, 3y, 5y, 10y, 15y, 20y, 30y)
-		int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};
+		int[] riskFactorsSIMM = riskClass=="INTEREST_RATE" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};
 
 		if(riskFactorDays==null) {
 			riskFactorDays = riskFactorDaysLibor(sensitivities, model);
@@ -800,8 +800,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		}
 
 		// Map sensitivities on SIMM Buckets
-		curveSwapRateSensitivityMap.put("Libor6m", mapSensitivitiesOnBuckets(dVdSLibor,"InterestRate",null,model));
-		curveSwapRateSensitivityMap.put("OIS", mapSensitivitiesOnBuckets(dVdSOIS,"InterestRate",null,model));
+		curveSwapRateSensitivityMap.put("Libor6m", mapSensitivitiesOnBuckets(dVdSLibor,"INTEREST_RATE",null,model));
+		curveSwapRateSensitivityMap.put("OIS", mapSensitivitiesOnBuckets(dVdSOIS,"INTEREST_RATE",null,model));
 		return curveSwapRateSensitivityMap;
 	}
 

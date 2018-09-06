@@ -6,7 +6,7 @@ public class Simm2Coordinate {
     private String maturityBucketKey;
     private String riskFactorKey;
     private String bucketKey;
-    private SIMMParameter.RiskClass riskClass;
+    private RiskClass riskClass;
     private MarginType marginType;
     private SIMMParameter.ProductClass productClass;
 
@@ -14,7 +14,7 @@ public class Simm2Coordinate {
         this.maturityBucketKey = maturityBucket;
         this.riskFactorKey = riskFactorID;
         this.bucketKey = bucketID;
-        this.riskClass = SIMMParameter.RiskClass.valueOf(riskClass);
+        this.riskClass = RiskClass.valueOf(riskClass);
         this.marginType = MarginType.valueOf(riskType);
         this.productClass = SIMMParameter.ProductClass.valueOf(productClass);
     }
@@ -43,7 +43,7 @@ public class Simm2Coordinate {
         return bucketKey;
     }
 
-    public SIMMParameter.RiskClass getRiskClass() {
+    public RiskClass getRiskClass() {
         return riskClass;
     }
 

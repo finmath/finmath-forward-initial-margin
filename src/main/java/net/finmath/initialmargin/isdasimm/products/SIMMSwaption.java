@@ -25,7 +25,7 @@ public class SIMMSwaption extends AbstractSIMMProduct{
 
 	// SIMM classification
 	static final String productClass = "RatesFX";
-	static final String[] riskClass = new String[]{"InterestRate"};
+	static final String[] riskClass = new String[]{"INTEREST_RATE"};
 
 	// Swap after exercise (delivery product)
 	private SimpleSwap swap = null;

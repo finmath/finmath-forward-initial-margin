@@ -6,6 +6,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 
 import java.text.DecimalFormat;
@@ -97,7 +98,7 @@ public class SIMMProduct extends AbstractLIBORMonteCarloProduct{
         RandomVariableInterface deltaMargin = null;
 
         String riskTypeKey = MarginType.DELTA.name();
-        if ( riskClassKey.equals(SIMMParameter.RiskClass.InterestRate.name()))
+        if ( riskClassKey.equals(RiskClass.INTEREST_RATE.name()))
         {
             SIMMProductIRDelta DeltaScheme = new SIMMProductIRDelta(this.simmSensitivityProvider,productClassKey,this.parameterSet,evaluationTime);
             deltaMargin = DeltaScheme.getValue(evaluationTime,model);

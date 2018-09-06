@@ -92,7 +92,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			}
 
 			// Map sensitivities on SIMM buckets
-			maturityBucketSensis = mapSensitivitiesOnBuckets(maturityBucketSensis, "InterestRate" /*riskClass*/, null, model);
+			maturityBucketSensis = mapSensitivitiesOnBuckets(maturityBucketSensis, "INTEREST_RATE" /*riskClass*/, null, model);
 
 			break;
 
@@ -135,7 +135,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	public RandomVariableInterface[] getExactDeltaSensitivities(AbstractSIMMProduct product, String curveIndexName, String riskClass,
 			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException{
 
-		//@Todo: Distinguish different risk classes. Works currently only for "InterestRate"
+		//@Todo: Distinguish different risk classes. Works currently only for "INTEREST_RATE"
 		return getSensitivitiesIRMarketRates(product, curveIndexName, evaluationTime, model);
 
 	}
@@ -173,14 +173,14 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 			if(sensitivityMode==SensitivityMode.MELTINGSIMMBUCKETS) {
 				// Map sensitivities on SIMM buckets
-				sensitivities = mapSensitivitiesOnBuckets(sensitivities, "InterestRate" /*riskClass*/, null, model);
+				sensitivities = mapSensitivitiesOnBuckets(sensitivities, "INTEREST_RATE" /*riskClass*/, null, model);
 			}
 		}
 
 		switch(sensitivityMode){
 		case MELTINGSIMMBUCKETS: // Melting of market-rate sensitivities on SIMM Buckets
 		{
-			int[] riskFactorsSIMM = riskClass=="InterestRate" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};
+			int[] riskFactorsSIMM = riskClass=="INTEREST_RATE" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};
 
 			// Get new riskFactor times
 			riskFactorDays = Arrays.stream(riskFactorsSIMM).filter(n -> n > (int)Math.round(365*(evaluationTime-meltingZeroTime))).map(n -> n-(int)Math.round(365*(evaluationTime-meltingZeroTime))).toArray();
@@ -280,11 +280,11 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		// Get Sensitivities from exactDeltaCache
 		RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
 		// Map sensitivities on SIMM buckets
-		initialSensitivities = mapSensitivitiesOnBuckets(initialSensitivities, "InterestRate" /*riskClass*/, null, model);
+		initialSensitivities = mapSensitivitiesOnBuckets(initialSensitivities, "INTEREST_RATE" /*riskClass*/, null, model);
 
 		RandomVariableInterface[] finalSensitivities   = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
 		// Map sensitivities on SIMM buckets
-		finalSensitivities = mapSensitivitiesOnBuckets(finalSensitivities, "InterestRate" /*riskClass*/, null, model);
+		finalSensitivities = mapSensitivitiesOnBuckets(finalSensitivities, "INTEREST_RATE" /*riskClass*/, null, model);
 
 		// Perform linear interpolation
 		double deltaT = finalTime-initialTime;

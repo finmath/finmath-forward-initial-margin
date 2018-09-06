@@ -1,6 +1,7 @@
 package net.finmath.xva.initialmargin;
 
 import com.google.gson.Gson;
+import net.finmath.xva.coordinates.simm2.RiskClass;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,15 +43,6 @@ public class SIMMParameter {
         Commodity
     }
 
-    public enum RiskClass {
-        InterestRate,
-        CreditQ,
-        CreditNonQ,
-        Equity,
-        Commodity,
-        FX
-    }
-
     public enum RatesCurveNames{
         OIS,
         Libor1m,
@@ -79,8 +71,8 @@ public class SIMMParameter {
 
     public Map<String,Double>       MapHistoricalVolaRatio;
 
-    public String[]           ProductClassKeys = {"RatesFX","Credit","Equity","Commodity"};
-    public String[]           RiskClassKeys = {"InterestRate","CreditQ","CreditNonQ","Equity","Commodity","FX"};
+    public String[]           ProductClassKeys = {"RatesFX","Credit","EQUITY","COMMODITY"};
+    public String[]           RiskClassKeys = {"INTEREST_RATE","CREDIT_Q","CREDIT_NON_Q","EQUITY","COMMODITY","FX"};
     public String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
     public String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
     public String[]           IRCurveIndexNames = {"OIS","Libor1m","Libor3m","Libor6m","Libor12m"};
