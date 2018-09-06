@@ -15,10 +15,10 @@ import net.finmath.time.ScheduleInterface;
 
 /**
  * Create a swap from schedules, notional, indices and spreads (fixed coupons).
- *
+ * <p>
  * The getValue method of this class simple returns
  * <code>
- * 	legReceiver.getValue(evaluationTime, model).sub(legPayer.getValue(evaluationTime, model))
+ * legReceiver.getValue(evaluationTime, model).sub(legPayer.getValue(evaluationTime, model))
  * </code>
  * where <code>legReceiver</code> and <code>legPayer</code> are {@link net.finmath.initialmargin.regression.products.SwapLeg}s.
  *
@@ -33,7 +33,7 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	 * Create a swap which values as <code>legReceiver - legPayer</code>.
 	 *
 	 * @param legReceiver The receiver leg.
-	 * @param legPayer The payer leg.
+	 * @param legPayer    The payer leg.
 	 */
 	public Swap(AbstractLIBORMonteCarloRegressionProduct legReceiver, AbstractLIBORMonteCarloRegressionProduct legPayer) {
 		super();
@@ -44,31 +44,29 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	/**
 	 * Create a swap from schedules, notional, indices and spreads (fixed coupons).
 	 *
-	 * @param notional The notional.
+	 * @param notional           The notional.
 	 * @param scheduleReceiveLeg The period schedule for the receiver leg.
-	 * @param indexReceiveLeg The index of the receiver leg, may be null if no index is received.
-	 * @param spreadReceiveLeg The constant spread or fixed coupon rate of the receiver leg.
-	 * @param schedulePayLeg The period schedule for the payer leg.
-	 * @param indexPayLeg The index of the payer leg, may be null if no index is paid.
-	 * @param spreadPayLeg The constant spread or fixed coupon rate of the payer leg.
+	 * @param indexReceiveLeg    The index of the receiver leg, may be null if no index is received.
+	 * @param spreadReceiveLeg   The constant spread or fixed coupon rate of the receiver leg.
+	 * @param schedulePayLeg     The period schedule for the payer leg.
+	 * @param indexPayLeg        The index of the payer leg, may be null if no index is paid.
+	 * @param spreadPayLeg       The constant spread or fixed coupon rate of the payer leg.
 	 */
 	public Swap(AbstractNotional notional,
-			ScheduleInterface scheduleReceiveLeg,
-			AbstractIndex indexReceiveLeg, double spreadReceiveLeg,
-			ScheduleInterface schedulePayLeg, AbstractIndex indexPayLeg,
-			double spreadPayLeg) {
+				ScheduleInterface scheduleReceiveLeg,
+				AbstractIndex indexReceiveLeg, double spreadReceiveLeg,
+				ScheduleInterface schedulePayLeg, AbstractIndex indexPayLeg,
+				double spreadPayLeg) {
 		super();
 
 		legReceiver = new SwapLeg(scheduleReceiveLeg, notional, indexReceiveLeg, spreadReceiveLeg, false);
 		legPayer = new SwapLeg(schedulePayLeg, notional, indexPayLeg, spreadPayLeg, false);
 	}
 
-
-
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		RandomVariableInterface value = legReceiver.getValue(evaluationTime, model);
-		if(legPayer != null) {
+		if (legPayer != null) {
 			value = value.sub(legPayer.getValue(evaluationTime, model));
 		}
 
@@ -78,7 +76,7 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		RandomVariableInterface cashFlow = legReceiver.getCF(initialTime, finalTime, model);
-		if(legPayer != null) {
+		if (legPayer != null) {
 			cashFlow = cashFlow.sub(legPayer.getCF(initialTime, finalTime, model));
 		}
 		return cashFlow;

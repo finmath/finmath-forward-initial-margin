@@ -12,6 +12,7 @@ public class ModelSensitivityAADProvider implements ModelSensitivityProviderInte
 
 	/**
 	 * Creates a model sensitivity provider which will return the value of a Monte Carlo product, interpreted as model sensitivity.
+	 *
 	 * @param sensitvityProduct A product whose value is the forward sensitivity.
 	 */
 	public ModelSensitivityAADProvider(AbstractLIBORMonteCarloProduct sensitvityProduct) {

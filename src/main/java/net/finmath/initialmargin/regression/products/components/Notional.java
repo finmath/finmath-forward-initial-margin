@@ -27,7 +27,7 @@ public class Notional implements AbstractNotional {
 	 */
 	public Notional(double notional, String currency) {
 		super();
-		this.notional = new RandomVariable(0.0,notional);
+		this.notional = new RandomVariable(0.0, notional);
 		this.currency = currency;
 	}
 

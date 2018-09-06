@@ -5,7 +5,6 @@
  */
 package net.finmath.initialmargin.regression.products;
 
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
@@ -35,11 +34,7 @@ public abstract class AbstractLIBORMonteCarloRegressionProduct extends AbstractL
 
 	public abstract RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
-
-	public RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException{
-		return getCF(initialTime, finalTime, (LIBORModelMonteCarloSimulationInterface)model);
-
+	public RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException {
+		return getCF(initialTime, finalTime, (LIBORModelMonteCarloSimulationInterface) model);
 	}
-
-
 }

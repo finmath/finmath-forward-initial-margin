@@ -12,12 +12,11 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * @author Christian Fries
- *
  */
 public class AccruingNotional implements AbstractNotional {
 
-	AbstractNotional	previousPeriodNotional;
-	AbstractPeriod		previousPeriod;
+	AbstractNotional previousPeriodNotional;
+	AbstractPeriod previousPeriod;
 
 	/**
 	 * Creates a notion where the notional of the period start is calculated as
@@ -25,7 +24,7 @@ public class AccruingNotional implements AbstractNotional {
 	 * is calculated as being accrued via getCoupon on the current period.
 	 *
 	 * @param previousPeriodNotional The notional of the previous period.
-	 * @param previousPeriod The previous period.
+	 * @param previousPeriod         The previous period.
 	 */
 	public AccruingNotional(AbstractNotional previousPeriodNotional, AbstractPeriod previousPeriod) {
 		this.previousPeriodNotional = previousPeriodNotional;

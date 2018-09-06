@@ -1,12 +1,11 @@
 package net.finmath.xva.sensiproducts;
 
-import java.util.Map;
-
-import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
+
+import java.util.Map;
 
 /**
  * A stub that only provides a time discretization and constants.

@@ -12,7 +12,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Base class for indices.
- *
+ * <p>
  * Indices are small functions mapping time and a vector of
  * random variables to a random variable, where the time
  * is the fixing time of the index.
@@ -28,7 +28,7 @@ public abstract class AbstractIndex extends AbstractProductComponent {
 	/**
 	 * Initialize name and currency of an index.
 	 *
-	 * @param name The name of an index. Used to map an index on a curve.
+	 * @param name     The name of an index. Used to map an index on a curve.
 	 * @param currency The natural currency of an index. This more for compatibility purposes, since the information sould be contained in the name.
 	 */
 	public AbstractIndex(String name, String currency) {

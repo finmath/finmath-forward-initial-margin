@@ -73,7 +73,6 @@ public class Simm2Coordinate {
 		if (riskClass != null ? !riskClass.equals(key.riskClass) : key.riskClass != null) return false;
 		if (marginType != null ? !marginType.equals(key.marginType) : key.marginType != null) return false;
 		return productClass != null ? productClass.equals(key.productClass) : key.productClass == null;
-
 	}
 
 	@Override

@@ -5,12 +5,12 @@
  */
 package net.finmath.initialmargin.regression.products.indices;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A forward rate index for a given period start offset (offset from fixing) and period length.
@@ -24,13 +24,12 @@ public class LIBORIndex extends AbstractIndex {
 	private final double periodStartOffset;
 	private final double periodLength;
 
-
 	/**
 	 * Creates a forward rate index for a given period start offset (offset from fixing) and period length.
 	 *
-	 * @param name The name of an index. Used to map an index on a curve.
+	 * @param name              The name of an index. Used to map an index on a curve.
 	 * @param periodStartOffset An offset added to the fixing to define the period start.
-	 * @param periodLength The period length
+	 * @param periodLength      The period length
 	 */
 	public LIBORIndex(String name, double periodStartOffset, double periodLength) {
 		super(name);
@@ -42,7 +41,7 @@ public class LIBORIndex extends AbstractIndex {
 	 * Creates a forward rate index for a given period start offset (offset from fixing) and period length.
 	 *
 	 * @param periodStartOffset An offset added to the fixing to define the period start.
-	 * @param periodLength The period length
+	 * @param periodLength      The period length
 	 */
 	public LIBORIndex(double periodStartOffset, double periodLength) {
 		this(null, periodStartOffset, periodLength);
@@ -51,13 +50,12 @@ public class LIBORIndex extends AbstractIndex {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
+		if (model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
 			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
 		}
-		RandomVariableInterface forwardRate = model.getLIBOR(evaluationTime, evaluationTime+periodStartOffset, evaluationTime+periodStartOffset+periodLength);
+		RandomVariableInterface forwardRate = model.getLIBOR(evaluationTime, evaluationTime + periodStartOffset, evaluationTime + periodStartOffset + periodLength);
 		return forwardRate;
 	}
-
 
 	/**
 	 * Returns the periodStartOffset as an act/365 daycount.
@@ -95,18 +93,17 @@ public class LIBORIndex extends AbstractIndex {
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		if(model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
+		if (model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
 			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
 		}
-		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime,fixingTime), fixingTime+periodStartOffset, fixingTime+periodStartOffset+periodLength);
+		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime, fixingTime), fixingTime + periodStartOffset, fixingTime + periodStartOffset + periodLength);
 		return forwardRate;
 	}
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) {
+										 LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

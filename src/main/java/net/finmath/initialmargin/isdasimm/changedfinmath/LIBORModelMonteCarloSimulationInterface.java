@@ -5,10 +5,10 @@
  */
 package net.finmath.initialmargin.isdasimm.changedfinmath;
 
-import java.util.Map;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.stochastic.RandomVariableInterface;
+
+import java.util.Map;
 
 /**
  * Basic interface which has to be implemented by Monte Carlo models for LIBOR processes.
@@ -19,21 +19,23 @@ import net.finmath.stochastic.RandomVariableInterface;
 
 public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface {
 
-
 	/**
 	 * Returns the map of <code> Double <code> (time) and <code> RandomVariableInterface <code> (numeraire Adjustment)
+	 *
 	 * @return The numeraire adjustment map
 	 */
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 
 	/**
 	 * Returns the map of <code> Double <code> (time) and <code> RandomVariableInterface <code> (numeraire cache)
+	 *
 	 * @return The numeraire cache (containing the numeraires adjusted to OIS curve)
 	 */
 	Map<Double, RandomVariableInterface> getNumeraireCache();
 
 	/**
 	 * Returns the numeraire adjustment
+	 *
 	 * @param time The time
 	 * @return
 	 * @throws CalculationException
@@ -42,15 +44,17 @@ public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.mon
 
 	/**
 	 * Returns the forward bond P(T;t) on the forward curve. Calculated directly from Libors without using conditional expectation
+	 *
 	 * @param T final time
 	 * @param t initial time
-	 * @return P(T;t)
+	 * @return P(T ; t)
 	 * @throws CalculationException
 	 */
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
 
 	/**
 	 * Returns the forward bond P(T;t) from on the OIS curve for a given Libor market model
+	 *
 	 * @param T The maturity of the forward bond
 	 * @param t The inception of the forward bond
 	 * @return The forward bond P(T;t) on the OIS curve

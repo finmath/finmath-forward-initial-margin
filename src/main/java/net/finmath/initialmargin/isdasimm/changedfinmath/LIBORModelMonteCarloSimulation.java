@@ -5,14 +5,14 @@
  */
 package net.finmath.initialmargin.isdasimm.changedfinmath;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implements convenient methods for a LIBOR market model,
@@ -24,14 +24,13 @@ import net.finmath.stochastic.RandomVariableInterface;
  */
 public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimulationInterface {
 
-
 	public LIBORModelMonteCarloSimulation(LIBORModelInterface model, AbstractProcessInterface process) {
 		// @TODO Cast can be removed with 3.2.15 of finmath-lib
-		super(model, (AbstractProcess)process);
+		super(model, (AbstractProcess) process);
 	}
 
 	@Override
-	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
+	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() {
 		return ((LIBORMarketModelInterface) getModel()).getNumeraireAdjustmentMap();
 	}
 
@@ -41,31 +40,30 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 	}
 
 	@Override
-	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
+	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		return ((LIBORMarketModelInterface) getModel()).getNumeraireOISAdjustmentFactor(time);
 	}
 
 	@Override
-	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException{
+	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException {
 		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
 	}
 
 	@Override
-	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
+	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException {
 		return ((LIBORMarketModelInterface) getModel()).getForwardBondOIS(T, t);
 	}
 
-
 	@Override
 	public Object getCloneWithModifiedSeed(int seed) {
-		AbstractProcess process = (AbstractProcess) ((AbstractProcess)getProcess()).getCloneWithModifiedSeed(seed);
+		AbstractProcess process = (AbstractProcess) ((AbstractProcess) getProcess()).getCloneWithModifiedSeed(seed);
 		return new LIBORModelMonteCarloSimulation(getModel(), process);
 	}
 
 	@Override
 	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException {
 		LIBORModelInterface modelClone = getModel().getCloneWithModifiedData(dataModified);
-		if(dataModified.containsKey("discountCurve") && dataModified.size() == 1) {
+		if (dataModified.containsKey("discountCurve") && dataModified.size() == 1) {
 			// In this case we may re-use the underlying process
 			LIBORModelMonteCarloSimulation lmmSimClone = new LIBORModelMonteCarloSimulation(modelClone, getProcess());
 			return lmmSimClone;
@@ -77,14 +75,13 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 	/**
 	 * Create a clone of this simulation modifying one of its properties (if any).
 	 *
-	 * @param entityKey The entity to modify.
+	 * @param entityKey    The entity to modify.
 	 * @param dataModified The data which should be changed in the new model
 	 * @return Returns a clone of this model, where the specified part of the data is modified data (then it is no longer a clone :-)
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(String entityKey, Object dataModified) throws CalculationException
-	{
+	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(String entityKey, Object dataModified) throws CalculationException {
 		Map<String, Object> dataModifiedMap = new HashMap<String, Object>();
 		dataModifiedMap.put(entityKey, dataModified);
 		return getCloneWithModifiedData(dataModifiedMap);

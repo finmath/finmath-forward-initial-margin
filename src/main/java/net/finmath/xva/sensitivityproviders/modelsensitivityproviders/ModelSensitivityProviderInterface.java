@@ -6,6 +6,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 public interface ModelSensitivityProviderInterface {
 
 	//@TODO specify curveKey and return type.
+
 	/**
 	 * @param evaluationTime
 	 * @param model

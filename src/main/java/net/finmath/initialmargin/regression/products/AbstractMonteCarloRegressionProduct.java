@@ -26,5 +26,4 @@ public abstract class AbstractMonteCarloRegressionProduct extends AbstractMonteC
 	}
 
 	public abstract RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException;
-
 }

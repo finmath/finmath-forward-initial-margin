@@ -1,16 +1,14 @@
 package net.finmath.xva.tradespecifications;
 
+import net.finmath.montecarlo.AbstractMonteCarloProduct;
 
 import java.time.LocalDate;
 
-import net.finmath.montecarlo.AbstractMonteCarloProduct;
-
-public class SACCRTradeSpecification  {
+public class SACCRTradeSpecification {
 
 	AbstractMonteCarloProduct underlyingValuationProduct;
 
-
-	public enum CreditRating{
+	public enum CreditRating {
 		AAA,
 		AA,
 		A,
@@ -21,10 +19,7 @@ public class SACCRTradeSpecification  {
 		NotDefined
 	}
 
-
-
-	public enum tRegulatoryAssetClass
-	{
+	public enum tRegulatoryAssetClass {
 		InterestRate,
 		FX,
 		Credit,
@@ -36,26 +31,22 @@ public class SACCRTradeSpecification  {
 		Default
 	}
 
+	private String ccy;
+	double[] notionals;
+	double[] periodStartTimes;
+	double[] periodEndTimes;
+	private String underlyingCreditRating;
+	private LocalDate maturityDateUnderlying;
+	private LocalDate tradeStartDate;
+	private LocalDate tradeMaturityDate;
+	private String regulatoryRiskFactorKey;
+	private tRegulatoryAssetClass assetClass;
 
-
-	private String                  ccy;
-	double[]                        notionals;
-	double[]                        periodStartTimes;
-	double[]                        periodEndTimes;
-	private String                  underlyingCreditRating;
-	private LocalDate               maturityDateUnderlying;
-	private LocalDate               tradeStartDate;
-	private LocalDate               tradeMaturityDate;
-	private String                  regulatoryRiskFactorKey;
-	private tRegulatoryAssetClass   assetClass;
-
-
-	public SACCRTradeSpecification(){
+	public SACCRTradeSpecification() {
 
 	}
 
-
-	public  AbstractMonteCarloProduct   getUnderlyingValuationProduct(){
+	public AbstractMonteCarloProduct getUnderlyingValuationProduct() {
 		return this.underlyingValuationProduct;
 	}
 
@@ -67,12 +58,11 @@ public class SACCRTradeSpecification  {
 		return assetClass;
 	}
 
-
-	public CreditRating getUnderlyingCreditRating(){
+	public CreditRating getUnderlyingCreditRating() {
 		return CreditRating.AAA;
 	}
 
-	public  double  getRegulatoryPosition(double evaluationTime){
+	public double getRegulatoryPosition(double evaluationTime) {
 		return 1.0;
 	}
 
@@ -120,18 +110,18 @@ public class SACCRTradeSpecification  {
 					double periodLength = 0.0;
 					periodLength =
 							this.periodStartTimes[i] >= evaluationTime ? this.periodEndTimes[i] - this.periodStartTimes[i] : this.periodEndTimes[i] - evaluationTime;
-							periodLength = java.lang.Math.max(periodLength, 1.0E-12);
-							if (periodLength < 0.0) {
-								throw new RuntimeException("getAverageNotional: Period Length should be positive");
-							}
-							averageNotional = averageNotional + periodLength * this.notionals[i];
-							sumTimeDiff += periodLength;
+					periodLength = java.lang.Math.max(periodLength, 1.0E-12);
+					if (periodLength < 0.0) {
+						throw new RuntimeException("getAverageNotional: Period Length should be positive");
+					}
+					averageNotional = averageNotional + periodLength * this.notionals[i];
+					sumTimeDiff += periodLength;
 				}
 			}
 			if (sumTimeDiff < 1.0E-12) {
 				return this.notionals[0];
 			}
-			if(sumTimeDiff == 0.0) {
+			if (sumTimeDiff == 0.0) {
 				throw new RuntimeException("sumTimeDiff must not be 0.0");
 			}
 			averageNotional = averageNotional / sumTimeDiff;
@@ -139,5 +129,4 @@ public class SACCRTradeSpecification  {
 		}
 		return this.notionals[0];
 	}
-
 }

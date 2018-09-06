@@ -28,7 +28,7 @@ public interface AbstractNotional {
 	 * Example: The notional can be independent of the period (constant running notional) or depending on the period (accruing notional).
 	 *
 	 * @param period Period.
-	 * @param model The model against we are evaluation.
+	 * @param model  The model against we are evaluation.
 	 * @return The notional for the given period as of period start.
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
@@ -39,7 +39,7 @@ public interface AbstractNotional {
 	 * Example: The notional can be independent of the period (constant running notional) or depending on the period (accruing notional).
 	 *
 	 * @param period Period.
-	 * @param model The model against we are evaluation.
+	 * @param model  The model against we are evaluation.
 	 * @return The notional for the given period as of period end.
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */

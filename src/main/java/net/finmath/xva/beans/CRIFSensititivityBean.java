@@ -83,7 +83,6 @@ public class CRIFSensititivityBean {
 			else if (riskType.contains("XCcy"))
 				key = new Simm2Coordinate("None", "ccybasis", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
 			return key;
-
 		}
 
 		public CRIFSensiBean(String counterparty, String tradeId, String productClass, String riskType, String qualifier, String bucket, String label1, String label2, Double amount, String amountCcy, Double amountUsd) {

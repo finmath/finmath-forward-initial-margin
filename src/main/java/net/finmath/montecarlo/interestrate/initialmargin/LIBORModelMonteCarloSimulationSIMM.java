@@ -5,13 +5,13 @@
  */
 package net.finmath.montecarlo.interestrate.initialmargin;
 
-import java.util.Map;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.stochastic.RandomVariableInterface;
+
+import java.util.Map;
 
 /**
  * Implements convenient methods for a LIBOR market model,
@@ -21,20 +21,19 @@ import net.finmath.stochastic.RandomVariableInterface;
  * @author Christian Fries
  * @version 0.7
  */
-public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimulation  implements LIBORModelMonteCarloSimulationSIMMInterface {
-
+public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimulationSIMMInterface {
 
 	private final LIBORModelSIMMInterface model;
 
 	/**
 	 * Create a LIBOR Monte-Carlo Simulation from a given LIBORMarketModel and an AbstractProcess.
 	 *
-	 * @param model The LIBORMarketModel.
+	 * @param model   The LIBORMarketModel.
 	 * @param process The process.
 	 */
 	public LIBORModelMonteCarloSimulationSIMM(LIBORModelSIMMInterface model, AbstractProcess process) {
-		super(model,process);
-		this.model		= model;
+		super(model, process);
+		this.model = model;
 
 		this.model.setProcess(process);
 		process.setModel(model);
@@ -47,33 +46,31 @@ public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimu
 	 */
 	public LIBORModelMonteCarloSimulationSIMM(LIBORModelSIMMInterface model) {
 		super(model);
-		this.model		= model;
+		this.model = model;
 	}
 
-
-
 	@Override
-	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap(){
+	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() {
 		return model.getNumeraireAdjustmentMap();
 	}
 
 	@Override
-	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException{
+	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		return model.getNumeraireOISAdjustmentFactor(time);
 	}
 
 	@Override
-	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException{
+	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException {
 		return model.getForwardBondLibor(T, t);
 	}
 
 	@Override
-	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException{
+	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException {
 		return model.getForwardBondOIS(T, t);
 	}
 
 	@Override
-	public AbstractRandomVariableFactory getRandomVariableFactory(){
+	public AbstractRandomVariableFactory getRandomVariableFactory() {
 		return model.getRandomVariableFactory();
 	}
 
@@ -81,5 +78,4 @@ public class LIBORModelMonteCarloSimulationSIMM extends LIBORModelMonteCarloSimu
 	public LIBORModelSIMMInterface getModel() {
 		return model;
 	}
-
 }

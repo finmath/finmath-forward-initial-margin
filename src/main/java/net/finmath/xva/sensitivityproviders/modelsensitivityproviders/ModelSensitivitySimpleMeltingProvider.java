@@ -8,18 +8,15 @@ public class ModelSensitivitySimpleMeltingProvider implements ModelSensitivityPr
 
 	double maturity;
 	private AbstractMonteCarloProduct product;
-	public ModelSensitivitySimpleMeltingProvider(AbstractMonteCarloProduct product, double maturity)
-	{
+
+	public ModelSensitivitySimpleMeltingProvider(AbstractMonteCarloProduct product, double maturity) {
 
 	}
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String curveKey) {
 
-		double ttmRatio = (maturity-evaluationTime)/evaluationTime;
-
-
-
+		double ttmRatio = (maturity - evaluationTime) / evaluationTime;
 
 		return null;
 	}

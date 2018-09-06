@@ -20,33 +20,30 @@ import java.util.stream.Stream;
 
 public class Launcher {
 
-    public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws Exception {
 
-        SIMMParameter parameterSet = new SIMMParameter();
-        String calculationCCY = "EUR";
+		SIMMParameter parameterSet = new SIMMParameter();
+		String calculationCCY = "EUR";
 
+		SIMMTradeSpecification trade = new SIMMTradeSpecification(1.0E6, 10.0, Indices.getLibor("EUR", "6M"));
+		SIMMTradeSpecification trade2 = new SIMMTradeSpecification(1.0E6, 20.0, Indices.getLibor("EUR", "3M"));
+		Set<SIMMTradeSpecification> tradeSet = new HashSet<>();
+		tradeSet.add(trade);
+		tradeSet.add(trade2);
 
-        SIMMTradeSpecification trade = new SIMMTradeSpecification(1.0E6,10.0, Indices.getLibor("EUR", "6M"));
-        SIMMTradeSpecification trade2 = new SIMMTradeSpecification(1.0E6,20.0, Indices.getLibor("EUR", "3M"));
-        Set<SIMMTradeSpecification> tradeSet = new HashSet<>();
-        tradeSet.add(trade);
-        tradeSet.add(trade2);
+		Stream<SIMMSensitivityProviderInterface> tradeSensiProviders = tradeSet.stream()
+				.map(tradeSpec -> (SIMMSensitivityProviderInterface) new SIMMTradeSensitivityProvider(
+						new ModelSensitivitySimpleMeltingProvider(
+								new SensiProductSimpleSwapBpv(tradeSpec), tradeSpec.getMaxTimeToMaturity()
+						),
+						tradeSpec));
 
-        Stream<SIMMSensitivityProviderInterface> tradeSensiProviders = tradeSet.stream()
-                .map(tradeSpec -> (SIMMSensitivityProviderInterface) new SIMMTradeSensitivityProvider(
-                        new ModelSensitivitySimpleMeltingProvider(
-                                new SensiProductSimpleSwapBpv(tradeSpec), tradeSpec.getMaxTimeToMaturity()
-                        ),
-                        tradeSpec));
+		SIMMSensitivityProviderInterface portfolioSensiProvider = new SIMMPortfolioSensitivityProvider(tradeSensiProviders.collect(Collectors.toSet()));
 
-        SIMMSensitivityProviderInterface portfolioSensiProvider = new SIMMPortfolioSensitivityProvider(tradeSensiProviders.collect(Collectors.toSet()));
-
-        double marginCalculationTime = 5.0;
-        SIMMProduct product = new SIMMProduct(marginCalculationTime,portfolioSensiProvider,parameterSet,calculationCCY,0.0,null);
-        LIBORMarketModel model = null;
-        LIBORModelMonteCarloSimulation simulation = null;
-        RandomVariableInterface result = product.getValue(4.0,simulation);
-
-
-    }
+		double marginCalculationTime = 5.0;
+		SIMMProduct product = new SIMMProduct(marginCalculationTime, portfolioSensiProvider, parameterSet, calculationCCY, 0.0, null);
+		LIBORMarketModel model = null;
+		LIBORModelMonteCarloSimulation simulation = null;
+		RandomVariableInterface result = product.getValue(4.0, simulation);
+	}
 }

@@ -26,21 +26,21 @@ public class Period extends AbstractPeriod {
 	/**
 	 * Create a simple period with notional and index (coupon) flow.
 	 *
-	 * @param periodStart The period start.
-	 * @param periodEnd The period end.
-	 * @param fixingDate The fixing date (as double).
-	 * @param paymentDate The payment date (as double).
-	 * @param notional The notional object relevant for this period.
-	 * @param index The index (used for coupon calculation) associated with this period.
-	 * @param daycountFraction The daycount fraction (<code>coupon = index(fixingDate) * daycountFraction</code>).
-	 * @param couponFlow If true, the coupon will be payed. Otherwise there will be not coupon flow.
-	 * @param notionalFlow If true, there will be a positive notional flow at period start (but only if peirodStart &gt; evaluationTime) and a negative notional flow at period end (but only if periodEnd &gt; evaluationTime). Otherwise there will be no notional flows.
-	 * @param payer If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
+	 * @param periodStart              The period start.
+	 * @param periodEnd                The period end.
+	 * @param fixingDate               The fixing date (as double).
+	 * @param paymentDate              The payment date (as double).
+	 * @param notional                 The notional object relevant for this period.
+	 * @param index                    The index (used for coupon calculation) associated with this period.
+	 * @param daycountFraction         The daycount fraction (<code>coupon = index(fixingDate) * daycountFraction</code>).
+	 * @param couponFlow               If true, the coupon will be payed. Otherwise there will be not coupon flow.
+	 * @param notionalFlow             If true, there will be a positive notional flow at period start (but only if peirodStart &gt; evaluationTime) and a negative notional flow at period end (but only if periodEnd &gt; evaluationTime). Otherwise there will be no notional flows.
+	 * @param payer                    If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
 	 * @param isExcludeAccruedInterest If the true, the valuation will exclude accrued interest, if any.
 	 */
 	public Period(double periodStart, double periodEnd, double fixingDate,
-			double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
-			boolean couponFlow, boolean notionalFlow, boolean payer, boolean isExcludeAccruedInterest) {
+				  double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
+				  boolean couponFlow, boolean notionalFlow, boolean payer, boolean isExcludeAccruedInterest) {
 		super(periodStart, periodEnd, fixingDate, paymentDate, notional, index, daycountFraction);
 		this.couponFlow = couponFlow;
 		this.notionalFlow = notionalFlow;
@@ -50,105 +50,105 @@ public class Period extends AbstractPeriod {
 
 	/**
 	 * Create a simple period with notional and index (coupon) flow.
-	 *
+	 * <p>
 	 * The valuation does not exclude the accrued interest, i.e., the valuation reports a so called dirty price.
 	 *
-	 * @param periodStart The period start.
-	 * @param periodEnd The period end.
-	 * @param fixingDate The fixing date (as double).
-	 * @param paymentDate The payment date (as double).
-	 * @param notional The notional object relevant for this period.
-	 * @param index The index (used for coupon calculation) associated with this period.
+	 * @param periodStart      The period start.
+	 * @param periodEnd        The period end.
+	 * @param fixingDate       The fixing date (as double).
+	 * @param paymentDate      The payment date (as double).
+	 * @param notional         The notional object relevant for this period.
+	 * @param index            The index (used for coupon calculation) associated with this period.
 	 * @param daycountFraction The daycount fraction (<code>coupon = index(fixingDate) * daycountFraction</code>).
-	 * @param couponFlow If true, the coupon will be payed. Otherwise there will be not coupon flow.
-	 * @param notionalFlow If true, there will be a positive notional flow at period start (but only if peirodStart &gt; evaluationTime) and a negative notional flow at period end (but only if periodEnd &gt; evaluationTime). Otherwise there will be no notional flows.
-	 * @param payer If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
+	 * @param couponFlow       If true, the coupon will be payed. Otherwise there will be not coupon flow.
+	 * @param notionalFlow     If true, there will be a positive notional flow at period start (but only if peirodStart &gt; evaluationTime) and a negative notional flow at period end (but only if periodEnd &gt; evaluationTime). Otherwise there will be no notional flows.
+	 * @param payer            If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
 	 */
 	public Period(double periodStart, double periodEnd, double fixingDate,
-			double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
-			boolean couponFlow, boolean notionalFlow, boolean payer) {
+				  double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
+				  boolean couponFlow, boolean notionalFlow, boolean payer) {
 		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, daycountFraction, couponFlow, notionalFlow, payer, false);
 	}
 
 	/**
 	 * Create a simple period with notional and index (coupon) flow.
-	 *
+	 * <p>
 	 * The valuation does not exclude the accrued interest, i.e., the valuation reports a so called dirty price.
 	 *
-	 * @param periodStart The period start.
-	 * @param periodEnd The period end.
-	 * @param fixingDate The fixing date (as double).
-	 * @param paymentDate The payment date (as double).
-	 * @param notional The notional object relevant for this period.
-	 * @param index The index (coupon) associated with this period.
-	 * @param couponFlow If true, the coupon will be payed. Otherwise there will be not coupon flow.
+	 * @param periodStart  The period start.
+	 * @param periodEnd    The period end.
+	 * @param fixingDate   The fixing date (as double).
+	 * @param paymentDate  The payment date (as double).
+	 * @param notional     The notional object relevant for this period.
+	 * @param index        The index (coupon) associated with this period.
+	 * @param couponFlow   If true, the coupon will be payed. Otherwise there will be not coupon flow.
 	 * @param notionalFlow If true, there will be a positive notional flow at period start (but only if peirodStart &gt; evaluationTime) and a negative notional flow at period end (but only if periodEnd &gt; evaluationTime). Otherwise there will be no notional flows.
-	 * @param payer If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
+	 * @param payer        If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
 	 */
 	public Period(double periodStart, double periodEnd, double fixingDate,
-			double paymentDate, AbstractNotional notional, AbstractProductComponent index,
-			boolean couponFlow, boolean notionalFlow, boolean payer) {
-		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, periodEnd-periodStart, couponFlow, notionalFlow, payer);
+				  double paymentDate, AbstractNotional notional, AbstractProductComponent index,
+				  boolean couponFlow, boolean notionalFlow, boolean payer) {
+		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, periodEnd - periodStart, couponFlow, notionalFlow, payer);
 	}
+
 	/**
 	 * This method returns the value random variable of the product within the specified model, evaluated at a given evalutationTime.
 	 * Note: For a lattice this is often the value conditional to evalutationTime, for a Monte-Carlo simulation this is the (sum of) value discounted to evaluation time.
 	 * Cashflows prior evaluationTime are not considered.
 	 *
 	 * @param evaluationTime The time on which this products value should be observed.
-	 * @param model The model used to price the product.
+	 * @param model          The model used to price the product.
 	 * @return The random variable representing the value of the product discounted to evaluation time
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		if(evaluationTime >= this.getPaymentDate()) {
+		if (evaluationTime >= this.getPaymentDate()) {
 			return new RandomVariable(0.0);
 		}
 
 		// Get random variables
-		RandomVariableInterface	notionalAtPeriodStart	= getNotional().getNotionalAtPeriodStart(this, model);
-		RandomVariableInterface	numeraireAtEval			= model.getNumeraire(evaluationTime);
-		RandomVariableInterface	numeraire				= model.getNumeraire(getPaymentDate());
+		RandomVariableInterface notionalAtPeriodStart = getNotional().getNotionalAtPeriodStart(this, model);
+		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
+		RandomVariableInterface numeraire = model.getNumeraire(getPaymentDate());
 		// @TODO: Add support for weighted Monte-Carlo.
 		//        RandomVariableInterface	monteCarloProbabilities	= model.getMonteCarloWeights(getPaymentDate());
 
 		RandomVariableInterface values;
 
 		// Calculate numeraire relative value of coupon flows
-		if(couponFlow) {
+		if (couponFlow) {
 
 			// getCoupon has been changed
 			values = getCoupon(evaluationTime, model);   // write here getCoupon(evaluationTime, model); if we want to get future value by going forward on the paths
 
 			values = values.mult(notionalAtPeriodStart);
 			values = values.div(numeraire);
-			if(isExcludeAccruedInterest && evaluationTime >= getPeriodStart() && evaluationTime < getPeriodEnd()) {
+			if (isExcludeAccruedInterest && evaluationTime >= getPeriodStart() && evaluationTime < getPeriodEnd()) {
 				double nonAccruedInterestRatio = (getPeriodEnd() - evaluationTime) / (getPeriodEnd() - getPeriodStart());
 				values = values.mult(nonAccruedInterestRatio);
 			}
-		}
-		else {
-			values = new RandomVariable(0.0,0.0);
+		} else {
+			values = new RandomVariable(0.0, 0.0);
 		}
 
 		// Apply notional exchange
-		if(notionalFlow) {
-			RandomVariableInterface	nationalAtPeriodEnd		= getNotional().getNotionalAtPeriodEnd(this, model);
+		if (notionalFlow) {
+			RandomVariableInterface nationalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
 
-			if(getPeriodStart() > evaluationTime) {
-				RandomVariableInterface	numeraireAtPeriodStart	= model.getNumeraire(getPeriodStart());
+			if (getPeriodStart() > evaluationTime) {
+				RandomVariableInterface numeraireAtPeriodStart = model.getNumeraire(getPeriodStart());
 				values = values.subRatio(notionalAtPeriodStart, numeraireAtPeriodStart);
 			}
 
-			if(getPeriodEnd() > evaluationTime) {
-				RandomVariableInterface	numeraireAtPeriodEnd	= model.getNumeraire(getPeriodEnd());
+			if (getPeriodEnd() > evaluationTime) {
+				RandomVariableInterface numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
 				values = values.addRatio(nationalAtPeriodEnd, numeraireAtPeriodEnd);
 			}
 		}
 
-		if(payer) {
+		if (payer) {
 			values = values.mult(-1.0);
 		}
 
@@ -158,16 +158,11 @@ public class Period extends AbstractPeriod {
 		return values;
 	}
 
-
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
-		return getValue(evaluationTime,model);
+		return getValue(evaluationTime, model);
 	}
-
-
-
-
 
 	@Override
 	public RandomVariableInterface getCoupon(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -203,11 +198,11 @@ public class Period extends AbstractPeriod {
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		RandomVariableInterface values = new RandomVariable(0.0);
-		if(initialTime >= this.getPaymentDate() || finalTime <this.getPaymentDate()) {
+		if (initialTime >= this.getPaymentDate() || finalTime < this.getPaymentDate()) {
 			// Apply notional exchange
-			if(notionalFlow && finalTime>=getPeriodEnd()) {
-				RandomVariableInterface	notionalAtPeriodEnd		= getNotional().getNotionalAtPeriodEnd(this, model);
-				RandomVariableInterface	numeraireAtPeriodEnd	= model.getNumeraire(getPeriodEnd());
+			if (notionalFlow && finalTime >= getPeriodEnd()) {
+				RandomVariableInterface notionalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
+				RandomVariableInterface numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
 				values = values.addRatio(notionalAtPeriodEnd, numeraireAtPeriodEnd);
 			} else {
 				return values;
@@ -215,43 +210,39 @@ public class Period extends AbstractPeriod {
 		} else {
 
 			// Get random variables
-			RandomVariableInterface	notionalAtPeriodStart	= getNotional().getNotionalAtPeriodStart(this, model);
-			RandomVariableInterface	numeraire				= model.getNumeraire(getPaymentDate());
+			RandomVariableInterface notionalAtPeriodStart = getNotional().getNotionalAtPeriodStart(this, model);
+			RandomVariableInterface numeraire = model.getNumeraire(getPaymentDate());
 			// @TODO: Add support for weighted Monte-Carlo.
 			//        RandomVariableInterface	monteCarloProbabilities	= model.getMonteCarloWeights(getPaymentDate());
 
-
 			// Calculate numeraire relative value of coupon flows
-			if(couponFlow) {
+			if (couponFlow) {
 				values = getCoupon(finalTime, model); //not discounted
 				values = values.mult(notionalAtPeriodStart);
 				values = values.div(numeraire);
-				if(isExcludeAccruedInterest && finalTime >= getPeriodStart() && finalTime < getPeriodEnd()) {
+				if (isExcludeAccruedInterest && finalTime >= getPeriodStart() && finalTime < getPeriodEnd()) {
 					double nonAccruedInterestRatio = (getPeriodEnd() - finalTime) / (getPeriodEnd() - getPeriodStart());
 					values = values.mult(nonAccruedInterestRatio);
 				}
-			}
-			else {
-				values = new RandomVariable(0.0,0.0);
+			} else {
+				values = new RandomVariable(0.0, 0.0);
 			}
 
 			// Apply notional exchange
-			if(notionalFlow && finalTime>=getPeriodEnd()) {
-				RandomVariableInterface	notionalAtPeriodEnd		= getNotional().getNotionalAtPeriodEnd(this, model);
-				RandomVariableInterface	numeraireAtPeriodEnd	= model.getNumeraire(getPeriodEnd());
+			if (notionalFlow && finalTime >= getPeriodEnd()) {
+				RandomVariableInterface notionalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
+				RandomVariableInterface numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
 				values = values.addRatio(notionalAtPeriodEnd, numeraireAtPeriodEnd);
-
 			}
 		}
 
-		if(payer) {
+		if (payer) {
 			values = values.mult(-1.0);
 		}
-		RandomVariableInterface	numeraireAtEval			= model.getNumeraire(initialTime); // was finalTime
+		RandomVariableInterface numeraireAtEval = model.getNumeraire(initialTime); // was finalTime
 		values = values.mult(numeraireAtEval);
 
 		// Return values
 		return values;
 	}
-
 }

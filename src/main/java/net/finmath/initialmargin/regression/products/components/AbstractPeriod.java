@@ -1,10 +1,10 @@
 package net.finmath.initialmargin.regression.products.components;
 
-import java.util.Set;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+
+import java.util.Set;
 
 /**
  * Base class for a period. A period has references to the index (coupon) and the notional.
@@ -22,12 +22,13 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	private final double fixingDate;
 	private final double paymentDate;
 
-	private final AbstractNotional				notional;
-	private final AbstractProductComponent		index;
-	private final double						daycountFraction;
+	private final AbstractNotional notional;
+	private final AbstractProductComponent index;
+	private final double daycountFraction;
 
 	@Override
 	public abstract RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+
 	@Override
 	public abstract RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
@@ -36,17 +37,17 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	/**
 	 * Initialize basic properties of the period.
 	 *
-	 * @param periodStart The period start.
-	 * @param periodEnd The period end.
-	 * @param fixingDate The fixing date (as double).
-	 * @param paymentDate The payment date (as double).
-	 * @param notional The notional object relevant for this period.
-	 * @param index The index (used for coupon calculation) associated with this period.
+	 * @param periodStart      The period start.
+	 * @param periodEnd        The period end.
+	 * @param fixingDate       The fixing date (as double).
+	 * @param paymentDate      The payment date (as double).
+	 * @param notional         The notional object relevant for this period.
+	 * @param index            The index (used for coupon calculation) associated with this period.
 	 * @param daycountFraction The daycount fraction (<code>coupon = index(fixingDate) * daycountFraction</code>).
 	 */
 	public AbstractPeriod(double periodStart, double periodEnd,
-			double fixingDate, double paymentDate, AbstractNotional notional,
-			AbstractProductComponent index, double daycountFraction) {
+						  double fixingDate, double paymentDate, AbstractNotional notional,
+						  AbstractProductComponent index, double daycountFraction) {
 		super();
 		this.periodStart = periodStart;
 		this.periodEnd = periodEnd;
@@ -62,15 +63,15 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	 * daycount faction <code>periodEnd-periodStart</code>.
 	 *
 	 * @param periodStart The period start.
-	 * @param periodEnd The period end.
-	 * @param fixingDate The fixing date (as double).
+	 * @param periodEnd   The period end.
+	 * @param fixingDate  The fixing date (as double).
 	 * @param paymentDate The payment date (as double).
-	 * @param notional The notional object relevant for this period.
-	 * @param index The index (coupon) associated with this period.
+	 * @param notional    The notional object relevant for this period.
+	 * @param index       The index (coupon) associated with this period.
 	 */
 	public AbstractPeriod(double periodStart, double periodEnd,
-			double fixingDate, double paymentDate, AbstractNotional notional,
-			AbstractProductComponent index) {
+						  double fixingDate, double paymentDate, AbstractNotional notional,
+						  AbstractProductComponent index) {
 		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, periodEnd - periodStart);
 	}
 

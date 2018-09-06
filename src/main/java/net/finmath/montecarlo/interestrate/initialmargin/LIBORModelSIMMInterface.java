@@ -6,19 +6,17 @@
 
 package net.finmath.montecarlo.interestrate.initialmargin;
 
-import java.util.Map;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 
+import java.util.Map;
+
 /**
  * @author Christian Fries
- *
  */
 public interface LIBORModelSIMMInterface extends LIBORModelInterface {
-
 
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 

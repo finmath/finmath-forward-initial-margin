@@ -5,12 +5,12 @@
  */
 package net.finmath.initialmargin.regression.products.indices;
 
-import java.util.Set;
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+
+import java.util.Set;
 
 /**
  * A fixed coupon index paying constant coupon..
@@ -61,15 +61,14 @@ public class FixedCoupon extends AbstractIndex {
 	// INSERTED
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+											LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return coupon;
 	}
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) {
+										 LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

@@ -9,24 +9,20 @@ import java.util.Map;
 
 public class SIMMCRIFSensititivityProvider implements SIMMSensitivityProviderInterface {
 
-    Map<Simm2Coordinate,Double>  SensitivitiyMap;
+	Map<Simm2Coordinate, Double> SensitivitiyMap;
 
+	public SIMMCRIFSensititivityProvider(Map<Simm2Coordinate, Double> SensitivityMap) {
+		this.SensitivitiyMap = SensitivityMap;
+	}
 
-    public SIMMCRIFSensititivityProvider(Map<Simm2Coordinate,Double> SensitivityMap){
-        this.SensitivitiyMap = SensitivityMap;
-    }
+	public Map<Simm2Coordinate, Double> getSensitivitiyMap() {
+		return SensitivitiyMap;
+	}
 
-    public Map<Simm2Coordinate,Double> getSensitivitiyMap(){
-        return SensitivitiyMap;
-    }
-
-    public RandomVariableInterface getSIMMSensitivity(Simm2Coordinate key, double evaluationTime, LIBORModelMonteCarloSimulationInterface model){
-        if ( SensitivitiyMap.containsKey(key))
-            return new RandomVariable(evaluationTime,model.getNumberOfPaths(),SensitivitiyMap.get(key));
-        else
-            return new RandomVariable(evaluationTime,model.getNumberOfPaths(),0.0);
-
-    }
-
-
+	public RandomVariableInterface getSIMMSensitivity(Simm2Coordinate key, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+		if (SensitivitiyMap.containsKey(key))
+			return new RandomVariable(evaluationTime, model.getNumberOfPaths(), SensitivitiyMap.get(key));
+		else
+			return new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
+	}
 }

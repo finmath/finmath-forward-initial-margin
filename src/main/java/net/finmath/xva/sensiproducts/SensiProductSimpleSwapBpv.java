@@ -1,6 +1,5 @@
 package net.finmath.xva.sensiproducts;
 
-
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
