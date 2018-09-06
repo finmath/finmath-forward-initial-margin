@@ -53,7 +53,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 
 	// Product classification within ISDA SIMM
-	private String   productClass;      // RatesFX, Credit,
+	private String   productClass;      // RATES_FX, CREDIT,
 	private String[] riskClass;         // INTEREST_RATE, CREDIT_Q, CREDIT_NON_Q, EQUITY, COMMODITY
 	private String[] curveIndexNames;   // e.g. OIS & Libor6m
 	private String   currency;
@@ -184,7 +184,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	@Override
 	public RandomVariableInterface getSensitivity(String productClass,
 			String riskClass,
-			String maturityBucket, // only for IR and Credit risk class, null otherwise
+			String maturityBucket, // only for IR and CREDIT risk class, null otherwise
 			String curveIndexName, // null if riskClass is not IR
 			String bucketKey,      // currency for IR otherwise bucket number
 			String riskType, double evaluationTime) throws SolverException, CloneNotSupportedException, CalculationException{

@@ -507,7 +507,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 */
 	public static RandomVariableInterface[] mapSensitivitiesOnBuckets(RandomVariableInterface[] sensitivities, String riskClass, int[] riskFactorDays, LIBORModelMonteCarloSimulationInterface model){
 		//rebucketing to SIMM structure(buckets: 2w, 1m, 3m, 6m, 1y, 2y, 3y, 5y, 10y, 15y, 20y, 30y)
-		int[] riskFactorsSIMM = riskClass=="INTEREST_RATE" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};
+		int[] riskFactorsSIMM = riskClass=="INTEREST_RATE" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*CREDIT*/ new int[] {365, 730, 1095, 1825, 3650};
 
 		if(riskFactorDays==null) {
 			riskFactorDays = riskFactorDaysLibor(sensitivities, model);

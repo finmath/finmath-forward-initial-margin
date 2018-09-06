@@ -5,9 +5,9 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivityProviderInterface;
-import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Optional;
 @Deprecated
 public class SIMMSensitivityProviderSIMMSwapBPV  {
 
-    final SIMMParameter.ProductClass productClass = SIMMParameter.ProductClass.RatesFX;
+    final ProductClass productClass = ProductClass.RATES_FX;
     final RiskClass riskClass = RiskClass.INTEREST_RATE;
     final MarginType riskType = MarginType.DELTA;
 

@@ -124,7 +124,7 @@ public class CalculationSchemeInitialMarginISDA {
 
 		public Map<String,String>       MapFXCategory;
 
-		public final String[]           ProductClassKeys = {"RatesFX","Credit","EQUITY","COMMODITY"};
+		public final String[]           ProductClassKeys = {"RATES_FX","CREDIT","EQUITY","COMMODITY"};
 		public final String[]           RiskClassKeys = {"INTEREST_RATE","CREDIT_Q","CREDIT_NON_Q","EQUITY","COMMODITY","FX"};
 		public final String[]           CreditMaturityBuckets = {"1y","2y","3y","5y","10y"};
 		public final String[]           IRMaturityBuckets = {"2w","1m","3m","6m","1y","2y","3y","5y","10y","15y","20y","30y"};
@@ -221,7 +221,7 @@ public class CalculationSchemeInitialMarginISDA {
 
 	public RandomVariableInterface getValue(double evaluationTime) throws CalculationException{
 		RandomVariableInterface SIMMValue = null;
-		for ( String productClass : productClassKeys) { // RatesFX, Credit etc.
+		for ( String productClass : productClassKeys) { // RATES_FX, CREDIT etc.
 			RandomVariableInterface SIMMProductValue = this.getSIMMProduct(productClass,evaluationTime);
 			SIMMValue = SIMMValue == null ? SIMMProductValue : SIMMValue.add(SIMMProductValue);
 		}
@@ -242,7 +242,7 @@ public class CalculationSchemeInitialMarginISDA {
 		this.productClassKeys = new String[]{product.getProductClass()};
 		this.riskClassKeys = product.getRiskClasses();
 		this.IRCurveIndexNames = product.getCurveIndexNames();
-		for ( String productClass : productClassKeys) { // RatesFX, Credit etc.
+		for ( String productClass : productClassKeys) { // RATES_FX, CREDIT etc.
 			RandomVariableInterface SIMMProductValue = this.getSIMMProduct(productClass,evaluationTime);
 			SIMMValue = SIMMValue == null ? SIMMProductValue : SIMMValue.add(SIMMProductValue);
 		}
@@ -262,7 +262,7 @@ public class CalculationSchemeInitialMarginISDA {
 		return this.resultMap;
 	}
 
-	// returns IM for productClass e.g. RatesFX
+	// returns IM for productClass e.g. RATES_FX
 	public RandomVariableInterface      getSIMMProduct(String productClass, double atTime){
 
 		Set<String> riskClassList = Stream.of(riskClassKeys).collect(Collectors.toSet());

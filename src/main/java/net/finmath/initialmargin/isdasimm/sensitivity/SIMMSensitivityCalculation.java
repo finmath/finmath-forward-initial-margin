@@ -180,7 +180,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		switch(sensitivityMode){
 		case MELTINGSIMMBUCKETS: // Melting of market-rate sensitivities on SIMM Buckets
 		{
-			int[] riskFactorsSIMM = riskClass=="INTEREST_RATE" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*Credit*/ new int[] {365, 730, 1095, 1825, 3650};
+			int[] riskFactorsSIMM = riskClass=="INTEREST_RATE" ? new int[] {14, 30, 90, 180, 365, 730, 1095, 1825, 3650, 5475, 7300, 10950} : /*CREDIT*/ new int[] {365, 730, 1095, 1825, 3650};
 
 			// Get new riskFactor times
 			riskFactorDays = Arrays.stream(riskFactorsSIMM).filter(n -> n > (int)Math.round(365*(evaluationTime-meltingZeroTime))).map(n -> n-(int)Math.round(365*(evaluationTime-meltingZeroTime))).toArray();

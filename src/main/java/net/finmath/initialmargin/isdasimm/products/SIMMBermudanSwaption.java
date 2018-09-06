@@ -27,7 +27,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 public class SIMMBermudanSwaption extends AbstractSIMMProduct{
 
 	// SIMM classification
-	static final String productClass = "RatesFX";
+	static final String productClass = "RATES_FX";
 	static final String[] riskClass = new String[]{"INTEREST_RATE"};
 
 	// Swap after exercise (delivery product)

@@ -1,8 +1,8 @@
 package net.finmath.xva.tradespecifications;
 
+import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-import net.finmath.xva.initialmargin.SIMMParameter;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,7 +27,7 @@ public class SIMMTradeSpecification {
 		return 0.0;
 	}
 
-	public SIMMParameter.ProductClass getProductClass() {
+	public ProductClass getProductClass() {
 		return sensitivityKeySet.stream().map(key -> key.getProductClass()).distinct().findAny().get();
 	}
 

@@ -21,7 +21,7 @@ import net.finmath.time.TimeDiscretization;
 public class SIMMSimpleSwap extends AbstractSIMMProduct{
 
 	// SIMM classification
-	static final String productClass = "RatesFX";
+	static final String productClass = "RATES_FX";
 	static final String[] riskClass = new String[]{"INTEREST_RATE"};
 	private SimpleSwap swap = null;
 

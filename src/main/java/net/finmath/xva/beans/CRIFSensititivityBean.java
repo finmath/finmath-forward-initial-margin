@@ -54,9 +54,9 @@ public class CRIFSensititivityBean {
             else if (RiskType.contains("Equity") && RiskType.contains("Vol"))
                 key = new Simm2Coordinate(Label1, Qualifier, Bucket, "EQUITY", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("Commodity") && !RiskType.contains("Vol"))
-                key = new Simm2Coordinate("None", Qualifier, Bucket, "Commodity", MarginType.DELTA.name(), ProductClass);
+                key = new Simm2Coordinate("None", Qualifier, Bucket, "COMMODITY", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("Commodity") && RiskType.contains("Vol"))
-                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "Commodity", MarginType.VEGA.name(), ProductClass);
+                key = new Simm2Coordinate(Label1, Qualifier, Bucket, "COMMODITY", MarginType.VEGA.name(), ProductClass);
             else if (RiskType.contains("FX") && !RiskType.contains("Vol"))
                 key = new Simm2Coordinate("None", Qualifier, "0", "FX", MarginType.DELTA.name(), ProductClass);
             else if (RiskType.contains("FX") && RiskType.contains("Vol")) {

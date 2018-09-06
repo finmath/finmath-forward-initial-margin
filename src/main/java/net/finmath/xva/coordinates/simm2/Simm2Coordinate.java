@@ -1,14 +1,12 @@
 package net.finmath.xva.coordinates.simm2;
 
-import net.finmath.xva.initialmargin.SIMMParameter;
-
 public class Simm2Coordinate {
     private String maturityBucketKey;
     private String riskFactorKey;
     private String bucketKey;
     private RiskClass riskClass;
     private MarginType marginType;
-    private SIMMParameter.ProductClass productClass;
+    private ProductClass productClass;
 
     public Simm2Coordinate(String maturityBucket, String riskFactorID, String bucketID, String riskClass, String riskType, String productClass) {
         this.maturityBucketKey = maturityBucket;
@@ -16,7 +14,7 @@ public class Simm2Coordinate {
         this.bucketKey = bucketID;
         this.riskClass = RiskClass.valueOf(riskClass);
         this.marginType = MarginType.valueOf(riskType);
-        this.productClass = SIMMParameter.ProductClass.valueOf(productClass);
+        this.productClass = ProductClass.valueOf(productClass);
     }
 
     public double getMaturityBucket() {
@@ -51,7 +49,7 @@ public class Simm2Coordinate {
         return marginType;
     }
 
-    public SIMMParameter.ProductClass getProductClass() {
+    public ProductClass getProductClass() {
         return productClass;
     }
 
