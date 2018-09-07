@@ -18,6 +18,10 @@ public class SimmModality {
 		return parameterSet;
 	}
 
+	public Simm2Parameter getParameterModern() {
+		return new Simm2ParameterImpl();
+	}
+
 	public String getCalculationCurrency() {
 		return calculationCurrency;
 	}
