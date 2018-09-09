@@ -5,6 +5,7 @@ import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
 import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
@@ -48,21 +49,25 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 		//not for credit -- here we have to sum up all sensitivities belonging to the same issuer/seniority; todo.
 		final RandomVariableInterface concentrationRiskFactor = x.abs().div(threshold).sqrt().floor(1.0);
 
-		return new WeightedSensitivity(concentrationRiskFactor, x.mult(riskWeight).mult(concentrationRiskFactor));
+		return new WeightedSensitivity(coordinate, concentrationRiskFactor, x.mult(riskWeight).mult(concentrationRiskFactor));
 	}
 
-	public RandomVariableInterface getBucketAggregation(String bucket, Set<Pair<Simm2Coordinate, WeightedSensitivity>> ss) {
-		return null;
+	public RandomVariableInterface getBucketAggregation(String bucket, Set<WeightedSensitivity> weightedSensitivities) {
+		return weightedSensitivities.stream().
+				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTerm(v, modality))).
+				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 	}
 
 	public RandomVariableInterface getValueA(double evaluationTime, LIBORModelMonteCarloSimulation model) {
-		availableCoordinates.stream().
+		return availableCoordinates.stream().
 				map(k -> Pair.of(
 						k.getBucketKey(),
 						getWeightedSensitivity(k, provider.getSIMMSensitivity(k, evaluationTime, model)))).
-				collect(Collectors.groupingBy(Pair::getKey, Collectors.toSet()));
-		return null;
-
+				collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toSet()))).
+				entrySet().stream().
+				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).
+				reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
+		//TODO this is missing cross-bucket correlation
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
