@@ -22,7 +22,7 @@ public class WeightedSensitivity {
 			mult(v.getWeightedSensitivity()).
 			mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
 			div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())). //denominator f
-			mult(modality.getParameterModern().getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho
+			mult(modality.getParams().getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho
 	}
 
 	public RandomVariableInterface getConcentrationRiskFactor() {

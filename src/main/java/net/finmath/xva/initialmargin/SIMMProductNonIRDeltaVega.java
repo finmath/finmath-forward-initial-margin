@@ -14,6 +14,7 @@ import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensiti
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -43,31 +44,66 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 		this.availableCoordinates = helper.getCoordinates(marginType, riskClass);
 	}
 
+	/**
+	 * Calculates the weighted sensitivity of a trade.
+	 * @param coordinate The coordinate describing what kind of sensitivity (with respect to which risk factor) x is.
+	 * @param x The value of the sensitivity as a random variable.
+	 * @return The {@link WeightedSensitivity} object representing the computation result.
+	 */
 	public WeightedSensitivity getWeightedSensitivity(Simm2Coordinate coordinate, RandomVariableInterface x) {
-		final double riskWeight = modality.getParameterModern().getRiskWeight(coordinate);
-		final double threshold = modality.getParameterModern().getConcentrationThreshold(coordinate);
+		final double riskWeight = modality.getParams().getRiskWeight(coordinate);
+		final double threshold = modality.getParams().getConcentrationThreshold(coordinate);
 		//not for credit -- here we have to sum up all sensitivities belonging to the same issuer/seniority; todo.
 		final RandomVariableInterface concentrationRiskFactor = x.abs().div(threshold).sqrt().floor(1.0);
 
 		return new WeightedSensitivity(coordinate, concentrationRiskFactor, x.mult(riskWeight).mult(concentrationRiskFactor));
 	}
 
-	public RandomVariableInterface getBucketAggregation(String bucket, Set<WeightedSensitivity> weightedSensitivities) {
-		return weightedSensitivities.stream().
+	/**
+	 * Calculates the result of a bucket aggregation, i. e. the figures K including the constituents' weighted sensitivities.
+	 * @param weightedSensitivities The set of the weighted sensitivities of the trades in the bucket.
+	 * @return A {@link BucketResult} containing the whole thing.
+	 */
+	public BucketResult getBucketAggregation(String bucketName, Set<WeightedSensitivity> weightedSensitivities) {
+		RandomVariableInterface k = weightedSensitivities.stream().
 				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTerm(v, modality))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
+
+		return new BucketResult(bucketName, weightedSensitivities, k);
+	}
+
+	public RandomVariableInterface getMargin(RiskClass rc, Collection<BucketResult> results) {
+		RandomVariableInterface kResidual = results.stream().
+				filter(bK -> bK.getBucketName().equalsIgnoreCase("residual")).
+				findAny().map(BucketResult::getK).orElse(new Scalar(0.0));
+
+		return results.stream().
+				filter(bK -> !bK.getBucketName().equalsIgnoreCase("residual")).
+				flatMap(bK1 -> results.stream().
+						filter(bK -> !bK.getBucketName().equalsIgnoreCase("residual")).
+						map(bK2 -> {
+
+							if (bK1.getBucketName().equalsIgnoreCase(bK2.getBucketName())) {
+								return bK1.getK().squared();
+							}
+							return bK1.getS().mult(bK2.getS()).
+									mult(modality.getParams().getCrossBucketCorrelation(rc, bK1.getBucketName(), bK2.getBucketName()));
+						})).
+				reduce(new Scalar(0.0), RandomVariableInterface::add).
+				sqrt().add(kResidual);
 	}
 
 	public RandomVariableInterface getValueA(double evaluationTime, LIBORModelMonteCarloSimulation model) {
-		return availableCoordinates.stream().
+		Set<BucketResult> bucketResults = availableCoordinates.stream().
 				map(k -> Pair.of(
 						k.getBucketKey(),
 						getWeightedSensitivity(k, provider.getSIMMSensitivity(k, evaluationTime, model)))).
 				collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toSet()))).
 				entrySet().stream().
 				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).
-				reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
-		//TODO this is missing cross-bucket correlation
+				collect(Collectors.toSet());
+
+		return getMargin(riskClass, bucketResults);
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {

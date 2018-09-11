@@ -18,7 +18,7 @@ public class SimmModality {
 		return parameterSet;
 	}
 
-	public Simm2Parameter getParameterModern() {
+	public Simm2Parameter getParams() {
 		return new Simm2ParameterImpl();
 	}
 
