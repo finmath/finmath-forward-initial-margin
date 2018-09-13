@@ -576,7 +576,7 @@ public class CalculationSchemeInitialMarginISDA {
 	//            riskClassKeys.stream().forEach(riskClass -> {
 	//                List<String> riskFactors = tradeSensitivityMap.keySet().stream()
 	//                        .flatMap(
-	//                                key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k -> k!=null &&  k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
+	//                                key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k -> k!=null &&  k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getQualifier())
 	//                        ).distinct().collect(Collectors.toList());
 	//                mapRiskClassRiskFactorKeys.put(riskClass, riskFactors.toArray(new String[riskFactors.size()]));
 	//            });
@@ -589,14 +589,14 @@ public class CalculationSchemeInitialMarginISDA {
 	//                if ( riskClass.equals("INTEREST_RATE") ) {
 	//                    List<String> riskFactors = tradeSensitivityMap.keySet().stream()
 	//                            .flatMap(
-	//                                    key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k -> k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
+	//                                    key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k -> k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getQualifier())
 	//                            ).distinct().collect(Collectors.toList());
 	//                    mapRiskClassRiskFactorKeys.put(riskClass, riskFactors.toArray(new String[riskFactors.size()]));
 	//                }
 	//                else{
 	//                    List<String> riskFactors = tradeSensitivityMap.keySet().stream()
 	//                            .flatMap(
-	//                                    key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k ->  k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getRiskFactorKey())
+	//                                    key -> tradeSensitivityMap.get(key).getKeySet().stream().filter(k ->  k!=null && k.getRiskClass().equals(riskClass) && k.getRiskType().equals(riskTypeString) && k.getBucketKey().equals(bucketKey)).map(k -> k.getQualifier())
 	//                            ).distinct().collect(Collectors.toList());
 	//                    mapRiskClassRiskFactorKeys.put(riskClass, riskFactors.toArray(new String[riskFactors.size()]));
 	//                }

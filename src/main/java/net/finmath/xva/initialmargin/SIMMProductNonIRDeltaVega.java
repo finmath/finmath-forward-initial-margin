@@ -72,7 +72,12 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 		return new BucketResult(bucketName, weightedSensitivities, k);
 	}
 
-	public RandomVariableInterface getMargin(RiskClass rc, Collection<BucketResult> results) {
+	/**
+	 * Calculates the resulting delta margin according to ISDA SIMM v2.0 B.8 (d)
+	 * @param results A collection of per-bucket results.
+	 * @return The delta margin.
+	 */
+	public RandomVariableInterface getMargin(Collection<BucketResult> results) {
 		RandomVariableInterface kResidual = results.stream().
 				filter(bK -> bK.getBucketName().equalsIgnoreCase("residual")).
 				findAny().map(BucketResult::getK).orElse(new Scalar(0.0));
@@ -87,7 +92,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 								return bK1.getK().squared();
 							}
 							return bK1.getS().mult(bK2.getS()).
-									mult(modality.getParams().getCrossBucketCorrelation(rc, bK1.getBucketName(), bK2.getBucketName()));
+									mult(modality.getParams().getCrossBucketCorrelation(riskClass, bK1.getBucketName(), bK2.getBucketName()));
 						})).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).
 				sqrt().add(kResidual);
@@ -103,7 +108,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).
 				collect(Collectors.toSet());
 
-		return getMargin(riskClass, bucketResults);
+		return getMargin(bucketResults);
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {

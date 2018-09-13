@@ -36,7 +36,7 @@ public class SIMMTradeSpecification {
 	}
 
 	public Set<String> getRiskfactors() {
-		return this.sensitivityKeySet.stream().map(key -> key.getRiskFactorKey()).collect(Collectors.toSet());
+		return this.sensitivityKeySet.stream().map(key -> key.getQualifier()).collect(Collectors.toSet());
 	}
 
 	public String getTradeID() {

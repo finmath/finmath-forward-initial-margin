@@ -22,4 +22,11 @@ public interface Simm2Parameter {
 	 * @return
 	 */
 	double getRiskWeight(Simm2Coordinate sensitivity);
+
+	/**
+	 * Returns the historical volatility ratio (HVR) for a given risk class.
+	 * @param c The risk class whose HVR is requested.
+	 * @return The HVR as a floating point number.
+	 */
+	double getHistoricalVolatilityRatio(Simm2Coordinate c);
 }

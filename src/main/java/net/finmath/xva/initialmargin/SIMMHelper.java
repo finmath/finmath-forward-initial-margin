@@ -14,7 +14,6 @@ import java.util.function.Function;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class SIMMHelper {
 	Set<Simm2Coordinate> coordinates;
@@ -96,6 +95,6 @@ public class SIMMHelper {
 				filter(Objects::nonNull).
 				filter(k -> k.getRiskType() == riskTypeString && k.getBucketKey().equals(bucketKey)).
 				collect(Collectors.groupingBy(Simm2Coordinate::getRiskClass,
-						Collectors.mapping(Simm2Coordinate::getRiskFactorKey, Collectors.toSet())));
+						Collectors.mapping(Simm2Coordinate::getQualifier, Collectors.toSet())));
 	}
 }
