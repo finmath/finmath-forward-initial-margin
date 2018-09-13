@@ -12,6 +12,7 @@ import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensiti
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 	final RiskClass riskClassKey = RiskClass.INTEREST_RATE;
@@ -78,7 +79,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 		int nTenors = parameterSet.IRMaturityBuckets.length;
 		String[] curveKeys = parameterSet.getRateCurveKeys();
 		RandomVariableInterface[][] netSensitivities = new RandomVariableInterface[curveKeys.length][nTenors];
-		Set<String> activeCurveKeys = helper.getRiskFactorKeysByRiskClass(this.riskTypeKey, bucketKey, evaluationTime).get(this.riskClassKey);
+		Set<String> activeCurveKeys = helper.getRiskFactorKeysByRiskClass(this.riskTypeKey, bucketKey, evaluationTime).get(this.riskClassKey).stream().map(Simm2Coordinate.Qualifier::getText).collect(Collectors.toSet());
 		for (int iCurve = 0; iCurve < curveKeys.length; iCurve++) {
 			String curveKey = curveKeys[iCurve];
 			if (activeCurveKeys.contains(curveKey)) {

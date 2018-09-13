@@ -90,7 +90,7 @@ public class SIMMHelper {
 						Collectors.mapping(Simm2Coordinate::getBucketKey, Collectors.toSet())));
 	}
 
-	public Map<RiskClass, Set<String>> getRiskFactorKeysByRiskClass(MarginType riskTypeString, String bucketKey, double evaluationTime) {
+	public Map<RiskClass, Set<Simm2Coordinate.Qualifier>> getRiskFactorKeysByRiskClass(MarginType riskTypeString, String bucketKey, double evaluationTime) {
 		return coordinates.stream().
 				filter(Objects::nonNull).
 				filter(k -> k.getRiskType() == riskTypeString && k.getBucketKey().equals(bucketKey)).

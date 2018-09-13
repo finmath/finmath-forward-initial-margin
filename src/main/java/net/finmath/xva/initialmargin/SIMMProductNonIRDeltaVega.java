@@ -133,7 +133,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 				}
 
 				/*Check whether we have risk factors in that bucket*/
-				Set<String> activeRiskFactorKeys = helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass);
+				Set<String> activeRiskFactorKeys = helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass).stream().map(Simm2Coordinate.Qualifier::getText).collect(Collectors.toSet());
 				if (activeRiskFactorKeys != null && activeRiskFactorKeys.size() > 0) {
 					Map<String, RandomVariableInterface> netSensitivityMap = this.getRiskFactorNetSensitivityMap(bucketKey, activeRiskFactorKeys, evaluationTime, model);
 					RandomVariableInterface k1 = getAggregatedSensitivityForBucket(bucketKey, netSensitivityMap, evaluationTime);
@@ -169,7 +169,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 		/* RESIDUAL TERM*/
 		if (this.riskClass != RiskClass.FX) {
 			String bucketKey = "Residual";
-			Set<String> activeRiskFactorKeys = this.helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass);
+			Set<String> activeRiskFactorKeys = this.helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass).stream().map(Simm2Coordinate.Qualifier::getText).collect(Collectors.toSet());
 			if (activeRiskFactorKeys != null && activeRiskFactorKeys.size() > 0) {
 				Map<String, RandomVariableInterface> netSensitivityMap = this.getRiskFactorNetSensitivityMap(bucketKey, activeRiskFactorKeys, evaluationTime, model);
 				Map<String, RandomVariableInterface> weightedNetSensitivityMap = this.getRiskFactorWeightedNetSensitivityMap(bucketKey, netSensitivityMap, evaluationTime);

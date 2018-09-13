@@ -35,7 +35,7 @@ public class SIMMTradeSpecification {
 		return sensitivityKeySet.stream().map(key -> key.getRiskClass()).collect(Collectors.toSet());
 	}
 
-	public Set<String> getRiskfactors() {
+	public Set<Simm2Coordinate.Qualifier> getRiskfactors() {
 		return this.sensitivityKeySet.stream().map(key -> key.getQualifier()).collect(Collectors.toSet());
 	}
 
