@@ -12,7 +12,11 @@ public final class Simm2Coordinate {
 
 	@Deprecated
 	public Simm2Coordinate(String maturityBucket, String qualifier, String bucketID, String riskClass, String riskType, String productClass) {
-		this(Vertex.parseCrifTenor(maturityBucket), new Qualifier(qualifier), bucketID, RiskClass.valueOf(riskClass), MarginType.valueOf(riskType), ProductClass.valueOf(productClass));
+		this(Vertex.parseCrifTenor(maturityBucket), qualifier, bucketID, RiskClass.valueOf(riskClass), MarginType.valueOf(riskType), ProductClass.valueOf(productClass));
+	}
+
+	public Simm2Coordinate(Vertex vertex, String qualifier, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
+		this(vertex, new Qualifier(qualifier), bucketKey, riskClass, marginType, productClass);
 	}
 
 	public Simm2Coordinate(Vertex vertex, Qualifier qualifier, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
