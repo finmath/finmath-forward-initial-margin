@@ -6,10 +6,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.xva.coordinates.simm2.MarginType;
-import net.finmath.xva.coordinates.simm2.ProductClass;
-import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.xva.coordinates.simm2.*;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -133,7 +130,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 				}
 
 				/*Check whether we have risk factors in that bucket*/
-				Set<String> activeRiskFactorKeys = helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass).stream().map(Simm2Coordinate.Qualifier::getText).collect(Collectors.toSet());
+				Set<String> activeRiskFactorKeys = helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass).stream().map(Qualifier::getText).collect(Collectors.toSet());
 				if (activeRiskFactorKeys != null && activeRiskFactorKeys.size() > 0) {
 					Map<String, RandomVariableInterface> netSensitivityMap = this.getRiskFactorNetSensitivityMap(bucketKey, activeRiskFactorKeys, evaluationTime, model);
 					RandomVariableInterface k1 = getAggregatedSensitivityForBucket(bucketKey, netSensitivityMap, evaluationTime);
@@ -169,7 +166,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 		/* RESIDUAL TERM*/
 		if (this.riskClass != RiskClass.FX) {
 			String bucketKey = "Residual";
-			Set<String> activeRiskFactorKeys = this.helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass).stream().map(Simm2Coordinate.Qualifier::getText).collect(Collectors.toSet());
+			Set<String> activeRiskFactorKeys = this.helper.getRiskFactorKeysByRiskClass(this.marginType, bucketKey, evaluationTime).get(riskClass).stream().map(Qualifier::getText).collect(Collectors.toSet());
 			if (activeRiskFactorKeys != null && activeRiskFactorKeys.size() > 0) {
 				Map<String, RandomVariableInterface> netSensitivityMap = this.getRiskFactorNetSensitivityMap(bucketKey, activeRiskFactorKeys, evaluationTime, model);
 				Map<String, RandomVariableInterface> weightedNetSensitivityMap = this.getRiskFactorWeightedNetSensitivityMap(bucketKey, netSensitivityMap, evaluationTime);

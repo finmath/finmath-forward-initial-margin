@@ -1,6 +1,7 @@
 package net.finmath.xva.tradespecifications;
 
 import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.Qualifier;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
@@ -35,7 +36,7 @@ public class SIMMTradeSpecification {
 		return sensitivityKeySet.stream().map(key -> key.getRiskClass()).collect(Collectors.toSet());
 	}
 
-	public Set<Simm2Coordinate.Qualifier> getRiskfactors() {
+	public Set<Qualifier> getRiskfactors() {
 		return this.sensitivityKeySet.stream().map(key -> key.getQualifier()).collect(Collectors.toSet());
 	}
 

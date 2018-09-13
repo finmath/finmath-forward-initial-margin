@@ -1,45 +1,23 @@
 package net.finmath.xva.coordinates.simm2;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.Objects;
 
 public final class Simm2Coordinate {
 	private Vertex vertex;
-	private String riskFactorKey;//~qualifier
+	private Qualifier riskFactorKey;//~qualifier
 	private String bucketKey;//~label2
 	private RiskClass riskClass;
 	private MarginType marginType;
 	private ProductClass productClass;
 
-	public static class Qualifier {
-		private String text;
-
-		Qualifier(String text) {
-			this.text = text;
-		}
-
-		public Pair<String, String> getCurrencyPair() {
-			return Pair.of(text.substring(0, 3).toUpperCase(), text.substring(3, 6).toUpperCase());
-		}
-
-		public String getCurrency() {
-			return text.toUpperCase();
-		}
-
-		public String getText() {
-			return text;
-		}
-	}
-
 	@Deprecated
-	public Simm2Coordinate(String maturityBucket, String riskFactorID, String bucketID, String riskClass, String riskType, String productClass) {
-		this(Vertex.parseCrifTenor(maturityBucket), riskFactorID, bucketID, RiskClass.valueOf(riskClass), MarginType.valueOf(riskType), ProductClass.valueOf(productClass));
+	public Simm2Coordinate(String maturityBucket, String qualifier, String bucketID, String riskClass, String riskType, String productClass) {
+		this(Vertex.parseCrifTenor(maturityBucket), new Qualifier(qualifier), bucketID, RiskClass.valueOf(riskClass), MarginType.valueOf(riskType), ProductClass.valueOf(productClass));
 	}
 
-	public Simm2Coordinate(Vertex vertex, String riskFactorKey, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
+	public Simm2Coordinate(Vertex vertex, Qualifier qualifier, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
 		this.vertex = vertex;
-		this.riskFactorKey = riskFactorKey;
+		this.riskFactorKey = qualifier;
 		this.bucketKey = bucketKey;
 		this.riskClass = riskClass;
 		this.marginType = marginType;
@@ -60,7 +38,7 @@ public final class Simm2Coordinate {
 	 * @return A {@link Qualifier} object wrapping the string and offering methods for handling the different formats.
 	 */
 	public Qualifier getQualifier() {
-		return new Qualifier(riskFactorKey);
+		return riskFactorKey;
 	}
 
 	public String getBucketKey() {

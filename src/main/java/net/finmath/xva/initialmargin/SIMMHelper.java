@@ -2,10 +2,7 @@ package net.finmath.xva.initialmargin;
 
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.xva.coordinates.simm2.MarginType;
-import net.finmath.xva.coordinates.simm2.ProductClass;
-import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.xva.coordinates.simm2.*;
 
 import java.util.Map;
 import java.util.Objects;
@@ -90,7 +87,7 @@ public class SIMMHelper {
 						Collectors.mapping(Simm2Coordinate::getBucketKey, Collectors.toSet())));
 	}
 
-	public Map<RiskClass, Set<Simm2Coordinate.Qualifier>> getRiskFactorKeysByRiskClass(MarginType riskTypeString, String bucketKey, double evaluationTime) {
+	public Map<RiskClass, Set<Qualifier>> getRiskFactorKeysByRiskClass(MarginType riskTypeString, String bucketKey, double evaluationTime) {
 		return coordinates.stream().
 				filter(Objects::nonNull).
 				filter(k -> k.getRiskType() == riskTypeString && k.getBucketKey().equals(bucketKey)).

@@ -5,6 +5,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.Qualifier;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
@@ -79,7 +80,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 		int nTenors = parameterSet.IRMaturityBuckets.length;
 		String[] curveKeys = parameterSet.getRateCurveKeys();
 		RandomVariableInterface[][] netSensitivities = new RandomVariableInterface[curveKeys.length][nTenors];
-		Set<String> activeCurveKeys = helper.getRiskFactorKeysByRiskClass(this.riskTypeKey, bucketKey, evaluationTime).get(this.riskClassKey).stream().map(Simm2Coordinate.Qualifier::getText).collect(Collectors.toSet());
+		Set<String> activeCurveKeys = helper.getRiskFactorKeysByRiskClass(this.riskTypeKey, bucketKey, evaluationTime).get(this.riskClassKey).stream().map(Qualifier::getText).collect(Collectors.toSet());
 		for (int iCurve = 0; iCurve < curveKeys.length; iCurve++) {
 			String curveKey = curveKeys[iCurve];
 			if (activeCurveKeys.contains(curveKey)) {
