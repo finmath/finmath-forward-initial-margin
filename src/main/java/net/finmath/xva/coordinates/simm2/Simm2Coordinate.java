@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public final class Simm2Coordinate {
 	private Vertex vertex;
-	private Qualifier riskFactorKey;//~qualifier
+	private Qualifier qualifier;//~qualifier
 	private String bucketKey;//~label2
 	private RiskClass riskClass;
 	private MarginType marginType;
@@ -21,7 +21,7 @@ public final class Simm2Coordinate {
 
 	public Simm2Coordinate(Vertex vertex, Qualifier qualifier, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
 		this.vertex = vertex;
-		this.riskFactorKey = qualifier;
+		this.qualifier = qualifier;
 		this.bucketKey = bucketKey;
 		this.riskClass = riskClass;
 		this.marginType = marginType;
@@ -42,7 +42,7 @@ public final class Simm2Coordinate {
 	 * @return A {@link Qualifier} object wrapping the string and offering methods for handling the different formats.
 	 */
 	public Qualifier getQualifier() {
-		return riskFactorKey;
+		return qualifier;
 	}
 
 	public String getBucketKey() {
@@ -70,7 +70,7 @@ public final class Simm2Coordinate {
 
 		if (vertex != null ? !vertex.equals(key.vertex) : key.vertex != null)
 			return false;
-		if (riskFactorKey != null ? !riskFactorKey.equals(key.riskFactorKey) : key.riskFactorKey != null)
+		if (qualifier != null ? !qualifier.equals(key.qualifier) : key.qualifier != null)
 			return false;
 		if (bucketKey != null ? !bucketKey.equals(key.bucketKey) : key.bucketKey != null) return false;
 		if (riskClass != null ? !riskClass.equals(key.riskClass) : key.riskClass != null) return false;
@@ -80,6 +80,6 @@ public final class Simm2Coordinate {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(vertex, riskFactorKey, bucketKey, riskClass,marginType, productClass);
+		return Objects.hash(vertex, qualifier, bucketKey, riskClass,marginType, productClass);
 	}
 }
