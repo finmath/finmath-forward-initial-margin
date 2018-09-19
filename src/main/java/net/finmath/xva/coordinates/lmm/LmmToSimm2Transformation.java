@@ -42,5 +42,6 @@ public class LmmToSimm2Transformation {
 		return dLdS;
 	}
 		 */
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 }
