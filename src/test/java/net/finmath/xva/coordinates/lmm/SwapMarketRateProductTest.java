@@ -11,6 +11,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelExponentialForm5Param;
 import net.finmath.montecarlo.interestrate.products.AnalyticZeroCouponBond;
+import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
 
@@ -78,5 +80,42 @@ public class SwapMarketRateProductTest {
 
 		assertThat(parRate.getValue(0.0, simulation).getAverage(),
 				is(closeTo(numerator/denominator, 1E-3)));
+	}
+
+	@Theory
+	public void testGetValuePutIntoSwap(TimeDiscretizationInterface uniTenor,
+									 @FromDataPoints("discountFactors") double[] discountFactors,
+									 @FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
+			throws CalculationException {
+
+		final SwapMarketRateProduct parRate = new SwapMarketRateProduct(uniTenor, uniTenor);
+
+		final double lastTime = uniTenor.getTime(uniTenor.getNumberOfTimeSteps());
+
+		TimeDiscretizationInterface periodTenor = new TimeDiscretization(0.0, lastTime, periodLength, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END);
+		TimeDiscretizationInterface processTenor = periodTenor.union(
+				new TimeDiscretization(0.0, lastTime, 0.1, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END));
+
+		final double[] timesFromStart = Arrays.stream(uniTenor.getAsDoubleArray()).limit(uniTenor.getNumberOfTimeSteps()).toArray();
+		final double[] timesFromEnd = Arrays.stream(uniTenor.getAsDoubleArray()).skip(1).toArray();
+		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
+				timesFromEnd, forwardRates, periodLength);
+		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("",
+				timesFromEnd, discountFactors);
+		AbstractLIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
+
+		LIBORModelMonteCarloSimulation simulation = new LIBORModelMonteCarloSimulation(
+				new LIBORMarketModel(periodTenor, forwardCurve, discountCurve, covariance),
+				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 1000, 42)));
+
+		double parRateToday = parRate.getValue(0.0, simulation).getAverage();
+
+		double[] notionals = new double[timesFromEnd.length];
+		double[] ratesForSwap = new double[timesFromEnd.length];
+		Arrays.fill(ratesForSwap, parRateToday);
+		Arrays.fill(notionals, 1.0);
+
+		assertThat(new SimpleSwap(timesFromStart, timesFromEnd, ratesForSwap, notionals).getValue(0.0, simulation).getAverage(),
+				is(closeTo(0.0, 1E-3)));
 	}
 }
