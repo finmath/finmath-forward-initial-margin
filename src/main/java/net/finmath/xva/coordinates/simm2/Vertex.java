@@ -9,11 +9,21 @@ public enum Vertex {
 		public String getCrifTenor() {
 			return "2w";
 		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 0.5 / 12.0;
+		}
 	},
 	M1 {
 		@Override
 		public String getCrifTenor() {
 			return "1m";
+		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 1.0 / 12.0;
 		}
 	},
 	M3 {
@@ -21,11 +31,21 @@ public enum Vertex {
 		public String getCrifTenor() {
 			return "3m";
 		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 0.25;
+		}
 	},
 	M6 {
 		@Override
 		public String getCrifTenor() {
 			return "6m";
+		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 0.5;
 		}
 	},
 	Y1 {
@@ -33,11 +53,21 @@ public enum Vertex {
 		public String getCrifTenor() {
 			return "1y";
 		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 1.0;
+		}
 	},
 	Y2 {
 		@Override
 		public String getCrifTenor() {
 			return "2y";
+		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 2.0;
 		}
 	},
 	Y3 {
@@ -45,11 +75,21 @@ public enum Vertex {
 		public String getCrifTenor() {
 			return "3y";
 		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 3.0;
+		}
 	},
 	Y5 {
 		@Override
 		public String getCrifTenor() {
 			return "5y";
+		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 5.0;
 		}
 	},
 	Y10 {
@@ -57,11 +97,21 @@ public enum Vertex {
 		public String getCrifTenor() {
 			return "10y";
 		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 10.0;
+		}
 	},
 	Y15 {
 		@Override
 		public String getCrifTenor() {
 			return "15y";
+		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 15.0;
 		}
 	},
 	Y20 {
@@ -69,11 +119,21 @@ public enum Vertex {
 		public String getCrifTenor() {
 			return "20y";
 		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 20.0;
+		}
 	},
 	Y30 {
 		@Override
 		public String getCrifTenor() {
 			return "30y";
+		}
+
+		@Override
+		public double getIdealizedYcf() {
+			return 30.0;
 		}
 	};
 
@@ -81,6 +141,8 @@ public enum Vertex {
 	 * @return Returns the name of the tenor in the CRIF.
 	 */
 	public abstract String getCrifTenor();
+
+	public abstract double getIdealizedYcf();
 
 	public static Vertex parseCrifTenor(String tenor) {
 		switch (tenor.toLowerCase().trim()) {

@@ -30,6 +30,14 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 				toArray(AbstractLIBORMonteCarloProduct[]::new);
 	}
 
+	public TimeDiscretizationInterface getFloatTenor() {
+		return floatTenor;
+	}
+
+	public TimeDiscretizationInterface getFixTenor() {
+		return fixTenor;
+	}
+
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation)
 			throws CalculationException {

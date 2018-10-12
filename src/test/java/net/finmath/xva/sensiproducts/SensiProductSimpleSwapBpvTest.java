@@ -41,10 +41,10 @@ public class SensiProductSimpleSwapBpvTest {
 	}
 
 	@Theory
-	public void getValue(@FromDataPoints("times") double maturity,
-						 @FromDataPoints("times") double evalTime,
-						 @FromDataPoints("irCurves") IRCurveSpec irCurve,
-						 @FromDataPoints("notionals") double notional) throws CalculationException {
+	public void testGetValue(@FromDataPoints("times") double maturity,
+							 @FromDataPoints("times") double evalTime,
+							 @FromDataPoints("irCurves") IRCurveSpec irCurve,
+							 @FromDataPoints("notionals") double notional) throws CalculationException {
 
 		SIMMTradeSpecification spec = new SIMMTradeSpecification(notional, maturity, irCurve);
 

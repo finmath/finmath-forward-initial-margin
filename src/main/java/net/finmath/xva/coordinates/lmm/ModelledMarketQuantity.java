@@ -16,7 +16,10 @@ public interface ModelledMarketQuantity {
 
 	/**
 	 * The product that will deliver the market quantity.
+	 * @param evaluationTime The evaluation time as {@link net.finmath.time.FloatingpointDate}.
+	 *                       This is needed as the product itself might depend on the time, e. g. a swap rate will have
+	 *                       a different schedule at different times.
 	 * @return An {@link AbstractMonteCarloProduct} able to calculate the quantity at given times and for given simulations.
 	 */
-	AbstractMonteCarloProduct getProduct();
+	AbstractMonteCarloProduct getProduct(double evaluationTime);
 }

@@ -8,21 +8,38 @@ import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.coordinates.simm2.Vertex;
 
 /**
- * The SIMM
+ * The SIMM required swap rate market quantities for IBOR rates.
  */
 public class IborSwapMarketQuantity implements ModelledMarketQuantity {
 	private Vertex tenor;
 	private String currency;
 	private ProductClass productClass;
+	private String curveName;
+	//TODO these are actually functions of tenor + currency (swap conventions)
+	//How not to pass these in addition?
+	private double iborPeriod;
+	private double fixPeriod;
 
-	@Override
-	public Simm2Coordinate getCoordinate() {
-		return new Simm2Coordinate(tenor, currency, "Curvename?", RiskClass.INTEREST_RATE, MarginType.DELTA, productClass);
+	public IborSwapMarketQuantity(Vertex tenor, String currency, ProductClass productClass, String curveName, double iborPeriod, double fixPeriod) {
+		this.tenor = tenor;
+		this.currency = currency;
+		this.productClass = productClass;
+		this.curveName = curveName;
+		this.iborPeriod = iborPeriod;
+		this.fixPeriod = fixPeriod;
 	}
 
 	@Override
-	public AbstractMonteCarloProduct getProduct() {
-		//TODO create tenor schedules in dependence of vertex.
-		return new SwapMarketRateProduct(null, null);
+	public Simm2Coordinate getCoordinate() {
+		return new Simm2Coordinate(tenor, currency, curveName, RiskClass.INTEREST_RATE, MarginType.DELTA, productClass);
+	}
+
+	@Override
+	public AbstractMonteCarloProduct getProduct(double evaluationTime) {
+		return SwapRateBuilder.startingAt(evaluationTime).
+				withTenor(tenor.getIdealizedYcf()).
+				floatPaysEvery(iborPeriod).
+				fixPaysEvery(fixPeriod).
+				build();
 	}
 }

@@ -17,7 +17,7 @@ import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
-public class ArbitrarySimm2TransformationTest {
+public class TransformationAlgorithmsTest {
 
 	@DataPoint
 	public static final double[] Diagonal1 = new double[]{ 1, 2, 3, 4, 5 };
@@ -44,7 +44,7 @@ public class ArbitrarySimm2TransformationTest {
 			}
 		}
 
-		final RandomVariableInterface[][] pseudoInverse = ArbitrarySimm2Transformation.getPseudoInverseByParallelAcmSvd(randomMatrix);
+		final RandomVariableInterface[][] pseudoInverse = TransformationAlgorithms.getPseudoInverseByParallelAcmSvd(randomMatrix);
 
 		assertThat(
 				IntStream.range(0, diagonal.length).
@@ -74,7 +74,7 @@ public class ArbitrarySimm2TransformationTest {
 			}
 		}
 
-		final RandomVariableInterface[][] pseudoInverse = ArbitrarySimm2Transformation.getPseudoInverseByParallelAcmSvd(randomMatrix);
+		final RandomVariableInterface[][] pseudoInverse = TransformationAlgorithms.getPseudoInverseByParallelAcmSvd(randomMatrix);
 
 		assertThat(
 				IntStream.range(0, dimension).

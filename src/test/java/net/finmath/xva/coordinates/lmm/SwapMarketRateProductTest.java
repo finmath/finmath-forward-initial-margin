@@ -10,7 +10,6 @@ import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelExponentialForm5Param;
-import net.finmath.montecarlo.interestrate.products.AnalyticZeroCouponBond;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.time.TimeDiscretization;
@@ -25,9 +24,8 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
 public class SwapMarketRateProductTest {
@@ -106,7 +104,7 @@ public class SwapMarketRateProductTest {
 
 		LIBORModelMonteCarloSimulation simulation = new LIBORModelMonteCarloSimulation(
 				new LIBORMarketModel(periodTenor, forwardCurve, discountCurve, covariance),
-				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 1000, 42)));
+				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 10000, 42)));
 
 		double parRateToday = parRate.getValue(0.0, simulation).getAverage();
 
