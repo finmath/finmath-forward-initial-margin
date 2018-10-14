@@ -16,10 +16,10 @@ import java.util.stream.IntStream;
 /**
  * Calculates the margin valuation adjustments by calculating the initial margins on a time discretization and integrating them.
  */
-public class MVAProduct extends AbstractLIBORMonteCarloProduct {
+public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 	private Set<SimmProduct> initialMargins;
 
-	public MVAProduct(SIMMSensitivityProviderInterface sensitivityProvider, SimmModality modality, TimeDiscretizationInterface times) {
+	public MvaProduct(SIMMSensitivityProviderInterface sensitivityProvider, SimmModality modality, TimeDiscretizationInterface times) {
 		initialMargins = IntStream.range(0, times.getNumberOfTimes())
 				.mapToObj(timeIndex -> new SimmProduct(times.getTime(timeIndex), sensitivityProvider, new SimmModality(null, "EUR", 0.0)))
 				.collect(Collectors.toSet());

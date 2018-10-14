@@ -4,8 +4,10 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,28 +18,18 @@ import java.util.stream.Collectors;
 public class ArbitrarySimm2Transformation {
 	private Set<ModelledMarketQuantity> marketQuantities;
 	private Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter;
-	private Set<Long> modelQuantityIDs;
-
-	/**
-	 * Creates a new SIMM transformation with the given model and market quantities, using getPseudoInverseByParallelAcmSvd for inversion.
-	 * @param modelQuantities A set of model quantities, differentiable via {@link RandomVariableDifferentiableInterface}.
-	 * @param marketQuantities A set of market quantities in the form of {@link ModelledMarketQuantity}s.
-	 */
-	public ArbitrarySimm2Transformation(Set<RandomVariableDifferentiableInterface> modelQuantities, Set<ModelledMarketQuantity> marketQuantities, Set<Long> modelQuantityIDs) {
-		this(modelQuantities, marketQuantities, TransformationAlgorithms::getPseudoInverseByParallelAcmSvd);
-	}
+	private Set<AadCoordinate> modelQuantities;
 
 	/**
 	 * Creates a new SIMM transformation with the given model and market quantities, using the specified pseudo-inversion algorithm.
-	 * @param modelQuantities A set of model quantities, differentiable via {@link RandomVariableDifferentiableInterface}.
+	 *
+	 * @param modelQuantities  A set of model quantities, differentiable via {@link RandomVariableDifferentiableInterface}.
 	 * @param marketQuantities A set of market quantities in the form of {@link ModelledMarketQuantity}s.
-	 * @param pseudoInverter A function that performs a pseudo-inversion on a random matrix.
+	 * @param pseudoInverter   A function that performs a pseudo-inversion on a random matrix.
 	 */
-	public ArbitrarySimm2Transformation(Set<RandomVariableDifferentiableInterface> modelQuantities, Set<ModelledMarketQuantity> marketQuantities, Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter) {
+	public ArbitrarySimm2Transformation(Set<AadCoordinate> modelQuantities, Set<ModelledMarketQuantity> marketQuantities, Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter) {
 		this.marketQuantities = marketQuantities;
-		this.modelQuantityIDs = modelQuantities.stream().
-				map(RandomVariableDifferentiableInterface::getID).
-				collect(Collectors.toSet());
+		this.modelQuantities = modelQuantities;
 		this.pseudoInverter = pseudoInverter;
 	}
 
@@ -56,7 +48,13 @@ public class ArbitrarySimm2Transformation {
 		throw new RuntimeException("Given model does not have automatic differentiation capabilities.");
 	}
 
-	public RandomVariableInterface[][] getTransformationMatrix(double time, MonteCarloSimulationInterface simulation) {
+	public RandomVariableInterface[][] getTransformationMatrix(double time, LIBORModelMonteCarloSimulationInterface simulation) {
+
+		Set<Long> modelQuantityIDs = modelQuantities.stream().
+				flatMap(c -> c.getDomainVariables(simulation)).
+				map(RandomVariableDifferentiableInterface::getID).
+				collect(Collectors.toSet());
+
 		final RandomVariableInterface[][] matrix = marketQuantities.stream().
 				map(q -> getValue(q.getProduct(time), time, simulation).getGradient(modelQuantityIDs).values().toArray(new RandomVariableInterface[0])).toArray(RandomVariableInterface[][]::new);
 

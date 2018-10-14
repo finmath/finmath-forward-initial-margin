@@ -1,17 +1,28 @@
 package net.finmath.xva.coordinates.lmm;
 
-import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+
+import java.util.stream.Stream;
 
 /**
- * Defines methods to retrieve sensitivities in a Monte Carlo model via automatic differentiation.
+ * Allows to retrieve the model quantities as a coordinate system for the calculation of sensitivities in a Monte Carlo model via automatic differentiation.
  */
 public interface AadCoordinate {
 	/**
-	 * Returns the random variable with regard to which the differentiation shall happen.
+	 * Returns the random variables with regard to which the differentiation shall happen.
+	 * @param simulation The {@link LIBORModelMonteCarloSimulationInterface} holding the differentiable simulation.
 	 * @param evaluationTime The evaluation time.
-	 * @return A {@link RandomVariableDifferentiableInterface} that can be used to retrieve to identify the derivative in the gradient.
-	 * @throws CalculationException Gets propagated from the Monte Carlo simulation.
+	 * @return A stream of {@link RandomVariableDifferentiableInterface}s that can be used to identify the derivatives in the gradient vector.
 	 */
-	RandomVariableDifferentiableInterface getDomainVariable(double evaluationTime) throws CalculationException;
+	Stream<RandomVariableDifferentiableInterface> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation, double evaluationTime);
+
+	/**
+	 * Returns the random variables with regard to which the differentiation shall happen, evaluated at time zero.
+	 * @param simulation The {@link LIBORModelMonteCarloSimulationInterface} holding the differentiable simulation.
+	 * @return A stream of {@link RandomVariableDifferentiableInterface}s that can be used to identify the derivatives in the gradient vector.
+	 */
+	default Stream<RandomVariableDifferentiableInterface> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation) {
+		return getDomainVariables(simulation, 0.0);
+	}
 }
