@@ -20,6 +20,10 @@ public class ArbitrarySimm2Transformation {
 	private Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter;
 	private Set<AadCoordinate> modelQuantities;
 
+	public ArbitrarySimm2Transformation(Set<ModelledMarketQuantity> marketQuantities, Set<AadCoordinate> modelQuantities) {
+		this(modelQuantities, marketQuantities, TransformationAlgorithms::getPseudoInverseByParallelAcmSvd);
+	}
+
 	/**
 	 * Creates a new SIMM transformation with the given model and market quantities, using the specified pseudo-inversion algorithm.
 	 *
