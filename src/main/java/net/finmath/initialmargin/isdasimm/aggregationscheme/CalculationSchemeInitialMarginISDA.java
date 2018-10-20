@@ -12,6 +12,8 @@ import net.finmath.optimizer.OptimizerInterface;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
@@ -95,18 +97,18 @@ public class CalculationSchemeInitialMarginISDA {
 		}
 
 		private final Double[][] correlationMatrixWithinSubCurve = new Double[][]{
-				{1.0, 1.0, 1.0, 0.782, 0.618, 0.498, 0.438, 0.361, 0.27, 0.196, 0.174, 0.129},
-				{1.0, 1.0, 1.0, 0.782, 0.618, 0.498, 0.438, 0.361, 0.27, 0.196, 0.174, 0.129},
-				{1.0, 1.0, 1.0, 0.782, 0.618, 0.498, 0.438, 0.361, 0.27, 0.196, 0.174, 0.129},
-				{0.782, 0.782, 0.782, 1.0, 0.84, 0.739, 0.667, 0.569, 0.444, 0.375, 0.349, 0.296},
-				{0.618, 0.618, 0.618, 0.84, 1.0, 0.917, 0.859, 0.757, 0.626, 0.555, 0.526, 0.471},
-				{0.498, 0.498, 0.498, 0.739, 0.917, 1.0, 0.976, 0.895, 0.749, 0.69, 0.66, 0.602},
-				{0.438, 0.438, 0.438, 0.667, 0.859, 0.976, 1.0, 0.958, 0.831, 0.779, 0.746, 0.69},
-				{0.361, 0.361, 0.361, 0.569, 0.757, 0.895, 0.958, 1.0, 0.925, 0.893, 0.859, 0.812},
-				{0.27, 0.27, 0.27, 0.444, 0.626, 0.749, 0.831, 0.925, 1.0, 0.98, 0.961, 0.931},
-				{0.196, 0.196, 0.196, 0.375, 0.555, 0.69, 0.779, 0.893, 0.98, 1.0, 0.989, 0.97},
-				{0.174, 0.174, 0.174, 0.349, 0.526, 0.66, 0.746, 0.859, 0.961, 0.989, 1.0, 0.988},
-				{0.129, 0.129, 0.129, 0.296, 0.471, 0.602, 0.69, 0.812, 0.931, 0.97, 0.988, 1.0}
+			{1.0, 1.0, 1.0, 0.782, 0.618, 0.498, 0.438, 0.361, 0.27, 0.196, 0.174, 0.129},
+			{1.0, 1.0, 1.0, 0.782, 0.618, 0.498, 0.438, 0.361, 0.27, 0.196, 0.174, 0.129},
+			{1.0, 1.0, 1.0, 0.782, 0.618, 0.498, 0.438, 0.361, 0.27, 0.196, 0.174, 0.129},
+			{0.782, 0.782, 0.782, 1.0, 0.84, 0.739, 0.667, 0.569, 0.444, 0.375, 0.349, 0.296},
+			{0.618, 0.618, 0.618, 0.84, 1.0, 0.917, 0.859, 0.757, 0.626, 0.555, 0.526, 0.471},
+			{0.498, 0.498, 0.498, 0.739, 0.917, 1.0, 0.976, 0.895, 0.749, 0.69, 0.66, 0.602},
+			{0.438, 0.438, 0.438, 0.667, 0.859, 0.976, 1.0, 0.958, 0.831, 0.779, 0.746, 0.69},
+			{0.361, 0.361, 0.361, 0.569, 0.757, 0.895, 0.958, 1.0, 0.925, 0.893, 0.859, 0.812},
+			{0.27, 0.27, 0.27, 0.444, 0.626, 0.749, 0.831, 0.925, 1.0, 0.98, 0.961, 0.931},
+			{0.196, 0.196, 0.196, 0.375, 0.555, 0.69, 0.779, 0.893, 0.98, 1.0, 0.989, 0.97},
+			{0.174, 0.174, 0.174, 0.349, 0.526, 0.66, 0.746, 0.859, 0.961, 0.989, 1.0, 0.988},
+			{0.129, 0.129, 0.129, 0.296, 0.471, 0.602, 0.69, 0.812, 0.931, 0.97, 0.988, 1.0}
 		};
 
 		public Double[][] CrossRiskClassCorrelationMatrix;
@@ -158,8 +160,8 @@ public class CalculationSchemeInitialMarginISDA {
 
 	// SIMM constructor
 	public CalculationSchemeInitialMarginISDA(SIMMPortfolio portfolio,
-											  //ParameterCollection parameterCollection, /* Uncomment this line if parameter collection constructor does not contain hard values */
-											  String calculationCCY) {
+			//ParameterCollection parameterCollection, /* Uncomment this line if parameter collection constructor does not contain hard values */
+			String calculationCCY) {
 		this.resultMap = new HashMap<>();
 		this.calculationCCY = calculationCCY;
 		this.products = portfolio.getProducts();
@@ -421,18 +423,10 @@ public class CalculationSchemeInitialMarginISDA {
 								riskFactor,     // CurveIndexName
 								bucketKey,      // currency for IR otherwise null.
 								riskType, atTime);
-					} catch (Exception e) {
-						return null;
+					} catch (SolverException | CloneNotSupportedException | CalculationException e) {
+						throw new IllegalArgumentException(e);
 					}
-				}).reduce(null, (e1, e2) -> {
-			if (e1 == null) {
-				return e2;
-			}
-			if (e2 == null) {
-				return e1;
-			}
-			return e1.add(e2);
-		});
+				}).reduce(new Scalar(0), (e1, e2) -> { return e1.add(e2); });
 
 		return isdasimmsensiofAllProducts;
 	}
@@ -443,11 +437,6 @@ public class CalculationSchemeInitialMarginISDA {
 
 	public String getCalculationCCY() {
 		return this.calculationCCY;
-	}
-
-	// I think we do not need this ?!
-	public int getPathDimension() {
-		return 1;
 	}
 
 	public ParameterCollection getParameterCollection() {
