@@ -291,7 +291,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			return finalSensitivities;
 		}
 
-		RandomVariableInterface[] interpolatedSensis = new RandomVariable[initialSensitivities.length];
+		RandomVariableInterface[] interpolatedSensis = new RandomVariableInterface[initialSensitivities.length];
 		for (int bucketIndex = 0; bucketIndex < initialSensitivities.length; bucketIndex++) {
 			RandomVariableInterface slope = finalSensitivities[bucketIndex].sub(initialSensitivities[bucketIndex]).div(deltaT);
 			interpolatedSensis[bucketIndex] = initialSensitivities[bucketIndex].add(slope.mult(deltaTEval));
