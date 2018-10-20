@@ -38,7 +38,7 @@ public class MarginSchemeIRDelta {
 	public RandomVariableInterface getValue(double atTime) {
 
 		if (this.bucketKeys.length == 0) {
-			return new RandomVariable(atTime, this.calculationSchemeInitialMarginISDA.getPathDimension(), 0.0);
+			return new RandomVariable(atTime, 0.0);
 		}
 
 		RandomVariableInterface[] S1Contributions = new RandomVariableInterface[this.bucketKeys.length];
@@ -149,7 +149,8 @@ public class MarginSchemeIRDelta {
 			if (netSensi != null) {
 				return netSensi.mult(riskWeight).mult(concentrationRiskFactor);
 			} else {
-				return new RandomVariable(atTime, this.calculationSchemeInitialMarginISDA.getPathDimension(), 0.0);
+				// @TODO: Should use factory here
+				return new RandomVariable(atTime, 0.0);
 			}
 		} else { /* Inflation or CCYBasis*/
 			riskWeight = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("INTEREST_RATE").get(indexName)[0][0];
