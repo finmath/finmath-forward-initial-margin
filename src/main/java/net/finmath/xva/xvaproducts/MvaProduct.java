@@ -1,10 +1,16 @@
 package net.finmath.xva.xvaproducts;
 
+import com.google.common.collect.ImmutableSet;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
+import net.finmath.xva.coordinates.lmm.ArbitrarySimm2Transformation;
+import net.finmath.xva.coordinates.lmm.ForwardCoordinates;
+import net.finmath.xva.coordinates.lmm.IborSwapMarketQuantity;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.Vertex;
 import net.finmath.xva.initialmargin.SimmProduct;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
@@ -18,23 +24,29 @@ import java.util.stream.IntStream;
  */
 public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 	private Set<SimmProduct> initialMargins;
+	private final ArbitrarySimm2Transformation deltaTransformation;
+	private final ArbitrarySimm2Transformation vegaTransformation;
 
 	public MvaProduct(SIMMSensitivityProviderInterface sensitivityProvider, SimmModality modality, TimeDiscretizationInterface times) {
-		initialMargins = IntStream.range(0, times.getNumberOfTimes())
-				.mapToObj(timeIndex -> new SimmProduct(times.getTime(timeIndex), sensitivityProvider, new SimmModality(null, "EUR", 0.0)))
+		this.deltaTransformation = getDeltaTransformation();
+		this.vegaTransformation = getVegaTransformation();
+		this.initialMargins = IntStream.range(0, times.getNumberOfTimes())
+				.mapToObj(timeIndex -> new SimmProduct(times.getTime(timeIndex), sensitivityProvider, modality,
+						deltaTransformation, vegaTransformation))
 				.collect(Collectors.toSet());
 	}
 
-	/**
-	 * This method returns the value random variable of the product within the specified model, evaluated at a given evalutationTime.
-	 * Note: For a lattice this is often the value conditional to evalutationTime, for a Monte-Carlo simulation this is the (sum of) value discounted to evaluation time.
-	 * Cashflows prior evaluationTime are not considered.
-	 *
-	 * @param evaluationTime The time on which this products value should be observed.
-	 * @param model          The model used to price the product.
-	 * @return The random variable representing the value of the product discounted to evaluation time
-	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
-	 */
+	private ArbitrarySimm2Transformation getVegaTransformation() {
+		//TODO return a vega transformation once the coordinate are there
+		return null;
+	}
+
+	private ArbitrarySimm2Transformation getDeltaTransformation() {
+		return new ArbitrarySimm2Transformation(
+				ImmutableSet.of(new IborSwapMarketQuantity(Vertex.Y1, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5)),
+				ImmutableSet.of(new ForwardCoordinates()));
+	}
+
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return initialMargins.stream()

@@ -1,12 +1,17 @@
 package net.finmath.xva.initialmargin;
 
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.xva.coordinates.simm2.*;
+import net.finmath.xva.coordinates.lmm.Transformation;
+import net.finmath.xva.coordinates.lmm.TransformationOperator;
+import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.Qualifier;
+import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,28 +22,34 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
-	private SimmModality modality;
-	private ProductClass productClass;
-	private RiskClass riskClass;
-	private String[] activeBucketKeys;
-	private MarginType marginType;
+/**
+ * Represents a product that returns the initial margin to be posted at a fixed time according to SIMM.
+ * This product will consider the non-IR Delta and Vega risk contributions to the total margin.
+ */
+public class SimmProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
+	private final SimmModality modality;
+	private final ProductClass productClass;
+	private final RiskClass riskClass;
+	private final MarginType marginType;
 	private final SIMMHelper helper;
-	private SIMMSensitivityProviderInterface provider;
-	private Set<Simm2Coordinate> availableCoordinates;
+	private final SIMMSensitivityProviderInterface provider;
+	private final Transformation transformation;
+	private final double postingTime;
+	private final AbstractLIBORMonteCarloProduct marginedProduct;
 
-	public SIMMProductNonIRDeltaVega(SIMMSensitivityProviderInterface provider,
+	public SimmProductNonIRDeltaVega(SIMMSensitivityProviderInterface provider,
 									 RiskClass riskClass,
 									 ProductClass productClass,
-									 MarginType marginType, SimmModality modality, double atTime) {
+									 MarginType marginType, SimmModality modality, double postingTime) {
 		this.modality = modality;
 		this.helper = null;//new SIMMHelper(provider.getTradeSpecs());
 		this.provider = provider;
 		this.riskClass = riskClass;
 		this.productClass = productClass;
 		this.marginType = marginType;
-		this.activeBucketKeys = helper.getBucketsByRiskClass(this.marginType, atTime).get(riskClass).stream().filter(e -> !e.equals("Residual")).toArray(String[]::new);
-		this.availableCoordinates = helper.getCoordinates(marginType, riskClass);
+		transformation = null; //TODO initialize non-null
+		this.postingTime = postingTime;
+		marginedProduct = null; //TODO initialize non-null
 	}
 
 	/**
@@ -95,11 +106,16 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 				sqrt().add(kResidual);
 	}
 
-	public RandomVariableInterface getValueA(double evaluationTime, LIBORModelMonteCarloSimulation model) {
-		Set<BucketResult> bucketResults = availableCoordinates.stream().
-				map(k -> Pair.of(
-						k.getBucketKey(),
-						getWeightedSensitivity(k, provider.getSIMMSensitivity(k, evaluationTime, model)))).
+	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+
+		final TransformationOperator transformer = transformation.getTransformationOperator(postingTime, model);
+
+		final Map<Simm2Coordinate, RandomVariableInterface> simmSensitivities = transformer.apply(evaluationTime, marginedProduct);
+
+		Set<BucketResult> bucketResults = simmSensitivities.entrySet().stream().
+				map(z -> Pair.of(
+						z.getKey().getBucketKey(),
+						getWeightedSensitivity(z.getKey(), z.getValue()))).
 				collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toSet()))).
 				entrySet().stream().
 				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).
@@ -108,14 +124,21 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 		return getMargin(bucketResults);
 	}
 
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariableInterface getValueB(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+
+		final TransformationOperator transformer = transformation.getTransformationOperator(postingTime, model);
+
+		final Map<Simm2Coordinate, RandomVariableInterface> simmSensitivities = transformer.apply(evaluationTime, marginedProduct);
+
+		String[] activeBucketKeys = simmSensitivities.keySet().stream().
+				map(Simm2Coordinate::getBucketKey).toArray(String[]::new);
 
 		RandomVariableInterface deltaMargin = model.getRandomVariableForConstant(0.0);
 		Double[][] correlationMatrix = getModality().getParameterSet().MapRiskClassCorrelationCrossBucketMap.get(this.riskClass);
 
-		int length = correlationMatrix.length == 1 ? this.activeBucketKeys.length : correlationMatrix.length;
+		int length = correlationMatrix.length == 1 ? activeBucketKeys.length : correlationMatrix.length;
 
-		if (this.activeBucketKeys.length > 0) {
+		if (activeBucketKeys.length > 0) {
 			RandomVariableInterface[] kContributions = new RandomVariableInterface[length];
 			RandomVariableInterface[] s1Contributions = new RandomVariableInterface[length];
 			for (int iBucket = 0; iBucket < activeBucketKeys.length; iBucket++) {
@@ -125,7 +148,7 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 					bucketKey = new Integer(activeBucketKeys[iBucket]).toString();
 					bucketIndex = Integer.parseInt(activeBucketKeys[iBucket]);
 				} else {
-					bucketKey = this.activeBucketKeys[iBucket];
+					bucketKey = activeBucketKeys[iBucket];
 					bucketIndex = iBucket;
 				}
 

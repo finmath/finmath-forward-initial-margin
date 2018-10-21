@@ -16,13 +16,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
-	final RiskClass riskClassKey = RiskClass.INTEREST_RATE;
-	final MarginType riskTypeKey = MarginType.DELTA;
-	final String productClassKey;
-	final Set<String> currencyKeys;
-	final SIMMParameter parameterSet;
-	final SIMMHelper helper;
-	private SIMMSensitivityProviderInterface simmSensitivitivityProvider;
+	private final RiskClass riskClassKey = RiskClass.INTEREST_RATE;
+	private final MarginType riskTypeKey = MarginType.DELTA;
+	private final String productClassKey;
+	private final Set<String> currencyKeys;
+	private final SIMMParameter parameterSet;
+	private final SIMMHelper helper;
+	private final SIMMSensitivityProviderInterface simmSensitivitivityProvider;
 
 	public SIMMProductIRDelta(SIMMSensitivityProviderInterface simmSensitivitivityProvider, String productClassKey, SIMMParameter parameterSet, double atTime) {
 

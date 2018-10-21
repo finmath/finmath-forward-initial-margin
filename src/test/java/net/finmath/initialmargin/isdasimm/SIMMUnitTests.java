@@ -59,7 +59,7 @@ public class SIMMUnitTests {
 					SIMMCRIFSensititivityProvider provider = new SIMMCRIFSensititivityProvider(simmSensitivityKeyDoubleMap);
 					SIMMHelper helper = new SIMMHelper(provider.getSensitivitiyMap().keySet());
 
-					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0));
+					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0), transformation, vegaTransformation);
 
 					RandomVariableInterface result = simmProduct.getValue(0.0, getDummySimulation());
 				} catch (Exception e) {

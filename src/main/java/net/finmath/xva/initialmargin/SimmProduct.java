@@ -1,20 +1,14 @@
 package net.finmath.xva.initialmargin;
 
-import com.google.common.collect.ImmutableSet;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.xva.coordinates.lmm.AadCoordinate;
-import net.finmath.xva.coordinates.lmm.ArbitrarySimm2Transformation;
-import net.finmath.xva.coordinates.lmm.ForwardCoordinates;
-import net.finmath.xva.coordinates.lmm.IborSwapMarketQuantity;
+import net.finmath.xva.coordinates.lmm.Transformation;
 import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Vertex;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
-import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -28,20 +22,16 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	private double marginCalculationTime;
 	private SimmModality modality;
 	private SIMMHelper helper;
-	private ArbitrarySimm2Transformation transformation;
+	private final Transformation deltaTransformation;
+	private final Transformation vegaTransformation;
 
-	public SimmProduct(double marginCalculationTime, SIMMSensitivityProviderInterface provider, SimmModality modality) {
+	public SimmProduct(double marginCalculationTime, SIMMSensitivityProviderInterface provider, SimmModality modality, Transformation deltaTransformation, Transformation vegaTransformation) {
 		this.modality = modality;
 		this.marginCalculationTime = marginCalculationTime;
 		this.simmSensitivityProvider = provider;
+		this.deltaTransformation = deltaTransformation;
+		this.vegaTransformation = vegaTransformation;
 		this.helper = null;
-		this.transformation = getTransformation();
-	}
-
-	private ArbitrarySimm2Transformation getTransformation() {
-		return new ArbitrarySimm2Transformation(
-				ImmutableSet.of(new IborSwapMarketQuantity(Vertex.Y1, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5)),
-				ImmutableSet.of(new ForwardCoordinates()));
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -92,11 +82,11 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 			return new SIMMProductIRDelta(this.simmSensitivityProvider, productClass.name(), this.getModality().getParameterSet(), evaluationTime);
 		}
 
-		return new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.DELTA, modality, evaluationTime);
+		return new SimmProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.DELTA, modality, evaluationTime);
 	}
 
 	public RandomVariableInterface getVegaMargin(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		SIMMProductNonIRDeltaVega VegaScheme = new SIMMProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.VEGA, getModality(), evaluationTime);
+		SimmProductNonIRDeltaVega VegaScheme = new SimmProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.VEGA, getModality(), evaluationTime);
 		return VegaScheme.getValue(evaluationTime, model);
 	}
 

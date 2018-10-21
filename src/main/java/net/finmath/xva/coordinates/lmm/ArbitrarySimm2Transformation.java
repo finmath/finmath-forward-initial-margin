@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Provides a transformation from model sensitivities (with respect to the model quantities) to SIMM sensitivities.
  */
-public class ArbitrarySimm2Transformation {
+public class ArbitrarySimm2Transformation implements Transformation {
 	private Set<ModelledMarketQuantity> marketQuantities;
 	private Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter;
 	private Set<AadCoordinate> modelQuantities;
@@ -63,5 +63,10 @@ public class ArbitrarySimm2Transformation {
 				map(q -> getValue(q.getProduct(time), time, simulation).getGradient(modelQuantityIDs).values().toArray(new RandomVariableInterface[0])).toArray(RandomVariableInterface[][]::new);
 
 		return pseudoInverter.apply(matrix);
+	}
+
+	@Override
+	public TransformationOperator getTransformationOperator(double time, LIBORModelMonteCarloSimulationInterface simulation) {
+		return new TransformationOperatorImpl();
 	}
 }
