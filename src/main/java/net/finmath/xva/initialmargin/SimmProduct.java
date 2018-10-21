@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * A product whose value represents the initial margin accordin to be posted at a fixed time according to SIMM.
+ * A product whose value represents the total initial margin to be posted at a fixed time according to SIMM.
  */
 public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	private SIMMSensitivityProviderInterface simmSensitivityProvider;

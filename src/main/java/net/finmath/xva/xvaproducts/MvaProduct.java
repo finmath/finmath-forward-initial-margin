@@ -1,5 +1,6 @@
 package net.finmath.xva.xvaproducts;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
@@ -43,7 +44,7 @@ public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 
 	private ArbitrarySimm2Transformation getDeltaTransformation() {
 		return new ArbitrarySimm2Transformation(
-				ImmutableSet.of(new IborSwapMarketQuantity(Vertex.Y1, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5)),
+				ImmutableList.of(new IborSwapMarketQuantity(Vertex.Y1, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5)),
 				ImmutableSet.of(new ForwardCoordinates()));
 	}
 

@@ -6,8 +6,9 @@ import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,11 +17,11 @@ import java.util.stream.Collectors;
  * Provides a transformation from model sensitivities (with respect to the model quantities) to SIMM sensitivities.
  */
 public class ArbitrarySimm2Transformation implements Transformation {
-	private Set<ModelledMarketQuantity> marketQuantities;
+	private List<ModelledMarketQuantity> marketQuantities;
 	private Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter;
 	private Set<AadCoordinate> modelQuantities;
 
-	public ArbitrarySimm2Transformation(Set<ModelledMarketQuantity> marketQuantities, Set<AadCoordinate> modelQuantities) {
+	public ArbitrarySimm2Transformation(List<ModelledMarketQuantity> marketQuantities, Set<AadCoordinate> modelQuantities) {
 		this(modelQuantities, marketQuantities, TransformationAlgorithms::getPseudoInverseByParallelAcmSvd);
 	}
 
@@ -31,13 +32,13 @@ public class ArbitrarySimm2Transformation implements Transformation {
 	 * @param marketQuantities A set of market quantities in the form of {@link ModelledMarketQuantity}s.
 	 * @param pseudoInverter   A function that performs a pseudo-inversion on a random matrix.
 	 */
-	public ArbitrarySimm2Transformation(Set<AadCoordinate> modelQuantities, Set<ModelledMarketQuantity> marketQuantities, Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter) {
+	public ArbitrarySimm2Transformation(Set<AadCoordinate> modelQuantities, List<ModelledMarketQuantity> marketQuantities, Function<RandomVariableInterface[][], RandomVariableInterface[][]> pseudoInverter) {
 		this.marketQuantities = marketQuantities;
 		this.modelQuantities = modelQuantities;
 		this.pseudoInverter = pseudoInverter;
 	}
 
-	private RandomVariableDifferentiableInterface getValue(AbstractMonteCarloProduct product, double time, MonteCarloSimulationInterface simulation) {
+	public static RandomVariableDifferentiableInterface getValueAsDifferentiable(AbstractMonteCarloProduct product, double time, MonteCarloSimulationInterface simulation) {
 		RandomVariableInterface x = null;
 		try {
 			x = product.getValue(time, simulation);
@@ -60,13 +61,22 @@ public class ArbitrarySimm2Transformation implements Transformation {
 				collect(Collectors.toSet());
 
 		final RandomVariableInterface[][] matrix = marketQuantities.stream().
-				map(q -> getValue(q.getProduct(time), time, simulation).getGradient(modelQuantityIDs).values().toArray(new RandomVariableInterface[0])).toArray(RandomVariableInterface[][]::new);
+				map(q -> getValueAsDifferentiable(q.getProduct(time), time, simulation).getGradient(modelQuantityIDs).values().toArray(new RandomVariableInterface[0])).toArray(RandomVariableInterface[][]::new);
 
 		return pseudoInverter.apply(matrix);
 	}
 
 	@Override
 	public TransformationOperator getTransformationOperator(double time, LIBORModelMonteCarloSimulationInterface simulation) {
-		return new TransformationOperatorImpl();
+		Set<Long> modelVariableIDs = modelQuantities.stream().
+				flatMap(x -> x.getDomainVariables(simulation)).
+				map(RandomVariableDifferentiableInterface::getID).
+				collect(Collectors.toSet());
+
+		List<Simm2Coordinate> targetCoordinates = marketQuantities.stream().
+				map(ModelledMarketQuantity::getCoordinate).
+				collect(Collectors.toList());
+
+		return new TransformationOperatorImpl(getTransformationMatrix(time, simulation), modelVariableIDs, targetCoordinates, simulation);
 	}
 }

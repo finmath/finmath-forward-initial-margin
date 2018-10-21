@@ -2,6 +2,7 @@ package net.finmath.xva.coordinates.lmm;
 
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
@@ -57,5 +58,25 @@ public final class TransformationAlgorithms {
 		}
 
 		return pseudoInverse;
+	}
+
+	public static RandomVariableInterface[] multiplyVectorMatrix(RandomVariableInterface[] vector, RandomVariableInterface[][] matrix) {
+		final int columnCount = matrix[0].length;
+		RandomVariableInterface[] product = new RandomVariableInterface[columnCount];
+
+		for (int column = 0; column < columnCount; column++) {
+			product[column] = new Scalar(0.0);
+			for (int row = 0; row < vector.length; row++) {
+				RandomVariableInterface currentEntry;
+
+				if (vector[row] == null || matrix[row][column] == null) {
+					currentEntry = new Scalar(0.0);
+				} else {
+					currentEntry = vector[row].mult(matrix[row][column]);
+				}
+				product[column] = product[column].add(currentEntry);
+			}
+		}
+		return product;
 	}
 }
