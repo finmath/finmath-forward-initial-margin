@@ -1,5 +1,13 @@
 package net.finmath.xva.coordinates.simm2;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
+
 /**
  * Defines the vertices from ISDA SIMM v2.0, C.1.14 (interest rate) and C.1.15/16 (credit).
  */
@@ -136,6 +144,23 @@ public enum Vertex {
 			return 30.0;
 		}
 	};
+
+	public static Map<Vertex, Double> splitYearCountFraction(double yearCountFraction) {
+		final ImmutableSortedMap<Double, Vertex> verticesByYcf = Arrays.stream(Vertex.values()).
+				map(v -> Pair.of(v.getIdealizedYcf(), v)).
+				collect(ImmutableSortedMap.toImmutableSortedMap(Comparator.comparing(Number::doubleValue), Pair::getKey, Pair::getValue));
+
+		final Map.Entry<Double, Vertex> floor = verticesByYcf.floorEntry(yearCountFraction);
+		final Map.Entry<Double, Vertex> ceiling = verticesByYcf.ceilingEntry(yearCountFraction);
+
+		if (ceiling == null || floor == null || floor.getValue() == ceiling.getValue()) {
+			return ImmutableMap.of(ceiling == null ? floor.getValue() : ceiling.getValue(), 1.0);
+		}
+
+		double floorWeight = (yearCountFraction - floor.getKey()) / (ceiling.getKey() - floor.getKey());
+
+		return ImmutableMap.of(floor.getValue(), floorWeight, ceiling.getValue(), 1.0 - floorWeight);
+	}
 
 	/**
 	 * @return Returns the name of the tenor in the CRIF.

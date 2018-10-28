@@ -82,4 +82,16 @@ public final class Simm2Coordinate {
 	public int hashCode() {
 		return Objects.hash(vertex, qualifier, bucketKey, riskClass,marginType, productClass);
 	}
+
+	@Override
+	public String toString() {
+		return "Simm2Coordinate{" +
+				"vertex=" + vertex +
+				", qualifier=" + qualifier +
+				", bucketKey='" + bucketKey + '\'' +
+				", riskClass=" + riskClass +
+				", marginType=" + marginType +
+				", productClass=" + productClass +
+				'}';
+	}
 }

@@ -2,6 +2,8 @@ package net.finmath.xva.coordinates.simm2;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Objects;
+
 /**
  * Represents the additional of a SIMM coordinate which corresponds to the CRIF qualifier.
  */
@@ -33,6 +35,28 @@ public class Qualifier {
 	 * @return A string whose meaning is context-dependent.
 	 */
 	public String getText() {
+		return text;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Qualifier qualifier = (Qualifier) o;
+		return Objects.equals(text, qualifier.text);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(text);
+	}
+
+	@Override
+	public String toString() {
 		return text;
 	}
 }
