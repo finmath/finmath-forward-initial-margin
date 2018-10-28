@@ -1,4 +1,4 @@
-package net.finmath.xva.sensitivityproviders.simmsensitivityproviders;
+package net.finmath.xva.sensitivityproviders.timelines;
 
 /**
  * Holds the parameters for identifying the requested ISDA SIMM sensitivity.

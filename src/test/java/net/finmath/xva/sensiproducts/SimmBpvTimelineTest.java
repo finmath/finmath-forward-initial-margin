@@ -3,6 +3,7 @@ package net.finmath.xva.sensiproducts;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.time.TimeDiscretization;
+import net.finmath.xva.sensitivityproviders.timelines.SimmBpvTimeline;
 import net.finmath.xva.tradespecifications.IRCurveSpec;
 import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
@@ -19,7 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
-public class SensiProductSimpleSwapBpvTest {
+public class SimmBpvTimelineTest {
 
 	@DataPoints("irCurves")
 	public static IRCurveSpec[] getIndices() {
@@ -48,7 +49,7 @@ public class SensiProductSimpleSwapBpvTest {
 
 		SIMMTradeSpecification spec = new SIMMTradeSpecification(notional, maturity, irCurve);
 
-		assertThat(new SensiProductSimpleSwapBpv(spec).getValue(evalTime, (getDummyModel())).getAverage(),
+		assertThat(new SimmBpvTimeline(spec).getValue(evalTime, (getDummyModel())).getAverage(),
 				is(closeTo(0.0001 * notional * irCurve.getPeriodLength() / irCurve.getDayInYears(), 1E-6)));
 	}
 }

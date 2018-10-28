@@ -8,7 +8,7 @@ import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.coordinates.simm2.Qualifier;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
+import net.finmath.xva.sensitivityproviders.timelines.SimmSensitivityTimeline;
 
 import java.util.Map;
 import java.util.Optional;
@@ -22,9 +22,9 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 	private final Set<String> currencyKeys;
 	private final SIMMParameter parameterSet;
 	private final SIMMHelper helper;
-	private final SIMMSensitivityProviderInterface simmSensitivitivityProvider;
+	private final SimmSensitivityTimeline simmSensitivitivityProvider;
 
-	public SIMMProductIRDelta(SIMMSensitivityProviderInterface simmSensitivitivityProvider, String productClassKey, SIMMParameter parameterSet, double atTime) {
+	public SIMMProductIRDelta(SimmSensitivityTimeline simmSensitivitivityProvider, String productClassKey, SIMMParameter parameterSet, double atTime) {
 
 		this.helper = null;//new SIMMHelper(simmSensitivitivityProvider.getTradeSpecs());
 		this.productClassKey = productClassKey;

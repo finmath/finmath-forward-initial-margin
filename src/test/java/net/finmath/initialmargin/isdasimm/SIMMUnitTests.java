@@ -18,7 +18,7 @@ import net.finmath.xva.initialmargin.SIMMHelper;
 import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.initialmargin.SimmProduct;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMCRIFSensititivityProvider;
+import net.finmath.xva.sensitivityproviders.timelines.SimmConstantTimeline;
 import org.junit.Test;
 
 import java.io.File;
@@ -56,7 +56,7 @@ public class SIMMUnitTests {
 
 					Map<Simm2Coordinate, Double> simmSensitivityKeyDoubleMap = test.stream().filter(entry -> entry.getCounterparty().equals(cp)).collect(Collectors.toMap(entry -> entry.getSensitivityKey(), entry -> entry.getAmount()));
 
-					SIMMCRIFSensititivityProvider provider = new SIMMCRIFSensititivityProvider(simmSensitivityKeyDoubleMap);
+					SimmConstantTimeline provider = new SimmConstantTimeline(simmSensitivityKeyDoubleMap);
 					SIMMHelper helper = new SIMMHelper(provider.getSensitivitiyMap().keySet());
 
 					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0), null, null);

@@ -8,24 +8,23 @@ import net.finmath.xva.coordinates.lmm.Transformation;
 import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
+import net.finmath.xva.sensitivityproviders.timelines.SimmSensitivityTimeline;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * A product whose value represents the total initial margin to be posted at a fixed time according to SIMM.
  */
 public class SimmProduct extends AbstractLIBORMonteCarloProduct {
-	private SIMMSensitivityProviderInterface simmSensitivityProvider;
+	private SimmSensitivityTimeline simmSensitivityProvider;
 	private double marginCalculationTime;
 	private SimmModality modality;
 	private SIMMHelper helper;
 	private final Transformation deltaTransformation;
 	private final Transformation vegaTransformation;
 
-	public SimmProduct(double marginCalculationTime, SIMMSensitivityProviderInterface provider, SimmModality modality, Transformation deltaTransformation, Transformation vegaTransformation) {
+	public SimmProduct(double marginCalculationTime, SimmSensitivityTimeline provider, SimmModality modality, Transformation deltaTransformation, Transformation vegaTransformation) {
 		this.modality = modality;
 		this.marginCalculationTime = marginCalculationTime;
 		this.simmSensitivityProvider = provider;
@@ -50,18 +49,12 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	public RandomVariableInterface getSimmForProductClass(ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		Set<RiskClass> riskClassList = helper.getRiskClassesForProductClass(productClass, evaluationTime);
-
 		RandomVariableInterface[] contributions = Arrays.stream(RiskClass.values()).map(rc -> {
-			if (riskClassList.contains(rc)) {
 				try {
 					return getSimmForRiskClass(rc, productClass, evaluationTime, model);
 				} catch (CalculationException e) {
 					throw new RuntimeException(e);
 				}
-			}
-
-			return model.getRandomVariableForConstant(0.0);
 		}).toArray(RandomVariableInterface[]::new);
 
 		RandomVariableInterface simmProductClass = helper.getVarianceCovarianceAggregation(contributions, getModality().getParameterSet().CrossRiskClassCorrelationMatrix);

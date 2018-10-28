@@ -6,11 +6,9 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.initialmargin.SimmProduct;
-import net.finmath.xva.sensiproducts.SensiProductSimpleSwapBpv;
-import net.finmath.xva.sensitivityproviders.modelsensitivityproviders.ModelSensitivitySimpleMeltingProvider;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMPortfolioSensitivityProvider;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMTradeSensitivityProvider;
+import net.finmath.xva.sensitivityproviders.timelines.SimmBpvTimeline;
+import net.finmath.xva.sensitivityproviders.timelines.SimmCompositeTimeline;
+import net.finmath.xva.sensitivityproviders.timelines.SimmSensitivityTimeline;
 import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
@@ -32,14 +30,9 @@ public class Launcher {
 		tradeSet.add(trade);
 		tradeSet.add(trade2);
 
-		Stream<SIMMSensitivityProviderInterface> tradeSensiProviders = tradeSet.stream()
-				.map(tradeSpec -> (SIMMSensitivityProviderInterface) new SIMMTradeSensitivityProvider(
-						new ModelSensitivitySimpleMeltingProvider(
-								new SensiProductSimpleSwapBpv(tradeSpec), tradeSpec.getMaxTimeToMaturity()
-						),
-						tradeSpec));
+		Stream<SimmSensitivityTimeline> tradeSensiProviders = tradeSet.stream().map(SimmBpvTimeline::new);
 
-		SIMMSensitivityProviderInterface portfolioSensiProvider = new SIMMPortfolioSensitivityProvider(tradeSensiProviders.collect(Collectors.toSet()));
+		SimmSensitivityTimeline portfolioSensiProvider = new SimmCompositeTimeline(tradeSensiProviders.collect(Collectors.toSet()));
 
 		double marginCalculationTime = 5.0;
 		SimmProduct product = new SimmProduct(marginCalculationTime, portfolioSensiProvider, new SimmModality(parameterSet, calculationCCY, 0.0), null, null);

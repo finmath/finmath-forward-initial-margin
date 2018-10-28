@@ -12,7 +12,7 @@ import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.Qualifier;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
+import net.finmath.xva.sensitivityproviders.timelines.SimmSensitivityTimeline;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -32,12 +32,12 @@ public class SimmProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 	private final RiskClass riskClass;
 	private final MarginType marginType;
 	private final SIMMHelper helper;
-	private final SIMMSensitivityProviderInterface provider;
+	private final SimmSensitivityTimeline provider;
 	private final Transformation transformation;
 	private final double postingTime;
 	private final AbstractLIBORMonteCarloProduct marginedProduct;
 
-	public SimmProductNonIRDeltaVega(SIMMSensitivityProviderInterface provider,
+	public SimmProductNonIRDeltaVega(SimmSensitivityTimeline provider,
 									 RiskClass riskClass,
 									 ProductClass productClass,
 									 MarginType marginType, SimmModality modality, double postingTime) {
