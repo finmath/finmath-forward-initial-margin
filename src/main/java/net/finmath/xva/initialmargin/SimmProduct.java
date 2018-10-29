@@ -4,33 +4,34 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.xva.coordinates.lmm.Transformation;
+import net.finmath.stochastic.Scalar;
 import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.sensitivityproviders.timelines.SimmSensitivityTimeline;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A product whose value represents the total initial margin to be posted at a fixed time according to SIMM.
  */
 public class SimmProduct extends AbstractLIBORMonteCarloProduct {
-	private SimmSensitivityTimeline simmSensitivityProvider;
+	private SimmSensitivityTimeline timeline;
 	private double marginCalculationTime;
 	private SimmModality modality;
-	private SIMMHelper helper;
-	private final Transformation deltaTransformation;
-	private final Transformation vegaTransformation;
+	private SimmNonIRDeltaAndVegaScheme nonIRDeltaAndVegaScheme;
 
-	public SimmProduct(double marginCalculationTime, SimmSensitivityTimeline provider, SimmModality modality, Transformation deltaTransformation, Transformation vegaTransformation) {
+	public SimmProduct(double marginCalculationTime, SimmSensitivityTimeline provider, SimmModality modality) {
 		this.modality = modality;
 		this.marginCalculationTime = marginCalculationTime;
-		this.simmSensitivityProvider = provider;
-		this.deltaTransformation = deltaTransformation;
-		this.vegaTransformation = vegaTransformation;
-		this.helper = null;
+		this.timeline = provider;
+		this.nonIRDeltaAndVegaScheme = new SimmNonIRDeltaAndVegaScheme(modality);
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -38,53 +39,42 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 			return model.getRandomVariableForConstant(0.0);
 		}
 
-		RandomVariableInterface simmValue = Arrays.stream(ProductClass.values()).
-				map(pc -> getSimmForProductClass(pc, evaluationTime, model)).
+		final RandomVariableInterface simmValue = timeline.getSimmSensitivities(evaluationTime, model).entrySet().stream().
+				collect(Collectors.groupingBy(e -> e.getKey().getProductClass())).entrySet().stream().
+				map(group -> getSimmForProductClass(group.getKey(), group.getValue())).
 				reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
-
-		System.out.println("SimmProduct: simmValue at " + DecimalFormat.getNumberInstance().format(evaluationTime) + ": " + DecimalFormat.getCurrencyInstance().format(simmValue.getAverage()));
 
 		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
 		return simmValue.sub(this.getModality().getPostingThreshold()).floor(0.0).mult(numeraireAtEval);
 	}
 
-	public RandomVariableInterface getSimmForProductClass(ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		RandomVariableInterface[] contributions = Arrays.stream(RiskClass.values()).map(rc -> {
-				try {
-					return getSimmForRiskClass(rc, productClass, evaluationTime, model);
-				} catch (CalculationException e) {
-					throw new RuntimeException(e);
-				}
-		}).toArray(RandomVariableInterface[]::new);
+	private RandomVariableInterface getSimmForProductClass(ProductClass productClass, List<Map.Entry<Simm2Coordinate, RandomVariableInterface>> sensitivities) {
+		final Map<RiskClass, RandomVariableInterface> marginByRiskClass = sensitivities.stream().
+				collect(Collectors.groupingBy(e -> e.getKey().getRiskClass())).entrySet().stream().
+				map(group -> Pair.of(group.getKey(), getSimmForRiskClass(group.getKey(), group.getValue()))).
+				collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-		RandomVariableInterface simmProductClass = helper.getVarianceCovarianceAggregation(contributions, getModality().getParameterSet().CrossRiskClassCorrelationMatrix);
-		return simmProductClass;
+		//TODO cross risk class aggregate
+		return marginByRiskClass.values().stream().reduce(new Scalar(0.0), RandomVariableInterface::add);
 	}
 
-	public RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		return getDeltaMargin(riskClass, productClass, evaluationTime, model).add(
-				getVegaMargin(riskClass, productClass, evaluationTime, model));
-	}
-
-	public RandomVariableInterface getDeltaMargin(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		return getDeltaScheme(riskClass, productClass, evaluationTime).getValue(evaluationTime, model);
-	}
-
-	private AbstractLIBORMonteCarloProduct getDeltaScheme(RiskClass riskClass, ProductClass productClass, double evaluationTime) { ;
-		if (riskClass == RiskClass.INTEREST_RATE) {
-			return new SIMMProductIRDelta(this.simmSensitivityProvider, productClass.name(), this.getModality().getParameterSet(), evaluationTime);
-		}
-
-		return new SimmProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.DELTA, modality, evaluationTime);
-	}
-
-	public RandomVariableInterface getVegaMargin(RiskClass riskClass, ProductClass productClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		SimmProductNonIRDeltaVega VegaScheme = new SimmProductNonIRDeltaVega(this.simmSensitivityProvider, riskClass, productClass, MarginType.VEGA, getModality(), evaluationTime);
-		return VegaScheme.getValue(evaluationTime, model);
-	}
-
-	public RandomVariableInterface getCurvatureMargin(RiskClass riskClass, ProductClass productClass, double atTime) {
-		throw new RuntimeException();
+	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, List<Map.Entry<Simm2Coordinate, RandomVariableInterface>> sensitivities) {
+		return sensitivities.stream().
+				collect(Collectors.groupingBy(e -> e.getKey().getRiskType())).entrySet().stream().
+				map(group -> {
+					switch (group.getKey()) {
+						case DELTA:
+							if (riskClass == RiskClass.INTEREST_RATE) {
+								return new Scalar(0.0); //TODO IR Delta
+							}
+							return nonIRDeltaAndVegaScheme.getValue(riskClass, sensitivities);
+						case VEGA:
+							return nonIRDeltaAndVegaScheme.getValue(riskClass, sensitivities);
+						default:
+							return new Scalar(0.0); //TODO Curvature/BaseCorr
+					}
+				}).
+				reduce(new Scalar(0.0), RandomVariableInterface::add);
 	}
 
 	public SimmModality getModality() {
