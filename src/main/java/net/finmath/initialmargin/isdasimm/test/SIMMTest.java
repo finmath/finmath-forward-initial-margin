@@ -468,7 +468,7 @@ public class SIMMTest {
 		/*
 		 * Create Brownian motions
 		 */
-		final BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */);
+		final BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */, new RandomVariableFactory(false));
 
 		// Create a volatility model: Piecewise constant volatility calibrated to Swaption Normal implied volatility of December 8, 2017
 		double[] volatility = new double[]{
@@ -551,7 +551,7 @@ public class SIMMTest {
 	public static AbstractRandomVariableFactory createRandomVariableFactoryAAD() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("isGradientRetainsLeafNodesOnly", new Boolean(false));
-		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(), properties);
+		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(false), properties);
 	}
 
 	public static RandomVariableInterface[] getRVAAD(double[] rates) {
