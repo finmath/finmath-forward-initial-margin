@@ -47,7 +47,7 @@ public class SimmNonIRDeltaAndVegaScheme {
 	 */
 	public BucketResult getBucketAggregation(String bucketName, Set<WeightedSensitivity> weightedSensitivities) {
 		RandomVariableInterface k = weightedSensitivities.stream().
-				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTerm(v, modality))).
+				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermNonIR(v, modality))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);

@@ -58,7 +58,7 @@ public class SIMMUnitTests {
 
 					SimmConstantTimeline provider = SimmConstantTimeline.fromDouble(simmSensitivityKeyDoubleMap);
 
-					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0), null, null);
+					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0));
 
 					RandomVariableInterface result = simmProduct.getValue(0.0, getDummySimulation());
 				} catch (Exception e) {

@@ -32,8 +32,7 @@ public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 		this.deltaTransformation = getDeltaTransformation();
 		this.vegaTransformation = getVegaTransformation();
 		this.initialMargins = IntStream.range(0, times.getNumberOfTimes())
-				.mapToObj(timeIndex -> new SimmProduct(times.getTime(timeIndex), sensitivityProvider, modality,
-						deltaTransformation, vegaTransformation))
+				.mapToObj(timeIndex -> new SimmProduct(times.getTime(timeIndex), sensitivityProvider, modality))
 				.collect(Collectors.toSet());
 	}
 

@@ -17,7 +17,7 @@ public class WeightedSensitivity {
 		this.weightedSensitivity = weightedSensitivity;
 	}
 
-	public RandomVariableInterface getCrossTerm(WeightedSensitivity v, SimmModality modality) {
+	public RandomVariableInterface getCrossTermNonIR(WeightedSensitivity v, SimmModality modality) {
 		return getWeightedSensitivity().
 			mult(v.getWeightedSensitivity()).
 			mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f

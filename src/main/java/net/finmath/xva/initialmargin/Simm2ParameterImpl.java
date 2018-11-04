@@ -87,6 +87,8 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 				return CREDIT_Q_CROSS_BUCKET_CORRELATIONS[i][j];
 			case CREDIT_NON_Q:
 				return 0.21;
+			case INTEREST_RATE:
+				return 1;
 			default:
 				throw new UnsupportedOperationException("Cannot calculate cross-bucket IR correlation yet.");
 		}
