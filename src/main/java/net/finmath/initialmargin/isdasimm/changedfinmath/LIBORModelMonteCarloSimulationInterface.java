@@ -11,8 +11,9 @@ import net.finmath.stochastic.RandomVariableInterface;
 import java.util.Map;
 
 /**
- * Basic interface which has to be implemented by Monte Carlo models for LIBOR processes.
+ * Extension of the original interface net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface
  *
+ * @author Mario Viehmann
  * @author Christian Fries
  * @version 1.0
  */

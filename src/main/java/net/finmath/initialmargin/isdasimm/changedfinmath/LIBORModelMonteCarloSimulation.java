@@ -7,10 +7,12 @@ package net.finmath.initialmargin.isdasimm.changedfinmath;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
+import net.finmath.montecarlo.interestrate.products.LIBORBond;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +28,7 @@ import java.util.Map;
 public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimulationInterface {
 
 	public LIBORModelMonteCarloSimulation(LIBORModelInterface model, AbstractProcessInterface process) {
-		// @TODO Cast can be removed with 3.2.15 of finmath-lib
-		super(model, (AbstractProcess) process);
+		super(model, process);
 	}
 
 	@Override
@@ -37,17 +38,40 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
-		return ((LIBORMarketModelInterface) getModel()).getNumeraireOISAdjustmentFactor(time);
+		/*
+		if (((LIBORMarketModel) getModel()).getNumeraireAdjustments().containsKey(time)) {
+			return ((LIBORMarketModel) getModel()).getNumeraireAdjustments().get(time);
+		}
+		*/
+
+		if(time == 0) return new Scalar(1.0);
+		return getForwardBondLibor(time, 0).mult(time).add(1.0).mult(getModel().getDiscountCurve().getDiscountFactor(time));
+
+		/*
+		// Get unadjusted Numeraire
+		RandomVariableInterface numeraireUnadjusted = ((LIBORMarketModel) getModel()).getNumerairetUnAdjusted(time);
+		RandomVariableInterface adjustment = getRandomVariableForConstant(numeraireUnadjusted.invert().getAverage()).div(getModel().getDiscountCurve().getDiscountFactor(time));
+
+		return adjustment;
+		*/
 	}
 
 	@Override
 	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException {
-		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
+		return (new LIBORBond(T)).getValue(t, this);
+//		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
 	}
 
 	@Override
 	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException {
-		return ((LIBORMarketModelInterface) getModel()).getForwardBondOIS(T, t);
+		return new Scalar(getModel().getDiscountCurve().getDiscountFactor(T) / getModel().getDiscountCurve().getDiscountFactor(t));
+		/*
+		// Get bondOIS = P^OIS(T;t) = P^L(T;t)*a_t/a_T
+		RandomVariableInterface adjustment_t = getNumeraireOISAdjustmentFactor(t);
+		RandomVariableInterface adjustment_T = getNumeraireOISAdjustmentFactor(T);
+
+		return getForwardBondLibor(T, t).mult(adjustment_t).div(adjustment_T);
+		*/
 	}
 
 	@Override
