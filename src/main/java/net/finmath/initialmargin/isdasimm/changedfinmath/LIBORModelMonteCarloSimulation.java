@@ -7,6 +7,7 @@ package net.finmath.initialmargin.isdasimm.changedfinmath;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
+import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
@@ -31,7 +32,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 	@Override
 	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() {
-		return ((LIBORMarketModelInterface) getModel()).getNumeraireAdjustmentMap();
+		return ((LIBORMarketModel) getModel()).getNumeraireAdjustments();
 	}
 
 	@Override

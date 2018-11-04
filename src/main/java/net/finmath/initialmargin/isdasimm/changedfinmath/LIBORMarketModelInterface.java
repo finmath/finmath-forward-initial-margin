@@ -9,8 +9,6 @@ public interface LIBORMarketModelInterface extends net.finmath.montecarlo.intere
 
 	// Added by Mario Viehmann
 
-	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
-
 	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
 
 	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
