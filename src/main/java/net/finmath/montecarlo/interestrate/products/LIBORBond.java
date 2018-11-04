@@ -9,6 +9,7 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
 
 /**
  * This class implements the valuation of a zero (forward) bond on the models forward rate curve.
@@ -42,7 +43,9 @@ public class LIBORBond extends AbstractLIBORMonteCarloProduct {
 	 */
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		return model.getLIBOR(evaluationTime, evaluationTime, maturity).mult(maturity - evaluationTime).add(1.0).pow(-1.0);
+		if(evaluationTime > maturity) return new Scalar(0);
+
+		return model.getLIBOR(evaluationTime, evaluationTime, maturity).mult(maturity - evaluationTime).add(1.0).invert();
 	}
 
 	/**
