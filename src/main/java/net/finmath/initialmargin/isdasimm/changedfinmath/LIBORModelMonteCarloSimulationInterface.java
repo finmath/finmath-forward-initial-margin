@@ -27,13 +27,6 @@ public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.mon
 	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
 
 	/**
-	 * Returns the map of <code> Double <code> (time) and <code> RandomVariableInterface <code> (numeraire cache)
-	 *
-	 * @return The numeraire cache (containing the numeraires adjusted to OIS curve)
-	 */
-	Map<Double, RandomVariableInterface> getNumeraireCache();
-
-	/**
 	 * Returns the numeraire adjustment
 	 *
 	 * @param time The time

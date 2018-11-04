@@ -788,11 +788,6 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 	}
 
 	@Override
-	public Map<Double, RandomVariableInterface> getNumeraireCache() {
-		return numeraireCacheReference != null ? numeraireCacheReference.get() : null;
-	}
-
-	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		if (numeraireAdjustmentCache.containsKey(time)) {
 			return numeraireAdjustmentCache.get(time);

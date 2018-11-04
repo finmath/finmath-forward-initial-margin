@@ -35,11 +35,6 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 	}
 
 	@Override
-	public Map<Double, RandomVariableInterface> getNumeraireCache() {
-		return ((LIBORMarketModelInterface) getModel()).getNumeraireCache();
-	}
-
-	@Override
 	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		return ((LIBORMarketModelInterface) getModel()).getNumeraireOISAdjustmentFactor(time);
 	}
