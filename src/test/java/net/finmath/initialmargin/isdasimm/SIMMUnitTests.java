@@ -1,8 +1,22 @@
 package net.finmath.initialmargin.isdasimm;
 
+import static java.lang.System.exit;
+
+import java.io.File;
+import java.io.FileReader;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
@@ -19,18 +33,6 @@ import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.initialmargin.SimmProduct;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMCRIFSensititivityProvider;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.FileReader;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.stream.Collectors;
-
-import static java.lang.System.exit;
 
 public class SIMMUnitTests {
 

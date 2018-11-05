@@ -53,10 +53,10 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	 * @param spreadPayLeg       The constant spread or fixed coupon rate of the payer leg.
 	 */
 	public Swap(AbstractNotional notional,
-				ScheduleInterface scheduleReceiveLeg,
-				AbstractIndex indexReceiveLeg, double spreadReceiveLeg,
-				ScheduleInterface schedulePayLeg, AbstractIndex indexPayLeg,
-				double spreadPayLeg) {
+			ScheduleInterface scheduleReceiveLeg,
+			AbstractIndex indexReceiveLeg, double spreadReceiveLeg,
+			ScheduleInterface schedulePayLeg, AbstractIndex indexPayLeg,
+			double spreadPayLeg) {
 		super();
 
 		legReceiver = new SwapLeg(scheduleReceiveLeg, notional, indexReceiveLeg, spreadReceiveLeg, false);

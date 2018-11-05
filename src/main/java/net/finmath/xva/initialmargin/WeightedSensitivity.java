@@ -19,10 +19,10 @@ public class WeightedSensitivity {
 
 	public RandomVariableInterface getCrossTerm(WeightedSensitivity v, SimmModality modality) {
 		return getWeightedSensitivity().
-			mult(v.getWeightedSensitivity()).
-			mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
-			div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())). //denominator f
-			mult(modality.getParams().getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho
+				mult(v.getWeightedSensitivity()).
+				mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
+				div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())). //denominator f
+				mult(modality.getParams().getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho
 	}
 
 	public RandomVariableInterface getConcentrationRiskFactor() {

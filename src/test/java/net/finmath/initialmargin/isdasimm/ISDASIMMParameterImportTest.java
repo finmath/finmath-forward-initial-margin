@@ -1,11 +1,13 @@
 package net.finmath.initialmargin.isdasimm;
 
-import com.google.gson.Gson;
-import net.finmath.xva.initialmargin.SIMMParameter;
-import org.junit.Test;
-
 import java.io.File;
 import java.util.Scanner;
+
+import org.junit.Test;
+
+import com.google.gson.Gson;
+
+import net.finmath.xva.initialmargin.SIMMParameter;
 
 public class ISDASIMMParameterImportTest {
 

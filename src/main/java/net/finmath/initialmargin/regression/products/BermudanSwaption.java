@@ -5,15 +5,15 @@
  */
 package net.finmath.initialmargin.regression.products;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.ConditionalExpectationEstimatorInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Implements the valuation of a cancelable swap under a <code>LIBORModelMonteCarloSimulationInterface</code>
@@ -124,7 +124,7 @@ public class BermudanSwaption extends AbstractLIBORMonteCarloRegressionProduct {
 	public ConditionalExpectationEstimatorInterface getConditionalExpectationEstimator(double fixingDate, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		MonteCarloConditionalExpectationRegression condExpEstimator = new MonteCarloConditionalExpectationRegression(
 				getRegressionBasisFunctions(fixingDate, model)
-		);
+				);
 		return condExpEstimator;
 	}
 
@@ -178,7 +178,7 @@ public class BermudanSwaption extends AbstractLIBORMonteCarloRegressionProduct {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-										 LIBORModelMonteCarloSimulationInterface model) {
+			LIBORModelMonteCarloSimulationInterface model) {
 		return new RandomVariable(0.0);
 	}
 }

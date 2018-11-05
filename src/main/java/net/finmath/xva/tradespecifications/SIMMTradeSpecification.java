@@ -1,12 +1,12 @@
 package net.finmath.xva.tradespecifications;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.Qualifier;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SIMMTradeSpecification {
 	private double notional;

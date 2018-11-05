@@ -27,7 +27,7 @@ public class SIMMProductFigures {
 	private RandomVariableInterface[] forwardIM = null;
 
 	public SIMMProductFigures(LIBORModelMonteCarloSimulationInterface model, AbstractSIMMProduct product, WeightMode weightMode, SensitivityMode sensitivityMode,
-							  double interpolationStep, boolean isUseAnalyticSensitivities, boolean isConsiderOISSensis, double timeStep, double finalTime) {
+			double interpolationStep, boolean isUseAnalyticSensitivities, boolean isConsiderOISSensis, double timeStep, double finalTime) {
 		this.model = model;
 		this.product = product;
 		this.weightMode = weightMode;

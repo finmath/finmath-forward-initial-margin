@@ -1,5 +1,10 @@
 package net.finmath.xva.initialmargin;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
@@ -9,11 +14,6 @@ import net.finmath.xva.coordinates.simm2.Qualifier;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 	final RiskClass riskClassKey = RiskClass.INTEREST_RATE;
@@ -137,7 +137,7 @@ public class SIMMProductIRDelta extends AbstractLIBORMonteCarloProduct {
 			RandomVariableInterface netSensi = netSensitivities[iIndex][iRateTenor];
 			return netSensi != null ?
 					netSensi.mult(riskWeight).mult(concentrationRiskFactor) :
-					new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
+						new RandomVariable(evaluationTime, model.getNumberOfPaths(), 0.0);
 		} else { /* Inflation or CCYBasis*/
 			riskWeight = parameterSet.MapRiskClassRiskweightMap.get(riskTypeKey).get(RiskClass.INTEREST_RATE).get(indexName)[0][0];
 

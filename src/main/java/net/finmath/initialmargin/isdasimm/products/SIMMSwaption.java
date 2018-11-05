@@ -1,5 +1,9 @@
 package net.finmath.initialmargin.isdasimm.products;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
@@ -10,10 +14,6 @@ import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProdu
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.Swaption;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 
 /**
  * This class describes a Swaption for SIMM initial margin (MVA) calculation.
@@ -68,7 +68,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	 * @param currency
 	 */
 	public SIMMSwaption(double exerciseDate, double[] fixingDates, double[] paymentDates, double[] swapRates, double notional,
-						DeliveryType deliveryType, String[] curveIndexNames, String currency) {
+			DeliveryType deliveryType, String[] curveIndexNames, String currency) {
 
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, true /*hasOptionality*/);
 
@@ -110,8 +110,8 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariableInterface[] getOISModelSensitivities(String riskClass,
-															  double evaluationTime,
-															  LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		double[] futureDiscountTimes = null; // the times of the times after evaluation time at which the numeraire has been used for this product
 		RandomVariableInterface[] dVdP = null;
@@ -217,7 +217,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
-																	LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) {
 			setSwapGradient();
 		}

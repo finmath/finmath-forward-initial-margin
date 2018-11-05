@@ -5,14 +5,14 @@
  */
 package net.finmath.initialmargin.regression.products;
 
+import java.util.Set;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.components.AbstractProductComponent;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Set;
 
 /**
  * Implements the pricing of a portfolio of AbstractLIBORMonteCarloProduct products
@@ -177,7 +177,7 @@ public class Portfolio extends AbstractProductComponent {
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
-											LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -1,9 +1,5 @@
 package net.finmath.xva.initialmargin;
 
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.stochastic.Scalar;
-import net.finmath.xva.coordinates.simm2.*;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -11,6 +7,14 @@ import java.util.function.Function;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
+import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.Qualifier;
+import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 public class SIMMHelper {
 	Set<Simm2Coordinate> coordinates;
@@ -52,7 +56,7 @@ public class SIMMHelper {
 	public static RandomVariableInterface doAgg(RandomVariableInterface[] contributions, ToDoubleBiFunction<Integer, Integer> correlator) {
 		return IntStream.range(0, contributions.length).
 				mapToObj(i -> IntStream.range(0, contributions.length).
-							mapToObj(j -> contributions[i].mult(contributions[j]).mult(correlator.applyAsDouble(i, j)))).
+						mapToObj(j -> contributions[i].mult(contributions[j]).mult(correlator.applyAsDouble(i, j)))).
 				flatMap(Function.identity()).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 	}

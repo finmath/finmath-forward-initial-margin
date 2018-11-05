@@ -1,21 +1,26 @@
 package net.finmath.xva.initialmargin;
 
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.stochastic.Scalar;
-import net.finmath.xva.coordinates.simm2.*;
-import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
+import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
+import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.Qualifier;
+import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.xva.sensitivityproviders.simmsensitivityproviders.SIMMSensitivityProviderInterface;
 
 public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 	private SimmModality modality;
@@ -28,9 +33,9 @@ public class SIMMProductNonIRDeltaVega extends AbstractLIBORMonteCarloProduct {
 	private Set<Simm2Coordinate> availableCoordinates;
 
 	public SIMMProductNonIRDeltaVega(SIMMSensitivityProviderInterface provider,
-									 RiskClass riskClass,
-									 ProductClass productClass,
-									 MarginType marginType, SimmModality modality, double atTime) {
+			RiskClass riskClass,
+			ProductClass productClass,
+			MarginType marginType, SimmModality modality, double atTime) {
 		this.modality = modality;
 		this.helper = null;//new SIMMHelper(provider.getTradeSpecs());
 		this.provider = provider;

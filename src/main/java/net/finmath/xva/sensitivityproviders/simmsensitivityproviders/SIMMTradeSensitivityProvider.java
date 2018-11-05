@@ -25,9 +25,9 @@ public class SIMMTradeSensitivityProvider implements SIMMSensitivityProviderInte
 	}
 
 	public RandomVariableInterface getSIMMSensitivity(Simm2Coordinate key, // null if riskClass is not IR
-													  double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-        /*
+		/*
         - Check remaining maturity
         - Look in Trade Spec whether
         - Ask Model Provider for Model Sensis
@@ -36,7 +36,7 @@ public class SIMMTradeSensitivityProvider implements SIMMSensitivityProviderInte
 
 
 
-         */
+		 */
 		return null;
 	}
 }

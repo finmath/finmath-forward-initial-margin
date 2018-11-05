@@ -5,16 +5,16 @@
  */
 package net.finmath.initialmargin.isdasimm.changedfinmath;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
+import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Implements convenient methods for a LIBOR market model,
@@ -41,7 +41,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 		if (((LIBORMarketModel) getModel()).getNumeraireAdjustments().containsKey(time)) {
 			return ((LIBORMarketModel) getModel()).getNumeraireAdjustments().get(time);
 		}
-		*/
+		 */
 
 		if(time == 0) return new Scalar(1.0);
 		return getForwardBondLibor(time, 0).mult(time).add(1.0).mult(getModel().getDiscountCurve().getDiscountFactor(time));
@@ -52,7 +52,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 		RandomVariableInterface adjustment = getRandomVariableForConstant(numeraireUnadjusted.invert().getAverage()).div(getModel().getDiscountCurve().getDiscountFactor(time));
 
 		return adjustment;
-		*/
+		 */
 	}
 
 	@Override
@@ -60,8 +60,8 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 		if(t > T) return new Scalar(0);
 
 		return this.getLIBOR(t, t, T).mult(T - t).add(1.0).invert();
-//		return (new LIBORBond(T)).getValue(t, this);
-//		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
+		//		return (new LIBORBond(T)).getValue(t, this);
+		//		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 		RandomVariableInterface adjustment_T = getNumeraireOISAdjustmentFactor(T);
 
 		return getForwardBondLibor(T, t).mult(adjustment_t).div(adjustment_T);
-		*/
+		 */
 	}
 
 	@Override

@@ -56,11 +56,11 @@ public class SensitivityApproximationTest {
 
 	static final DecimalFormat formatterTime = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
-		formatterTime.applyPattern("0");	
+		formatterTime.applyPattern("0");
 	}
 	static final DecimalFormat formatterReal2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
-		formatterReal2.applyPattern("0.00");	
+		formatterReal2.applyPattern("0.00");
 	}
 
 	// Model Paths
@@ -246,7 +246,7 @@ public class SensitivityApproximationTest {
 						"\t" + formatterReal2.format(mvaExact*100) +
 						"\t" + formatterReal2.format((mvaMelting - mvaExact)*100) +
 						"\t" + formatterReal2.format((mvaInterpolation - mvaExact)*100) +
-						"\t" + formatterReal2.format(mvaExactConstantWeights*100) + 
+						"\t" + formatterReal2.format(mvaExactConstantWeights*100) +
 						"\t" + formatterReal2.format(mvaApproximation*100)
 						);
 

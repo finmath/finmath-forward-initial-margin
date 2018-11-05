@@ -1,11 +1,11 @@
 package net.finmath.initialmargin.isdasimm.products;
 
+import java.util.Map;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Map;
 
 /**
  * The interface to be implemented by all products whose initial margin (MVA) we are interested in, i.e. all classes
@@ -42,11 +42,11 @@ public interface SIMMProductInterface {
 	 * @throws SolverException
 	 */
 	RandomVariableInterface getSensitivity(String productClass,
-										   String riskClass,
-										   String maturityBucket, // only for IR and Credit risk class, null otherwise
-										   String curveIndexName, // null if riskClass not IR
-										   String bucketKey,      // currency for IR otherwise bucket nr.
-										   String riskType, double evaluationTime) throws SolverException, CloneNotSupportedException, CalculationException;
+			String riskClass,
+			String maturityBucket, // only for IR and Credit risk class, null otherwise
+			String curveIndexName, // null if riskClass not IR
+			String bucketKey,      // currency for IR otherwise bucket nr.
+			String riskType, double evaluationTime) throws SolverException, CloneNotSupportedException, CalculationException;
 
 	/**
 	 * Calculate the delta sensitivities of the product w.r.t. the forward curve, i.e. dV/dL.

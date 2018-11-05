@@ -6,17 +6,21 @@
 
 package net.finmath.initialmargin.regression.products;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.regression.products.components.*;
+import net.finmath.initialmargin.regression.products.components.AbstractNotional;
+import net.finmath.initialmargin.regression.products.components.AbstractProductComponent;
+import net.finmath.initialmargin.regression.products.components.AccruingNotional;
+import net.finmath.initialmargin.regression.products.components.Period;
+import net.finmath.initialmargin.regression.products.components.ProductCollection;
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.initialmargin.regression.products.indices.FixedCoupon;
 import net.finmath.initialmargin.regression.products.indices.LinearCombinationIndex;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleInterface;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * @author Christian Fries

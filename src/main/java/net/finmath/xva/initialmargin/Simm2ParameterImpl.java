@@ -1,11 +1,11 @@
 package net.finmath.xva.initialmargin;
 
-import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 public final class Simm2ParameterImpl implements Simm2Parameter {
 	private static final String RESIDUAL_BUCKET = "Residual";
@@ -77,134 +77,134 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 		int j = Integer.parseInt(right);
 
 		switch (rc) {
-			case FX:
-				return 1.0;
-			case EQUITY:
-				return EQUITY_CROSS_BUCKET_CORRELATIONS[i][j];
-			case COMMODITY:
-				return COMMODITY_CROSS_BUCKET_CORRELATIONS[i][j];
-			case CREDIT_Q:
-				return CREDIT_Q_CROSS_BUCKET_CORRELATIONS[i][j];
-			case CREDIT_NON_Q:
-				return 0.21;
-			default:
-				throw new UnsupportedOperationException("Cannot calculate cross-bucket IR correlation yet.");
+		case FX:
+			return 1.0;
+		case EQUITY:
+			return EQUITY_CROSS_BUCKET_CORRELATIONS[i][j];
+		case COMMODITY:
+			return COMMODITY_CROSS_BUCKET_CORRELATIONS[i][j];
+		case CREDIT_Q:
+			return CREDIT_Q_CROSS_BUCKET_CORRELATIONS[i][j];
+		case CREDIT_NON_Q:
+			return 0.21;
+		default:
+			throw new UnsupportedOperationException("Cannot calculate cross-bucket IR correlation yet.");
 		}
 	}
 
 	@Override
 	public double getConcentrationThreshold(Simm2Coordinate sensitivity) {
 		switch (sensitivity.getRiskType()) {
-			case DELTA:
-				return getDeltaConcentrationThreshold(sensitivity);
-			case VEGA:
-				return getVegaConcentrationThreshold(sensitivity);
-			default:
-				throw new UnsupportedOperationException("Non-delta CR cannot be calculated yet");
+		case DELTA:
+			return getDeltaConcentrationThreshold(sensitivity);
+		case VEGA:
+			return getVegaConcentrationThreshold(sensitivity);
+		default:
+			throw new UnsupportedOperationException("Non-delta CR cannot be calculated yet");
 		}
 	}
 
 	private double getVegaConcentrationThreshold(Simm2Coordinate coordinate) {
 		switch (coordinate.getRiskClass()) {
-			case COMMODITY:
-				return getBucketwiseValue(coordinate, COMMODITY_VEGA_THRESHOLDS);
-			case CREDIT_NON_Q:
-				return 65E6;
-			case CREDIT_Q:
-				return 290E6;
-			case EQUITY:
-				return getBucketwiseValue(coordinate, EQUITY_VEGA_THRESHOLDS);
-			default:
-				throw new UnsupportedOperationException("Vega concentration threshold for IR/FX not available yet");
+		case COMMODITY:
+			return getBucketwiseValue(coordinate, COMMODITY_VEGA_THRESHOLDS);
+		case CREDIT_NON_Q:
+			return 65E6;
+		case CREDIT_Q:
+			return 290E6;
+		case EQUITY:
+			return getBucketwiseValue(coordinate, EQUITY_VEGA_THRESHOLDS);
+		default:
+			throw new UnsupportedOperationException("Vega concentration threshold for IR/FX not available yet");
 
 		}
 	}
 
 	private double getDeltaConcentrationThreshold(Simm2Coordinate coordinate) {
 		switch (coordinate.getRiskClass()) {
-			case FX:
-				if (FX_CATEGORY_1.contains(coordinate.getQualifier().getCurrency())) {
-					return 8400E6;
-				}
-				if (FX_CATEGORY_2.contains(coordinate.getQualifier().getCurrency())) {
-					return 1900E6;
-				}
-				return 560E6;
-			case EQUITY:
-				return getBucketwiseValue(coordinate, EQUITY_DELTA_THRESHOLDS);
-			case COMMODITY:
-				return getBucketwiseValue(coordinate, COMMODITY_DELTA_THRESHOLDS);
-			case CREDIT_Q:
-				return getBucketwiseValue(coordinate, CREDIT_Q_DELTA_THRESHOLDS);
-			case CREDIT_NON_Q:
-				return getBucketwiseValue(coordinate, CREDIT_NON_Q_DELTA_THRESHOLDS);
-			default:
-				throw new UnsupportedOperationException("Delta concentration threshold for IR not available yet.");
+		case FX:
+			if (FX_CATEGORY_1.contains(coordinate.getQualifier().getCurrency())) {
+				return 8400E6;
+			}
+			if (FX_CATEGORY_2.contains(coordinate.getQualifier().getCurrency())) {
+				return 1900E6;
+			}
+			return 560E6;
+		case EQUITY:
+			return getBucketwiseValue(coordinate, EQUITY_DELTA_THRESHOLDS);
+		case COMMODITY:
+			return getBucketwiseValue(coordinate, COMMODITY_DELTA_THRESHOLDS);
+		case CREDIT_Q:
+			return getBucketwiseValue(coordinate, CREDIT_Q_DELTA_THRESHOLDS);
+		case CREDIT_NON_Q:
+			return getBucketwiseValue(coordinate, CREDIT_NON_Q_DELTA_THRESHOLDS);
+		default:
+			throw new UnsupportedOperationException("Delta concentration threshold for IR not available yet.");
 		}
 	}
 
 	@Override
 	public double getIntraBucketCorrelation(Simm2Coordinate left, Simm2Coordinate right) {
 		switch (left.getRiskClass()) {
-			case FX:
+		case FX:
+			return 0.5;
+		case EQUITY:
+			return getBucketwiseValue(left, EQUITY_INTRA_BUCKET_CORRELATIONS);
+		case COMMODITY:
+			return getBucketwiseValue(left, COMMODITY_INTRA_BUCKET_CORRELATIONS);
+		case CREDIT_Q:
+		case CREDIT_NON_Q:
+			if (left.getBucketKey().equalsIgnoreCase(RESIDUAL_BUCKET)) {
 				return 0.5;
-			case EQUITY:
-				return getBucketwiseValue(left, EQUITY_INTRA_BUCKET_CORRELATIONS);
-			case COMMODITY:
-				return getBucketwiseValue(left, COMMODITY_INTRA_BUCKET_CORRELATIONS);
-			case CREDIT_Q:
-			case CREDIT_NON_Q:
-				if (left.getBucketKey().equalsIgnoreCase(RESIDUAL_BUCKET)) {
-					return 0.5;
-				}
-				throw new UnsupportedOperationException("Cannot retrieve credit intra-bucket correlation yet.");
-			default:
-				throw new UnsupportedOperationException("Cannot retrieve IR intra-bucket correlation yet.");
+			}
+			throw new UnsupportedOperationException("Cannot retrieve credit intra-bucket correlation yet.");
+		default:
+			throw new UnsupportedOperationException("Cannot retrieve IR intra-bucket correlation yet.");
 		}
 	}
 
 	@Override
 	public double getRiskWeight(Simm2Coordinate sensitivity) {
 		switch (sensitivity.getRiskType()) {
-			case DELTA:
-				return getDeltaRiskWeight(sensitivity);
-			default:
-				throw new UnsupportedOperationException("Risk weight for non-delta not implemented yet.");
+		case DELTA:
+			return getDeltaRiskWeight(sensitivity);
+		default:
+			throw new UnsupportedOperationException("Risk weight for non-delta not implemented yet.");
 		}
 	}
 
 	@Override
 	public double getHistoricalVolatilityRatio(Simm2Coordinate c) {
 		switch (c.getRiskClass()) {
-			case FX:
-				return 0.6;
-			case EQUITY:
-				return 0.65;
-			case CREDIT_Q:
-			case CREDIT_NON_Q:
-			case INTEREST_RATE:
-				return 1.0; //B.10 (c) -- p.5, first line
-			case COMMODITY:
-				return 0.8;
-			default:
-				throw new IllegalArgumentException("Unknown risk class.");
+		case FX:
+			return 0.6;
+		case EQUITY:
+			return 0.65;
+		case CREDIT_Q:
+		case CREDIT_NON_Q:
+		case INTEREST_RATE:
+			return 1.0; //B.10 (c) -- p.5, first line
+		case COMMODITY:
+			return 0.8;
+		default:
+			throw new IllegalArgumentException("Unknown risk class.");
 		}
 	}
 
 	private double getDeltaRiskWeight(Simm2Coordinate sensitivity) {
 		switch (sensitivity.getRiskClass()) {
-			case FX:
-				return 8.2;
-			case EQUITY:
-				return getBucketwiseValue(sensitivity, EQUITY_DELTA_RISK_WEIGHTS);
-			case COMMODITY:
-				return getBucketwiseValue(sensitivity, COMMODITY_DELTA_RISK_WEIGHTS);
-			case CREDIT_Q:
-				return getBucketwiseValue(sensitivity, CREDIT_Q_DELTA_RISK_WEIGHTS);
-			case CREDIT_NON_Q:
-				return getBucketwiseValue(sensitivity, CREDIT_NON_Q_DELTA_RISK_WEIGHTS);
-			default:
-				throw new UnsupportedOperationException("IR delta risk weight not supported yet.");
+		case FX:
+			return 8.2;
+		case EQUITY:
+			return getBucketwiseValue(sensitivity, EQUITY_DELTA_RISK_WEIGHTS);
+		case COMMODITY:
+			return getBucketwiseValue(sensitivity, COMMODITY_DELTA_RISK_WEIGHTS);
+		case CREDIT_Q:
+			return getBucketwiseValue(sensitivity, CREDIT_Q_DELTA_RISK_WEIGHTS);
+		case CREDIT_NON_Q:
+			return getBucketwiseValue(sensitivity, CREDIT_NON_Q_DELTA_RISK_WEIGHTS);
+		default:
+			throw new UnsupportedOperationException("IR delta risk weight not supported yet.");
 		}
 	}
 

@@ -1,13 +1,14 @@
 package net.finmath.xva.initialmargin;
 
-import com.google.gson.Gson;
-import net.finmath.xva.coordinates.simm2.ProductClass;
-import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Vertex;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import com.google.gson.Gson;
+
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Vertex;
 
 public class SIMMParameter {
 	public SIMMParameter() {

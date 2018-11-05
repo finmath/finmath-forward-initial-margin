@@ -36,16 +36,16 @@ public enum ProductClass {
 
 	public static ProductClass parseCrifProductClass(String classString) {
 		switch (classString.toLowerCase()) {
-			case "ratesfx":
-				return RATES_FX;
-			case "credit":
-				return CREDIT;
-			case "equity":
-				return EQUITY;
-			case "commodity":
-				return COMMODITY;
-			default:
-				throw new IllegalArgumentException(String.format("Unknown CRIF product class name %1$s", classString));
+		case "ratesfx":
+			return RATES_FX;
+		case "credit":
+			return CREDIT;
+		case "equity":
+			return EQUITY;
+		case "commodity":
+			return COMMODITY;
+		default:
+			throw new IllegalArgumentException(String.format("Unknown CRIF product class name %1$s", classString));
 		}
 	}
 }

@@ -1,7 +1,12 @@
 package net.finmath.xva.beans;
 
 import com.google.gson.annotations.SerializedName;
-import net.finmath.xva.coordinates.simm2.*;
+
+import net.finmath.xva.coordinates.simm2.MarginType;
+import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.RiskClass;
+import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.xva.coordinates.simm2.Vertex;
 
 /**
  * Contains a row from a CRIF file, i. e. a sensitivity

@@ -1,5 +1,16 @@
 package net.finmath.initialmargin.isdasimm.products;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
@@ -14,10 +25,6 @@ import net.finmath.stochastic.ConditionalExpectationEstimatorInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class contains the functions and methods which are shared by all products to be considered for
@@ -75,14 +82,14 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * from this map. This map may - in contrast to the second map "exactDeltaCache" - contain interpolated sensitivities.
 	 */
 	private HashMap<String/*RiskClass*/, List<HashMap<String/*curveIndexName*/,
-			HashMap<String/*maturityBucket*/, RandomVariableInterface>>>> deltaAtTime = new HashMap<String, List<HashMap<String, HashMap<String, RandomVariableInterface>>>>(); // currently only for INTEREST_RATE riskClass
+	HashMap<String/*maturityBucket*/, RandomVariableInterface>>>> deltaAtTime = new HashMap<String, List<HashMap<String, HashMap<String, RandomVariableInterface>>>>(); // currently only for INTEREST_RATE riskClass
 
 	/**
 	 * The cache for the exact delta sensitivities as given by AAD (or analytic). Unlike the map
 	 * "deltaAtTime", this map is not cleared if evaluationTime differs from lastEvaluationTime
 	 */
 	private HashMap<Double /*time*/, List<HashMap<String/*RiskClass*/, List<HashMap<String/*curveIndexName*/,
-			RandomVariableInterface[]>>>>> exactDeltaCache = new HashMap<Double /*time*/, List<HashMap<String/*RiskClass*/, List<HashMap<String/*curveIndexName*/, RandomVariableInterface[]>>>>>();
+	RandomVariableInterface[]>>>>> exactDeltaCache = new HashMap<Double /*time*/, List<HashMap<String/*RiskClass*/, List<HashMap<String/*curveIndexName*/, RandomVariableInterface[]>>>>>();
 
 	//private RandomVariableInterface vegaSensitivity=null;
 
@@ -104,11 +111,11 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @param hasOptionality  True if this product is not linear
 	 */
 	public AbstractSIMMProduct(String productClass,
-							   String[] riskClass,     // One product may contribute to several risk classes
-							   String[] curveIndexNames,
-							   String currency,
-							   String bucketKey,
-							   boolean hasOptionality) {
+			String[] riskClass,     // One product may contribute to several risk classes
+			String[] curveIndexNames,
+			String currency,
+			String bucketKey,
+			boolean hasOptionality) {
 
 		this.productClass = productClass;
 		this.riskClass = riskClass;
@@ -124,13 +131,13 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 
 	public RandomVariableInterface getInitialMargin(double evaluationTime,
-													LIBORModelMonteCarloSimulationInterface model,
-													String calculationCCY,
-													SensitivityMode sensitivityMode,
-													WeightMode liborWeightMode,
-													double interpolationStep,
-													boolean isUseAnalyticSwapSensis,
-													boolean isConsiderOISSensitivities) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model,
+			String calculationCCY,
+			SensitivityMode sensitivityMode,
+			WeightMode liborWeightMode,
+			double interpolationStep,
+			boolean isUseAnalyticSwapSensis,
+			boolean isConsiderOISSensitivities) throws CalculationException {
 
 		if (evaluationTime >= getFinalMaturity()) {
 			return new RandomVariable(0.0);
@@ -152,8 +159,8 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	// for risk weight calibration only. Not used in the thesis.
 	public RandomVariableInterface getInitialMargin(double evaluationTime,
-													LIBORModelMonteCarloSimulationInterface model,
-													CalculationSchemeInitialMarginISDA simmScheme) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model,
+			CalculationSchemeInitialMarginISDA simmScheme) throws CalculationException {
 
 		if (evaluationTime >= getFinalMaturity()) {
 			return new RandomVariable(0.0);
@@ -171,11 +178,11 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	@Override
 	public RandomVariableInterface getSensitivity(String productClass,
-												  String riskClass,
-												  String maturityBucket, // only for IR and CREDIT risk class, null otherwise
-												  String curveIndexName, // null if riskClass is not IR
-												  String bucketKey,      // currency for IR otherwise bucket number
-												  String riskType, double evaluationTime) throws SolverException, CloneNotSupportedException, CalculationException {
+			String riskClass,
+			String maturityBucket, // only for IR and CREDIT risk class, null otherwise
+			String curveIndexName, // null if riskClass is not IR
+			String bucketKey,      // currency for IR otherwise bucket number
+			String riskType, double evaluationTime) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		RandomVariableInterface result = null;
 		RandomVariableInterface[] maturityBucketSensis; // Sensitivities mapped on the SIMM Buckets
@@ -191,65 +198,65 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		if (productClass == this.productClass && Arrays.asList(this.riskClass).contains(riskClass)) {
 
 			switch (riskType) {
-				case ("delta"):
-					switch (riskClass) {
-						case ("INTEREST_RATE"):
+			case ("delta"):
+				switch (riskClass) {
+				case ("INTEREST_RATE"):
 
-							if (Arrays.asList(curveIndexNames).contains(curveIndexName) && bucketKey == this.currency) {
-								// There exists a sensitivity. Check if the sensitivities (on all maturityBuckets) have already been calculated for given riskClass and riskType)
+					if (Arrays.asList(curveIndexNames).contains(curveIndexName) && bucketKey == this.currency) {
+						// There exists a sensitivity. Check if the sensitivities (on all maturityBuckets) have already been calculated for given riskClass and riskType)
 
-								if (!deltaAtTime.containsKey(riskClass) || !deltaAtTime.get(riskClass).stream().filter(n -> n.containsKey(curveIndexName)).findAny().isPresent()) {
+						if (!deltaAtTime.containsKey(riskClass) || !deltaAtTime.get(riskClass).stream().filter(n -> n.containsKey(curveIndexName)).findAny().isPresent()) {
 
-									// The sensitivities need to be calculated for the given riskClass and riskType
-									maturityBucketSensis = sensitivityCalculationScheme.getDeltaSensitivities(this, riskClass, curveIndexName, evaluationTime, modelCache);
+							// The sensitivities need to be calculated for the given riskClass and riskType
+							maturityBucketSensis = sensitivityCalculationScheme.getDeltaSensitivities(this, riskClass, curveIndexName, evaluationTime, modelCache);
 
-									if (isPrintSensis && curveIndexName == "Libor6m") {
-										System.out.println(evaluationTime + "\t" + maturityBucketSensis[3].getAverage() + "\t" + maturityBucketSensis[4].getAverage() + "\t" + maturityBucketSensis[5].getAverage() + "\t" + maturityBucketSensis[6].getAverage() + "\t" + maturityBucketSensis[7].getAverage() + "\t" + maturityBucketSensis[8].getAverage() + "\t" + maturityBucketSensis[9].getAverage() + "\t" + maturityBucketSensis[10].getAverage() + "\t" + maturityBucketSensis[11].getAverage());
-									}
-									// Create a new element of the curveIndex List for given risk class
-									HashMap<String, HashMap<String, RandomVariableInterface>> curveIndexNameexactDeltaCache = new HashMap<String, HashMap<String, RandomVariableInterface>>();
-									HashMap<String, RandomVariableInterface> bucketSensitivities = new HashMap<String, RandomVariableInterface>();
-
-									for (int i = 0; i < IRMaturityBuckets.length; i++) {
-										bucketSensitivities.put(IRMaturityBuckets[i], maturityBucketSensis[i]);
-									}
-									curveIndexNameexactDeltaCache.put(curveIndexName, bucketSensitivities);
-
-									// Check if list already exist
-									if (deltaAtTime.containsKey(riskClass)) {
-										deltaAtTime.get(riskClass).add(curveIndexNameexactDeltaCache);
-									} else {
-										List<HashMap<String/*curveIndexName*/, HashMap<String/*maturityBucket*/, RandomVariableInterface>>> list = new ArrayList<HashMap<String/*curveIndexName*/, HashMap<String/*maturityBucket*/, RandomVariableInterface>>>();
-										list.add(curveIndexNameexactDeltaCache);
-										deltaAtTime.put(riskClass, list);
-									}
-								}
-								result = deltaAtTime.get(riskClass).stream().filter(n -> n.containsKey(curveIndexName)).findFirst().get().get(curveIndexName).get(maturityBucket);
-							} else {
-								result = new RandomVariable(0.0); // There exists no delta Sensi for risk Class INTEREST_RATE
+							if (isPrintSensis && curveIndexName == "Libor6m") {
+								System.out.println(evaluationTime + "\t" + maturityBucketSensis[3].getAverage() + "\t" + maturityBucketSensis[4].getAverage() + "\t" + maturityBucketSensis[5].getAverage() + "\t" + maturityBucketSensis[6].getAverage() + "\t" + maturityBucketSensis[7].getAverage() + "\t" + maturityBucketSensis[8].getAverage() + "\t" + maturityBucketSensis[9].getAverage() + "\t" + maturityBucketSensis[10].getAverage() + "\t" + maturityBucketSensis[11].getAverage());
 							}
-							break;
-						// @Todo Add sensitivity calculation for the subsequent cases
-						case ("CREDIT_Q"):
-						case ("CREDIT_NON_Q"):
-						case ("FX"):
-						case ("COMMODITY"):
-						case ("EQUITY"):
-							result = null;
+							// Create a new element of the curveIndex List for given risk class
+							HashMap<String, HashMap<String, RandomVariableInterface>> curveIndexNameexactDeltaCache = new HashMap<String, HashMap<String, RandomVariableInterface>>();
+							HashMap<String, RandomVariableInterface> bucketSensitivities = new HashMap<String, RandomVariableInterface>();
+
+							for (int i = 0; i < IRMaturityBuckets.length; i++) {
+								bucketSensitivities.put(IRMaturityBuckets[i], maturityBucketSensis[i]);
+							}
+							curveIndexNameexactDeltaCache.put(curveIndexName, bucketSensitivities);
+
+							// Check if list already exist
+							if (deltaAtTime.containsKey(riskClass)) {
+								deltaAtTime.get(riskClass).add(curveIndexNameexactDeltaCache);
+							} else {
+								List<HashMap<String/*curveIndexName*/, HashMap<String/*maturityBucket*/, RandomVariableInterface>>> list = new ArrayList<HashMap<String/*curveIndexName*/, HashMap<String/*maturityBucket*/, RandomVariableInterface>>>();
+								list.add(curveIndexNameexactDeltaCache);
+								deltaAtTime.put(riskClass, list);
+							}
+						}
+						result = deltaAtTime.get(riskClass).stream().filter(n -> n.containsKey(curveIndexName)).findFirst().get().get(curveIndexName).get(maturityBucket);
+					} else {
+						result = new RandomVariable(0.0); // There exists no delta Sensi for risk Class INTEREST_RATE
 					}
-					break;
+				break;
 				// @Todo Add sensitivity calculation for the subsequent cases
-				case ("vega"):
-				case ("curvature"):
-					switch (riskClass) {
-						case ("INTEREST_RATE"): //if(vegaSensitivity!=null) vegaSensitivity = getVegaSensitivityIR(curveIndexNames, product, evaluationTime, model);
-						case ("CREDIT_Q"):
-						case ("CREDIT_NON_Q"):
-						case ("FX"):
-						case ("COMMODITY"):
-						case ("EQUITY"):
-							result = null;
-					}
+				case ("CREDIT_Q"):
+				case ("CREDIT_NON_Q"):
+				case ("FX"):
+				case ("COMMODITY"):
+				case ("EQUITY"):
+					result = null;
+				}
+			break;
+			// @Todo Add sensitivity calculation for the subsequent cases
+			case ("vega"):
+			case ("curvature"):
+				switch (riskClass) {
+				case ("INTEREST_RATE"): //if(vegaSensitivity!=null) vegaSensitivity = getVegaSensitivityIR(curveIndexNames, product, evaluationTime, model);
+				case ("CREDIT_Q"):
+				case ("CREDIT_NON_Q"):
+				case ("FX"):
+				case ("COMMODITY"):
+				case ("EQUITY"):
+					result = null;
+				}
 			}
 		}
 
@@ -300,7 +307,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @throws CalculationException
 	 */
 	private void setExactDeltaCache(String riskClass, String curveIndexName,
-									double time, LIBORModelMonteCarloSimulationInterface model, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException {
+			double time, LIBORModelMonteCarloSimulationInterface model, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		// Calculate the sensitivities
 		RandomVariableInterface[] deltaSensis = null;
@@ -403,7 +410,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @throws CalculationException
 	 */
 	protected RandomVariableInterface[] getOISModelSensitivities(double evaluationTime, double[] discountTimes,
-																 RandomVariableInterface[] dVdP, String riskClass, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			RandomVariableInterface[] dVdP, String riskClass, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (dVdP == null || discountTimes == null) { //i.e. need to calculate it with AAD
 
@@ -537,7 +544,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 
 	public HashMap<Double /*time*/, List<HashMap<String/*RiskClass*/, List<HashMap<String/*curveIndexName*/,
-			RandomVariableInterface[]>>>>> getExactDeltaCache() {
+	RandomVariableInterface[]>>>>> getExactDeltaCache() {
 		return this.exactDeltaCache;
 	}
 

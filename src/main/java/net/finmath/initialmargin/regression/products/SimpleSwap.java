@@ -5,12 +5,12 @@
  */
 package net.finmath.initialmargin.regression.products;
 
+import java.util.Arrays;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Arrays;
 
 /**
  * Implements the valuation of a swap under a LIBORModelMonteCarloSimulationInterface
@@ -118,7 +118,7 @@ public class SimpleSwap extends AbstractLIBORMonteCarloRegressionProduct {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-										 LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// find paymentDate in interval [initialTime, finalTime]
 		RandomVariableInterface CF = new RandomVariable(0.0);
 		for (int period = 0; period < paymentDates.length; period++) {

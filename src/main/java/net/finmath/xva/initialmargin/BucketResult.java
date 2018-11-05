@@ -1,9 +1,9 @@
 package net.finmath.xva.initialmargin;
 
+import java.util.Set;
+
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-
-import java.util.Set;
 
 /**
  * Holds the result of a per-bucket aggregation together with the constituents' weighted sensitivities.

@@ -1,15 +1,15 @@
 package net.finmath.xva.coordinates.lmm;
 
-import org.junit.Test;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.Test;
 
 public class SwapRateBuilderTest {
 

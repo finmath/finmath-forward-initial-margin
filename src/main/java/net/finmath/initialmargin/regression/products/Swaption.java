@@ -5,6 +5,8 @@
  */
 package net.finmath.initialmargin.regression.products;
 
+import java.util.Arrays;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.functions.AnalyticFormulas;
 import net.finmath.marketdata.model.AnalyticModelInterface;
@@ -18,8 +20,6 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
-
-import java.util.Arrays;
 
 /**
  * Implements the valuation of a swaption under a LIBORModelMonteCarloSimulationInterface

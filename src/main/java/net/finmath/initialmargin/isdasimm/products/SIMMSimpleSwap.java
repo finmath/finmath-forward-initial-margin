@@ -1,5 +1,8 @@
 package net.finmath.initialmargin.isdasimm.products;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
@@ -9,9 +12,6 @@ import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProdu
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * This class describes a Swap for SIMM initial margin (MVA) calculation.
@@ -49,11 +49,11 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	 * @param currency
 	 */
 	public SIMMSimpleSwap(double[] fixingDates,
-						  double[] paymentDates,
-						  double[] swapRates,
-						  boolean isPayFix,
-						  double notional,
-						  String[] curveIndexNames, String currency) {
+			double[] paymentDates,
+			double[] swapRates,
+			boolean isPayFix,
+			double notional,
+			String[] curveIndexNames, String currency) {
 		super(productClass, riskClass, curveIndexNames, currency, null /*bucketKey*/, false /*hasOptionality*/);
 		this.swap = new SimpleSwap(fixingDates, paymentDates, swapRates, isPayFix, notional);
 	}
@@ -71,12 +71,12 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	 * @throws CalculationException
 	 */
 	public static RandomVariableInterface[] getAnalyticSensitivities(double evaluationTime,
-																	 double[] fixingDates,
-																	 double[] swapRates, /* Only relevant for OIS derivative*/
-																	 double periodLength,
-																	 double[] notional,
-																	 LIBORModelMonteCarloSimulationInterface model,
-																	 String withRespectTo) throws CalculationException {
+			double[] fixingDates,
+			double[] swapRates, /* Only relevant for OIS derivative*/
+			double periodLength,
+			double[] notional,
+			LIBORModelMonteCarloSimulationInterface model,
+			String withRespectTo) throws CalculationException {
 
 		/*
 		 * Check notionals
@@ -98,60 +98,60 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 
 		switch (withRespectTo) {
 
-			case ("Libor"):
+		case ("Libor"):
 
-				int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
-				int numberOfRemainingLibors = model.getNumberOfLibors() - nextLiborIndex;
+			int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
+		int numberOfRemainingLibors = model.getNumberOfLibors() - nextLiborIndex;
 
-				int numberOfSensis = evaluationTime == model.getLiborPeriodDiscretization().getTime(nextLiborIndex) ? numberOfRemainingLibors : numberOfRemainingLibors + 1;
-				sensis = new RandomVariableInterface[numberOfSensis];
-				Arrays.fill(sensis, new RandomVariable(0.0));
+		int numberOfSensis = evaluationTime == model.getLiborPeriodDiscretization().getTime(nextLiborIndex) ? numberOfRemainingLibors : numberOfRemainingLibors + 1;
+		sensis = new RandomVariableInterface[numberOfSensis];
+		Arrays.fill(sensis, new RandomVariable(0.0));
 
-				// return zero if evaluationTime > last payment date
-				if (evaluationTime >= fixingDates[fixingDates.length - 1] + periodLength) {
-					return sensis;
-				}
+		// return zero if evaluationTime > last payment date
+		if (evaluationTime >= fixingDates[fixingDates.length - 1] + periodLength) {
+			return sensis;
+		}
 
-				// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
-				for (int liborIndex = currentLiborIndex; liborIndex < numberOfSensis + currentLiborIndex; liborIndex++) {
-					int i = liborIndex < firstLiborIndex ? 0 : liborIndex - firstLiborIndex + 1;
-					if (!(i > fixingDates.length - periodIndex || i == 0)) {
-						double paymentTime = fixingDates[periodIndex + i - 1] + periodLength;
-						sensis[liborIndex - currentLiborIndex] = model.getForwardBondOIS(paymentTime, evaluationTime).mult(periodLength);
-					}
-				}
-				break;
+		// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
+		for (int liborIndex = currentLiborIndex; liborIndex < numberOfSensis + currentLiborIndex; liborIndex++) {
+			int i = liborIndex < firstLiborIndex ? 0 : liborIndex - firstLiborIndex + 1;
+			if (!(i > fixingDates.length - periodIndex || i == 0)) {
+				double paymentTime = fixingDates[periodIndex + i - 1] + periodLength;
+				sensis[liborIndex - currentLiborIndex] = model.getForwardBondOIS(paymentTime, evaluationTime).mult(periodLength);
+			}
+		}
+		break;
 
-			case ("OIS"):
+		case ("OIS"):
 
-				// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
-				numberOfSensis = fixingDates.length - periodIndex;
+			// Actual sensitivity calculation: dV/dL = P(T,t)*periodLength
+			numberOfSensis = fixingDates.length - periodIndex;
 
-				// return zero if evaluationTime > last payment date, i.e. if numberOfSensis <= 0
-				if (numberOfSensis <= 0) {
-					return new RandomVariableInterface[]{new RandomVariable(0.0)};
-				}
+		// return zero if evaluationTime > last payment date, i.e. if numberOfSensis <= 0
+		if (numberOfSensis <= 0) {
+			return new RandomVariableInterface[]{new RandomVariable(0.0)};
+		}
 
-				sensis = new RandomVariableInterface[numberOfSensis];
-				int timeIndex = model.getTimeIndex(evaluationTime);
-				timeIndex = timeIndex < 0 ? -timeIndex - 2 : timeIndex;
-				firstLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(fixingDates[0]);
+		sensis = new RandomVariableInterface[numberOfSensis];
+		int timeIndex = model.getTimeIndex(evaluationTime);
+		timeIndex = timeIndex < 0 ? -timeIndex - 2 : timeIndex;
+		firstLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(fixingDates[0]);
 
-				for (int liborIndex = 0; liborIndex < numberOfSensis; liborIndex++) {
-					double swapRate = swapRates[periodIndex + liborIndex];
-					int timeIndexFixing = model.getTimeIndex(fixingDates[periodIndex + liborIndex]);
-					sensis[liborIndex] = model.getLIBOR(Math.min(timeIndex, timeIndexFixing), firstLiborIndex + periodIndex + liborIndex).sub(swapRate).mult(periodLength);
-				}
-				break;
+		for (int liborIndex = 0; liborIndex < numberOfSensis; liborIndex++) {
+			double swapRate = swapRates[periodIndex + liborIndex];
+			int timeIndexFixing = model.getTimeIndex(fixingDates[periodIndex + liborIndex]);
+			sensis[liborIndex] = model.getLIBOR(Math.min(timeIndex, timeIndexFixing), firstLiborIndex + periodIndex + liborIndex).sub(swapRate).mult(periodLength);
+		}
+		break;
 		}
 		sensis = Arrays.stream(sensis).map(n -> n.mult(notional[0])).toArray(RandomVariableInterface[]::new);
 		return sensis;
 	}
 
 	public RandomVariableInterface[] getAnalyticSensitivities(double evaluationTime,
-															  double periodLength,
-															  LIBORModelMonteCarloSimulationInterface model,
-															  String withRespectTo) throws CalculationException {
+			double periodLength,
+			LIBORModelMonteCarloSimulationInterface model,
+			String withRespectTo) throws CalculationException {
 
 		return getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), periodLength, swap.getNotional(), model, withRespectTo);
 	}
@@ -175,8 +175,8 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariableInterface[] getOISModelSensitivities(String riskClass,
-															  double evaluationTime,
-															  LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		double[] futureDiscountTimes = null; // the times of the times after evaluation time at which the numeraire has been used for this product
 		RandomVariableInterface[] dVdP = null;
@@ -241,7 +241,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
-																	LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// No need to adjust sensitivities on paths.
 		return getValueNumeraireSensitivitiesAAD(evaluationTime, model);
 	}
