@@ -7,7 +7,6 @@ package net.finmath.initialmargin.isdasimm.changedfinmath;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
-import net.finmath.montecarlo.interestrate.products.LIBORBond;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
@@ -58,7 +57,10 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 	@Override
 	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException {
-		return (new LIBORBond(T)).getValue(t, this);
+		if(t > T) return new Scalar(0);
+
+		return this.getLIBOR(t, t, T).mult(T - t).add(1.0).invert();
+//		return (new LIBORBond(T)).getValue(t, this);
 //		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
 	}
 
