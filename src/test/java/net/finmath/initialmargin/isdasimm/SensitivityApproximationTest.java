@@ -56,7 +56,7 @@ public class SensitivityApproximationTest {
 
 	static final DecimalFormat formatterTime = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
-		formatterTime.applyPattern("0.0");	
+		formatterTime.applyPattern("0");	
 	}
 	static final DecimalFormat formatterReal2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
@@ -64,8 +64,8 @@ public class SensitivityApproximationTest {
 	}
 
 	// Model Paths
-	static final int numberOfPaths = 1000; // Use 1000 or more for results in publication.
-	static final double simulationTimeDt = 0.1;        // Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
+	static final int numberOfPaths = 100; // Use 1000 or more for results in publication.
+	static final double simulationTimeDt = 0.25;        // Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
 	static final double notional = 100;
 	static final boolean isPrintProfile = false;
 	static final double fundingSpread = 0.005; // For MVA
