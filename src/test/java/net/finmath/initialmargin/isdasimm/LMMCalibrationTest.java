@@ -1,8 +1,6 @@
 package net.finmath.initialmargin.isdasimm;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel.CalibrationItem;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.marketdata.model.curves.DiscountCurve;
@@ -11,6 +9,8 @@ import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.interestrate.LIBORMarketModel;
+import net.finmath.montecarlo.interestrate.LIBORMarketModel.CalibrationItem;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.interestrate.modelplugins.*;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;

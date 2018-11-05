@@ -1,9 +1,6 @@
 package net.finmath.initialmargin.isdasimm.test;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModel.CalibrationItem;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModelInterface;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.*;
@@ -19,6 +16,9 @@ import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
+import net.finmath.montecarlo.interestrate.LIBORMarketModel;
+import net.finmath.montecarlo.interestrate.LIBORMarketModel.CalibrationItem;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.interestrate.modelplugins.*;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
@@ -468,7 +468,7 @@ public class SIMMTest {
 		/*
 		 * Create Brownian motions
 		 */
-		final BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */);
+		final BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */, new RandomVariableFactory(false));
 
 		// Create a volatility model: Piecewise constant volatility calibrated to Swaption Normal implied volatility of December 8, 2017
 		double[] volatility = new double[]{
@@ -551,7 +551,7 @@ public class SIMMTest {
 	public static AbstractRandomVariableFactory createRandomVariableFactoryAAD() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("isGradientRetainsLeafNodesOnly", new Boolean(false));
-		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(), properties);
+		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(false), properties);
 	}
 
 	public static RandomVariableInterface[] getRVAAD(double[] rates) {
