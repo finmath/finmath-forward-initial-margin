@@ -58,9 +58,13 @@ public class SensitivityApproximationTest {
 	{
 		formatterTime.applyPattern("0");
 	}
-	static final DecimalFormat formatterReal2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+	static final DecimalFormat formatterReal1 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
-		formatterReal2.applyPattern("0.00");
+		formatterReal1.applyPattern("0.0");
+	}
+	static final DecimalFormat formatterPercent = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+	{
+		formatterPercent.applyPattern("0%");
 	}
 
 	// Model Paths
@@ -243,11 +247,11 @@ public class SensitivityApproximationTest {
 						"\t" + formatterTime.format((timeEndMelting - timeStartMelting) / 1000.0) + "s" +
 						"\t" + formatterTime.format((timeEndInterpolation - timeStartInterpolation) / 1000.0) + "s" +
 						"\t" + formatterTime.format((timeEndContantWeights - timeStartConstantWeights) / 1000.0) + "s" +
-						"\t" + formatterReal2.format(mvaExact*100) +
-						"\t" + formatterReal2.format((mvaMelting - mvaExact)*100) +
-						"\t" + formatterReal2.format((mvaInterpolation - mvaExact)*100) +
-						"\t" + formatterReal2.format(mvaExactConstantWeights*100) +
-						"\t" + formatterReal2.format(mvaApproximation*100)
+						"\t" + formatterReal1.format(mvaExact*100) +
+						"\t" + formatterPercent.format((mvaMelting - mvaExact)/mvaExact) +
+						"\t" + formatterPercent.format((mvaInterpolation - mvaExact)/mvaExact) +
+						"\t" + formatterReal1.format(mvaExactConstantWeights*100) +
+						"\t" + formatterReal1.format(mvaApproximation*100)
 						);
 
 				productIndex++;
