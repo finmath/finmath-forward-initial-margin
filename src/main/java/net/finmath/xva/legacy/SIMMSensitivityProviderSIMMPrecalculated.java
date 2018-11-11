@@ -23,7 +23,7 @@ public class SIMMSensitivityProviderSIMMPrecalculated {
 														 String curveIndexName, // null if riskClass is not IR
 														 double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-		Optional<Simm2Coordinate> optional = sensitivityMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
+		Optional<Simm2Coordinate> optional = sensitivityMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getSimmBucket().equals(bucketKey)).findAny();
 		if (optional.isPresent()) {
 
 			double externalProvidedSensitivity = sensitivityMap.get(optional.get());

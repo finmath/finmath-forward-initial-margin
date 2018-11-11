@@ -47,9 +47,9 @@ public class CrifSensitivityBean {
 	public Simm2Coordinate getSensitivityKey() {
 		Simm2Coordinate key = null;
 		if (riskType.contains("IR") && !riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), label2, qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), SubCurve.valueOf(label2), qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("IR") && riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), label2, qualifier, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
+			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("Equity") && !riskType.contains("Vol")) {
 			key = new Simm2Coordinate(null, qualifier, bucket, RiskClass.EQUITY, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("Equity") && riskType.contains("Vol")) {

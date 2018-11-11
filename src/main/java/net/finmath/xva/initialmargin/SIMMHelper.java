@@ -84,13 +84,13 @@ public class SIMMHelper {
 				filter(Objects::nonNull).
 				filter(k -> k.getRiskType() == marginType).
 				collect(Collectors.groupingBy(Simm2Coordinate::getRiskClass,
-						Collectors.mapping(Simm2Coordinate::getBucketKey, Collectors.toSet())));
+						Collectors.mapping(Simm2Coordinate::getSimmBucket, Collectors.toSet())));
 	}
 
 	public Map<RiskClass, Set<Qualifier>> getRiskFactorKeysByRiskClass(MarginType riskTypeString, String bucketKey, double evaluationTime) {
 		return coordinates.stream().
 				filter(Objects::nonNull).
-				filter(k -> k.getRiskType() == riskTypeString && k.getBucketKey().equals(bucketKey)).
+				filter(k -> k.getRiskType() == riskTypeString && k.getSimmBucket().equals(bucketKey)).
 				collect(Collectors.groupingBy(Simm2Coordinate::getRiskClass,
 						Collectors.mapping(Simm2Coordinate::getQualifier, Collectors.toSet())));
 	}

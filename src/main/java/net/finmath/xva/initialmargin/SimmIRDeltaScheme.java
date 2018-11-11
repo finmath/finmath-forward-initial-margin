@@ -68,7 +68,7 @@ public class SimmIRDeltaScheme {
 	public RandomVariableInterface getValue(Map<Simm2Coordinate, RandomVariableInterface> gradient) {
 
 		Set<BucketResult> bucketResults = gradient.entrySet().stream().
-				collect(Collectors.groupingBy(e -> e.getKey().getBucketKey(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))).
+				collect(Collectors.groupingBy(e -> e.getKey().getSimmBucket(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))).
 				entrySet().stream().
 				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).
 				collect(Collectors.toSet());

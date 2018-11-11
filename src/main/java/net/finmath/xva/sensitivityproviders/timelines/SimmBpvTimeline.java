@@ -1,11 +1,9 @@
 package net.finmath.xva.sensitivityproviders.timelines;
 
-import com.google.common.collect.ImmutableMap;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.FloatingpointDate;
 import net.finmath.xva.coordinates.simm2.MarginType;
@@ -15,7 +13,6 @@ import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 import net.finmath.xva.coordinates.simm2.Vertex;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,7 +51,7 @@ public class SimmBpvTimeline extends AbstractMonteCarloProduct implements SimmSe
 
 	private Pair<Simm2Coordinate, RandomVariableInterface> getCoordinateSensitivityPair(RandomVariableInterface bpv, Map.Entry<Vertex, Double> vertexAndWeight) {
 		return Pair.of(
-				new Simm2Coordinate(vertexAndWeight.getKey(), tradeSpec.getIRCurve().getName(), tradeSpec.getIRCurve().getCurrency(),
+				new Simm2Coordinate(vertexAndWeight.getKey(), tradeSpec.getIRCurve().getName(), null, tradeSpec.getIRCurve().getCurrency(),
 						RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX),
 				bpv.mult(vertexAndWeight.getValue()));
 	}

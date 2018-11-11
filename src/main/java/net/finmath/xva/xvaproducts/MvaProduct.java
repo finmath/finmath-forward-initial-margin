@@ -11,6 +11,7 @@ import net.finmath.xva.coordinates.lmm.ArbitrarySimm2Transformation;
 import net.finmath.xva.coordinates.lmm.ForwardCoordinates;
 import net.finmath.xva.coordinates.lmm.IborSwapMarketQuantity;
 import net.finmath.xva.coordinates.simm2.ProductClass;
+import net.finmath.xva.coordinates.simm2.SubCurve;
 import net.finmath.xva.coordinates.simm2.Vertex;
 import net.finmath.xva.initialmargin.SimmProduct;
 import net.finmath.xva.initialmargin.SimmModality;
@@ -44,18 +45,18 @@ public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 	private ArbitrarySimm2Transformation getDeltaTransformation() {
 		return new ArbitrarySimm2Transformation(
 				ImmutableList.of(
-						new IborSwapMarketQuantity(Vertex.W2, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.M1, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.M3, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.M6, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y1, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y2, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y3, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y5, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y10, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y15, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y20, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5),
-						new IborSwapMarketQuantity(Vertex.Y30, "EUR", ProductClass.RATES_FX, "Libor3m", 0.25, 0.5)),
+						new IborSwapMarketQuantity(Vertex.W2, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.M1, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.M3, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.M6, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y1, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y2, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y3, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y5, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y10, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y15, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y20, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5),
+						new IborSwapMarketQuantity(Vertex.Y30, "EUR", ProductClass.RATES_FX, SubCurve.Libor3m, 0.25, 0.5)),
 				ImmutableSet.of(new ForwardCoordinates()));
 	}
 

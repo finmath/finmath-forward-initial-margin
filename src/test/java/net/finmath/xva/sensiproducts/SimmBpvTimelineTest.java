@@ -1,7 +1,6 @@
 package net.finmath.xva.sensiproducts;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
@@ -16,7 +15,6 @@ import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
-import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;

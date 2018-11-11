@@ -84,7 +84,7 @@ public class SimmNonIRDeltaAndVegaScheme {
 
 		Set<BucketResult> bucketResults = simmSensitivities.stream().
 				map(z -> Pair.of(
-						z.getKey().getBucketKey(),
+						z.getKey().getSimmBucket(),
 						getWeightedSensitivity(z.getKey(), z.getValue()))).
 				collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toSet()))).
 				entrySet().stream().

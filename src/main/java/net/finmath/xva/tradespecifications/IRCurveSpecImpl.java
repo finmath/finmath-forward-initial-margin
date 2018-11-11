@@ -1,12 +1,15 @@
 package net.finmath.xva.tradespecifications;
 
+import javafx.scene.SubScene;
+import net.finmath.xva.coordinates.simm2.SubCurve;
+
 public class IRCurveSpecImpl implements IRCurveSpec {
 	private String currency;
-	private String name;
+	private SubCurve name;
 	private double periodLength;
 	private double daysInYear;
 
-	public IRCurveSpecImpl(String currency, String name, double periodLength, double daysInYear) {
+	public IRCurveSpecImpl(String currency, SubCurve name, double periodLength, double daysInYear) {
 		this.currency = currency;
 		this.name = name;
 		this.periodLength = periodLength;
@@ -19,7 +22,7 @@ public class IRCurveSpecImpl implements IRCurveSpec {
 	}
 
 	@Override
-	public String getName() {
+	public SubCurve getName() {
 		return name;
 	}
 

@@ -1,12 +1,14 @@
 package net.finmath.xva.tradespecifications;
 
+import net.finmath.xva.coordinates.simm2.SubCurve;
+
 /**
  * Holds the details of an interest rate curve.
  */
 public interface IRCurveSpec {
 	String getCurrency();
 
-	String getName();
+	SubCurve getName();
 
 	double getPeriodLength();
 

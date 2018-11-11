@@ -38,7 +38,7 @@ public class SIMMSensitivityProviderSIMMSwapBPV {
 													  String curveIndexName, // null if riskClass is not IR
 													  double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 
-		Optional<Simm2Coordinate> optional = notionalMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getBucketKey().equals(bucketKey)).findAny();
+		Optional<Simm2Coordinate> optional = notionalMap.keySet().stream().filter(key -> key.getRiskClass().equals(riskClass) && key.getProductClass().equals(productClass) && key.getRiskType().equals(riskType) && key.getSimmBucket().equals(bucketKey)).findAny();
 		if (optional.isPresent()) {
 			double effectiveMaturity = 0.0;//maturityMap.get(curveIndexName);
 			double notional = notionalMap.get(curveIndexName);

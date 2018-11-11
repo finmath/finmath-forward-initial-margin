@@ -3,6 +3,7 @@ package net.finmath.xva.initialmargin;
 import com.google.common.collect.ImmutableSet;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.xva.coordinates.simm2.Vertex;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -79,6 +80,22 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 	private static final Set<String> IR_REGULAR_WELL_TRADED_CURRENCIES = ImmutableSet.of("USD", "EUR", "GBP");
 	private static final Set<String> IR_REGULAR_CURRENCIES = ImmutableSet.of("USD", "EUR", "GBP", "CHF", "AUD", "NZD", "CAD", "SEK", "NOK", "DKK", "HKD", "KRW", "SGD", "TWD");
 	private static final Set<String> IR_LOW_VOLATILITY_CURRENCIES = ImmutableSet.of("JPY");
+
+
+	private static final double[][] IR_CROSS_VERTEX_CORRELATIONS = {
+			{1.0, 1.0, 0.79, 0.67, 0.53, 0.42, 0.37, 0.30, 0.22, 0.18, 0.16, 0.12},
+			{1.0, 1.0, 0.79, 0.67, 0.53, 0.42, 0.37, 0.30, 0.22, 0.18, 0.16, 0.12},
+			{0.79, 0.79, 1.0, 0.85, 0.69, 0.57, 0.50, 0.42, 0.32, 0.25, 0.23, 0.2},
+			{0.67, 0.67, 0.85, 1.0, 0.86, 0.76, 0.69, 0.59, 0.47, 0.40, 0.37, 0.32},
+			{0.53, 0.53, 0.69, 0.86, 1.0, 0.93, 0.87, 0.77, 0.63, 0.57, 0.54, 0.50},
+			{0.42, 0.42, 0.57, 0.76, 0.93, 1.0, 0.98, 0.90, 0.77, 0.70, 0.67, 0.63},
+			{0.37, 0.37, 0.50, 0.69, 0.87, 0.98, 1.0, 0.96, 0.84, 0.78, 0.75, 0.71},
+			{0.30, 0.30, 0.42, 0.59, 0.77, 0.90, 0.96, 1.0, 0.93, 0.89, 0.86, 0.82},
+			{0.22, 0.22, 0.32, 0.47, 0.63, 0.77, 0.84, 0.93, 1.0, 0.98, 0.96, 0.94},
+			{0.18, 0.18, 0.25, 0.40, 0.57, 0.70, 0.78, 0.89, 0.98, 1.0, 0.99, 0.98},
+			{0.16, 0.16, 0.23, 0.37, 0.54, 0.67, 0.75, 0.86, 0.96, 0.99, 1.0, 0.99},
+			{0.12, 0.12, 0.20, 0.32, 0.50, 0.63, 0.71, 0.82, 0.94, 0.98, 0.99, 1.0}
+	};
 
 	@Override
 	public double getCrossBucketCorrelation(RiskClass rc, String left, String right) {
@@ -181,13 +198,23 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 				return getBucketwiseValue(left, COMMODITY_INTRA_BUCKET_CORRELATIONS);
 			case CREDIT_Q:
 			case CREDIT_NON_Q:
-				if (left.getBucketKey().equalsIgnoreCase(RESIDUAL_BUCKET)) {
+				if (left.getSimmBucket().equalsIgnoreCase(RESIDUAL_BUCKET)) {
 					return 0.5;
 				}
 				throw new UnsupportedOperationException("Cannot retrieve credit intra-bucket correlation yet.");
+			case INTEREST_RATE:
+				return getCrossVertexCorrelation(left.getVertex(), right.getVertex()) * getCrossCurveCorrelation(left, right);
 			default:
 				throw new UnsupportedOperationException("Cannot retrieve IR intra-bucket correlation yet.");
 		}
+	}
+
+	private double getCrossCurveCorrelation(Simm2Coordinate left, Simm2Coordinate right) {
+		return 0.98;
+	}
+
+	private double getCrossVertexCorrelation(Vertex left, Vertex right) {
+		return IR_CROSS_VERTEX_CORRELATIONS[left.ordinal()][right.ordinal()];
 	}
 
 	@Override
@@ -250,11 +277,11 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 	 * @return The value in the array at the given bucket.
 	 */
 	private double getBucketwiseValue(Simm2Coordinate coordinate, double[] array) {
-		if (coordinate.getBucketKey().equalsIgnoreCase(RESIDUAL_BUCKET)) {
+		if (coordinate.getSimmBucket().equalsIgnoreCase(RESIDUAL_BUCKET)) {
 			return array[array.length - 1];
 		}
 
-		return array[Integer.parseInt(coordinate.getBucketKey())];
+		return array[Integer.parseInt(coordinate.getSimmBucket())];
 	}
 
 	private double getVertexwiseValue(Simm2Coordinate coordinate, double[] array) {

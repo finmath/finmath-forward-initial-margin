@@ -5,6 +5,7 @@ import net.finmath.xva.coordinates.simm2.MarginType;
 import net.finmath.xva.coordinates.simm2.ProductClass;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.xva.coordinates.simm2.SubCurve;
 import net.finmath.xva.coordinates.simm2.Vertex;
 
 /**
@@ -14,24 +15,24 @@ public class IborSwapMarketQuantity implements ModelledMarketQuantity {
 	private Vertex tenor;
 	private String currency;
 	private ProductClass productClass;
-	private String curveName;
+	private SubCurve subCurve;
 	//TODO these are actually functions of tenor + currency (swap conventions)
 	//How not to pass these in addition?
 	private double iborPeriod;
 	private double fixPeriod;
 
-	public IborSwapMarketQuantity(Vertex tenor, String currency, ProductClass productClass, String curveName, double iborPeriod, double fixPeriod) {
+	public IborSwapMarketQuantity(Vertex tenor, String currency, ProductClass productClass, SubCurve subCurve, double iborPeriod, double fixPeriod) {
 		this.tenor = tenor;
 		this.currency = currency;
 		this.productClass = productClass;
-		this.curveName = curveName;
+		this.subCurve = subCurve;
 		this.iborPeriod = iborPeriod;
 		this.fixPeriod = fixPeriod;
 	}
 
 	@Override
 	public Simm2Coordinate getCoordinate() {
-		return new Simm2Coordinate(tenor, currency, curveName, RiskClass.INTEREST_RATE, MarginType.DELTA, productClass);
+		return new Simm2Coordinate(tenor, subCurve, currency, RiskClass.INTEREST_RATE, MarginType.DELTA, productClass);
 	}
 
 	@Override
