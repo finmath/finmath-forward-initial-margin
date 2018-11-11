@@ -99,12 +99,17 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 
 	@Override
 	public double getCrossBucketCorrelation(RiskClass rc, String left, String right) {
+
+		if (rc == RiskClass.INTEREST_RATE) {
+			return left.equalsIgnoreCase(right) ? 1.0 : 0.23;
+		}
+
 		int i = Integer.parseInt(left);
 		int j = Integer.parseInt(right);
 
 		switch (rc) {
 			case FX:
-				return 1.0;
+				return 1.0; //There is only one FX bucket
 			case EQUITY:
 				return EQUITY_CROSS_BUCKET_CORRELATIONS[i][j];
 			case COMMODITY:
@@ -112,11 +117,9 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 			case CREDIT_Q:
 				return CREDIT_Q_CROSS_BUCKET_CORRELATIONS[i][j];
 			case CREDIT_NON_Q:
-				return 0.21;
-			case INTEREST_RATE:
-				return 1;
+				return i == j ? 1.0 : 0.21;
 			default:
-				throw new UnsupportedOperationException("Cannot calculate cross-bucket IR correlation yet.");
+				throw new IllegalArgumentException("Unknown risk class");
 		}
 	}
 
@@ -178,7 +181,7 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 
 				return 8.0E6;
 			default:
-				throw new UnsupportedOperationException("Delta concentration threshold for IR not available yet.");
+				throw new IllegalArgumentException("Unknown risk class");
 		}
 	}
 
@@ -205,7 +208,7 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 			case INTEREST_RATE:
 				return getCrossVertexCorrelation(left.getVertex(), right.getVertex()) * getCrossCurveCorrelation(left, right);
 			default:
-				throw new UnsupportedOperationException("Cannot retrieve IR intra-bucket correlation yet.");
+				throw new IllegalArgumentException("Unknown risk class");
 		}
 	}
 
@@ -267,7 +270,7 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 
 				return getVertexwiseValue(sensitivity, IR_DELTA_RISK_WEIGHTS_HI);
 			default:
-				throw new UnsupportedOperationException("IR delta risk weight not supported yet.");
+				throw new IllegalArgumentException("Unknown risk class");
 		}
 	}
 

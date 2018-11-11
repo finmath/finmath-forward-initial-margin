@@ -3,7 +3,6 @@ package net.finmath.xva;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.initialmargin.SimmProduct;
 import net.finmath.xva.sensitivityproviders.timelines.SimmBpvTimeline;
@@ -21,7 +20,6 @@ public class Launcher {
 
 	public static void main(String[] args) throws Exception {
 
-		SIMMParameter parameterSet = new SIMMParameter();
 		String calculationCCY = "EUR";
 
 		SIMMTradeSpecification trade = new SIMMTradeSpecification(1.0E6, 10.0, Indices.getLibor("EUR", "6M"));
