@@ -14,10 +14,6 @@ public class SimmModality {
 		this.postingThreshold = postingThreshold;
 	}
 
-	public SIMMParameter getParameterSet() {
-		return parameterSet;
-	}
-
 	public Simm2Parameter getParams() {
 		return new Simm2ParameterImpl();
 	}

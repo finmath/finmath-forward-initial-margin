@@ -12,8 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Represents a product that returns the initial margin to be posted at a fixed time according to SIMM.
- * This product will consider the non-IR Delta and Vega risk contributions to the total margin.
+ * Calculates the initial margin to be posted at a fixed time according to SIMM. This calculation scheme will consider the IR Delta contribution to the total margin.
  */
 public class SimmIRDeltaScheme {
 	private final SimmModality modality;
@@ -28,7 +27,8 @@ public class SimmIRDeltaScheme {
 	 * @return A {@link BucketResult} containing the whole thing.
 	 */
 	public BucketResult getBucketAggregation(String bucketName, Map<Simm2Coordinate, RandomVariableInterface> gradient) {
-		double threshold = modality.getParams().getConcentrationThreshold(null);//TODO accept bucket instead of sensitivity?
+		double threshold = modality.getParams().getConcentrationThreshold(gradient.keySet().stream().
+				findFirst().orElseThrow(() -> new IllegalArgumentException("Gradient is empty")));
 
 		RandomVariableInterface concentrationRiskFactor = gradient.values().stream().
 				reduce(new Scalar(0.0), RandomVariableInterface::add).abs().div(threshold).sqrt().cap(1.0);
@@ -38,7 +38,7 @@ public class SimmIRDeltaScheme {
 				collect(Collectors.toSet());
 
 		RandomVariableInterface k = weightedSensitivities.stream().
-				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermNonIR(v, modality))).
+				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermIR(v, modality))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);
@@ -59,6 +59,7 @@ public class SimmIRDeltaScheme {
 								return bK1.getK().squared();
 							}
 							return bK1.getS().mult(bK2.getS()).
+									mult(bK1.getG(bK2)).
 									mult(modality.getParams().getCrossBucketCorrelation(RiskClass.INTEREST_RATE, bK1.getBucketName(), bK2.getBucketName()));
 						})).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).
