@@ -35,7 +35,7 @@ public class Launcher {
 		SimmSensitivityTimeline portfolioSensiProvider = new SimmCompositeTimeline(tradeSensiProviders.collect(Collectors.toSet()));
 
 		double marginCalculationTime = 5.0;
-		SimmProduct product = new SimmProduct(marginCalculationTime, portfolioSensiProvider, new SimmModality(parameterSet, calculationCCY, 0.0));
+		SimmProduct product = new SimmProduct(marginCalculationTime, portfolioSensiProvider, new SimmModality(calculationCCY, 0.0));
 		LIBORMarketModel model = null;
 		LIBORModelMonteCarloSimulation simulation = null;
 		RandomVariableInterface result = product.getValue(4.0, simulation);

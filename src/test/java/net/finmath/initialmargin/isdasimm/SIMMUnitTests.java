@@ -14,7 +14,6 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.xva.beans.CrifSensitivityBean;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-import net.finmath.xva.initialmargin.SIMMHelper;
 import net.finmath.xva.initialmargin.SIMMParameter;
 import net.finmath.xva.initialmargin.SimmModality;
 import net.finmath.xva.initialmargin.SimmProduct;
@@ -58,7 +57,7 @@ public class SIMMUnitTests {
 
 					SimmConstantTimeline provider = SimmConstantTimeline.fromDouble(simmSensitivityKeyDoubleMap);
 
-					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality(parameter, "EUR", 0.0));
+					SimmProduct simmProduct = new SimmProduct(0.0, provider, new SimmModality("EUR", 0.0));
 
 					RandomVariableInterface result = simmProduct.getValue(0.0, getDummySimulation());
 				} catch (Exception e) {

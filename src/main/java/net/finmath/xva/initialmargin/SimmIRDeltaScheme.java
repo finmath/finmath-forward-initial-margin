@@ -6,7 +6,6 @@ import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,9 +65,9 @@ public class SimmIRDeltaScheme {
 				sqrt();
 	}
 
-	public RandomVariableInterface getValue(List<Map.Entry<Simm2Coordinate, RandomVariableInterface>> simmSensitivities) {
+	public RandomVariableInterface getValue(Map<Simm2Coordinate, RandomVariableInterface> gradient) {
 
-		Set<BucketResult> bucketResults = simmSensitivities.stream().
+		Set<BucketResult> bucketResults = gradient.entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getBucketKey(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))).
 				entrySet().stream().
 				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).

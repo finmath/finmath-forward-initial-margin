@@ -1,5 +1,6 @@
 package net.finmath.xva.initialmargin;
 
+import com.google.common.collect.ImmutableSet;
 import net.finmath.xva.coordinates.simm2.RiskClass;
 import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
 
@@ -51,7 +52,7 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 	private static final double[] COMMODITY_DELTA_THRESHOLDS = {1.4E9, 2.0E10, 3.5E9, 3.5E9, 3.5E9, 6.4E9, 6.4E9, 2.5E9, 2.5E9, 3.0E8, 2.9E9, 7.6E9, 3.9E9, 3.9E9, 3.9E9, 3.0E8, 1.2E10};
 	private static final double[] COMMODITY_VEGA_THRESHOLDS = {250E6, 2000E6, 510E6, 510E6, 510E6, 1900E6, 1900E6, 870E6, 870E6, 220E6, 450E6, 740E6, 370E6, 370E6, 370E6, 220E6, 430E6};
 	private static final double[] CREDIT_Q_DELTA_RISK_WEIGHTS = {85.0, 85.0, 73.0, 49.0, 48.0, 43.0, 161.0, 238.0, 151.0, 210.0, 141.0, 102.0, 238.0};
-	private static final double[] CREDIT_Q_DELTA_THRESHOLDS = {950000.0,290000.0,290000.0,290000.0,290000.0,290000.0,950000.0,290000.0,290000.0,290000.0,290000.0,290000.0,290000.0};
+	private static final double[] CREDIT_Q_DELTA_THRESHOLDS = {950000.0, 290000.0, 290000.0, 290000.0, 290000.0, 290000.0, 950000.0, 290000.0, 290000.0, 290000.0, 290000.0, 290000.0, 290000.0};
 	private static final double[][] CREDIT_Q_CROSS_BUCKET_CORRELATIONS = {
 			{0.00, 0.42, 0.39, 0.39, 0.40, 0.38, 0.39, 0.34, 0.37, 0.39, 0.37, 0.31},
 			{0.42, 0.00, 0.44, 0.45, 0.47, 0.45, 0.33, 0.40, 0.41, 0.44, 0.43, 0.37},
@@ -67,9 +68,17 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 			{0.31, 0.37, 0.36, 0.36, 0.37, 0.38, 0.26, 0.30, 0.32, 0.35, 0.34, 0.00}
 	};
 	private static final double[] CREDIT_NON_Q_DELTA_RISK_WEIGHTS = {140.0, 2000.0, 2000.0};
-	private static final double[] CREDIT_NON_Q_DELTA_THRESHOLDS = {9500000.0,500000.0,500000.0};
+	private static final double[] CREDIT_NON_Q_DELTA_THRESHOLDS = {9500000.0, 500000.0, 500000.0};
 	private static final Set<String> FX_CATEGORY_1 = new HashSet<>(Arrays.asList("USD", "EUR", "JPY", "GBP", "AUD", "CHF", "CAD"));
 	private static final Set<String> FX_CATEGORY_2 = new HashSet<>(Arrays.asList("BRL", "CNY", "HKD", "INR", "KRW", "MXN", "NOK", "NZD", "RUB", "SEK", "SGD", "TRY", "ZAR"));
+
+	private static final double[] IR_DELTA_RISK_WEIGHTS_REG = {113, 113, 98, 69, 56, 52, 51, 51, 51, 53, 56, 64};
+	private static final double[] IR_DELTA_RISK_WEIGHTS_LO = {21, 21, 10, 11, 15, 20, 22, 21, 19, 20, 23, 27};
+	private static final double[] IR_DELTA_RISK_WEIGHTS_HI = {93, 93, 90, 94, 97, 103, 101, 103, 102, 101, 102, 101};
+
+	private static final Set<String> IR_REGULAR_WELL_TRADED_CURRENCIES = ImmutableSet.of("USD", "EUR", "GBP");
+	private static final Set<String> IR_REGULAR_CURRENCIES = ImmutableSet.of("USD", "EUR", "GBP", "CHF", "AUD", "NZD", "CAD", "SEK", "NOK", "DKK", "HKD", "KRW", "SGD", "TWD");
+	private static final Set<String> IR_LOW_VOLATILITY_CURRENCIES = ImmutableSet.of("JPY");
 
 	@Override
 	public double getCrossBucketCorrelation(RiskClass rc, String left, String right) {
@@ -123,12 +132,13 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 	}
 
 	private double getDeltaConcentrationThreshold(Simm2Coordinate coordinate) {
+		final String currency = coordinate.getQualifier().getCurrency();
 		switch (coordinate.getRiskClass()) {
 			case FX:
-				if (FX_CATEGORY_1.contains(coordinate.getQualifier().getCurrency())) {
+				if (FX_CATEGORY_1.contains(currency)) {
 					return 8400E6;
 				}
-				if (FX_CATEGORY_2.contains(coordinate.getQualifier().getCurrency())) {
+				if (FX_CATEGORY_2.contains(currency)) {
 					return 1900E6;
 				}
 				return 560E6;
@@ -140,6 +150,16 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 				return getBucketwiseValue(coordinate, CREDIT_Q_DELTA_THRESHOLDS);
 			case CREDIT_NON_Q:
 				return getBucketwiseValue(coordinate, CREDIT_NON_Q_DELTA_THRESHOLDS);
+			case INTEREST_RATE:
+				if (IR_REGULAR_CURRENCIES.contains(currency)) {
+					return IR_REGULAR_WELL_TRADED_CURRENCIES.contains(currency) ? 230.0E6 : 28.0E6;
+				}
+
+				if (IR_LOW_VOLATILITY_CURRENCIES.contains(currency)) {
+					return 82.0E6;
+				}
+
+				return 8.0E6;
 			default:
 				throw new UnsupportedOperationException("Delta concentration threshold for IR not available yet.");
 		}
@@ -147,6 +167,11 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 
 	@Override
 	public double getIntraBucketCorrelation(Simm2Coordinate left, Simm2Coordinate right) {
+
+		if (left.equals(right)) {
+			return 1.0;
+		}
+
 		switch (left.getRiskClass()) {
 			case FX:
 				return 0.5;
@@ -205,6 +230,15 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 				return getBucketwiseValue(sensitivity, CREDIT_Q_DELTA_RISK_WEIGHTS);
 			case CREDIT_NON_Q:
 				return getBucketwiseValue(sensitivity, CREDIT_NON_Q_DELTA_RISK_WEIGHTS);
+			case INTEREST_RATE:
+				if (IR_REGULAR_CURRENCIES.contains(sensitivity.getQualifier().getCurrency())) {
+					return getVertexwiseValue(sensitivity, IR_DELTA_RISK_WEIGHTS_REG);
+				}
+				if (IR_LOW_VOLATILITY_CURRENCIES.contains(sensitivity.getQualifier().getCurrency())) {
+					return getVertexwiseValue(sensitivity, IR_DELTA_RISK_WEIGHTS_LO);
+				}
+
+				return getVertexwiseValue(sensitivity, IR_DELTA_RISK_WEIGHTS_HI);
 			default:
 				throw new UnsupportedOperationException("IR delta risk weight not supported yet.");
 		}
@@ -221,5 +255,9 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 		}
 
 		return array[Integer.parseInt(coordinate.getBucketKey())];
+	}
+
+	private double getVertexwiseValue(Simm2Coordinate coordinate, double[] array) {
+		return array[coordinate.getVertex().ordinal()];
 	}
 }

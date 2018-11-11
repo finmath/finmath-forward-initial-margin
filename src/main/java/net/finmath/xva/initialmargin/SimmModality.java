@@ -4,12 +4,10 @@ package net.finmath.xva.initialmargin;
  * Determines the modality of the initial margin posting.
  */
 public class SimmModality {
-	private final SIMMParameter parameterSet;
 	private final String calculationCurrency;
 	private final double postingThreshold;
 
-	public SimmModality(SIMMParameter parameterSet, String calculationCurrency, double postingThreshold) {
-		this.parameterSet = parameterSet;
+	public SimmModality(String calculationCurrency, double postingThreshold) {
 		this.calculationCurrency = calculationCurrency;
 		this.postingThreshold = postingThreshold;
 	}
