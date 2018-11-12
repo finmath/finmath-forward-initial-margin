@@ -1,6 +1,6 @@
 package net.finmath.xva.tradespecifications;
 
-import net.finmath.xva.coordinates.simm2.SubCurve;
+import net.finmath.sensitivities.simm2.SubCurve;
 
 /**
  * Holds the details of an interest rate curve.

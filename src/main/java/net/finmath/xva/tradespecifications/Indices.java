@@ -1,6 +1,6 @@
 package net.finmath.xva.tradespecifications;
 
-import net.finmath.xva.coordinates.simm2.SubCurve;
+import net.finmath.sensitivities.simm2.SubCurve;
 
 public final class Indices {
 	private Indices() {

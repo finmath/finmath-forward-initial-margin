@@ -1,9 +1,9 @@
 package net.finmath.xva.tradespecifications;
 
-import net.finmath.xva.coordinates.simm2.ProductClass;
-import net.finmath.xva.coordinates.simm2.Qualifier;
-import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
+import net.finmath.sensitivities.simm2.ProductClass;
+import net.finmath.sensitivities.simm2.Qualifier;
+import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ public class SIMMTradeSpecification {
 	private double notional;
 	private double maturity;
 	private IRCurveSpec irCurve;
-	private Set<Simm2Coordinate> sensitivityKeySet;
+	private Set<SimmCoordinate> sensitivityKeySet;
 
 	public SIMMTradeSpecification(double notional, double maturity, IRCurveSpec irCurve) {
 		this.notional = notional;
@@ -44,7 +44,7 @@ public class SIMMTradeSpecification {
 		return "";
 	}
 
-	public Set<Simm2Coordinate> getSensitivityKeySet(double evaluationTime) {
+	public Set<SimmCoordinate> getSensitivityKeySet(double evaluationTime) {
 		return sensitivityKeySet;
 	}
 

@@ -1,20 +1,22 @@
 package net.finmath.xva.initialmargin;
 
 import com.google.common.collect.ImmutableMap;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.xva.coordinates.simm2.MarginType;
-import net.finmath.xva.coordinates.simm2.ProductClass;
-import net.finmath.xva.coordinates.simm2.RiskClass;
-import net.finmath.xva.coordinates.simm2.Simm2Coordinate;
-import net.finmath.xva.coordinates.simm2.SubCurve;
-import net.finmath.xva.coordinates.simm2.Vertex;
+import net.finmath.sensitivities.simm2.MarginType;
+import net.finmath.sensitivities.simm2.ProductClass;
+import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.sensitivities.simm2.SubCurve;
+import net.finmath.sensitivities.simm2.Vertex;
+import net.finmath.xva.initialmargin.simm2.calculation.SimmIRDeltaScheme;
+import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
+import net.finmath.xva.initialmargin.simm2.specs.Simm2_0;
 import org.junit.Test;
 
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 
@@ -23,15 +25,15 @@ public class SimmIRDeltaSchemeTest {
 	@Test
 	public void testGetValueForSingleDeterministicVertex() {
 
-		final Simm2Parameter parameters = new Simm2ParameterImpl();
+		final ParameterSet parameters = new Simm2_0();
 		final SimmIRDeltaScheme scheme = new SimmIRDeltaScheme(parameters);
-		final Simm2Coordinate coordinate = new Simm2Coordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
+		final SimmCoordinate coordinate = new SimmCoordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
 		final double riskWeight = parameters.getRiskWeight(coordinate);
 
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinate)*2.0;
 
-		Map<Simm2Coordinate, RandomVariableInterface> gradient = ImmutableMap.of(
+		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(
 				coordinate,
 				new Scalar(marketSensitivity)
 		);
@@ -47,17 +49,17 @@ public class SimmIRDeltaSchemeTest {
 	@Test
 	public void testGetValueForTwoDeterministicVerticesOfSameCurrency() {
 
-		final Simm2Parameter parameters = new Simm2ParameterImpl();
+		final ParameterSet parameters = new Simm2_0();
 		final SimmIRDeltaScheme scheme = new SimmIRDeltaScheme(parameters);
-		final Simm2Coordinate coordinate1m = new Simm2Coordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
-		final Simm2Coordinate coordinate3m = new Simm2Coordinate(Vertex.M3, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
+		final SimmCoordinate coordinate1m = new SimmCoordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
+		final SimmCoordinate coordinate3m = new SimmCoordinate(Vertex.M3, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
 		final double riskWeight1m = parameters.getRiskWeight(coordinate1m);
 		final double riskWeight3m = parameters.getRiskWeight(coordinate3m);
 
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinate1m);
 
-		Map<Simm2Coordinate, RandomVariableInterface> gradient = ImmutableMap.of(coordinate1m, new Scalar(marketSensitivity), coordinate3m, new Scalar(marketSensitivity));
+		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(coordinate1m, new Scalar(marketSensitivity), coordinate3m, new Scalar(marketSensitivity));
 
 		final RandomVariableInterface result = scheme.getMargin(gradient);
 
@@ -75,10 +77,10 @@ public class SimmIRDeltaSchemeTest {
 	@Test
 	public void testGetValueForTwoDeterministicVerticesOfDifferentCurrencies() {
 
-		final Simm2Parameter parameters = new Simm2ParameterImpl();
+		final ParameterSet parameters = new Simm2_0();
 		final SimmIRDeltaScheme scheme = new SimmIRDeltaScheme(parameters);
-		final Simm2Coordinate coordinateEur = new Simm2Coordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
-		final Simm2Coordinate coordinateUsd = new Simm2Coordinate(Vertex.M3, SubCurve.Libor3m, "USD", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
+		final SimmCoordinate coordinateEur = new SimmCoordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
+		final SimmCoordinate coordinateUsd = new SimmCoordinate(Vertex.M3, SubCurve.Libor3m, "USD", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
 		final double riskWeightEur = parameters.getRiskWeight(coordinateEur);
 		final double riskWeightUsd = parameters.getRiskWeight(coordinateUsd);
 
@@ -86,7 +88,7 @@ public class SimmIRDeltaSchemeTest {
 		//USD and EUR also have the same threshold so we can re-use the value
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinateEur) * 2.0;
 
-		Map<Simm2Coordinate, RandomVariableInterface> gradient = ImmutableMap.of(
+		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(
 				coordinateEur, new Scalar(marketSensitivity), coordinateUsd, new Scalar(marketSensitivity)
 		);
 

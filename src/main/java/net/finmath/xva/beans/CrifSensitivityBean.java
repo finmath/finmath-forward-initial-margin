@@ -1,7 +1,7 @@
 package net.finmath.xva.beans;
 
 import com.google.gson.annotations.SerializedName;
-import net.finmath.xva.coordinates.simm2.*;
+import net.finmath.sensitivities.simm2.*;
 
 /**
  * Contains a row from a CRIF file, i. e. a sensitivity
@@ -44,22 +44,22 @@ public class CrifSensitivityBean {
 		return counterparty;
 	}
 
-	public Simm2Coordinate getSensitivityKey() {
-		Simm2Coordinate key = null;
+	public SimmCoordinate getSensitivityKey() {
+		SimmCoordinate key = null;
 		if (riskType.contains("IR") && !riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), SubCurve.valueOf(label2), qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), SubCurve.valueOf(label2), qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("IR") && riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("Equity") && !riskType.contains("Vol")) {
-			key = new Simm2Coordinate(null, qualifier, bucket, RiskClass.EQUITY, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(null, qualifier, bucket, RiskClass.EQUITY, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("Equity") && riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.EQUITY, MarginType.VEGA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.EQUITY, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("Commodity") && !riskType.contains("Vol")) {
-			key = new Simm2Coordinate(null, qualifier, bucket, RiskClass.COMMODITY, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(null, qualifier, bucket, RiskClass.COMMODITY, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("Commodity") && riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.COMMODITY, MarginType.VEGA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.COMMODITY, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("FX") && !riskType.contains("Vol")) {
-			key = new Simm2Coordinate(null, qualifier, "0", RiskClass.FX, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(null, qualifier, "0", RiskClass.FX, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("FX") && riskType.contains("Vol")) {
 			if (qualifier.length() == 6) {
 				String ccy1 = qualifier.substring(0, 3);
@@ -68,19 +68,19 @@ public class CrifSensitivityBean {
 					qualifier = ccy2 + ccy1;
 				}
 			}
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, "0", RiskClass.FX, MarginType.VEGA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, "0", RiskClass.FX, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("CreditQ")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.CREDIT_Q, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.CREDIT_Q, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("CreditNonQ")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.CREDIT_NON_Q, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.CREDIT_NON_Q, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("Credit") && riskType.contains("Vol")) {
-			key = new Simm2Coordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.CREDIT_Q, MarginType.VEGA, getParsedProductClass());
+			key = new SimmCoordinate(Vertex.parseCrifTenor(label1), qualifier, bucket, RiskClass.CREDIT_Q, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("Inflation") && !riskType.contains("Vol")) {
-			key = new Simm2Coordinate(null, "inflation", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(null, "inflation", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
 		} else if (riskType.contains("Inflation") && riskType.contains("Vol")) {
-			key = new Simm2Coordinate(null, "inflation", qualifier, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
+			key = new SimmCoordinate(null, "inflation", qualifier, RiskClass.INTEREST_RATE, MarginType.VEGA, getParsedProductClass());
 		} else if (riskType.contains("XCcy")) {
-			key = new Simm2Coordinate(null, "ccybasis", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
+			key = new SimmCoordinate(null, "ccybasis", qualifier, RiskClass.INTEREST_RATE, MarginType.DELTA, getParsedProductClass());
 		}
 		return key;
 	}

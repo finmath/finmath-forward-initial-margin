@@ -2,12 +2,13 @@ package net.finmath.xva;
 
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
+import net.finmath.sensitivities.GradientProduct;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.xva.initialmargin.SimmModality;
-import net.finmath.xva.initialmargin.SimmProduct;
-import net.finmath.xva.sensitivityproviders.timelines.SimmBpvTimeline;
-import net.finmath.xva.sensitivityproviders.timelines.SimmCompositeTimeline;
-import net.finmath.xva.sensitivityproviders.timelines.SimmSensitivityTimeline;
+import net.finmath.xva.initialmargin.simm2.SimmModality;
+import net.finmath.xva.initialmargin.simm2.SimmProduct;
+import net.finmath.sensitivities.simm2.products.ApproximateAnnuity;
+import net.finmath.sensitivities.GradientProductComposite;
 import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
@@ -28,9 +29,9 @@ public class Launcher {
 		tradeSet.add(trade);
 		tradeSet.add(trade2);
 
-		Stream<SimmSensitivityTimeline> tradeSensiProviders = tradeSet.stream().map(SimmBpvTimeline::new);
+		Stream<GradientProduct<SimmCoordinate>> tradeSensiProviders = tradeSet.stream().map(ApproximateAnnuity::new);
 
-		SimmSensitivityTimeline portfolioSensiProvider = new SimmCompositeTimeline(tradeSensiProviders.collect(Collectors.toSet()));
+		GradientProduct<SimmCoordinate> portfolioSensiProvider = new GradientProductComposite<>(tradeSensiProviders.collect(Collectors.toSet()));
 
 		double marginCalculationTime = 5.0;
 		SimmProduct product = new SimmProduct(marginCalculationTime, portfolioSensiProvider, new SimmModality(calculationCCY, 0.0));

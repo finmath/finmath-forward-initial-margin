@@ -1,5 +1,7 @@
 package net.finmath.xva.coordinates.lmm;
 
+import net.finmath.montecarlo.interestrate.products.SwapMarketRateProduct;
+import net.finmath.montecarlo.interestrate.products.SwapRateBuilder;
 import org.junit.Test;
 
 import java.util.stream.Collectors;

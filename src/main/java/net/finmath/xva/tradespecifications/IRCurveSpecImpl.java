@@ -1,7 +1,6 @@
 package net.finmath.xva.tradespecifications;
 
-import javafx.scene.SubScene;
-import net.finmath.xva.coordinates.simm2.SubCurve;
+import net.finmath.sensitivities.simm2.SubCurve;
 
 public class IRCurveSpecImpl implements IRCurveSpec {
 	private String currency;
