@@ -51,7 +51,7 @@ public class SimmBpvTimeline extends AbstractMonteCarloProduct implements SimmSe
 
 	private Pair<Simm2Coordinate, RandomVariableInterface> getCoordinateSensitivityPair(RandomVariableInterface bpv, Map.Entry<Vertex, Double> vertexAndWeight) {
 		return Pair.of(
-				new Simm2Coordinate(vertexAndWeight.getKey(), tradeSpec.getIRCurve().getName(), null, tradeSpec.getIRCurve().getCurrency(),
+				new Simm2Coordinate(vertexAndWeight.getKey(), tradeSpec.getIRCurve().getName(), tradeSpec.getIRCurve().getCurrency(),
 						RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX),
 				bpv.mult(vertexAndWeight.getValue()));
 	}
