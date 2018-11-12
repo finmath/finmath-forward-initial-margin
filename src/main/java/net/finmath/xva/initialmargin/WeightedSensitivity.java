@@ -20,11 +20,11 @@ public class WeightedSensitivity {
 	/**
 	 * Returns the cross-term for non-IR cross-aggregation of weighted sensitivities in the same bucket found in ISDA SIMM v2.0 p.3, B.8 (c).
 	 * @param v The other weighted sensitivity.
-	 * @param modality The {@link SimmModality} instance providing correlation parameters.
+	 * @param parameter The {@link Simm2Parameter} instance providing correlation parameters.
 	 * @return The term of <i>ρ<sub>kl</sub> × f<sub>kl</sub> × WS<sub>k</sub> × WS<sub>l</sub></i> in the formula for <i>K</i>.
 	 */
-	public RandomVariableInterface getCrossTermNonIR(WeightedSensitivity v, SimmModality modality) {
-		return getCrossTermIR(v, modality).
+	public RandomVariableInterface getCrossTermNonIR(WeightedSensitivity v, Simm2Parameter parameter) {
+		return getCrossTermIR(v, parameter).
 			mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
 			div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())); //denominator f
 	}
@@ -32,13 +32,13 @@ public class WeightedSensitivity {
 	/**
 	 * Returns the cross-term for IR cross-aggregation of weighted sensitivities in the same bucket found in ISDA SIMM v2.0 p.2, B.7 (c).
 	 * @param v The other weighted sensitivity.
-	 * @param modality The {@link SimmModality} instance providing correlation parameters.
+	 * @param parameter The {@link Simm2Parameter} instance providing correlation parameters.
 	 * @return The term of <i>φ<sub>i,j</sub> × ρ<sub>k,l</sub> × WS<sub>k,i</sub> × WS<sub>l,j</sub></i> in the formula for <i>K</i>.
 	 */
-	public RandomVariableInterface getCrossTermIR(WeightedSensitivity v, SimmModality modality) {
+	public RandomVariableInterface getCrossTermIR(WeightedSensitivity v, Simm2Parameter parameter) {
 		return getWeightedSensitivity().
 				mult(v.getWeightedSensitivity()).
-				mult(modality.getParams().getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho (times phi for IR)
+				mult(parameter.getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho (times phi for IR)
 	}
 
 	/**

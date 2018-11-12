@@ -213,6 +213,10 @@ public final class Simm2ParameterImpl implements Simm2Parameter {
 	}
 
 	private double getCrossCurveCorrelation(Simm2Coordinate left, Simm2Coordinate right) {
+		if (left.getSubCurve().equals(right.getSubCurve())) {
+			return 1.0;
+		}
+
 		return 0.98;
 	}
 

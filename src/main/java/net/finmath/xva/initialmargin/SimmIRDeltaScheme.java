@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
  * Calculates the initial margin to be posted at a fixed time according to SIMM. This calculation scheme will consider the IR Delta contribution to the total margin.
  */
 public class SimmIRDeltaScheme {
-	private final SimmModality modality;
+	private final Simm2Parameter parameter;
 
-	public SimmIRDeltaScheme(SimmModality modality) {
-		this.modality = modality;
+	public SimmIRDeltaScheme(Simm2Parameter parameter) {
+		this.parameter = parameter;
 	}
 
 	/**
@@ -26,18 +26,18 @@ public class SimmIRDeltaScheme {
 	 * @return A {@link BucketResult} containing the whole thing.
 	 */
 	public BucketResult getBucketAggregation(String bucketName, Map<Simm2Coordinate, RandomVariableInterface> gradient) {
-		double threshold = modality.getParams().getConcentrationThreshold(gradient.keySet().stream().
+		double threshold = parameter.getConcentrationThreshold(gradient.keySet().stream().
 				findFirst().orElseThrow(() -> new IllegalArgumentException("Gradient is empty")));
 
 		RandomVariableInterface concentrationRiskFactor = gradient.values().stream().
 				reduce(new Scalar(0.0), RandomVariableInterface::add).abs().div(threshold).sqrt().cap(1.0);
 
 		Set<WeightedSensitivity> weightedSensitivities = gradient.entrySet().stream().
-				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(modality.getParams().getRiskWeight(z.getKey())))).
+				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(parameter.getRiskWeight(z.getKey())))).
 				collect(Collectors.toSet());
 
 		RandomVariableInterface k = weightedSensitivities.stream().
-				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermIR(v, modality))).
+				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermIR(v, parameter))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);
@@ -59,13 +59,19 @@ public class SimmIRDeltaScheme {
 							}
 							return bK1.getS().mult(bK2.getS()).
 									mult(bK1.getG(bK2)).
-									mult(modality.getParams().getCrossBucketCorrelation(RiskClass.INTEREST_RATE, bK1.getBucketName(), bK2.getBucketName()));
+									mult(parameter.getCrossBucketCorrelation(RiskClass.INTEREST_RATE, bK1.getBucketName(), bK2.getBucketName()));
 						})).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).
 				sqrt();
 	}
 
-	public RandomVariableInterface getValue(Map<Simm2Coordinate, RandomVariableInterface> gradient) {
+	/**
+	 * Calculates the resulting delta margin according to ISDA SIMM v2.0 B.8 (d)
+	 *
+	 * @param gradient A sensitivity gradient in SIMM coordinates.
+	 * @return The delta margin.
+	 */
+	public RandomVariableInterface getMargin(Map<Simm2Coordinate, RandomVariableInterface> gradient) {
 
 		Set<BucketResult> bucketResults = gradient.entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getSimmBucket(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))).

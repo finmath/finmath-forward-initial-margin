@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
  * This product will consider the non-IR Delta and Vega risk contributions to the total margin.
  */
 public class SimmNonIRDeltaAndVegaScheme {
-	private final SimmModality modality;
+	private final Simm2Parameter parameter;
 
-	public SimmNonIRDeltaAndVegaScheme(SimmModality modality) {
-		this.modality = modality;
+	public SimmNonIRDeltaAndVegaScheme(Simm2Parameter parameter) {
+		this.parameter = parameter;
 	}
 
 	/**
@@ -31,8 +31,8 @@ public class SimmNonIRDeltaAndVegaScheme {
 	 * @return The {@link WeightedSensitivity} object representing the computation result.
 	 */
 	public WeightedSensitivity getWeightedSensitivity(Simm2Coordinate coordinate, RandomVariableInterface x) {
-		final double riskWeight = modality.getParams().getRiskWeight(coordinate);
-		final double threshold = modality.getParams().getConcentrationThreshold(coordinate);
+		final double riskWeight = parameter.getRiskWeight(coordinate);
+		final double threshold = parameter.getConcentrationThreshold(coordinate);
 		//not for credit -- here we have to sum up all sensitivities belonging to the same issuer/seniority; todo.
 		final RandomVariableInterface concentrationRiskFactor = x.abs().div(threshold).sqrt().floor(1.0);
 
@@ -47,7 +47,7 @@ public class SimmNonIRDeltaAndVegaScheme {
 	 */
 	public BucketResult getBucketAggregation(String bucketName, Set<WeightedSensitivity> weightedSensitivities) {
 		RandomVariableInterface k = weightedSensitivities.stream().
-				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermNonIR(v, modality))).
+				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermNonIR(v, parameter))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);
@@ -74,7 +74,7 @@ public class SimmNonIRDeltaAndVegaScheme {
 								return bK1.getK().squared();
 							}
 							return bK1.getS().mult(bK2.getS()).
-									mult(modality.getParams().getCrossBucketCorrelation(riskClass, bK1.getBucketName(), bK2.getBucketName()));
+									mult(parameter.getCrossBucketCorrelation(riskClass, bK1.getBucketName(), bK2.getBucketName()));
 						})).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).
 				sqrt().add(kResidual);

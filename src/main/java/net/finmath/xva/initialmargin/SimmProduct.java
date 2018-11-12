@@ -31,7 +31,7 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		this.modality = modality;
 		this.marginCalculationTime = marginCalculationTime;
 		this.timeline = provider;
-		this.nonIRDeltaAndVegaScheme = new SimmNonIRDeltaAndVegaScheme(modality);
+		this.nonIRDeltaAndVegaScheme = new SimmNonIRDeltaAndVegaScheme(modality.getParams());
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
