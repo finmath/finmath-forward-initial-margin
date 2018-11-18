@@ -1,4 +1,4 @@
-package net.finmath.xva.initialmargin;
+package net.finmath.xva.initialmargin.simm2.calculation;
 
 import com.google.common.collect.ImmutableMap;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
@@ -28,7 +28,7 @@ public class SimmIRDeltaSchemeTest {
 		final ParameterSet parameters = new Simm2_0();
 		final SimmIRDeltaScheme scheme = new SimmIRDeltaScheme(parameters);
 		final SimmCoordinate coordinate = new SimmCoordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
-		final double riskWeight = parameters.getRiskWeight(coordinate);
+		final double riskWeight = parameters.getRiskWeightWithScaling(coordinate);
 
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinate)*2.0;
@@ -53,8 +53,8 @@ public class SimmIRDeltaSchemeTest {
 		final SimmIRDeltaScheme scheme = new SimmIRDeltaScheme(parameters);
 		final SimmCoordinate coordinate1m = new SimmCoordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
 		final SimmCoordinate coordinate3m = new SimmCoordinate(Vertex.M3, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
-		final double riskWeight1m = parameters.getRiskWeight(coordinate1m);
-		final double riskWeight3m = parameters.getRiskWeight(coordinate3m);
+		final double riskWeight1m = parameters.getRiskWeightWithScaling(coordinate1m);
+		final double riskWeight3m = parameters.getRiskWeightWithScaling(coordinate3m);
 
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinate1m);
@@ -81,8 +81,8 @@ public class SimmIRDeltaSchemeTest {
 		final SimmIRDeltaScheme scheme = new SimmIRDeltaScheme(parameters);
 		final SimmCoordinate coordinateEur = new SimmCoordinate(Vertex.M1, SubCurve.Libor3m, "EUR", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
 		final SimmCoordinate coordinateUsd = new SimmCoordinate(Vertex.M3, SubCurve.Libor3m, "USD", RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX);
-		final double riskWeightEur = parameters.getRiskWeight(coordinateEur);
-		final double riskWeightUsd = parameters.getRiskWeight(coordinateUsd);
+		final double riskWeightEur = parameters.getRiskWeightWithScaling(coordinateEur);
+		final double riskWeightUsd = parameters.getRiskWeightWithScaling(coordinateUsd);
 
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		//USD and EUR also have the same threshold so we can re-use the value

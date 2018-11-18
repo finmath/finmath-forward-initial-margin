@@ -34,7 +34,7 @@ public class SimmIRDeltaScheme {
 				reduce(new Scalar(0.0), RandomVariableInterface::add).abs().div(threshold).sqrt().cap(1.0);
 
 		Set<WeightedSensitivity> weightedSensitivities = gradient.entrySet().stream().
-				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(parameter.getRiskWeight(z.getKey())))).
+				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(parameter.getRiskWeightWithScaling(z.getKey())))).
 				collect(Collectors.toSet());
 
 		RandomVariableInterface k = weightedSensitivities.stream().

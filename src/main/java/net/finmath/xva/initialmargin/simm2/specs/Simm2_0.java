@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static net.finmath.functions.NormalDistribution.inverseCumulativeDistribution;
+
 public final class Simm2_0 implements ParameterSet {
 	private static final String RESIDUAL_BUCKET = "Residual";
 	private static final double[] EQUITY_INTRA_BUCKET_CORRELATIONS = {0.14, 0.2, 0.19, 0.21, 0.24, 0.35, 0.34, 0.34, 0.2, 0.24, 0.62, 0.62, 0.0};
@@ -96,6 +98,7 @@ public final class Simm2_0 implements ParameterSet {
 			{0.16, 0.16, 0.23, 0.37, 0.54, 0.67, 0.75, 0.86, 0.96, 0.99, 1.0, 0.99},
 			{0.12, 0.12, 0.20, 0.32, 0.50, 0.63, 0.71, 0.82, 0.94, 0.98, 0.99, 1.0}
 	};
+	private static final double VRW_SCALE = Math.sqrt(365.0 / 14.0) / inverseCumulativeDistribution(0.99);
 
 	@Override
 	public double getCrossBucketCorrelation(RiskClass rc, String left, String right) {
@@ -225,12 +228,32 @@ public final class Simm2_0 implements ParameterSet {
 	}
 
 	@Override
-	public double getRiskWeight(SimmCoordinate sensitivity) {
+	public double getRiskWeightWithScaling(SimmCoordinate sensitivity) {
 		switch (sensitivity.getRiskType()) {
 			case DELTA:
 				return getDeltaRiskWeight(sensitivity);
+			case VEGA:
+				return getVegaRiskWeight(sensitivity) * getHistoricalVolatilityRatio(sensitivity) * VRW_SCALE;
 			default:
 				throw new UnsupportedOperationException("Risk weight for non-delta not implemented yet.");
+		}
+	}
+
+	private double getVegaRiskWeight(SimmCoordinate sensitivity) {
+		switch (sensitivity.getRiskClass()) {
+			case INTEREST_RATE:
+				return 0.21; //D.1.34
+			case CREDIT_Q:
+			case CREDIT_NON_Q:
+				return 0.27; //E.1.39
+			case EQUITY:
+				return sensitivity.getSimmBucket().equals("12") ? 0.64 : 0.28; //G.1.57
+			case COMMODITY:
+				return 0.38; //H.1.62
+			case FX:
+				return 0.33; //I.1.67
+			default:
+				throw new IllegalArgumentException("Unknown risk class");
 		}
 	}
 
@@ -238,15 +261,15 @@ public final class Simm2_0 implements ParameterSet {
 	public double getHistoricalVolatilityRatio(SimmCoordinate c) {
 		switch (c.getRiskClass()) {
 			case FX:
-				return 0.6;
+				return 0.6; //I.1.66
 			case EQUITY:
-				return 0.65;
+				return 0.65; //G.1.56
 			case CREDIT_Q:
 			case CREDIT_NON_Q:
 			case INTEREST_RATE:
 				return 1.0; //B.10 (c) -- p.5, first line
 			case COMMODITY:
-				return 0.8;
+				return 0.8; //H.1.61
 			default:
 				throw new IllegalArgumentException("Unknown risk class.");
 		}

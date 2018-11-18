@@ -9,6 +9,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.xva.initialmargin.simm2.calculation.SimmIRDeltaScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmNonIRDeltaAndVegaScheme;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -23,12 +24,14 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	private GradientProduct<SimmCoordinate> timeline;
 	private double marginCalculationTime;
 	private SimmModality modality;
+	private SimmIRDeltaScheme irDeltaScheme;
 	private SimmNonIRDeltaAndVegaScheme nonIRDeltaAndVegaScheme;
 
 	public SimmProduct(double marginCalculationTime, GradientProduct<SimmCoordinate> provider, SimmModality modality) {
 		this.modality = modality;
 		this.marginCalculationTime = marginCalculationTime;
 		this.timeline = provider;
+		this.irDeltaScheme = new SimmIRDeltaScheme(modality.getParams());
 		this.nonIRDeltaAndVegaScheme = new SimmNonIRDeltaAndVegaScheme(modality.getParams());
 	}
 
@@ -49,25 +52,28 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	private RandomVariableInterface getSimmForProductClass(ProductClass productClass, List<Map.Entry<SimmCoordinate, RandomVariableInterface>> sensitivities) {
 		final Map<RiskClass, RandomVariableInterface> marginByRiskClass = sensitivities.stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getRiskClass())).entrySet().stream().
-				map(group -> Pair.of(group.getKey(), getSimmForRiskClass(group.getKey(), group.getValue()))).
+				map(group -> Pair.of(group.getKey(), getSimmForRiskClass(
+						group.getKey(),
+						group.getValue().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+				))).
 				collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
 		//TODO cross risk class aggregate
 		return marginByRiskClass.values().stream().reduce(new Scalar(0.0), RandomVariableInterface::add);
 	}
 
-	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, List<Map.Entry<SimmCoordinate, RandomVariableInterface>> sensitivities) {
-		return sensitivities.stream().
+	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> sensitivities) {
+		return sensitivities.entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getRiskType())).entrySet().stream().
 				map(group -> {
 					switch (group.getKey()) {
 						case DELTA:
 							if (riskClass == RiskClass.INTEREST_RATE) {
-								return new Scalar(0.0); //TODO IR Delta
+								return irDeltaScheme.getMargin(sensitivities);
 							}
-							return nonIRDeltaAndVegaScheme.getValue(riskClass, sensitivities);
+							return nonIRDeltaAndVegaScheme.getMargin(riskClass, sensitivities);
 						case VEGA:
-							return nonIRDeltaAndVegaScheme.getValue(riskClass, sensitivities);
+							return nonIRDeltaAndVegaScheme.getMargin(riskClass, sensitivities);
 						default:
 							return new Scalar(0.0); //TODO Curvature/BaseCorr
 					}

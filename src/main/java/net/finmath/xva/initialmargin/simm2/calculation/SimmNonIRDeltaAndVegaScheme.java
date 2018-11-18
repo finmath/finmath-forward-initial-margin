@@ -1,14 +1,13 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
+import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,10 +31,10 @@ public class SimmNonIRDeltaAndVegaScheme {
 	 * @return The {@link WeightedSensitivity} object representing the computation result.
 	 */
 	public WeightedSensitivity getWeightedSensitivity(SimmCoordinate coordinate, RandomVariableInterface x) {
-		final double riskWeight = parameter.getRiskWeight(coordinate);
+		final double riskWeight = parameter.getRiskWeightWithScaling(coordinate);
 		final double threshold = parameter.getConcentrationThreshold(coordinate);
 		//not for credit -- here we have to sum up all sensitivities belonging to the same issuer/seniority; todo.
-		final RandomVariableInterface concentrationRiskFactor = x.abs().div(threshold).sqrt().floor(1.0);
+		final RandomVariableInterface concentrationRiskFactor = x.abs().div(threshold).sqrt().cap(1.0);
 
 		return new WeightedSensitivity(coordinate, concentrationRiskFactor, x.mult(riskWeight).mult(concentrationRiskFactor));
 	}
@@ -81,9 +80,9 @@ public class SimmNonIRDeltaAndVegaScheme {
 				sqrt().add(kResidual);
 	}
 
-	public RandomVariableInterface getValue(RiskClass riskClass, List<Map.Entry<SimmCoordinate, RandomVariableInterface>> simmSensitivities) {
+	public RandomVariableInterface getMargin(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
 
-		Set<BucketResult> bucketResults = simmSensitivities.stream().
+		Set<BucketResult> bucketResults = gradient.entrySet().stream().
 				map(z -> Pair.of(
 						z.getKey().getSimmBucket(),
 						getWeightedSensitivity(z.getKey(), z.getValue()))).

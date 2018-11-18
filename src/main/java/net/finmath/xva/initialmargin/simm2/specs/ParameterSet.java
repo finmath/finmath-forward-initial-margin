@@ -21,7 +21,7 @@ public interface ParameterSet {
 	 * @param sensitivity The coordinate of the net sensitivity.
 	 * @return
 	 */
-	double getRiskWeight(SimmCoordinate sensitivity);
+	double getRiskWeightWithScaling(SimmCoordinate sensitivity);
 
 	/**
 	 * Returns the historical volatility ratio (HVR) for a given risk class.
