@@ -1,6 +1,7 @@
 package net.finmath.xva.initialmargin.simm2.specs;
 
 import com.google.common.collect.ImmutableSet;
+import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
@@ -30,7 +31,7 @@ public final class Simm2_0 implements ParameterSet {
 	};
 	private static final double[] EQUITY_DELTA_RISK_WEIGHTS = {25.0, 32.0, 29.0, 27.0, 18.0, 21.0, 25.0, 22.0, 27.0, 29.0, 16.0, 16.0, 32.0};
 	private static final double[] EQUITY_DELTA_THRESHOLDS = {3300000.0, 3300000.0, 3300000.0, 3300000.0, 3.0E7, 3.0E7, 3.0E7, 3.0E7, 600000.0, 2300000.0, 9.0E8, 9.0E8, 600000.0};
-	private static final double[] EQUITY_VEGA_THRESHOLDS = {800E6, 800E6, 800E6, 800E6, 7300E6, 7300E6, 7300E6, 7300E6, 70E6, 300E6, 21000E6, 21000E6, 70};
+	private static final double[] EQUITY_VEGA_THRESHOLDS = {800E6, 800E6, 800E6, 800E6, 7300E6, 7300E6, 7300E6, 7300E6, 70E6, 300E6, 21000E6, 21000E6, 70E6 };
 	private static final double[] COMMODITY_INTRA_BUCKET_CORRELATIONS = {0.3, 0.97, 0.93, 0.98, 0.99, 0.92, 1.0, 0.58, 1.0, 0.1, 0.55, 0.64, 0.71, 0.22, 0.29, 0.0, 0.21};
 	private static final double[][] COMMODITY_CROSS_BUCKET_CORRELATIONS = {
 			{0.00, 0.18, 0.15, 0.20, 0.25, 0.08, 0.19, 0.01, 0.27, 0.00, 0.15, 0.02, 0.06, 0.07, -0.04, 0.00, 0.06},
@@ -233,9 +234,20 @@ public final class Simm2_0 implements ParameterSet {
 			case DELTA:
 				return getDeltaRiskWeight(sensitivity);
 			case VEGA:
-				return getVegaRiskWeight(sensitivity) * getHistoricalVolatilityRatio(sensitivity) * VRW_SCALE;
+				return getVegaRiskWeight(sensitivity) * getVolatilityWeight(sensitivity);
 			default:
 				throw new UnsupportedOperationException("Risk weight for non-delta not implemented yet.");
+		}
+	}
+
+	private double getVolatilityWeight(SimmCoordinate coordinate) {
+        switch (coordinate.getRiskClass()) {
+			case INTEREST_RATE:
+			case CREDIT_Q:
+			case CREDIT_NON_Q:
+				return 1.0; //Vegas for IR, CQ and CNQ are supposed to be already volatility-weighted, see Risk Data Standards v1.36, table in §2.8, p. 10
+			default:
+				return getHistoricalVolatilityRatio(coordinate) * VRW_SCALE * getDeltaRiskWeight(coordinate.withMarginType(MarginType.DELTA));
 		}
 	}
 

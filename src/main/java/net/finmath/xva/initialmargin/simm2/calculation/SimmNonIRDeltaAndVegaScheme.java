@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a product that returns the initial margin to be posted at a fixed time according to SIMM.
@@ -80,9 +81,25 @@ public class SimmNonIRDeltaAndVegaScheme {
 				sqrt().add(kResidual);
 	}
 
+	/**
+	 * Strips the vertices of the gradient summing the sensitivities of different vertices together.
+	 * Vertex-level sensitivities are neither needed for vega margins nor for delta margins (since this scheme does not handle IR delta).
+	 * @param gradient The gradient which may contain coordinates with vertices.
+	 * @return A stream of vertex-less coordinates paired with sensitivities.
+	 */
+	private Stream<Pair<SimmCoordinate, RandomVariableInterface>> stripVertices(Map<SimmCoordinate, RandomVariableInterface> gradient) {
+		return gradient.entrySet().stream().
+				map(z -> Pair.of(z.getKey().stripVertex(), z.getValue())).
+				collect(Collectors.groupingBy(Pair::getKey)).entrySet().stream().
+				map(group -> Pair.of(
+						group.getKey(),
+						group.getValue().stream().map(Pair::getValue).reduce(new Scalar(0.0), RandomVariableInterface::add)
+						));
+	}
+
 	public RandomVariableInterface getMargin(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
 
-		Set<BucketResult> bucketResults = gradient.entrySet().stream().
+		Set<BucketResult> bucketResults = stripVertices(gradient).
 				map(z -> Pair.of(
 						z.getKey().getSimmBucket(),
 						getWeightedSensitivity(z.getKey(), z.getValue()))).

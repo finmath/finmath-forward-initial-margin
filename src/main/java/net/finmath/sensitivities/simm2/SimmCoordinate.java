@@ -34,6 +34,17 @@ public final class SimmCoordinate {
 	}
 
 	/**
+	 * @return Returns the same coordinate without a vertex, which can be used to group different vertices together.
+	 */
+	public SimmCoordinate stripVertex() {
+		return new SimmCoordinate(null, subCurve, qualifier, bucketKey, riskClass, marginType, productClass);
+	}
+
+	public SimmCoordinate withMarginType(MarginType newMarginType) {
+		return new SimmCoordinate(vertex, subCurve, qualifier, bucketKey, riskClass, newMarginType, productClass);
+	}
+
+	/**
 	 * Gets the additional identifier needed to determine the risk factor. This shall correspond to the CRIF qualifier.
 	 * For interest rate/inflation risk factors this will be the currency.
 	 * For the FX delta this will be the currency.
