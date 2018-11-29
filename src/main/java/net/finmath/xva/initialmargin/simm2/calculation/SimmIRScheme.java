@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 /**
  * Calculates the initial margin to be posted at a fixed time according to SIMM. This calculation scheme will consider the IR Delta contribution to the total margin.
  */
-public class SimmIRDeltaScheme {
+public class SimmIRScheme {
 	private final ParameterSet parameter;
 
-	public SimmIRDeltaScheme(ParameterSet parameter) {
+	public SimmIRScheme(ParameterSet parameter) {
 		this.parameter = parameter;
 	}
 
@@ -34,7 +34,7 @@ public class SimmIRDeltaScheme {
 				reduce(new Scalar(0.0), RandomVariableInterface::add).abs().div(threshold).sqrt().cap(1.0);
 
 		Set<WeightedSensitivity> weightedSensitivities = gradient.entrySet().stream().
-				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(parameter.getRiskWeightWithScaling(z.getKey())))).
+				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(parameter.getRiskWeight(z.getKey())))).
 				collect(Collectors.toSet());
 
 		RandomVariableInterface k = weightedSensitivities.stream().

@@ -9,8 +9,8 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
-import net.finmath.xva.initialmargin.simm2.calculation.SimmIRDeltaScheme;
-import net.finmath.xva.initialmargin.simm2.calculation.SimmNonIRDeltaAndVegaScheme;
+import net.finmath.xva.initialmargin.simm2.calculation.SimmIRScheme;
+import net.finmath.xva.initialmargin.simm2.calculation.SimmNonIRScheme;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -21,18 +21,18 @@ import java.util.stream.Collectors;
  * A product whose value represents the total initial margin to be posted at a fixed time according to SIMM.
  */
 public class SimmProduct extends AbstractLIBORMonteCarloProduct {
-	private GradientProduct<SimmCoordinate> timeline;
+	private GradientProduct<SimmCoordinate> gradientProduct;
 	private double marginCalculationTime;
 	private SimmModality modality;
-	private SimmIRDeltaScheme irDeltaScheme;
-	private SimmNonIRDeltaAndVegaScheme nonIRDeltaAndVegaScheme;
+	private SimmIRScheme irScheme;
+	private SimmNonIRScheme nonIRScheme;
 
-	public SimmProduct(double marginCalculationTime, GradientProduct<SimmCoordinate> provider, SimmModality modality) {
+	public SimmProduct(double marginCalculationTime, GradientProduct<SimmCoordinate> gradientProduct, SimmModality modality) {
 		this.modality = modality;
 		this.marginCalculationTime = marginCalculationTime;
-		this.timeline = provider;
-		this.irDeltaScheme = new SimmIRDeltaScheme(modality.getParams());
-		this.nonIRDeltaAndVegaScheme = new SimmNonIRDeltaAndVegaScheme(modality.getParams());
+		this.gradientProduct = gradientProduct;
+		this.irScheme = new SimmIRScheme(modality.getParams());
+		this.nonIRScheme = new SimmNonIRScheme(modality.getParams());
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -40,7 +40,7 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 			return model.getRandomVariableForConstant(0.0);
 		}
 
-		final RandomVariableInterface simmValue = timeline.getGradient(evaluationTime, model).entrySet().stream().
+		final RandomVariableInterface simmValue = gradientProduct.getGradient(evaluationTime, model).entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getProductClass())).entrySet().stream().
 				map(group -> getSimmForProductClass(group.getKey(), group.getValue())).
 				reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
@@ -62,23 +62,13 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		return marginByRiskClass.values().stream().reduce(new Scalar(0.0), RandomVariableInterface::add);
 	}
 
-	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> sensitivities) {
-		return sensitivities.entrySet().stream().
-				collect(Collectors.groupingBy(e -> e.getKey().getRiskType())).entrySet().stream().
-				map(group -> {
-					switch (group.getKey()) {
-						case DELTA:
-							if (riskClass == RiskClass.INTEREST_RATE) {
-								return irDeltaScheme.getMargin(sensitivities);
-							}
-							return nonIRDeltaAndVegaScheme.getMargin(riskClass, sensitivities);
-						case VEGA:
-							return nonIRDeltaAndVegaScheme.getMargin(riskClass, sensitivities);
-						default:
-							return new Scalar(0.0); //TODO Curvature/BaseCorr
-					}
-				}).
-				reduce(new Scalar(0.0), RandomVariableInterface::add);
+	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
+		switch (riskClass) {
+			case INTEREST_RATE:
+				return irScheme.getMargin(gradient);
+			default:
+				return nonIRScheme.getMargin(riskClass, gradient);
+		}
 	}
 
 	public SimmModality getModality() {

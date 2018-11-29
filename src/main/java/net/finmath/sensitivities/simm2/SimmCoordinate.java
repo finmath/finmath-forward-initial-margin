@@ -11,6 +11,10 @@ public final class SimmCoordinate {
 	private MarginType marginType;
 	private ProductClass productClass;
 
+	public SimmCoordinate(Vertex vertex, String qualifier, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
+		this(vertex, null, new Qualifier(qualifier), null, riskClass, marginType, productClass);
+	}
+
 	public SimmCoordinate(Vertex vertex, String qualifier, String bucketKey, RiskClass riskClass, MarginType marginType, ProductClass productClass) {
 		this(vertex, null, new Qualifier(qualifier), bucketKey, riskClass, marginType, productClass);
 	}

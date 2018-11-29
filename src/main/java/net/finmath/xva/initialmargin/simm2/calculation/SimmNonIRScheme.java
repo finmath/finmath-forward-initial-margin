@@ -17,10 +17,10 @@ import java.util.stream.Stream;
  * Represents a product that returns the initial margin to be posted at a fixed time according to SIMM.
  * This product will consider the non-IR Delta and Vega risk contributions to the total margin.
  */
-public class SimmNonIRDeltaAndVegaScheme {
+public class SimmNonIRScheme {
 	private final ParameterSet parameter;
 
-	public SimmNonIRDeltaAndVegaScheme(ParameterSet parameter) {
+	public SimmNonIRScheme(ParameterSet parameter) {
 		this.parameter = parameter;
 	}
 
@@ -32,12 +32,17 @@ public class SimmNonIRDeltaAndVegaScheme {
 	 * @return The {@link WeightedSensitivity} object representing the computation result.
 	 */
 	public WeightedSensitivity getWeightedSensitivity(SimmCoordinate coordinate, RandomVariableInterface x) {
-		final double riskWeight = parameter.getRiskWeightWithScaling(coordinate);
+		//Additional weighting:
+		//Vega: For non-IR, non-CR we have a non-trivial volatility weight to multiply
+		//This is not included in the risk weight (the risk weight is excluded from the concentration factor)
+		RandomVariableInterface a = x.mult(parameter.getAdditionalWeight(coordinate));
+
+		final double riskWeight = parameter.getRiskWeight(coordinate);
 		final double threshold = parameter.getConcentrationThreshold(coordinate);
 		//not for credit -- here we have to sum up all sensitivities belonging to the same issuer/seniority; todo.
-		final RandomVariableInterface concentrationRiskFactor = x.abs().div(threshold).sqrt().cap(1.0);
+		final RandomVariableInterface concentrationRiskFactor = a.abs().div(threshold).sqrt().cap(1.0);
 
-		return new WeightedSensitivity(coordinate, concentrationRiskFactor, x.mult(riskWeight).mult(concentrationRiskFactor));
+		return new WeightedSensitivity(coordinate, concentrationRiskFactor, a.mult(riskWeight).mult(concentrationRiskFactor));
 	}
 
 	/**

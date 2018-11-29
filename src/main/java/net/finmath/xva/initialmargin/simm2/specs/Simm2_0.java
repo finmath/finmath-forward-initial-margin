@@ -5,6 +5,7 @@ import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -73,8 +74,10 @@ public final class Simm2_0 implements ParameterSet {
 	};
 	private static final double[] CREDIT_NON_Q_DELTA_RISK_WEIGHTS = {140.0, 2000.0, 2000.0};
 	private static final double[] CREDIT_NON_Q_DELTA_THRESHOLDS = {9500000.0, 500000.0, 500000.0};
+
 	private static final Set<String> FX_CATEGORY_1 = new HashSet<>(Arrays.asList("USD", "EUR", "JPY", "GBP", "AUD", "CHF", "CAD"));
 	private static final Set<String> FX_CATEGORY_2 = new HashSet<>(Arrays.asList("BRL", "CNY", "HKD", "INR", "KRW", "MXN", "NOK", "NZD", "RUB", "SEK", "SGD", "TRY", "ZAR"));
+	private static final double[] FX_VEGA_TRESHOLDS = { 4000E6, 1900E6, 320E6, 1900E6, 120E6, 110E6, 320E6, 110E6, 110E6 };
 
 	private static final double[] IR_DELTA_RISK_WEIGHTS_REG = {113, 113, 98, 69, 56, 52, 51, 51, 51, 53, 56, 64};
 	private static final double[] IR_DELTA_RISK_WEIGHTS_LO = {21, 21, 10, 11, 15, 20, 22, 21, 19, 20, 23, 27};
@@ -100,6 +103,18 @@ public final class Simm2_0 implements ParameterSet {
 			{0.12, 0.12, 0.20, 0.32, 0.50, 0.63, 0.71, 0.82, 0.94, 0.98, 0.99, 1.0}
 	};
 	private static final double VRW_SCALE = Math.sqrt(365.0 / 14.0) / inverseCumulativeDistribution(0.99);
+
+	private int getCurrencyCategory(String currencyCode) {
+		if (FX_CATEGORY_1.contains(currencyCode)) {
+			return 1;
+		}
+
+		if (FX_CATEGORY_2.contains(currencyCode)) {
+			return 2;
+		}
+
+		return 3;
+	}
 
 	@Override
 	public double getCrossBucketCorrelation(RiskClass rc, String left, String right) {
@@ -149,8 +164,24 @@ public final class Simm2_0 implements ParameterSet {
 				return 290E6;
 			case EQUITY:
 				return getBucketwiseValue(coordinate, EQUITY_VEGA_THRESHOLDS);
+			case INTEREST_RATE:
+				final String currency = coordinate.getQualifier().getCurrency();
+
+				if (IR_REGULAR_CURRENCIES.contains(currency)) {
+					return IR_REGULAR_WELL_TRADED_CURRENCIES.contains(currency) ? 2700E6 : 150E6;
+				}
+
+				if (IR_LOW_VOLATILITY_CURRENCIES.contains(currency)) {
+					return 960E6;
+				}
+
+				return 110E6;
+			case FX:
+				final Pair<String, String> currencyPair = coordinate.getQualifier().getCurrencyPair();
+
+				return FX_VEGA_TRESHOLDS[3 * (getCurrencyCategory(currencyPair.getLeft()) - 1) + (getCurrencyCategory(currencyPair.getRight()) - 1)];
 			default:
-				throw new UnsupportedOperationException("Vega concentration threshold for IR/FX not available yet");
+				throw new IllegalArgumentException("Unknown risk class " + coordinate.getRiskClass());
 
 		}
 	}
@@ -212,11 +243,16 @@ public final class Simm2_0 implements ParameterSet {
 			case INTEREST_RATE:
 				return getCrossVertexCorrelation(left.getVertex(), right.getVertex()) * getCrossCurveCorrelation(left, right);
 			default:
-				throw new IllegalArgumentException("Unknown risk class");
+				throw new IllegalArgumentException("Unknown risk class " + left.getRiskClass());
 		}
 	}
 
 	private double getCrossCurveCorrelation(SimmCoordinate left, SimmCoordinate right) {
+
+		if (left.getSubCurve() == null) { //There is no sub-curve for non-delta margin
+			return 1.0;
+		}
+
 		if (left.getSubCurve().equals(right.getSubCurve())) {
 			return 1.0;
 		}
@@ -229,18 +265,23 @@ public final class Simm2_0 implements ParameterSet {
 	}
 
 	@Override
-	public double getRiskWeightWithScaling(SimmCoordinate sensitivity) {
-		switch (sensitivity.getRiskType()) {
+	public double getRiskWeight(SimmCoordinate coordinate) {
+		switch (coordinate.getRiskType()) {
 			case DELTA:
-				return getDeltaRiskWeight(sensitivity);
+				return getDeltaRiskWeight(coordinate);
 			case VEGA:
-				return getVegaRiskWeight(sensitivity) * getVolatilityWeight(sensitivity);
+				return getVegaRiskWeight(coordinate);
 			default:
 				throw new UnsupportedOperationException("Risk weight for non-delta not implemented yet.");
 		}
 	}
 
-	private double getVolatilityWeight(SimmCoordinate coordinate) {
+	@Override
+	public double getAdditionalWeight(SimmCoordinate coordinate) {
+		if (coordinate.getRiskType() != MarginType.VEGA) {
+			return 1.0;
+		}
+
         switch (coordinate.getRiskClass()) {
 			case INTEREST_RATE:
 			case CREDIT_Q:
@@ -251,21 +292,21 @@ public final class Simm2_0 implements ParameterSet {
 		}
 	}
 
-	private double getVegaRiskWeight(SimmCoordinate sensitivity) {
-		switch (sensitivity.getRiskClass()) {
+	private double getVegaRiskWeight(SimmCoordinate coordinate) {
+		switch (coordinate.getRiskClass()) {
 			case INTEREST_RATE:
 				return 0.21; //D.1.34
 			case CREDIT_Q:
 			case CREDIT_NON_Q:
 				return 0.27; //E.1.39
 			case EQUITY:
-				return sensitivity.getSimmBucket().equals("12") ? 0.64 : 0.28; //G.1.57
+				return coordinate.getSimmBucket().equals("12") ? 0.64 : 0.28; //G.1.57
 			case COMMODITY:
 				return 0.38; //H.1.62
 			case FX:
 				return 0.33; //I.1.67
 			default:
-				throw new IllegalArgumentException("Unknown risk class");
+				throw new IllegalArgumentException("Unknown risk class " + coordinate.getRiskClass());
 		}
 	}
 
