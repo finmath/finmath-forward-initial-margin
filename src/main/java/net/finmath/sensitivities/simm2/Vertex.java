@@ -169,6 +169,10 @@ public enum Vertex {
 
 	public abstract double getIdealizedYcf();
 
+	public double getIdealizedDaycount() {
+		return getIdealizedYcf() * 365.0;
+	}
+
 	public static Vertex parseCrifTenor(String tenor) {
 		switch (tenor.toLowerCase().trim()) {
 			case "2w":

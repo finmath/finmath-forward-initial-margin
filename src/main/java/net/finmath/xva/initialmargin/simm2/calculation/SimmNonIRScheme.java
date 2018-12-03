@@ -17,11 +17,10 @@ import java.util.stream.Stream;
  * Represents a product that returns the initial margin to be posted at a fixed time according to SIMM.
  * This product will consider the non-IR Delta and Vega risk contributions to the total margin.
  */
-public class SimmNonIRScheme {
-	private final ParameterSet parameter;
+public class SimmNonIRScheme extends SimmBaseScheme {
 
 	public SimmNonIRScheme(ParameterSet parameter) {
-		this.parameter = parameter;
+		super(parameter);
 	}
 
 	/**
@@ -45,54 +44,25 @@ public class SimmNonIRScheme {
 		return new WeightedSensitivity(coordinate, concentrationRiskFactor, a.mult(riskWeight).mult(concentrationRiskFactor));
 	}
 
-	/**
-	 * Calculates the result of a bucket aggregation, i. e. the figures K including the constituents' weighted sensitivities.
-	 *
-	 * @param weightedSensitivities The set of the weighted sensitivities of the trades in the bucket.
-	 * @return A {@link BucketResult} containing the whole thing.
-	 */
-	public BucketResult getBucketAggregation(String bucketName, Set<WeightedSensitivity> weightedSensitivities) {
-		RandomVariableInterface k = weightedSensitivities.stream().
+	public BucketResult getBucketAggregation(String bucketName, Map<SimmCoordinate, RandomVariableInterface> gradient) {
+		final Set<WeightedSensitivity> weightedSensitivities = gradient.entrySet().stream().map(e -> getWeightedSensitivity(e.getKey(), e.getValue())).collect(Collectors.toSet());
+
+		RandomVariableInterface k = gradient.entrySet().stream().map(e -> getWeightedSensitivity(e.getKey(), e.getValue())).
 				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermNonIR(v, parameter))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);
-	}
 
-	/**
-	 * Calculates the resulting delta margin according to ISDA SIMM v2.0 B.8 (d)
-	 *
-	 * @param results A collection of per-bucket results.
-	 * @return The delta margin.
-	 */
-	public RandomVariableInterface getMargin(Collection<BucketResult> results, RiskClass riskClass) {
-		RandomVariableInterface kResidual = results.stream().
-				filter(bK -> bK.getBucketName().equalsIgnoreCase("residual")).
-				findAny().map(BucketResult::getK).orElse(new Scalar(0.0));
-
-		return results.stream().
-				filter(bK -> !bK.getBucketName().equalsIgnoreCase("residual")).
-				flatMap(bK1 -> results.stream().
-						filter(bK -> !bK.getBucketName().equalsIgnoreCase("residual")).
-						map(bK2 -> {
-
-							if (bK1.getBucketName().equalsIgnoreCase(bK2.getBucketName())) {
-								return bK1.getK().squared();
-							}
-							return bK1.getS().mult(bK2.getS()).
-									mult(parameter.getCrossBucketCorrelation(riskClass, bK1.getBucketName(), bK2.getBucketName()));
-						})).
-				reduce(new Scalar(0.0), RandomVariableInterface::add).
-				sqrt().add(kResidual);
 	}
 
 	/**
 	 * Strips the vertices of the gradient summing the sensitivities of different vertices together.
-	 * Vertex-level sensitivities are neither needed for vega margins nor for delta margins (since this scheme does not handle IR delta).
+	 * Vertex-level sensitivities are neither needed for vega margins (only the sum across vertices is needed) nor for delta margins (since this scheme does not handle IR delta).
 	 * @param gradient The gradient which may contain coordinates with vertices.
 	 * @return A stream of vertex-less coordinates paired with sensitivities.
 	 */
-	private Stream<Pair<SimmCoordinate, RandomVariableInterface>> stripVertices(Map<SimmCoordinate, RandomVariableInterface> gradient) {
+	@Override
+	protected Stream<Map.Entry<SimmCoordinate, RandomVariableInterface>> streamGradient(Map<SimmCoordinate, RandomVariableInterface> gradient) {
 		return gradient.entrySet().stream().
 				map(z -> Pair.of(z.getKey().stripVertex(), z.getValue())).
 				collect(Collectors.groupingBy(Pair::getKey)).entrySet().stream().
@@ -100,19 +70,5 @@ public class SimmNonIRScheme {
 						group.getKey(),
 						group.getValue().stream().map(Pair::getValue).reduce(new Scalar(0.0), RandomVariableInterface::add)
 						));
-	}
-
-	public RandomVariableInterface getMargin(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
-
-		Set<BucketResult> bucketResults = stripVertices(gradient).
-				map(z -> Pair.of(
-						z.getKey().getSimmBucket(),
-						getWeightedSensitivity(z.getKey(), z.getValue()))).
-				collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toSet()))).
-				entrySet().stream().
-				map(bucketWS -> getBucketAggregation(bucketWS.getKey(), bucketWS.getValue())).
-				collect(Collectors.toSet());
-
-		return getMargin(bucketResults, riskClass);
 	}
 }

@@ -7,8 +7,6 @@ import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import static net.finmath.functions.NormalDistribution.inverseCumulativeDistribution;
@@ -32,7 +30,7 @@ public final class Simm2_0 implements ParameterSet {
 	};
 	private static final double[] EQUITY_DELTA_RISK_WEIGHTS = {25.0, 32.0, 29.0, 27.0, 18.0, 21.0, 25.0, 22.0, 27.0, 29.0, 16.0, 16.0, 32.0};
 	private static final double[] EQUITY_DELTA_THRESHOLDS = {3300000.0, 3300000.0, 3300000.0, 3300000.0, 3.0E7, 3.0E7, 3.0E7, 3.0E7, 600000.0, 2300000.0, 9.0E8, 9.0E8, 600000.0};
-	private static final double[] EQUITY_VEGA_THRESHOLDS = {800E6, 800E6, 800E6, 800E6, 7300E6, 7300E6, 7300E6, 7300E6, 70E6, 300E6, 21000E6, 21000E6, 70E6 };
+	private static final double[] EQUITY_VEGA_THRESHOLDS = {800E6, 800E6, 800E6, 800E6, 7300E6, 7300E6, 7300E6, 7300E6, 70E6, 300E6, 21000E6, 21000E6, 70E6};
 	private static final double[] COMMODITY_INTRA_BUCKET_CORRELATIONS = {0.3, 0.97, 0.93, 0.98, 0.99, 0.92, 1.0, 0.58, 1.0, 0.1, 0.55, 0.64, 0.71, 0.22, 0.29, 0.0, 0.21};
 	private static final double[][] COMMODITY_CROSS_BUCKET_CORRELATIONS = {
 			{0.00, 0.18, 0.15, 0.20, 0.25, 0.08, 0.19, 0.01, 0.27, 0.00, 0.15, 0.02, 0.06, 0.07, -0.04, 0.00, 0.06},
@@ -75,9 +73,9 @@ public final class Simm2_0 implements ParameterSet {
 	private static final double[] CREDIT_NON_Q_DELTA_RISK_WEIGHTS = {140.0, 2000.0, 2000.0};
 	private static final double[] CREDIT_NON_Q_DELTA_THRESHOLDS = {9500000.0, 500000.0, 500000.0};
 
-	private static final Set<String> FX_CATEGORY_1 = new HashSet<>(Arrays.asList("USD", "EUR", "JPY", "GBP", "AUD", "CHF", "CAD"));
-	private static final Set<String> FX_CATEGORY_2 = new HashSet<>(Arrays.asList("BRL", "CNY", "HKD", "INR", "KRW", "MXN", "NOK", "NZD", "RUB", "SEK", "SGD", "TRY", "ZAR"));
-	private static final double[] FX_VEGA_TRESHOLDS = { 4000E6, 1900E6, 320E6, 1900E6, 120E6, 110E6, 320E6, 110E6, 110E6 };
+	private static final Set<String> FX_CATEGORY_1 = ImmutableSet.of("USD", "EUR", "JPY", "GBP", "AUD", "CHF", "CAD");
+	private static final Set<String> FX_CATEGORY_2 = ImmutableSet.of("BRL", "CNY", "HKD", "INR", "KRW", "MXN", "NOK", "NZD", "RUB", "SEK", "SGD", "TRY", "ZAR");
+	private static final double[] FX_VEGA_THRESHOLDS = {4000E6, 1900E6, 320E6, 1900E6, 120E6, 110E6, 320E6, 110E6, 110E6};
 
 	private static final double[] IR_DELTA_RISK_WEIGHTS_REG = {113, 113, 98, 69, 56, 52, 51, 51, 51, 53, 56, 64};
 	private static final double[] IR_DELTA_RISK_WEIGHTS_LO = {21, 21, 10, 11, 15, 20, 22, 21, 19, 20, 23, 27};
@@ -179,7 +177,7 @@ public final class Simm2_0 implements ParameterSet {
 			case FX:
 				final Pair<String, String> currencyPair = coordinate.getQualifier().getCurrencyPair();
 
-				return FX_VEGA_TRESHOLDS[3 * (getCurrencyCategory(currencyPair.getLeft()) - 1) + (getCurrencyCategory(currencyPair.getRight()) - 1)];
+				return FX_VEGA_THRESHOLDS[3 * (getCurrencyCategory(currencyPair.getLeft()) - 1) + (getCurrencyCategory(currencyPair.getRight()) - 1)];
 			default:
 				throw new IllegalArgumentException("Unknown risk class " + coordinate.getRiskClass());
 
@@ -227,6 +225,11 @@ public final class Simm2_0 implements ParameterSet {
 			return 1.0;
 		}
 
+		//B.11 (c) states the correlations for the curvature margin are squared
+		if (left.getRiskType() == MarginType.CURVATURE) {
+			return Math.pow(getIntraBucketCorrelation(left.withMarginType(MarginType.VEGA), right.withMarginType(MarginType.VEGA)), 2.0);
+		}
+
 		switch (left.getRiskClass()) {
 			case FX:
 				return 0.5;
@@ -271,8 +274,10 @@ public final class Simm2_0 implements ParameterSet {
 				return getDeltaRiskWeight(coordinate);
 			case VEGA:
 				return getVegaRiskWeight(coordinate);
+			case CURVATURE:
+				return 0.5 * Math.min(1.0, 14.0 / coordinate.getVertex().getIdealizedDaycount());
 			default:
-				throw new UnsupportedOperationException("Risk weight for non-delta not implemented yet.");
+				throw new UnsupportedOperationException("Risk weight for BaseCorr not implemented yet.");
 		}
 	}
 
@@ -282,7 +287,7 @@ public final class Simm2_0 implements ParameterSet {
 			return 1.0;
 		}
 
-        switch (coordinate.getRiskClass()) {
+		switch (coordinate.getRiskClass()) {
 			case INTEREST_RATE:
 			case CREDIT_Q:
 			case CREDIT_NON_Q:
