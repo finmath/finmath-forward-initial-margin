@@ -5,7 +5,9 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.junit.Test;
@@ -47,10 +49,10 @@ public class SensitivityApproximationTest {
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> generateData() {
 		return Arrays.asList(new Object[][]{
-			{TestProductType.SWAPS },
-			{TestProductType.SWAPTIONS },
-			{TestProductType.BERMUDANCALLABLE },
-			{TestProductType.BERMUDANCANCELABLE },
+			{TestProductType.SWAPS, WeightMode.TIMEDEPENDENT },
+			{TestProductType.SWAPTIONS, WeightMode.TIMEDEPENDENT },
+			{TestProductType.BERMUDANCALLABLE, WeightMode.TIMEDEPENDENT },
+			{TestProductType.BERMUDANCANCELABLE, WeightMode.TIMEDEPENDENT },
 		});
 	}
 
@@ -60,19 +62,30 @@ public class SensitivityApproximationTest {
 	}
 	static final DecimalFormat formatterReal1 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
-		formatterReal1.applyPattern("0.0");
+		formatterReal1.applyPattern("0.00");
 	}
 	static final DecimalFormat formatterPercent = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 	{
-		formatterPercent.applyPattern("0%");
+		formatterPercent.applyPattern("0.0%");
+	}
+
+	private static class MvaResult {
+		private double mva;
+		private Map<Double, Double> expectedIM;
+		public MvaResult(double mva, Map<Double, Double> expectedIM) {
+			super();
+			this.mva = mva;
+			this.expectedIM = expectedIM;
+		}		
 	}
 
 	// Model Paths
-	static final int numberOfPaths = 100; // Use 1000 or more for results in publication.
-	static final double simulationTimeDt = 0.25;        // Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
+	static final int numberOfPaths = 1000; // Use 1000 or more for results in publication.
+	static final double simulationTimeDt = 0.1;        // Value is higher to let unit test run on low mem. Set this to 0.1 for better results.
 	static final double notional = 100;
 	static final boolean isPrintProfile = false;
 	static final double fundingSpread = 0.005; // For MVA
+	static final double periodLength = 0.5;
 
 	public enum TestProductType {
 		SWAPS,
@@ -83,15 +96,17 @@ public class SensitivityApproximationTest {
 
 	// Selected TestProducts
 	private final TestProductType testProductType;
+	private final WeightMode weightMode;
 
 	public static void main(String[] args) throws CalculationException {
-		SensitivityApproximationTest sat = new SensitivityApproximationTest(TestProductType.BERMUDANCALLABLE);
+		SensitivityApproximationTest sat = new SensitivityApproximationTest(TestProductType.BERMUDANCALLABLE, WeightMode.TIMEDEPENDENT);
 		sat.test();
 	}
 
-	public SensitivityApproximationTest(TestProductType testProductType) {
+	public SensitivityApproximationTest(TestProductType testProductType, WeightMode weightMode) {
 		super();
 		this.testProductType = testProductType;
+		this.weightMode = weightMode;
 	}
 
 	@Test
@@ -135,15 +150,26 @@ public class SensitivityApproximationTest {
 		switch (testProductType) {
 		case SWAPS:
 			exerciseDates = new double[] { 0.0 };
-			numberOfPeriods = new int[] { 10, 20, 25, 30, 40 };
+			if(isPrintProfile) {
+				numberOfPeriods = new int[] { 20 };
+			}
+			else {
+				numberOfPeriods = new int[] { 10, 20, 24, 30, 40 };
+			}
 			break;
 		case SWAPTIONS:
 			exerciseDates = new double[] { 5.0, 10.0 };
-			numberOfPeriods = new int[] { 4, 8, 10, 12, 16 };
+			if(isPrintProfile) {
+				numberOfPeriods = new int[] { 10, 16 };
+			}
+			else {
+				numberOfPeriods = new int[] { 4, 8, 10, 12, 16 };
+			}
 			break;
 		case BERMUDANCALLABLE:
 		case BERMUDANCANCELABLE:
 			exerciseDates = new double[] { 5.0, 8.0, 10.0 };
+//			exerciseDates = new double[] { 10.0 };
 			numberOfPeriods = new int[] { 20 };
 			break;
 		default:
@@ -151,23 +177,23 @@ public class SensitivityApproximationTest {
 		}
 
 		System.out.println("Product....................: " + testProductType.name());
-		System.out.println("");
+		System.out.println("Sensitivity Transformation.: " + weightMode.name());
 		System.out.println();
 
 		// Create test products
-		AbstractSIMMProduct[] products = createProducts(testProductType, exerciseDates, numberOfPeriods, forwardCurve, discountCurve);
+		AbstractSIMMProduct[] products = createProducts(testProductType, exerciseDates, periodLength, numberOfPeriods, forwardCurve, discountCurve);
 
 		// Execute test function
-		testSIMMProductApproximation(products, exerciseDates, numberOfPeriods, forwardCurve, discountCurve, model, isConsiderOISSensis, interpolationStep, simulationTimeDt);
+		testSIMMProductApproximation(products, exerciseDates, numberOfPeriods, forwardCurve, discountCurve, model, isConsiderOISSensis, interpolationStep, simulationTimeDt, weightMode);
 	}
 
 	public static void testSIMMProductApproximation(AbstractSIMMProduct[] product, double[] exerciseDates,
-			int[] numberOfPeriods, ForwardCurve forwardCurve, DiscountCurve discountCurve, LIBORModelMonteCarloSimulationInterface model, boolean isConsiderOISSensis, double interpolationStep, double simulationTimeDt) throws CalculationException {
+			int[] numberOfPeriods, ForwardCurve forwardCurve, DiscountCurve discountCurve, LIBORModelMonteCarloSimulationInterface model, boolean isConsiderOISSensis, double interpolationStep, double simulationTimeDt, WeightMode weightMode) throws CalculationException {
 
 		double timeStep = simulationTimeDt;
 		boolean isUseAnalyticSwapSensis = false;
 
-		System.out.println("Exercise" + "\t" + "Maturity" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpol." + "\t" + "Time Const Weights." + "\t" + "MVA Exact" + "\t" + "MVA Deviation Melting" + "\t" + "MVA Deviation Interpolation" + "\t" + "MVA Const Weights" + "\t" + "MVA Det Funding");
+		System.out.println("Exercise" + "\t" + "Maturity" + "\t" + "Time Exact" + "\t" + "Time Melting" + "\t" + "Time Interpol." + "\t" + "Time Exact C" + "\t" + "Time Melting C" + "\t" + "Time Interpol C" + "\t" + "MVA Exact" + "\t" + "MVA Dev Melting" + "\t" + "MVA Dev Interpol" + "\t" + "MVA Exact C" + "\t" + "MVA Dev Melting C" + "\t" + "MVA Dev Interpol C" + "\t" + "MVA Det Funding");
 
 		int productIndex = 0;
 		for (int exerciseIndex = 0; exerciseIndex < exerciseDates.length; exerciseIndex++) {
@@ -177,81 +203,73 @@ public class SensitivityApproximationTest {
 				/*
 				 * Calculate IM
 				 */
-				RandomVariableInterface[] initialMarginExactConstantWeights = new RandomVariableInterface[(int) (finalIMTime / timeStep) + 1];
 
 				/*
 				 * 1) Exact
 				 */
 				long timeStart = System.currentTimeMillis();
-				RandomVariableInterface[] initialMarginExact = new RandomVariableInterface[(int) (finalIMTime / timeStep) + 1];
-				for (int i = 0; i < finalIMTime / timeStep + 1; i++) {
-					initialMarginExact[i] = product[productIndex].getInitialMargin(i * timeStep, model, "EUR", SensitivityMode.EXACT, WeightMode.TIMEDEPENDENT, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
-				}
+				MvaResult mvaExact = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.EXACT, SensitivityMode.EXACT, WeightMode.TIMEDEPENDENT, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEnd = System.currentTimeMillis();
 
-				double mvaExact = getMVA(initialMarginExact, model, timeStep, fundingSpread, MVAMode.EXACT);
-				double mvaApproximation = getMVA(initialMarginExact, model, timeStep, fundingSpread, MVAMode.APPROXIMATION);
-				initialMarginExact = null;
+				MvaResult mvaApproximation = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.APPROXIMATION, SensitivityMode.EXACT, WeightMode.TIMEDEPENDENT, isUseAnalyticSwapSensis, isConsiderOISSensis);
 
 				/*
-				 * 1.2) Exact with constant weights
+				 * 1) Exact Const
 				 */
 				long timeStartConstantWeights = System.currentTimeMillis();
-				// Calculate benchmark MVA from initial margin under time dependent sensitivity transformation
-				for (int i = 0; i < finalIMTime / timeStep + 1; i++) {
-					initialMarginExactConstantWeights[i] = product[productIndex].getInitialMargin(i * timeStep, model, "EUR", SensitivityMode.EXACT, WeightMode.CONSTANT, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
-				}
-				long timeEndContantWeights = System.currentTimeMillis();
-
-				double mvaExactConstantWeights = getMVA(initialMarginExactConstantWeights, model, timeStep, fundingSpread, MVAMode.EXACT);
-				initialMarginExactConstantWeights = null;
+				MvaResult mvaExactConstantWeights = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.EXACT, SensitivityMode.EXACT, WeightMode.CONSTANT, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				long timeEndConstantWeights = System.currentTimeMillis();
 
 				/*
 				 * 2) Melting (on SIMM buckets)
 				 */
 				long timeStartMelting = System.currentTimeMillis();
-				RandomVariableInterface[] initialMarginMeling = new RandomVariableInterface[(int) (finalIMTime / timeStep) + 1];
-				for (int i = 0; i < finalIMTime / timeStep + 1; i++) {
-					initialMarginMeling[i] = product[productIndex].getInitialMargin(i * timeStep, model, "EUR", SensitivityMode.MELTINGSIMMBUCKETS, WeightMode.TIMEDEPENDENT, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
-				}
+				MvaResult mvaMelting = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.EXACT, SensitivityMode.MELTINGSIMMBUCKETS, WeightMode.TIMEDEPENDENT, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndMelting = System.currentTimeMillis();
 
-				double mvaMelting = getMVA(initialMarginMeling, model, timeStep, fundingSpread, MVAMode.EXACT);
-				initialMarginMeling = null;
+				long timeStartMeltingConstant = System.currentTimeMillis();
+				MvaResult mvaMeltingConstant = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.EXACT, SensitivityMode.MELTINGSIMMBUCKETS, WeightMode.CONSTANT, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				long timeEndMeltingConstant = System.currentTimeMillis();
 
 				/*
 				 * 3) Interpolation
 				 */
 				long timeStartInterpolation = System.currentTimeMillis();
-				RandomVariableInterface[] initialMarginInterpolation = new RandomVariableInterface[(int) (finalIMTime / timeStep) + 1];
-				for (int i = 0; i < finalIMTime / timeStep + 1; i++) {
-					initialMarginInterpolation[i] = product[productIndex].getInitialMargin(i * timeStep, model, "EUR", SensitivityMode.INTERPOLATION, WeightMode.TIMEDEPENDENT, interpolationStep, isUseAnalyticSwapSensis, isConsiderOISSensis);
-				}
+				MvaResult mvaInterpolation = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.EXACT, SensitivityMode.INTERPOLATION, WeightMode.TIMEDEPENDENT, isUseAnalyticSwapSensis, isConsiderOISSensis);
 				long timeEndInterpolation = System.currentTimeMillis();
 
-				double mvaInterpolation = getMVA(initialMarginInterpolation, model, timeStep, fundingSpread, MVAMode.EXACT);
-				initialMarginInterpolation = null;
+				long timeStartInterpolationConstant = System.currentTimeMillis();
+				MvaResult mvaInterpolationConstant = getMVA(model, product[productIndex], finalIMTime, timeStep, fundingSpread, MVAMode.EXACT, SensitivityMode.INTERPOLATION, WeightMode.CONSTANT, isUseAnalyticSwapSensis, isConsiderOISSensis);
+				long timeEndInterpolationConstant = System.currentTimeMillis();
 
+				boolean isPrintProfileConstant = true;
 				// Print Result and calculate Deviations
 				if (isPrintProfile) {
-					System.out.println("Exact" + "\t" + "Melting" + "\t" + "Interpolation");
-				}
-				for (int i = 0; i < finalIMTime / timeStep + 1; i++) {
-					if (isPrintProfile) {
-						System.out.println(initialMarginExact[i].getAverage() + "\t" + initialMarginMeling[i].getAverage() + "\t" + initialMarginInterpolation[i].getAverage());
+					System.out.println("time" + "\t" + "exact" + "\t" + "melting" + "\t" + "interpolation");
+					for (int i = 0; i < finalIMTime / timeStep + 1; i++) {
+						if(isPrintProfileConstant) {
+							System.out.println((i*timeStep) + "\t" + mvaExactConstantWeights.expectedIM.get(i*timeStep).doubleValue() + "\t" + mvaMeltingConstant.expectedIM.get(i*timeStep).doubleValue() + "\t" + mvaInterpolationConstant.expectedIM.get(i*timeStep).doubleValue());
+						}
+						else {
+							System.out.println((i*timeStep) + "\t" + mvaExact.expectedIM.get(i*timeStep).doubleValue() + "\t" + mvaMelting.expectedIM.get(i*timeStep).doubleValue() + "\t" + mvaInterpolation.expectedIM.get(i*timeStep).doubleValue());
+						}
 					}
 				}
 
-				System.out.println(exerciseDates[exerciseIndex] + "\t" + numberOfPeriods[swapPeriodsIndex] +
+				System.out.println(exerciseDates[exerciseIndex] + "\t" + (numberOfPeriods[swapPeriodsIndex]*periodLength) +
 						"\t" + formatterTime.format((timeEnd - timeStart) / 1000.0) + "s" +
 						"\t" + formatterTime.format((timeEndMelting - timeStartMelting) / 1000.0) + "s" +
 						"\t" + formatterTime.format((timeEndInterpolation - timeStartInterpolation) / 1000.0) + "s" +
-						"\t" + formatterTime.format((timeEndContantWeights - timeStartConstantWeights) / 1000.0) + "s" +
-						"\t" + formatterReal1.format(mvaExact*100) +
-						"\t" + formatterPercent.format((mvaMelting - mvaExact)/mvaExact) +
-						"\t" + formatterPercent.format((mvaInterpolation - mvaExact)/mvaExact) +
-						"\t" + formatterReal1.format(mvaExactConstantWeights*100) +
-						"\t" + formatterReal1.format(mvaApproximation*100)
+						"\t" + formatterTime.format((timeEndConstantWeights - timeStartConstantWeights) / 1000.0) + "s" +
+						"\t" + formatterTime.format((timeEndMeltingConstant - timeStartMeltingConstant) / 1000.0) + "s" +
+						"\t" + formatterTime.format((timeEndInterpolationConstant - timeStartInterpolationConstant) / 1000.0) + "s" +
+						"\t" + formatterReal1.format(mvaExact.mva*100) +
+						"\t" + formatterPercent.format((mvaMelting.mva - mvaExact.mva)/mvaExact.mva) +
+						"\t" + formatterPercent.format((mvaInterpolation.mva - mvaExact.mva)/mvaExact.mva) +
+						"\t" + formatterReal1.format(mvaExactConstantWeights.mva*100) +
+						"\t" + formatterPercent.format((mvaMeltingConstant.mva - mvaExact.mva)/mvaExact.mva) +
+						"\t" + formatterPercent.format((mvaInterpolationConstant.mva - mvaExact.mva)/mvaExact.mva) +
+						"\t" + formatterReal1.format(mvaApproximation.mva*100)
 						);
 
 				productIndex++;
@@ -261,14 +279,17 @@ public class SensitivityApproximationTest {
 		System.out.println("\n");
 	}
 
-	public static AbstractSIMMProduct[] createProducts(TestProductType type, double[] exerciseDates, int[] periodNumber, ForwardCurve forwardCurve, DiscountCurve discountCurve) throws CalculationException {
+	/*
+	 * @TODO HARDCODED PERIOD LENGTH: BAD. Fix.
+	 */
+	public static AbstractSIMMProduct[] createProducts(TestProductType type, double[] exerciseDates, double periodLength, int[] numberOfPeriods, ForwardCurve forwardCurve, DiscountCurve discountCurve) throws CalculationException {
 
 		ArrayList<AbstractSIMMProduct> products = new ArrayList<>();
 		double[] fixingDates;
 		double[] paymentDates;
 		double[] swapRates;
 		double[] swapTenor;
-		double[] periodLength;
+		double[] periodLengths;
 		double[] periodNotionals;
 		boolean[] isPeriodStartDateExerciseDate;
 
@@ -278,16 +299,16 @@ public class SensitivityApproximationTest {
 
 			// 1) Swap Input
 			double startTime = 0.0;    // Exercise date
-			for (int i = 0; i < periodNumber.length; i++) {
-				fixingDates = new double[periodNumber[i]];
-				paymentDates = new double[periodNumber[i]];
-				swapRates = new double[periodNumber[i]];
-				swapTenor = new double[periodNumber[i] + 1];
+			for (int i = 0; i < numberOfPeriods.length; i++) {
+				fixingDates = new double[numberOfPeriods[i]];
+				paymentDates = new double[numberOfPeriods[i]];
+				swapRates = new double[numberOfPeriods[i]];
+				swapTenor = new double[numberOfPeriods[i] + 1];
 
 				// Fill data
-				fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> startTime + n * 0.5).toArray();
-				paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> startTime + (n + 1) * 0.5).toArray();
-				swapTenor = IntStream.range(0, periodNumber[i] + 1).mapToDouble(n -> startTime + n * 0.5).toArray();
+				fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> startTime + n * periodLength).toArray();
+				paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> startTime + (n + 1) * periodLength).toArray();
+				swapTenor = IntStream.range(0, numberOfPeriods[i] + 1).mapToDouble(n -> startTime + n * periodLength).toArray();
 				Arrays.fill(swapRates, SIMMTest.getParSwaprate(forwardCurve, discountCurve, swapTenor));
 
 				products.add(new SIMMSimpleSwap(fixingDates, paymentDates, swapRates, true /*isPayFix*/, notional, new String[]{"OIS", "Libor6m"}, "EUR"));
@@ -297,22 +318,22 @@ public class SensitivityApproximationTest {
 		case SWAPTIONS:
 
 			for (int i = 0; i < exerciseDates.length; i++) {
-				for (int j = 0; j < periodNumber.length; j++) {
+				for (int j = 0; j < numberOfPeriods.length; j++) {
 
-					fixingDates = new double[periodNumber[j]];
-					paymentDates = new double[periodNumber[j]];
-					swapRates = new double[periodNumber[j]];
-					swapTenor = new double[periodNumber[j] + 1];
+					fixingDates = new double[numberOfPeriods[j]];
+					paymentDates = new double[numberOfPeriods[j]];
+					swapRates = new double[numberOfPeriods[j]];
+					swapTenor = new double[numberOfPeriods[j] + 1];
 
-					periodLength = new double[paymentDates.length];
-					periodNotionals = new double[periodLength.length];
+					periodLengths = new double[paymentDates.length];
+					periodNotionals = new double[periodLengths.length];
 
 					int index = i;
 					// Set values
-					fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> exerciseDates[index] + n * 0.5).toArray();
-					paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> exerciseDates[index] + (n + 1) * 0.5).toArray();
-					swapTenor = IntStream.range(0, periodNumber[j] + 1).mapToDouble(n -> exerciseDates[index] + n * 0.5).toArray();
-					Arrays.fill(periodLength, 0.5);
+					fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> exerciseDates[index] + n * periodLength).toArray();
+					paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> exerciseDates[index] + (n + 1) * periodLength).toArray();
+					swapTenor = IntStream.range(0, numberOfPeriods[j] + 1).mapToDouble(n -> exerciseDates[index] + n * periodLength).toArray();
+					Arrays.fill(periodLengths, periodLength);
 					Arrays.fill(periodNotionals, notional);
 					Arrays.fill(swapRates, SIMMTest.getParSwaprate(forwardCurve, discountCurve, swapTenor));
 
@@ -325,16 +346,16 @@ public class SensitivityApproximationTest {
 		case BERMUDANCALLABLE:
 
 			for (int i = 0; i < exerciseDates.length; i++) {
-				for (int j = 0; j < periodNumber.length; j++) {
+				for (int j = 0; j < numberOfPeriods.length; j++) {
 
-					fixingDates = new double[periodNumber[j]];
-					paymentDates = new double[periodNumber[j]];
-					swapRates = new double[periodNumber[j]];
-					swapTenor = new double[periodNumber[j] + 1];
+					fixingDates = new double[numberOfPeriods[j]];
+					paymentDates = new double[numberOfPeriods[j]];
+					swapRates = new double[numberOfPeriods[j]];
+					swapTenor = new double[numberOfPeriods[j] + 1];
 
-					periodLength = new double[paymentDates.length];
-					periodNotionals = new double[periodLength.length];
-					isPeriodStartDateExerciseDate = new boolean[periodLength.length];
+					periodLengths = new double[paymentDates.length];
+					periodNotionals = new double[periodLengths.length];
+					isPeriodStartDateExerciseDate = new boolean[periodLengths.length];
 					Arrays.fill(isPeriodStartDateExerciseDate, false);
 					isPeriodStartDateExerciseDate[0] = true;
 					isPeriodStartDateExerciseDate[4] = true;
@@ -343,13 +364,13 @@ public class SensitivityApproximationTest {
 
 					int index = i;
 					// Set values
-					fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> exerciseDates[index] + n * 0.5).toArray();
-					paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> exerciseDates[index] + (n + 1) * 0.5).toArray();
-					swapTenor = IntStream.range(0, periodNumber[j] + 1).mapToDouble(n -> exerciseDates[index] + n * 0.5).toArray();
-					Arrays.fill(periodLength, 0.5);
+					fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> exerciseDates[index] + n * periodLength).toArray();
+					paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> exerciseDates[index] + (n + 1) * periodLength).toArray();
+					swapTenor = IntStream.range(0, numberOfPeriods[j] + 1).mapToDouble(n -> exerciseDates[index] + n * periodLength).toArray();
+					Arrays.fill(periodLengths, periodLength);
 					Arrays.fill(periodNotionals, notional);
 					Arrays.fill(swapRates, SIMMTest.getParSwaprate(forwardCurve, discountCurve, swapTenor));
-					products.add(new SIMMBermudanSwaption(fixingDates, periodLength, paymentDates, periodNotionals,
+					products.add(new SIMMBermudanSwaption(fixingDates, periodLengths, paymentDates, periodNotionals,
 							swapRates, isPeriodStartDateExerciseDate, ExerciseType.Callable, new String[]{"OIS", "Libor6m"}, "EUR"));
 				}
 			}
@@ -358,16 +379,16 @@ public class SensitivityApproximationTest {
 		case BERMUDANCANCELABLE:
 
 			for (int i = 0; i < exerciseDates.length; i++) {
-				for (int j = 0; j < periodNumber.length; j++) {
+				for (int j = 0; j < numberOfPeriods.length; j++) {
 
-					fixingDates = new double[periodNumber[j]];
-					paymentDates = new double[periodNumber[j]];
-					swapRates = new double[periodNumber[j]];
-					swapTenor = new double[periodNumber[j] + 1];
+					fixingDates = new double[numberOfPeriods[j]];
+					paymentDates = new double[numberOfPeriods[j]];
+					swapRates = new double[numberOfPeriods[j]];
+					swapTenor = new double[numberOfPeriods[j] + 1];
 
-					periodLength = new double[paymentDates.length];
-					periodNotionals = new double[periodLength.length];
-					isPeriodStartDateExerciseDate = new boolean[periodLength.length];
+					periodLengths = new double[paymentDates.length];
+					periodNotionals = new double[periodLengths.length];
+					isPeriodStartDateExerciseDate = new boolean[periodLengths.length];
 					Arrays.fill(isPeriodStartDateExerciseDate, false);
 					isPeriodStartDateExerciseDate[0] = true;
 					isPeriodStartDateExerciseDate[4] = true;
@@ -376,13 +397,13 @@ public class SensitivityApproximationTest {
 
 					int index = i;
 					// Set values
-					fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> exerciseDates[index] + n * 0.5).toArray();
-					paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> exerciseDates[index] + (n + 1) * 0.5).toArray();
-					swapTenor = IntStream.range(0, periodNumber[j] + 1).mapToDouble(n -> exerciseDates[index] + n * 0.5).toArray();
-					Arrays.fill(periodLength, 0.5);
+					fixingDates = IntStream.range(0, fixingDates.length).mapToDouble(n -> exerciseDates[index] + n * periodLength).toArray();
+					paymentDates = IntStream.range(0, paymentDates.length).mapToDouble(n -> exerciseDates[index] + (n + 1) * periodLength).toArray();
+					swapTenor = IntStream.range(0, numberOfPeriods[j] + 1).mapToDouble(n -> exerciseDates[index] + n * periodLength).toArray();
+					Arrays.fill(periodLengths, periodLength);
 					Arrays.fill(periodNotionals, notional);
 					Arrays.fill(swapRates, SIMMTest.getParSwaprate(forwardCurve, discountCurve, swapTenor));
-					products.add(new SIMMBermudanSwaption(fixingDates, periodLength, paymentDates, periodNotionals,
+					products.add(new SIMMBermudanSwaption(fixingDates, periodLengths, paymentDates, periodNotionals,
 							swapRates, isPeriodStartDateExerciseDate, ExerciseType.Cancelable, new String[]{"OIS", "Libor6m"}, "EUR"));
 				}
 			}
@@ -394,18 +415,25 @@ public class SensitivityApproximationTest {
 		return products.stream().toArray(AbstractSIMMProduct[]::new);
 	}
 
-	public static double getMVA(RandomVariableInterface[] initialMargin, LIBORModelMonteCarloSimulationInterface model, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException {
+	public static MvaResult getMVA(LIBORModelMonteCarloSimulationInterface model, AbstractSIMMProduct product, double finalIMTime, double timeStep, double fundingSpread, MVAMode mvaMode, SensitivityMode sensitivityMode, WeightMode weightMode, boolean isUseAnalyticSwapSensis, boolean isConsiderOISSensis) throws CalculationException {
+
+		Map<Double, Double> expectedIM = new HashMap<Double, Double>();
 
 		RandomVariableInterface forwardBond;
 		RandomVariableInterface MVA = new RandomVariable(0.0);
-		for (int i = 0; i < initialMargin.length; i++) {
-			forwardBond = model.getNumeraire((i + 1) * timeStep).mult(Math.exp((i + 1) * timeStep * fundingSpread)).invert();
-			forwardBond = forwardBond.sub(model.getNumeraire(i * timeStep).mult(Math.exp(i * timeStep * fundingSpread)).invert());
+		for (int i = 0; i < (int) (finalIMTime / timeStep)+1; i++) {
+			double time = i * timeStep;
+			double timeNext = (i+1) * timeStep;
+			RandomVariableInterface initialMargin = product.getInitialMargin(time, model, "EUR", sensitivityMode, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			forwardBond = model.getNumeraire((i + 1) * timeStep).mult(Math.exp(timeNext * fundingSpread)).invert();
+			forwardBond = forwardBond.sub(model.getNumeraire(time).mult(Math.exp(time * fundingSpread)).invert());
 			if (mvaMode == MVAMode.APPROXIMATION) {
-				initialMargin[i] = initialMargin[i].average();
+				initialMargin = initialMargin.average();
 			}
-			MVA = MVA.add(forwardBond.mult(initialMargin[i]));
+			MVA = MVA.add(forwardBond.mult(initialMargin));
+			expectedIM.put(time, initialMargin.getAverage());
 		}
-		return -MVA.getAverage();
+
+		return new MvaResult(-MVA.getAverage(), expectedIM);
 	}
 }
