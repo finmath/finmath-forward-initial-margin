@@ -1,9 +1,9 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.stochastic.Scalar;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Calculates the initial margin to be posted at a fixed time according to SIMM. This calculation scheme will consider the IR Delta contribution to the total margin.
+ *  This calculation scheme will consider the IR Delta or Vega contribution to the total margin.
  */
 public class SimmIRScheme extends SimmBaseScheme {
 
@@ -20,9 +20,9 @@ public class SimmIRScheme extends SimmBaseScheme {
 	}
 
 	/**
-	 * Calculates the result of a bucket aggregation, i. e. the figures K including the constituents' weighted sensitivities.
-	 *
-	 * @return A {@link BucketResult} containing the whole thing.
+	 * @param bucketName A string containing the bucket name (i. e. currency).
+	 * @param gradient The gradient of all sensitivities.
+	 * @return Returns the {@link BucketResult} for this bucket (i. e. currency).
 	 */
 	@Override
 	public BucketResult getBucketAggregation(String bucketName, Map<SimmCoordinate, RandomVariableInterface> gradient) {
@@ -37,7 +37,7 @@ public class SimmIRScheme extends SimmBaseScheme {
 				collect(Collectors.toSet());
 
 		RandomVariableInterface k = weightedSensitivities.stream().
-				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermIR(v, parameter))).
+				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermWithoutConcentration(v, parameter))).
 				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);

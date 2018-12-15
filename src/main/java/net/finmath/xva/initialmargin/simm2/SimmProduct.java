@@ -4,11 +4,13 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.sensitivities.GradientProduct;
+import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.xva.initialmargin.simm2.calculation.SimmCurvatureScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmIRScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmNonIRScheme;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +28,7 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	private SimmModality modality;
 	private SimmIRScheme irScheme;
 	private SimmNonIRScheme nonIRScheme;
+	private SimmCurvatureScheme curvatureScheme;
 
 	public SimmProduct(double marginCalculationTime, GradientProduct<SimmCoordinate> gradientProduct, SimmModality modality) {
 		this.modality = modality;
@@ -33,6 +36,7 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		this.gradientProduct = gradientProduct;
 		this.irScheme = new SimmIRScheme(modality.getParams());
 		this.nonIRScheme = new SimmNonIRScheme(modality.getParams());
+		this.curvatureScheme = new SimmCurvatureScheme(modality.getParams());
 	}
 
 	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -63,12 +67,20 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
-		switch (riskClass) {
-			case INTEREST_RATE:
-				return irScheme.getMargin(gradient);
-			default:
-				return nonIRScheme.getMargin(riskClass, gradient);
-		}
+		final Map<MarginType, Map<SimmCoordinate, RandomVariableInterface>> gradientsByMarginType = gradient.entrySet().stream().
+				collect(Collectors.groupingBy(e -> e.getKey().getMarginType(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+		return gradientsByMarginType.entrySet().stream().reduce((RandomVariableInterface)new Scalar(0.0),
+				(accum, e) -> {
+					if (e.getKey() == MarginType.CURVATURE) {
+						return accum.add(curvatureScheme.getMargin(riskClass, gradient));
+					}
+					if (riskClass == RiskClass.INTEREST_RATE) {
+						return accum.add(irScheme.getMargin(gradient));
+					}
+
+					return accum.add(nonIRScheme.getMargin(riskClass, gradient));
+				}, RandomVariableInterface::add);
 	}
 
 	public SimmModality getModality() {

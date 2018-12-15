@@ -89,7 +89,7 @@ public final class SimmCoordinate {
 		return riskClass;
 	}
 
-	public MarginType getRiskType() {
+	public MarginType getMarginType() {
 		return marginType;
 	}
 

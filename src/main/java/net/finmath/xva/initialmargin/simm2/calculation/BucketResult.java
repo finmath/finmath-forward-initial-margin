@@ -24,6 +24,10 @@ public class BucketResult {
 		this.aggregatedResult = aggregatedResult;
 	}
 
+	public Set<WeightedSensitivity> getSingleSensitivities() {
+		return singleSensitivities;
+	}
+
 	public RandomVariableInterface getK() {
 		return aggregatedResult;
 	}

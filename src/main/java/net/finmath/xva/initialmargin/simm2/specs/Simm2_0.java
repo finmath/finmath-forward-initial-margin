@@ -142,7 +142,7 @@ public final class Simm2_0 implements ParameterSet {
 
 	@Override
 	public double getConcentrationThreshold(SimmCoordinate sensitivity) {
-		switch (sensitivity.getRiskType()) {
+		switch (sensitivity.getMarginType()) {
 			case DELTA:
 				return getDeltaConcentrationThreshold(sensitivity);
 			case VEGA:
@@ -226,7 +226,7 @@ public final class Simm2_0 implements ParameterSet {
 		}
 
 		//B.11 (c) states the correlations for the curvature margin are squared
-		if (left.getRiskType() == MarginType.CURVATURE) {
+		if (left.getMarginType() == MarginType.CURVATURE) {
 			return Math.pow(getIntraBucketCorrelation(left.withMarginType(MarginType.VEGA), right.withMarginType(MarginType.VEGA)), 2.0);
 		}
 
@@ -269,7 +269,7 @@ public final class Simm2_0 implements ParameterSet {
 
 	@Override
 	public double getRiskWeight(SimmCoordinate coordinate) {
-		switch (coordinate.getRiskType()) {
+		switch (coordinate.getMarginType()) {
 			case DELTA:
 				return getDeltaRiskWeight(coordinate);
 			case VEGA:
@@ -283,7 +283,7 @@ public final class Simm2_0 implements ParameterSet {
 
 	@Override
 	public double getAdditionalWeight(SimmCoordinate coordinate) {
-		if (coordinate.getRiskType() != MarginType.VEGA) {
+		if (coordinate.getMarginType() != MarginType.VEGA) {
 			return 1.0;
 		}
 

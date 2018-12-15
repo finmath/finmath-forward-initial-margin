@@ -19,6 +19,12 @@ public abstract class SimmBaseScheme {
 		this.parameter = parameter;
 	}
 
+	/**
+	 * Override this method to adjust the gradient before further calculations.
+	 *
+	 * @param gradient The input gradient from a {@link SimmBaseScheme#getMargin(RiskClass, Map)} call.
+	 * @return Returns a stream of the gradient components used to calculate buckets.
+	 */
 	protected Stream<Map.Entry<SimmCoordinate, RandomVariableInterface>> streamGradient(Map<SimmCoordinate, RandomVariableInterface> gradient) {
 		return gradient.entrySet().stream();
 	}

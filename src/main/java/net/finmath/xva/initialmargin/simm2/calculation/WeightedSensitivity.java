@@ -25,7 +25,7 @@ public class WeightedSensitivity {
 	 * @return The term of <i>ρ<sub>kl</sub> × f<sub>kl</sub> × WS<sub>k</sub> × WS<sub>l</sub></i> in the formula for <i>K</i>.
 	 */
 	public RandomVariableInterface getCrossTermNonIR(WeightedSensitivity v, ParameterSet parameter) {
-		return getCrossTermIR(v, parameter).
+		return getCrossTermWithoutConcentration(v, parameter).
 			mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
 			div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())); //denominator f
 	}
@@ -36,7 +36,7 @@ public class WeightedSensitivity {
 	 * @param parameter The {@link ParameterSet} instance providing correlation parameters.
 	 * @return The term of <i>φ<sub>i,j</sub> × ρ<sub>k,l</sub> × WS<sub>k,i</sub> × WS<sub>l,j</sub></i> in the formula for <i>K</i>.
 	 */
-	public RandomVariableInterface getCrossTermIR(WeightedSensitivity v, ParameterSet parameter) {
+	public RandomVariableInterface getCrossTermWithoutConcentration(WeightedSensitivity v, ParameterSet parameter) {
 		return getWeightedSensitivity().
 				mult(v.getWeightedSensitivity()).
 				mult(parameter.getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho (times phi for IR)
