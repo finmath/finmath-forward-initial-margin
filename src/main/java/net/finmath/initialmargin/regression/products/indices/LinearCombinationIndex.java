@@ -5,12 +5,12 @@
  */
 package net.finmath.initialmargin.regression.products.indices;
 
+import java.util.Set;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.components.AbstractProductComponent;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Set;
 
 /**
  * A linear combination index paying scaling1 * index1(t) + scaling2 * index2(t)
@@ -107,14 +107,14 @@ public class LinearCombinationIndex extends AbstractIndex {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-										 LIBORModelMonteCarloSimulationInterface model) {
+			LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
-											LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// TODO Auto-generated method stub
 		return null;
 	}

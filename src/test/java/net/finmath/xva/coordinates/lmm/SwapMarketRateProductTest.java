@@ -1,5 +1,18 @@
 package net.finmath.xva.coordinates.lmm;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.Assert.assertThat;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterface;
@@ -15,18 +28,6 @@ import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.interestrate.products.SwapMarketRateProduct;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.FromDataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
-
-import java.util.Arrays;
-import java.util.stream.IntStream;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
 public class SwapMarketRateProductTest {
@@ -47,9 +48,9 @@ public class SwapMarketRateProductTest {
 
 	@Theory
 	public void testGetValue(TimeDiscretizationInterface floatTenor, TimeDiscretizationInterface fixTenor,
-							 @FromDataPoints("discountFactors") double[] discountFactors,
-							 @FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
-			throws CalculationException {
+			@FromDataPoints("discountFactors") double[] discountFactors,
+			@FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
+					throws CalculationException {
 
 		final SwapMarketRateProduct parRate = new SwapMarketRateProduct(floatTenor, fixTenor);
 
@@ -83,9 +84,9 @@ public class SwapMarketRateProductTest {
 
 	@Theory
 	public void testGetValuePutIntoSwap(TimeDiscretizationInterface uniTenor,
-									 @FromDataPoints("discountFactors") double[] discountFactors,
-									 @FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
-			throws CalculationException {
+			@FromDataPoints("discountFactors") double[] discountFactors,
+			@FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
+					throws CalculationException {
 
 		final SwapMarketRateProduct parRate = new SwapMarketRateProduct(uniTenor, uniTenor);
 

@@ -1,5 +1,17 @@
 package net.finmath.initialmargin.isdasimm.sensitivity;
 
+import java.lang.ref.SoftReference;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
@@ -8,17 +20,6 @@ import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
-
-import java.lang.ref.SoftReference;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
 
 /**
  * This class contains some functions and methods which we need to calculate forward initial margin.
@@ -105,7 +106,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @param isConsiderOISSensitivities
 	 */
 	public AbstractSIMMSensitivityCalculation(SensitivityMode sensitivityMode, WeightMode weightTransformationMode,
-											  boolean isUseAnalyticSwapSensitivities, boolean isConsiderOISSensitivities) {
+			boolean isUseAnalyticSwapSensitivities, boolean isConsiderOISSensitivities) {
 		this.sensitivityMode = sensitivityMode;
 		this.weightTransformationMethod = weightTransformationMode;
 		this.isUseAnalyticSwapSensitivities = isUseAnalyticSwapSensitivities;
@@ -138,10 +139,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public abstract RandomVariableInterface[] getDeltaSensitivities(AbstractSIMMProduct product,
-																	String riskClass,
-																	String curveIndexName,
-																	double evaluationTime,
-																	LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
+			String riskClass,
+			String curveIndexName,
+			double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
 
 	/**
 	 * This function calculates the exact delta sensitivities as in SensitivityMode.Exact. The function is used for melting or
@@ -159,10 +160,10 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public abstract RandomVariableInterface[] getExactDeltaSensitivities(AbstractSIMMProduct product,
-																		 String curveIndexName,
-																		 String riskClass,
-																		 double evaluationTime,
-																		 LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
+			String curveIndexName,
+			String riskClass,
+			double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException;
 
 	/**
 	 * Get the sensitivities using sensitivity melting on SIMM Buckets or LIBOR buckets depending on the SensitivityMode.
@@ -179,7 +180,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public abstract RandomVariableInterface[] getMeltedSensitivities(AbstractSIMMProduct product, RandomVariableInterface[] sensitivities, double meltingZeroTime,
-																	 double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException;
+			double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException;
 
 	/**
 	 * Calculate the sensitivities dV/dS with respect to all swap rates (market rates) for given product and curve.
@@ -194,35 +195,35 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] getSensitivitiesIRMarketRates(AbstractSIMMProduct product,
-																   String curveIndexName,
-																   double evaluationTime,
-																   LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			String curveIndexName,
+			double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		RandomVariableInterface[] dVdS = null; // The vector of delta sensitivities on all SIMM buckets
 
 		switch (curveIndexName) {
-			case ("Libor6m"): {
+		case ("Libor6m"): {
 
-				RandomVariableInterface[] dVdL = product.getLiborModelSensitivities(evaluationTime, model);
+			RandomVariableInterface[] dVdL = product.getLiborModelSensitivities(evaluationTime, model);
 
-				// Calculate dV/dS = dV/dL * (dL/dL*dL/dS)
-				dVdS = mapLiborToMarketRateSensitivities(evaluationTime, dVdL, model);
+			// Calculate dV/dS = dV/dL * (dL/dL*dL/dS)
+			dVdS = mapLiborToMarketRateSensitivities(evaluationTime, dVdL, model);
+		}
+		break;
+		case ("OIS"): {
+			if (isConsiderOISSensitivities) {
+
+				// Calculate dV/dS = dV/dP * dP/dS.
+				RandomVariableInterface[] dVdP = product.getOISModelSensitivities("INTEREST_RATE" /*riskClass*/, evaluationTime, model);
+
+				dVdS = mapOISBondToMarketRateSensitivities(evaluationTime, dVdP, model);
+			} else {
+				dVdS = zeroBucketsIR;
 			}
-			break;
-			case ("OIS"): {
-				if (isConsiderOISSensitivities) {
-
-					// Calculate dV/dS = dV/dP * dP/dS.
-					RandomVariableInterface[] dVdP = product.getOISModelSensitivities("INTEREST_RATE" /*riskClass*/, evaluationTime, model);
-
-					dVdS = mapOISBondToMarketRateSensitivities(evaluationTime, dVdP, model);
-				} else {
-					dVdS = zeroBucketsIR;
-				}
-			}
-			break;
-			default:
-				throw new IllegalArgumentException("Unknow curve: " + curveIndexName);
+		}
+		break;
+		default:
+			throw new IllegalArgumentException("Unknow curve: " + curveIndexName);
 		}
 
 		return dVdS;
@@ -239,8 +240,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] mapOISBondToMarketRateSensitivities(double evaluationTime,
-																		 RandomVariableInterface[] dVdP, /*OIS bond sensitivities*/
-																		 LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			RandomVariableInterface[] dVdP, /*OIS bond sensitivities*/
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (dVdP == null) {
 			return zeroBucketsIR;
@@ -277,8 +278,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] mapLiborToMarketRateSensitivities(double evaluationTime,
-																	   RandomVariableInterface[] dVdL, /*Libor sensitivities*/
-																	   LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			RandomVariableInterface[] dVdL, /*Libor sensitivities*/
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		int timeGridIndicator = 0;
 		int numberOfSwaps;
@@ -359,7 +360,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	private RandomVariableInterface[][] getSensitivityWeightOIS(double evaluationTime,
-																LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (riskWeightMapOIS.containsKey(evaluationTime)) {
 			return riskWeightMapOIS.get(evaluationTime);
@@ -671,9 +672,9 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] doCalculateDeltaSensitivitiesOISLiborDependence(AbstractSIMMProduct product,
-																					 String curveIndexName,
-																					 double evaluationTime,
-																					 LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			String curveIndexName,
+			double evaluationTime,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		RandomVariableInterface[] deltaSensitivitiesOfCurve = null;
 
@@ -691,24 +692,24 @@ public abstract class AbstractSIMMSensitivityCalculation {
 
 		switch (curveIndexName) {
 
-			case ("Libor6m"):
-				deltaSensitivitiesOfCurve = sensitivityCache.get(evaluationTime).get("Libor6m");
+		case ("Libor6m"):
+			deltaSensitivitiesOfCurve = sensitivityCache.get(evaluationTime).get("Libor6m");
 
-				break;
+		break;
 
-			case ("OIS"):
+		case ("OIS"):
 
-				if (isConsiderOISSensitivities) {
+			if (isConsiderOISSensitivities) {
 
-					deltaSensitivitiesOfCurve = sensitivityCache.get(evaluationTime).get("OIS");
-				} else {
-					deltaSensitivitiesOfCurve = zeroBucketsIR;
-				}
+				deltaSensitivitiesOfCurve = sensitivityCache.get(evaluationTime).get("OIS");
+			} else {
+				deltaSensitivitiesOfCurve = zeroBucketsIR;
+			}
 
-				break;
+		break;
 
-			default:
-				throw new IllegalArgumentException("Unknow curve: " + curveIndexName);
+		default:
+			throw new IllegalArgumentException("Unknow curve: " + curveIndexName);
 		}
 
 		return deltaSensitivitiesOfCurve;

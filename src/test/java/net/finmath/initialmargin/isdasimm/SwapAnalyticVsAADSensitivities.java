@@ -1,5 +1,16 @@
 package net.finmath.initialmargin.isdasimm;
 
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.IntStream;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
@@ -34,16 +45,6 @@ import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
 
 public class SwapAnalyticVsAADSensitivities {
 	static final DecimalFormat formatterTime = new DecimalFormat("0.000");
@@ -135,9 +136,9 @@ public class SwapAnalyticVsAADSensitivities {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] getAnalyticSwapLiborSensitivities(double evaluationTime,
-																	   double periodLength,
-																	   double[] fixingDates,
-																	   LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			double periodLength,
+			double[] fixingDates,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		MonteCarloConditionalExpectationRegression cOperator = getConditionalExpectationOperator(evaluationTime, model);
 		// Calculate forward sensitivities
@@ -170,8 +171,8 @@ public class SwapAnalyticVsAADSensitivities {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface[] getAADSwapLiborSensitivities(double evaluationTime,
-																  AbstractLIBORMonteCarloProduct product,
-																  LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			AbstractLIBORMonteCarloProduct product,
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (this.gradient == null) {
 			RandomVariableDifferentiableInterface value = (RandomVariableDifferentiableInterface) product.getValue(0.0, model);
 			this.gradient = value.getGradient();

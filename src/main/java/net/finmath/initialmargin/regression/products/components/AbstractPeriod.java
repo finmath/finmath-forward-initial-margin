@@ -1,10 +1,10 @@
 package net.finmath.initialmargin.regression.products.components;
 
+import java.util.Set;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Set;
 
 /**
  * Base class for a period. A period has references to the index (coupon) and the notional.
@@ -46,8 +46,8 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	 * @param daycountFraction The daycount fraction (<code>coupon = index(fixingDate) * daycountFraction</code>).
 	 */
 	public AbstractPeriod(double periodStart, double periodEnd,
-						  double fixingDate, double paymentDate, AbstractNotional notional,
-						  AbstractProductComponent index, double daycountFraction) {
+			double fixingDate, double paymentDate, AbstractNotional notional,
+			AbstractProductComponent index, double daycountFraction) {
 		super();
 		this.periodStart = periodStart;
 		this.periodEnd = periodEnd;
@@ -70,8 +70,8 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	 * @param index       The index (coupon) associated with this period.
 	 */
 	public AbstractPeriod(double periodStart, double periodEnd,
-						  double fixingDate, double paymentDate, AbstractNotional notional,
-						  AbstractProductComponent index) {
+			double fixingDate, double paymentDate, AbstractNotional notional,
+			AbstractProductComponent index) {
 		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, periodEnd - periodStart);
 	}
 

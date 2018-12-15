@@ -1,14 +1,14 @@
 package net.finmath.montecarlo.interestrate.products;
 
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.AnalyticDiscountZeroCouponBond;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
-
-import java.util.Arrays;
-import java.util.stream.IntStream;
 
 /**
  * Calculates the par-swap rate for a given float versus fix tenor structure.

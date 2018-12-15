@@ -55,11 +55,11 @@ public class SIMMPortfolio {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface getInitialMargin(double evaluationTime,
-													LIBORModelMonteCarloSimulationInterface model,
-													String calculationCCY,
-													SensitivityMode sensitivityMode,
-													WeightMode liborWeightMode,
-													double interpolationStep) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model,
+			String calculationCCY,
+			SensitivityMode sensitivityMode,
+			WeightMode liborWeightMode,
+			double interpolationStep) throws CalculationException {
 		return getInitialMargin(evaluationTime, model, calculationCCY, sensitivityMode, liborWeightMode, interpolationStep, false, true);
 	}
 
@@ -78,13 +78,13 @@ public class SIMMPortfolio {
 	 * @throws CalculationException
 	 */
 	public RandomVariableInterface getInitialMargin(double evaluationTime,
-													LIBORModelMonteCarloSimulationInterface model,
-													String calculationCCY,
-													SensitivityMode sensitivityMode,
-													WeightMode liborWeightMode,
-													double interpolationStep,
-													boolean isUseAnalyticSwapSensis,
-													boolean isConsiderOISSensis) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model,
+			String calculationCCY,
+			SensitivityMode sensitivityMode,
+			WeightMode liborWeightMode,
+			double interpolationStep,
+			boolean isUseAnalyticSwapSensis,
+			boolean isConsiderOISSensis) throws CalculationException {
 
 		if (this.model == null || !model.equals(this.model) || (sensitivityCalculationScheme != null && (sensitivityMode != sensitivityCalculationScheme.getSensitivityMode() || liborWeightMode != sensitivityCalculationScheme.getWeightMode()))) { // At inception (t=0) or if the model is reset
 

@@ -3,17 +3,21 @@
  */
 package net.finmath.initialmargin.regression.products.components;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+
 import net.finmath.concurrency.FutureWrapper;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A collection of product components (like periods, options, etc.) paying the sum of their payouts.
@@ -105,7 +109,7 @@ public class ProductCollection extends AbstractProductComponent {
 								return product.getValue(evaluationTime, model);
 							}
 						}
-				);
+						);
 			} catch (RejectedExecutionException e) {
 				valueFuture = new FutureWrapper<RandomVariableInterface>(product.getValue(evaluationTime, model));
 			}
@@ -150,7 +154,7 @@ public class ProductCollection extends AbstractProductComponent {
 								return product.getCF(initialTime, finalTime, model);
 							}
 						}
-				);
+						);
 			} catch (RejectedExecutionException e) {
 				valueFuture = new FutureWrapper<RandomVariableInterface>(product.getCF(initialTime, finalTime, model));
 			}
@@ -187,7 +191,7 @@ public class ProductCollection extends AbstractProductComponent {
 
 	@Override
 	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
-											LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return getValue(evaluationTime, model);
 	}
 }

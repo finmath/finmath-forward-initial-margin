@@ -39,8 +39,8 @@ public class Period extends AbstractPeriod {
 	 * @param isExcludeAccruedInterest If the true, the valuation will exclude accrued interest, if any.
 	 */
 	public Period(double periodStart, double periodEnd, double fixingDate,
-				  double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
-				  boolean couponFlow, boolean notionalFlow, boolean payer, boolean isExcludeAccruedInterest) {
+			double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
+			boolean couponFlow, boolean notionalFlow, boolean payer, boolean isExcludeAccruedInterest) {
 		super(periodStart, periodEnd, fixingDate, paymentDate, notional, index, daycountFraction);
 		this.couponFlow = couponFlow;
 		this.notionalFlow = notionalFlow;
@@ -65,8 +65,8 @@ public class Period extends AbstractPeriod {
 	 * @param payer            If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
 	 */
 	public Period(double periodStart, double periodEnd, double fixingDate,
-				  double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
-				  boolean couponFlow, boolean notionalFlow, boolean payer) {
+			double paymentDate, AbstractNotional notional, AbstractProductComponent index, double daycountFraction,
+			boolean couponFlow, boolean notionalFlow, boolean payer) {
 		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, daycountFraction, couponFlow, notionalFlow, payer, false);
 	}
 
@@ -86,8 +86,8 @@ public class Period extends AbstractPeriod {
 	 * @param payer        If true, the period will be a payer period, i.e. notional and coupon at period end are payed (negative). Otherwise it is a receiver period.
 	 */
 	public Period(double periodStart, double periodEnd, double fixingDate,
-				  double paymentDate, AbstractNotional notional, AbstractProductComponent index,
-				  boolean couponFlow, boolean notionalFlow, boolean payer) {
+			double paymentDate, AbstractNotional notional, AbstractProductComponent index,
+			boolean couponFlow, boolean notionalFlow, boolean payer) {
 		this(periodStart, periodEnd, fixingDate, paymentDate, notional, index, periodEnd - periodStart, couponFlow, notionalFlow, payer);
 	}
 

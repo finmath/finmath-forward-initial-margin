@@ -175,32 +175,32 @@ public enum Vertex {
 
 	public static Vertex parseCrifTenor(String tenor) {
 		switch (tenor.toLowerCase().trim()) {
-			case "2w":
-				return W2;
-			case "1m":
-				return M1;
-			case "3m":
-				return M3;
-			case "6m":
-				return M6;
-			case "1y":
-				return Y1;
-			case "2y":
-				return Y2;
-			case "3y":
-				return Y3;
-			case "5y":
-				return Y5;
-			case "10y":
-				return Y10;
-			case "15y":
-				return Y15;
-			case "20y":
-				return Y20;
-			case "30y":
-				return Y30;
-			default:
-				throw new IllegalArgumentException(String.format("Unknown CRIF tenor %1$s", tenor));
+		case "2w":
+			return W2;
+		case "1m":
+			return M1;
+		case "3m":
+			return M3;
+		case "6m":
+			return M6;
+		case "1y":
+			return Y1;
+		case "2y":
+			return Y2;
+		case "3y":
+			return Y3;
+		case "5y":
+			return Y5;
+		case "10y":
+			return Y10;
+		case "15y":
+			return Y15;
+		case "20y":
+			return Y20;
+		case "30y":
+			return Y30;
+		default:
+			throw new IllegalArgumentException(String.format("Unknown CRIF tenor %1$s", tenor));
 		}
 	}
 }

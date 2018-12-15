@@ -5,12 +5,12 @@
  */
 package net.finmath.initialmargin.regression.products.indices;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A forward rate index for a given period start offset (offset from fixing) and period length.
@@ -102,7 +102,7 @@ public class LIBORIndex extends AbstractIndex {
 
 	@Override
 	public RandomVariableInterface getCF(double initialTime, double finalTime,
-										 LIBORModelMonteCarloSimulationInterface model) {
+			LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;
 	}

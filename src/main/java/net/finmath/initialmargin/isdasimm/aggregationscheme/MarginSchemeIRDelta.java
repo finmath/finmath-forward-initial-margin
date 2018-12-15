@@ -1,10 +1,10 @@
 package net.finmath.initialmargin.isdasimm.aggregationscheme;
 
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.stochastic.RandomVariableInterface;
-
 import java.util.Map;
 import java.util.Optional;
+
+import net.finmath.montecarlo.RandomVariable;
+import net.finmath.stochastic.RandomVariableInterface;
 
 
 /*
@@ -27,7 +27,7 @@ public class MarginSchemeIRDelta {
 	final String riskTypeKey = "delta";
 
 	public MarginSchemeIRDelta(CalculationSchemeInitialMarginISDA calculationSchemeInitialMarginISDA,
-							   String productClassKey) {
+			String productClassKey) {
 		this.calculationSchemeInitialMarginISDA = calculationSchemeInitialMarginISDA;
 		this.riskClassKey = "INTEREST_RATE";
 		this.productClassKey = productClassKey;

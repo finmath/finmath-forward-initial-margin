@@ -5,16 +5,20 @@
  */
 package net.finmath.initialmargin.regression.products.components;
 
-import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import net.finmath.exception.CalculationException;
+import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.stochastic.RandomVariableInterface;
 
 /**
  * Base class for product components.
@@ -37,13 +41,13 @@ public abstract class AbstractProductComponent extends AbstractLIBORMonteCarloRe
 			10 + Runtime.getRuntime().availableProcessors(),
 			100 + 2 * Runtime.getRuntime().availableProcessors(),
 			10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
-		@Override
-		public Thread newThread(Runnable runnable) {
-			Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-			thread.setDaemon(true);
-			return thread;
-		}
-	});
+				@Override
+				public Thread newThread(Runnable runnable) {
+					Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
 
 	public AbstractProductComponent(String currency) {
 		super(currency);
@@ -70,5 +74,5 @@ public abstract class AbstractProductComponent extends AbstractLIBORMonteCarloRe
 
 	// INSERTED
 	public abstract RandomVariableInterface getValue(double evaluationTime, double fixingDate,
-													 LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+			LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 }

@@ -1,5 +1,7 @@
 package net.finmath.initialmargin.regression;
 
+import java.util.ArrayList;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.functions.NormalDistribution;
 import net.finmath.initialmargin.regression.products.Portfolio;
@@ -9,8 +11,6 @@ import net.finmath.stochastic.ConditionalExpectationEstimatorInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
-
-import java.util.ArrayList;
 
 /**
  * This class implements the Dynamic Initial Margin by Regression as described in
@@ -31,9 +31,9 @@ public class InitialMarginForwardRegression {
 	private Portfolio portfolio;
 
 	public InitialMarginForwardRegression(Portfolio portfolio,
-										  LIBORModelMonteCarloSimulationInterface model,
-										  int polynomialOrder,
-										  String method) {
+			LIBORModelMonteCarloSimulationInterface model,
+			int polynomialOrder,
+			String method) {
 		this.model = model;
 		this.portfolio = portfolio;
 		this.polynomialOrder = polynomialOrder;
@@ -54,26 +54,26 @@ public class InitialMarginForwardRegression {
 
 		switch (method) {
 
-			case LSQREGRESSION: // Least Square Regression
+		case LSQREGRESSION: // Least Square Regression
 
-				variance = getVarianceForecast(evaluationTime, model);
+			variance = getVarianceForecast(evaluationTime, model);
 
-				double normalQuantile = NormalDistribution.inverseCumulativeDistribution(confidenceLevel);
+			double normalQuantile = NormalDistribution.inverseCumulativeDistribution(confidenceLevel);
 
-				RandomVariableInterface initialMarginPathwise = variance.sqrt().mult(normalQuantile);
+			RandomVariableInterface initialMarginPathwise = variance.sqrt().mult(normalQuantile);
 
-				initialMargin = initialMarginPathwise.getAverage();
+			initialMargin = initialMarginPathwise.getAverage();
 
-				break;
+			break;
 
-			case SIMPLE: // Simple Dynamic Initial Margin
+		case SIMPLE: // Simple Dynamic Initial Margin
 
-				initialMargin = -getCleanPortfolioValueChange(evaluationTime).getQuantile(confidenceLevel);
+			initialMargin = -getCleanPortfolioValueChange(evaluationTime).getQuantile(confidenceLevel);
 
-				break;
+			break;
 
-			default:
-				break;
+		default:
+			break;
 		}
 
 		return initialMargin;
@@ -169,7 +169,7 @@ public class InitialMarginForwardRegression {
 	private ConditionalExpectationEstimatorInterface getConditionalExpectationEstimator(double forwardVaRTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		MonteCarloConditionalExpectationRegression condExpEstimator = new MonteCarloConditionalExpectationRegression(
 				getRegressionBasisFunctions(forwardVaRTime, model)
-		);
+				);
 		return condExpEstimator;
 	}
 
@@ -184,8 +184,8 @@ public class InitialMarginForwardRegression {
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	private RandomVariableInterface[] getRegressionBasisFunctions(double forwardVaRTime,
-																  LIBORModelMonteCarloSimulationInterface model
-	) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model
+			) throws CalculationException {
 		// If Libor for last CF is not yet fixed
 		RandomVariableInterface NPV = portfolio.getValue(forwardVaRTime, model);
 		double lastFixingTime = model.getLiborPeriodDiscretization().getTime(model.getLiborPeriodDiscretization().getTimeIndex(portfolio.getInitialLifeTime()) - 1);
@@ -219,7 +219,7 @@ public class InitialMarginForwardRegression {
 	private ConditionalExpectationEstimatorInterface getConditionalExpectationEstimatorLibor(double forwardVaRTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		MonteCarloConditionalExpectationRegression condExpEstimator = new MonteCarloConditionalExpectationRegression(
 				getRegressionBasisFunctionsLibor(forwardVaRTime, model)
-		);
+				);
 		return condExpEstimator;
 	}
 
@@ -232,8 +232,8 @@ public class InitialMarginForwardRegression {
 	 * @throws CalculationException
 	 */
 	private RandomVariableInterface[] getRegressionBasisFunctionsLibor(double forwardVaRTime,
-																	   LIBORModelMonteCarloSimulationInterface model
-	) throws CalculationException {
+			LIBORModelMonteCarloSimulationInterface model
+			) throws CalculationException {
 
 		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<RandomVariableInterface>();
 		ArrayList<RandomVariableInterface> libors = new ArrayList<RandomVariableInterface>();

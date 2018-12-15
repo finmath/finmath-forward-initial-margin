@@ -1,5 +1,10 @@
 package net.finmath.initialmargin.regression;
 
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
 import net.finmath.initialmargin.regression.products.Portfolio;
@@ -29,11 +34,6 @@ import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
-
-import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 //import org.joda.time.DateTimeConstants;
 //import org.joda.time.LocalDate;
