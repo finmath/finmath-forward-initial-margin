@@ -85,6 +85,7 @@ public final class Simm2_0 implements ParameterSet {
 	private static final Set<String> IR_REGULAR_CURRENCIES = ImmutableSet.of("USD", "EUR", "GBP", "CHF", "AUD", "NZD", "CAD", "SEK", "NOK", "DKK", "HKD", "KRW", "SGD", "TWD");
 	private static final Set<String> IR_LOW_VOLATILITY_CURRENCIES = ImmutableSet.of("JPY");
 
+	private static final double[] RISK_CLASS_CORRELATIONS = { 1.0, 0.28, 0.18, 0.18, 0.30, 0.22, 0.28, 1.0, 0.30, 0.66, 0.46, 0.27, 0.18, 0.30, 1.00, 0.23, 0.25, 0.18, 0.18, 0.66, 0.23, 1.00, 0.39, 0.24, 0.30, 0.46, 0.25, 0.39, 1.00, 0.32, 0.22, 0.27, 0.18, 0.24, 0.32, 1.00 };
 
 	private static final double[][] IR_CROSS_VERTEX_CORRELATIONS = {
 			{1.0, 1.0, 0.79, 0.67, 0.53, 0.42, 0.37, 0.30, 0.22, 0.18, 0.16, 0.12},
@@ -295,6 +296,21 @@ public final class Simm2_0 implements ParameterSet {
 			default:
 				return getHistoricalVolatilityRatio(coordinate) * VRW_SCALE * getDeltaRiskWeight(coordinate.withMarginType(MarginType.DELTA));
 		}
+	}
+
+	/**
+	 * Returns the correlations between risk classes for the aggregation of initial margins in a single product class.
+	 *
+	 * @param left  The risk class of one initial margin.
+	 * @param right The risk class of another initial margin.
+	 * @return The correlation between the two risk classes.
+	 */
+	@Override
+	public double getRiskClassCorrelation(RiskClass left, RiskClass right) {
+		int leftIndex = left.ordinal();
+		int rightIndex = right.ordinal();
+
+		return RISK_CLASS_CORRELATIONS[leftIndex + 6 * rightIndex];
 	}
 
 	private double getVegaRiskWeight(SimmCoordinate coordinate) {

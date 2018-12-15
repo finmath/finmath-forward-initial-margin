@@ -36,4 +36,12 @@ public interface ParameterSet {
 	 * @return The additional weight as a floating point number.
 	 */
 	double getAdditionalWeight(SimmCoordinate coordinate);
+
+	/**
+	 * Returns the correlations between risk classes for the aggregation of initial margins in a single product class.
+	 * @param left The risk class of one initial margin.
+	 * @param right The risk class of another initial margin.
+	 * @return The correlation between the two risk classes.
+	 */
+	double getRiskClassCorrelation(RiskClass left, RiskClass right);
 }

@@ -8,7 +8,6 @@ import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmCurvatureScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmIRScheme;
@@ -46,14 +45,14 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 
 		final RandomVariableInterface simmValue = gradientProduct.getGradient(evaluationTime, model).entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getProductClass())).entrySet().stream().
-				map(group -> getSimmForProductClass(group.getKey(), group.getValue())).
+				map(group -> getSimmForProductClass(group.getValue())).
 				reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
 
 		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
 		return simmValue.sub(this.getModality().getPostingThreshold()).floor(0.0).mult(numeraireAtEval);
 	}
 
-	private RandomVariableInterface getSimmForProductClass(ProductClass productClass, List<Map.Entry<SimmCoordinate, RandomVariableInterface>> sensitivities) {
+	private RandomVariableInterface getSimmForProductClass(List<Map.Entry<SimmCoordinate, RandomVariableInterface>> sensitivities) {
 		final Map<RiskClass, RandomVariableInterface> marginByRiskClass = sensitivities.stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getRiskClass())).entrySet().stream().
 				map(group -> Pair.of(group.getKey(), getSimmForRiskClass(
@@ -62,8 +61,10 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 				))).
 				collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-		//TODO cross risk class aggregate
-		return marginByRiskClass.values().stream().reduce(new Scalar(0.0), RandomVariableInterface::add);
+		return marginByRiskClass.entrySet().stream().
+				flatMap(im1 -> marginByRiskClass.entrySet().stream().
+						map(im2 -> im1.getValue().mult(im2.getValue()).mult(modality.getParams().getRiskClassCorrelation(im1.getKey(), im2.getKey())))
+				).reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 	}
 
 	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
