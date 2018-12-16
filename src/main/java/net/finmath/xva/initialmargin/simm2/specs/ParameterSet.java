@@ -19,19 +19,12 @@ public interface ParameterSet {
 	/**
 	 * Returns the risk weight for a given net sensitivity.
 	 * @param sensitivity The coordinate of the net sensitivity.
-	 * @return
+	 * @return The risk weight as floating point number.
 	 */
 	double getRiskWeight(SimmCoordinate sensitivity);
 
 	/**
-	 * Returns the historical volatility ratio (HVR) for a given risk class.
-	 * @param c The risk class whose HVR is requested.
-	 * @return The HVR as a floating point number.
-	 */
-	double getHistoricalVolatilityRatio(SimmCoordinate c);
-
-	/**
-	 * Returns the weight for a sensitivity not included in the risk weight.
+	 * Returns the weight for a sensitivity not included in the risk weight. This will be included in the concentration risk factor.
 	 * @param coordinate The coordinate of the net sensitivity.
 	 * @return The additional weight as a floating point number.
 	 */
