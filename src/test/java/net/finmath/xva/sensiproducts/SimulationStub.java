@@ -10,6 +10,7 @@ import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -30,6 +31,11 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	@Override
 	public int getNumberOfPaths() {
 		return 1;
+	}
+
+	@Override
+	public LocalDateTime getReferenceDate() {
+		return null;
 	}
 
 	/**
@@ -228,6 +234,11 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 */
 	@Override
 	public TermStructureModelInterface getModel() {
+		return null;
+	}
+
+	@Override
+	public Map<String, RandomVariableInterface> getModelParameters() {
 		return null;
 	}
 
