@@ -22,8 +22,8 @@ import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.interestrate.CalibrationItem;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORMarketModel.CalibrationItem;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.modelplugins.BlendedLocalVolatilityModel;
@@ -223,9 +223,9 @@ public class LMMCalibrationTest {
 		/*
 		 * Create corresponding LIBOR Market Model
 		 */
-		LIBORMarketModel.CalibrationItem[] calibrationItemsLMM = new LIBORMarketModel.CalibrationItem[calibrationItemNames.size()];
+		CalibrationItem[] calibrationItemsLMM = new CalibrationItem[calibrationItemNames.size()];
 		for (int i = 0; i < calibrationItemNames.size(); i++) {
-			calibrationItemsLMM[i] = new LIBORMarketModel.CalibrationItem(calibrationItems.get(i).calibrationProduct, calibrationItems.get(i).calibrationTargetValue, calibrationItems.get(i).calibrationWeight);
+			calibrationItemsLMM[i] = new CalibrationItem(calibrationItems.get(i).getProduct(), calibrationItems.get(i).getTargetValue(), calibrationItems.get(i).weight());
 		}
 		LIBORModelInterface liborMarketModelCalibrated = new LIBORMarketModel(
 				liborPeriodDiscretization,
@@ -251,10 +251,10 @@ public class LMMCalibrationTest {
 		double deviationSum = 0.0;
 		double deviationSquaredSum = 0.0;
 		for (int i = 0; i < calibrationItems.size(); i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems.get(i).calibrationProduct;
+			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems.get(i).getProduct();
 			try {
 				double valueModel = calibrationProduct.getValue(simulationCalibrated);
-				double valueTarget = calibrationItems.get(i).calibrationTargetValue;
+				double valueTarget = calibrationItems.get(i).getTargetValue().getAverage();
 				double error = valueModel - valueTarget;
 				deviationSum += error;
 				deviationSquaredSum += error * error;
@@ -277,7 +277,7 @@ public class LMMCalibrationTest {
 		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
 	}
 
-	public static LIBORMarketModel.CalibrationItem[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, BusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
+	public static CalibrationItem[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, BusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
 
 		final ArrayList<CalibrationItem> calibrationItems = new ArrayList<CalibrationItem>();
 
@@ -307,9 +307,9 @@ public class LMMCalibrationTest {
 
 			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
 		}
-		LIBORMarketModel.CalibrationItem[] calibrationItemsLMM = new LIBORMarketModel.CalibrationItem[calibrationItems.size()];
+		CalibrationItem[] calibrationItemsLMM = new CalibrationItem[calibrationItems.size()];
 		for (int i = 0; i < calibrationItems.size(); i++) {
-			calibrationItemsLMM[i] = new LIBORMarketModel.CalibrationItem(calibrationItems.get(i).calibrationProduct, calibrationItems.get(i).calibrationTargetValue, calibrationItems.get(i).calibrationWeight);
+			calibrationItemsLMM[i] = new CalibrationItem(calibrationItems.get(i).getProduct(), calibrationItems.get(i).getTargetValue(), calibrationItems.get(i).weight());
 		}
 
 		return calibrationItemsLMM;
@@ -349,7 +349,7 @@ public class LMMCalibrationTest {
 
 		double[] valueModel = new double[calibrationItems.length];
 		for (int i = 0; i < calibrationItems.length; i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems[i].calibrationProduct;
+			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems[i].getProduct();
 			try {
 				valueModel[i] = calibrationProduct.getValue(simulationCalibrated);
 			} catch (Exception e) {

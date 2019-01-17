@@ -32,6 +32,7 @@ import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
+import net.finmath.montecarlo.interestrate.CalibrationItem;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModelExponentialDecay;
@@ -295,7 +296,7 @@ public class SwapAnalyticVsAADSensitivities {
 		properties.put("stateSpace", LIBORMarketModel.StateSpace.LOGNORMAL.name());
 
 		// Empty array of calibration items - hence, model will use given covariance
-		LIBORMarketModel.CalibrationItem[] calibrationItems = new LIBORMarketModel.CalibrationItem[0];
+		CalibrationItem[] calibrationItems = new CalibrationItem[0];
 
 		/*
 		 * Create corresponding LIBOR Market Model
