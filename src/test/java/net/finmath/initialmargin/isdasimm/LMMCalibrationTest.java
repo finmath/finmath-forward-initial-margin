@@ -22,7 +22,7 @@ import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
-import net.finmath.montecarlo.interestrate.CalibrationItem;
+import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
@@ -50,7 +50,7 @@ public class LMMCalibrationTest {
 	private static DecimalFormat formatterValue = new DecimalFormat(" ##0.000%;-##0.000%", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static DecimalFormat formatterDeviation = new DecimalFormat(" 0.00000E00;-0.00000E00", new DecimalFormatSymbols(Locale.ENGLISH));
 
-	public static CalibrationItem createCalibrationItem(double weight, double exerciseDate, double swapPeriodLength, int numberOfPeriods, double moneyness, double targetVolatility, String targetVolatilityType, ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve) throws CalculationException {
+	public static CalibrationProduct createCalibrationItem(double weight, double exerciseDate, double swapPeriodLength, int numberOfPeriods, double moneyness, double targetVolatility, String targetVolatilityType, ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve) throws CalculationException {
 
 		double[] fixingDates = new double[numberOfPeriods];
 		double[] paymentDates = new double[numberOfPeriods];
@@ -77,7 +77,7 @@ public class LMMCalibrationTest {
 		 */
 		SwaptionSimple swaptionMonteCarlo = new SwaptionSimple(swaprate, swapTenor, SwaptionSimple.ValueUnit.valueOf(targetVolatilityType));
 		//		double targetValuePrice = AnalyticFormulas.blackModelSwaptionValue(swaprate, targetVolatility, fixingDates[0], swaprate, getSwapAnnuity(discountCurve, swapTenor));
-		return new CalibrationItem(swaptionMonteCarlo, targetVolatility, weight);
+		return new CalibrationProduct(swaptionMonteCarlo, targetVolatility, weight);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class LMMCalibrationTest {
 		 * Create a set of calibration products.
 		 */
 		ArrayList<String> calibrationItemNames = new ArrayList<String>();
-		final ArrayList<CalibrationItem> calibrationItems = new ArrayList<CalibrationItem>();
+		final ArrayList<CalibrationProduct> calibrationProducts = new ArrayList<CalibrationProduct>();
 
 		double swapPeriodLength = 0.5;
 
@@ -152,7 +152,7 @@ public class LMMCalibrationTest {
 
 			double weight = 1.0;
 
-			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
+			calibrationProducts.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
 			calibrationItemNames.add(atmExpiries[i] + "\t" + atmTenors[i]);
 		}
 
@@ -223,9 +223,9 @@ public class LMMCalibrationTest {
 		/*
 		 * Create corresponding LIBOR Market Model
 		 */
-		CalibrationItem[] calibrationItemsLMM = new CalibrationItem[calibrationItemNames.size()];
+		CalibrationProduct[] calibrationItemsLMM = new CalibrationProduct[calibrationItemNames.size()];
 		for (int i = 0; i < calibrationItemNames.size(); i++) {
-			calibrationItemsLMM[i] = new CalibrationItem(calibrationItems.get(i).getProduct(), calibrationItems.get(i).getTargetValue(), calibrationItems.get(i).weight());
+			calibrationItemsLMM[i] = new CalibrationProduct(calibrationProducts.get(i).getProduct(), calibrationProducts.get(i).getTargetValue(), calibrationProducts.get(i).getWeight());
 		}
 		LIBORModelInterface liborMarketModelCalibrated = new LIBORMarketModel(
 				liborPeriodDiscretization,
@@ -250,11 +250,11 @@ public class LMMCalibrationTest {
 		System.out.println("\nValuation on calibrated model:");
 		double deviationSum = 0.0;
 		double deviationSquaredSum = 0.0;
-		for (int i = 0; i < calibrationItems.size(); i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems.get(i).getProduct();
+		for (int i = 0; i < calibrationProducts.size(); i++) {
+			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationProducts.get(i).getProduct();
 			try {
 				double valueModel = calibrationProduct.getValue(simulationCalibrated);
-				double valueTarget = calibrationItems.get(i).getTargetValue().getAverage();
+				double valueTarget = calibrationProducts.get(i).getTargetValue().getAverage();
 				double error = valueModel - valueTarget;
 				deviationSum += error;
 				deviationSquaredSum += error * error;
@@ -265,9 +265,9 @@ public class LMMCalibrationTest {
 
 		System.out.println("Calibration of volatilities..." + (millisCalibrationEnd - millisCalibrationStart) / 1000.0);
 
-		double averageDeviation = deviationSum / calibrationItems.size();
+		double averageDeviation = deviationSum / calibrationProducts.size();
 		System.out.println("Mean Deviation:" + formatterValue.format(averageDeviation));
-		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum / calibrationItems.size())));
+		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum / calibrationProducts.size())));
 		System.out.println("__________________________________________________________________________________________\n");
 
 		Assert.assertTrue(Math.abs(averageDeviation) < 1E-3);
@@ -277,9 +277,9 @@ public class LMMCalibrationTest {
 		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretization(swapTenor), new TimeDiscretization(swapTenor), forwardCurve, discountCurve);
 	}
 
-	public static CalibrationItem[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, BusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
+	public static CalibrationProduct[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, BusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
 
-		final ArrayList<CalibrationItem> calibrationItems = new ArrayList<CalibrationItem>();
+		final ArrayList<CalibrationProduct> calibrationProducts = new ArrayList<CalibrationProduct>();
 
 		for (int i = 0; i < atmNormalVolatilities.length; i++) {
 
@@ -305,11 +305,11 @@ public class LMMCalibrationTest {
 
 			double weight = 1.0;
 
-			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
+			calibrationProducts.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
 		}
-		CalibrationItem[] calibrationItemsLMM = new CalibrationItem[calibrationItems.size()];
-		for (int i = 0; i < calibrationItems.size(); i++) {
-			calibrationItemsLMM[i] = new CalibrationItem(calibrationItems.get(i).getProduct(), calibrationItems.get(i).getTargetValue(), calibrationItems.get(i).weight());
+		CalibrationProduct[] calibrationItemsLMM = new CalibrationProduct[calibrationProducts.size()];
+		for (int i = 0; i < calibrationProducts.size(); i++) {
+			calibrationItemsLMM[i] = new CalibrationProduct(calibrationProducts.get(i).getProduct(), calibrationProducts.get(i).getTargetValue(), calibrationProducts.get(i).getWeight());
 		}
 
 		return calibrationItemsLMM;
@@ -343,7 +343,7 @@ public class LMMCalibrationTest {
 		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
 	}
 
-	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotionInterface brownianMotion, CalibrationItem[] calibrationItems) {
+	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotionInterface brownianMotion, CalibrationProduct[] calibrationItems) {
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
 
