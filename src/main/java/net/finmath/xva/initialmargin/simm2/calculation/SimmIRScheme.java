@@ -1,14 +1,14 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  *  This calculation scheme will consider the IR Delta or Vega contribution to the total margin.

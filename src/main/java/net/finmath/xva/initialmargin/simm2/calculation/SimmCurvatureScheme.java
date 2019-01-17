@@ -1,11 +1,6 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
-import net.finmath.sensitivities.simm2.RiskClass;
-import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.stochastic.Scalar;
-import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
-import org.apache.commons.lang3.tuple.Pair;
+import static net.finmath.functions.NormalDistribution.inverseCumulativeDistribution;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +8,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.finmath.functions.NormalDistribution.inverseCumulativeDistribution;
+import org.apache.commons.lang3.tuple.Pair;
+
+import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
+import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 
 public class SimmCurvatureScheme extends SimmBaseScheme {
 
@@ -75,7 +76,7 @@ public class SimmCurvatureScheme extends SimmBaseScheme {
 		final Map<Boolean, List<WeightedSensitivity>> singleSensitivitiesByRes = bucketResultsByRes.entrySet().stream().
 				map(e -> Pair.of(e.getKey(),
 						e.getValue().stream().flatMap(f -> f.getSingleSensitivities().stream()).
-								collect(Collectors.toList()))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+						collect(Collectors.toList()))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
 		return bucketResultsByRes.keySet().stream().
 				map(isRes -> getMarginForResidualOrNonResidual(singleSensitivitiesByRes.get(isRes), bucketResultsByRes.get(isRes), riskClass)).

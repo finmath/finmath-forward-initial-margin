@@ -1,22 +1,23 @@
 package net.finmath.xva.initialmargin.simm2;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.simm2.MarginType;
+import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.stochastic.Scalar;
-import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmCurvatureScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmIRScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmNonIRScheme;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A product whose value represents the total initial margin to be posted at a fixed time according to SIMM.
@@ -58,13 +59,13 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 				map(group -> Pair.of(group.getKey(), getSimmForRiskClass(
 						group.getKey(),
 						group.getValue().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-				))).
+						))).
 				collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
 		return marginByRiskClass.entrySet().stream().
 				flatMap(im1 -> marginByRiskClass.entrySet().stream().
 						map(im2 -> im1.getValue().mult(im2.getValue()).mult(modality.getParams().getRiskClassCorrelation(im1.getKey(), im2.getKey())))
-				).reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
+						).reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
 	}
 
 	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {

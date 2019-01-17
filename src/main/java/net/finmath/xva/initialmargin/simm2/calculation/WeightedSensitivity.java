@@ -26,8 +26,8 @@ public class WeightedSensitivity {
 	 */
 	public RandomVariableInterface getCrossTermNonIR(WeightedSensitivity v, ParameterSet parameter) {
 		return getCrossTermWithoutConcentration(v, parameter).
-			mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
-			div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())); //denominator f
+				mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
+				div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())); //denominator f
 	}
 
 	/**

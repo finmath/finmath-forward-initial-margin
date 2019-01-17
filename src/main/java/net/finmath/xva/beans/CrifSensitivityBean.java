@@ -1,6 +1,7 @@
 package net.finmath.xva.beans;
 
 import com.google.gson.annotations.SerializedName;
+
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;

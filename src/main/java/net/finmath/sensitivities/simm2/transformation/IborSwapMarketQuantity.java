@@ -1,13 +1,13 @@
 package net.finmath.sensitivities.simm2.transformation;
 
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.SwapRateBuilder;
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.SubCurve;
 import net.finmath.sensitivities.simm2.Vertex;
-import net.finmath.montecarlo.interestrate.products.SwapRateBuilder;
 import net.finmath.sensitivities.transformation.TargetQuantity;
 
 /**

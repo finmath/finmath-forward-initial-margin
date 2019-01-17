@@ -1,8 +1,8 @@
 package net.finmath.sensitivities.simm2;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.Objects;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Represents the additional of a SIMM coordinate which corresponds to the CRIF qualifier.

@@ -1,23 +1,25 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
-import com.google.common.collect.ImmutableMap;
-import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.stochastic.Scalar;
-import net.finmath.sensitivities.simm2.MarginType;
-import net.finmath.sensitivities.simm2.ProductClass;
-import net.finmath.sensitivities.simm2.RiskClass;
-import net.finmath.sensitivities.simm2.SubCurve;
-import net.finmath.sensitivities.simm2.Vertex;
-import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
-import net.finmath.xva.initialmargin.simm2.specs.Simm2_0;
-import org.junit.Test;
-
-import java.util.Map;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Map;
+
+import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
+
+import net.finmath.sensitivities.simm2.MarginType;
+import net.finmath.sensitivities.simm2.ProductClass;
+import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
+import net.finmath.sensitivities.simm2.SubCurve;
+import net.finmath.sensitivities.simm2.Vertex;
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
+import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
+import net.finmath.xva.initialmargin.simm2.specs.Simm2_0;
 
 public class SimmIRSchemeTest {
 
@@ -78,7 +80,7 @@ public class SimmIRSchemeTest {
 
 		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(
 				coordinateEur, new Scalar(marketSensitivity), coordinateUsd, new Scalar(marketSensitivity)
-		);
+				);
 
 		//We have two weighted sensitivities in different buckets
 		//The general cross-bucket correlation is 0.23

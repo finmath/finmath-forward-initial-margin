@@ -1,10 +1,10 @@
 package net.finmath.sensitivities.transformation;
 
+import java.util.Map;
+
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Map;
 
 /**
  * Provides a method to perform the transformation of a random variable's gradient.

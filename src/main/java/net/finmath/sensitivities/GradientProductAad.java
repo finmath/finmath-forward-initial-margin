@@ -1,14 +1,12 @@
 package net.finmath.sensitivities;
 
+import java.util.Map;
+
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.sensitivities.GradientProduct;
-import net.finmath.sensitivities.transformation.SvdTransformation;
 import net.finmath.sensitivities.transformation.Transformation;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.FloatingpointDate;
-
-import java.util.Map;
 
 /**
  * Provides gradients from AAD model gradients undergone a transformation.

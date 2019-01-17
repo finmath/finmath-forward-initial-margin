@@ -1,12 +1,12 @@
 package net.finmath.sensitivities.simm2;
 
-import org.junit.Test;
-
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Test;
 
 public class VertexTest {
 
@@ -21,7 +21,7 @@ public class VertexTest {
 				allOf(
 						hasEntry(equalTo(Vertex.Y3), closeTo(0.5, 1E-16)),
 						hasEntry(equalTo(Vertex.Y5), closeTo(0.5, 1E-16)))
-		);
+				);
 	}
 
 	@Test

@@ -1,16 +1,16 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
-import net.finmath.sensitivities.simm2.RiskClass;
-import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.stochastic.Scalar;
-import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
+import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 
 public abstract class SimmBaseScheme {
 	protected final ParameterSet parameter;

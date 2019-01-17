@@ -1,22 +1,23 @@
 package net.finmath.sensitivities.simm2.products;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.sensitivities.GradientProduct;
-import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
-import net.finmath.time.FloatingpointDate;
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
+import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
+import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.time.FloatingpointDate;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Approximates the sensitivity of a swap using the period length instead of the annuity.

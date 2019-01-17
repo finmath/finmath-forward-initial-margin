@@ -1,18 +1,20 @@
 package net.finmath.sensitivities.transformation;
 
-import com.google.common.collect.Streams;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.stochastic.RandomVariableInterface;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.Streams;
+
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.stochastic.RandomVariableInterface;
 
 class MatrixMultiplicationOperator<C> implements TransformationOperator<C> {
 	private final RandomVariableInterface[][] matrix;

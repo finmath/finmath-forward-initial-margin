@@ -76,7 +76,7 @@ public class SensitivityApproximationTest {
 			super();
 			this.mva = mva;
 			this.expectedIM = expectedIM;
-		}		
+		}
 	}
 
 	// Model Paths
@@ -169,7 +169,7 @@ public class SensitivityApproximationTest {
 		case BERMUDANCALLABLE:
 		case BERMUDANCANCELABLE:
 			exerciseDates = new double[] { 5.0, 8.0, 10.0 };
-//			exerciseDates = new double[] { 10.0 };
+			//			exerciseDates = new double[] { 10.0 };
 			numberOfPeriods = new int[] { 20 };
 			break;
 		default:

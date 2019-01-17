@@ -1,9 +1,9 @@
 package net.finmath.sensitivities;
 
+import java.util.Map;
+
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariableInterface;
-
-import java.util.Map;
 
 public interface GradientProduct<C> {
 
