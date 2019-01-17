@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.Scalar;
 
 
 /*
@@ -169,16 +170,16 @@ public class MarginSchemeIRDelta {
 	}
 
 	public RandomVariableInterface getParameterG(RandomVariableInterface CR1, RandomVariableInterface CR2) {
-		RandomVariableInterface min = CR1.barrier(CR1.sub(CR2), CR2, CR1);
-		RandomVariableInterface max = CR1.barrier(CR1.sub(CR2), CR1, CR2);
+		RandomVariableInterface min = CR1.sub(CR2).choose(CR2, CR1);
+		RandomVariableInterface max = CR1.sub(CR2).choose(CR1, CR2);
 		return min.div(max);
 	}
 
 	public RandomVariableInterface getFactorS(String bucketKey, RandomVariableInterface K, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double atTime) {
 		RandomVariableInterface sum = this.getWeightedSensitivitySum(bucketKey, netSensitivities, concentrationRiskFactor, atTime);
-		RandomVariableInterface S1 = K.barrier(sum.sub(K), K, sum);
+		RandomVariableInterface S1 = sum.sub(K).choose(K, sum);
 		RandomVariableInterface KNegative = K.mult(-1);
-		S1 = S1.barrier(S1.sub(KNegative), S1, KNegative);
+		S1 = S1.sub(KNegative).choose(S1, KNegative);
 		return S1;
 	}
 
@@ -225,7 +226,7 @@ public class MarginSchemeIRDelta {
 
 		double concentrationThreshold = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassThresholdMap.get(this.riskTypeKey).get(riskClassKey).get(currencyMapKey)[0][0];
 		RandomVariableInterface CR = (sensitivitySum.abs().div(concentrationThreshold)).sqrt();
-		CR = CR.barrier(CR.sub(1.0), CR, 1.0);
+		CR = CR.sub(1.0).choose(CR, new Scalar(1.0));
 		return CR;
 	}
 }

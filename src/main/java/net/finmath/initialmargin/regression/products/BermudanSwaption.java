@@ -99,7 +99,7 @@ public class BermudanSwaption extends AbstractLIBORMonteCarloRegressionProduct {
 
 				// Apply the exercise criteria
 				// foreach(path) if(valueIfExcercided.get(path) < 0.0) values[path] = 0.0;
-				values = values.barrier(triggerValues, values, valuesUnderlying);
+				values = triggerValues.choose(values, valuesUnderlying);
 			}
 		}
 

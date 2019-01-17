@@ -118,13 +118,13 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 
 					// Set sensis of not exercised paths to zero
 					for (int i = 0; i < bermudanSensis.length; i++) {
-						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], new RandomVariable(0.0));
+						bermudanSensis[i] = indicator[0].choose(swapSensis[i], new RandomVariable(0.0));
 					}
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
 					for (int i = 0; i < bermudanSensis.length; i++) {
-						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+						bermudanSensis[i] = indicator[0].choose(swapSensis[i], bermudanSensis[i]);
 					}
 				}
 
@@ -134,7 +134,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 
 				// Set the sensitivities on exercised paths to zero
 				for (int i = 0; i < bermudanSensis.length; i++) {
-					bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+					bermudanSensis[i] = indicator[0].choose(new RandomVariable(0.0), bermudanSensis[i]);
 				}
 
 				break;
@@ -186,13 +186,13 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 
 					// Set sensis of not exercised paths to zero
 					for (int i = 0; i < bermudanSensis.length; i++) {
-						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], new RandomVariable(0.0));
+						bermudanSensis[i] = indicator[0].choose(swapSensis[i], new RandomVariable(0.0));
 					}
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
 					for (int i = 0; i < bermudanSensis.length; i++) {
-						bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+						bermudanSensis[i] = indicator[0].choose(swapSensis[i], bermudanSensis[i]);
 					}
 				}
 
@@ -202,7 +202,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 
 				// Set the sensitivities on exercised paths to zero
 				for (int i = 0; i < bermudanSensis.length; i++) {
-					bermudanSensis[i] = bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+					bermudanSensis[i] = indicator[0].choose(new RandomVariable(0.0), bermudanSensis[i]);
 				}
 
 				break;
@@ -253,13 +253,13 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 
 					// Set sensis of not exercised paths to zero
 					for (int i = 0; i < meltedBermudanSensis.length; i++) {
-						meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, meltedSwapSensis[i], new RandomVariable(0.0));
+						meltedBermudanSensis[i] = indicator.choose(meltedSwapSensis[i], new RandomVariable(0.0));
 					}
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
 					for (int i = 0; i < meltedBermudanSensis.length; i++) {
-						meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, meltedSwapSensis[i], meltedBermudanSensis[i]);
+						meltedBermudanSensis[i] = indicator.choose(meltedSwapSensis[i], meltedBermudanSensis[i]);
 					}
 				}
 
@@ -268,7 +268,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 			case Cancelable:
 				// Set sensis on exercised paths to zero
 				for (int i = 0; i < meltedBermudanSensis.length; i++) {
-					meltedBermudanSensis[i] = meltedBermudanSensis[i].barrier(indicator, new RandomVariable(0.0), meltedBermudanSensis[i]);
+					meltedBermudanSensis[i] = indicator.choose(new RandomVariable(0.0), meltedBermudanSensis[i]);
 				}
 
 				break;
@@ -323,7 +323,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
 		RandomVariableInterface exerciseTime = (RandomVariableInterface) bermudan.getValues(time, model).get("exerciseTime");
-		RandomVariableInterface indicator = exerciseTime.barrier(new RandomVariable(exerciseTime.sub(time + 0.00001)), new RandomVariable(0.0), new RandomVariable(1.0));
+		RandomVariableInterface indicator = exerciseTime.sub(time + 0.00001).choose(new RandomVariable(0.0), new RandomVariable(1.0));
 		return indicator;
 	}
 
@@ -343,7 +343,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		// Bermudan Swaption: Set paths on which we have already exercised to zero.
-		RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model).barrier(new RandomVariable(getExerciseIndicator(evaluationTime, model).sub(0.5)), new RandomVariable(0.0), new RandomVariable(1.0));
+		RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model).sub(0.5).choose(new RandomVariable(0.0), new RandomVariable(1.0));
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
 		RandomVariableInterface[] regressor = new RandomVariableInterface[2];
@@ -405,14 +405,14 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 					// Set sensis of not exercised paths to zero
 					IntStream.range(0, bermudanSensis.length).forEach(i -> {
 						bermudanSensis[i] =
-								bermudanSensis[i].barrier(indicator[0], swapSensis[i], new RandomVariable(0.0));
+								indicator[0].choose(swapSensis[i], new RandomVariable(0.0));
 					});
 				} else {
 
 					// Set sensitivities on paths: Bermudan sensis if not exercised, swap sensis if exercised.
 					IntStream.range(0, bermudanSensis.length).forEach(i -> {
 						bermudanSensis[i] =
-								bermudanSensis[i].barrier(indicator[0], swapSensis[i], bermudanSensis[i]);
+								indicator[0].choose(swapSensis[i], bermudanSensis[i]);
 					});
 				}
 
@@ -423,7 +423,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 				// Set the sensitivities on exercised paths to zero
 				IntStream.range(0, bermudanSensis.length).forEach(i -> {
 					bermudanSensis[i] =
-							bermudanSensis[i].barrier(indicator[0], new RandomVariable(0.0), bermudanSensis[i]);
+							indicator[0].choose(new RandomVariable(0.0), bermudanSensis[i]);
 				});
 
 				break;

@@ -136,7 +136,7 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 				swap = new SimpleSwap(fixingDates, paymentDates, swaprates, true, notional);
 			}
 			RandomVariableInterface swapValue = swap.getValue(evaluationTime, model);
-			values = swapValue.barrier(barrierIndicator, new RandomVariable(0.0), swapValue);
+			values = barrierIndicator.choose(new RandomVariable(0.0), swapValue);
 		} else {
 
 			/*
@@ -249,7 +249,7 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 			barrierIndicator = getValue(exerciseDate, model).mult(-1.0);
 		}
 		RandomVariableInterface swapCF = swap.getCF(initialTime, finalTime, model);
-		RandomVariableInterface swapCFOnPathWhereExercised = swapCF.barrier(barrierIndicator, new RandomVariable(0.0), swapCF);
+		RandomVariableInterface swapCFOnPathWhereExercised = barrierIndicator.choose(new RandomVariable(0.0), swapCF);
 		return swapCFOnPathWhereExercised;
 	}
 }
