@@ -52,7 +52,7 @@ import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.businessdaycalendar.AbstractBusinessdayCalendar;
-import net.finmath.time.daycount.DayCountConventionInterface;
+import net.finmath.time.daycount.DayCountConvention;
 
 public class SIMMTest {
 	static final DecimalFormat formatterTime = new DecimalFormat("0.000");
@@ -658,7 +658,7 @@ public class SIMMTest {
 		return new CalibrationProduct(swaptionMonteCarlo, targetVolatility, weight);
 	}
 
-	public static CalibrationProduct[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, AbstractBusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
+	public static CalibrationProduct[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, AbstractBusinessdayCalendar cal, DayCountConvention modelDC, double swapPeriodLength) throws CalculationException {
 
 		final ArrayList<CalibrationProduct> calibrationProducts = new ArrayList<CalibrationProduct>();
 
