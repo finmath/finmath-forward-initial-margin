@@ -5,9 +5,9 @@
  */
 package net.finmath.initialmargin.regression.products.components;
 
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * A constant (non-stochastic) notional.
@@ -17,7 +17,7 @@ import net.finmath.stochastic.RandomVariableInterface;
 public class Notional implements AbstractNotional {
 
 	private final String currency;
-	private final RandomVariable notional;
+	private final RandomVariableFromDoubleArray notional;
 
 	/**
 	 * Creates a constant (non-stochastic) notional.
@@ -27,7 +27,7 @@ public class Notional implements AbstractNotional {
 	 */
 	public Notional(double notional, String currency) {
 		super();
-		this.notional = new RandomVariable(0.0, notional);
+		this.notional = new RandomVariableFromDoubleArray(0.0, notional);
 		this.currency = currency;
 	}
 
@@ -46,12 +46,12 @@ public class Notional implements AbstractNotional {
 	}
 
 	@Override
-	public RandomVariableInterface getNotionalAtPeriodEnd(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariable getNotionalAtPeriodEnd(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) {
 		return notional;
 	}
 
 	@Override
-	public RandomVariableInterface getNotionalAtPeriodStart(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariable getNotionalAtPeriodStart(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) {
 		return notional;
 	}
 

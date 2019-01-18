@@ -8,7 +8,7 @@ package net.finmath.initialmargin.regression.products;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * Base class for products requiring an MonteCarloSimulationInterface for valuation.
@@ -25,5 +25,5 @@ public abstract class AbstractMonteCarloRegressionProduct extends AbstractMonteC
 		this(null);
 	}
 
-	public abstract RandomVariableInterface getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException;
+	public abstract RandomVariable getCF(double initialTime, double finalTime, MonteCarloSimulationInterface model) throws CalculationException;
 }

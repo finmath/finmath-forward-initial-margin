@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
-import net.finmath.montecarlo.BrownianMotion;
+import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
@@ -62,7 +62,7 @@ public class AnalyticZeroCouponBondTest {
 
 		LIBORModelMonteCarloSimulation simulation = new LIBORModelMonteCarloSimulation(
 				new LIBORMarketModel(periodTenor, forwardCurve, covariance),
-				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 100, 42)));
+				new ProcessEulerScheme(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
 
 		double priceFromForward = 1.0 / (forwardCurve.getValue(0.0)*periodLength + 1.0);
 
@@ -84,7 +84,7 @@ public class AnalyticZeroCouponBondTest {
 
 		LIBORModelMonteCarloSimulation simulation = new LIBORModelMonteCarloSimulation(
 				new LIBORMarketModel(periodTenor, forwardCurve, covariance),
-				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 100, 42)));
+				new ProcessEulerScheme(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
 
 		double priceFromForward1 = 1.0 / (forwardCurve.getValue(0.0)*periodLength + 1.0);
 		double priceFromForward2 = 1.0 / (forwardCurve.getValue(periodLength)*periodLength + 1.0);

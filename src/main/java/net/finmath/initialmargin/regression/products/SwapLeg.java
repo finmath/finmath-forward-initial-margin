@@ -19,7 +19,7 @@ import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.initialmargin.regression.products.indices.FixedCoupon;
 import net.finmath.initialmargin.regression.products.indices.LinearCombinationIndex;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.ScheduleInterface;
 
 /**
@@ -116,12 +116,12 @@ public class SwapLeg extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return components.getValue(evaluationTime, model);
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return components.getCF(initialTime, finalTime, model);
 	}
 }

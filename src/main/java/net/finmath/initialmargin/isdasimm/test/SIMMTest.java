@@ -28,8 +28,8 @@ import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
+import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.BrownianMotion;
-import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
@@ -49,7 +49,7 @@ import net.finmath.montecarlo.interestrate.products.SwaptionSimple;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendar;
 import net.finmath.time.daycount.DayCountConventionInterface;
@@ -225,7 +225,7 @@ public class SIMMTest {
 		// Portfolio
 
 		if (isCalculatePortfolio) {
-			RandomVariableInterface[][] valuesPortfolio = new RandomVariableInterface[3][(int) (finalIMTimePortfolio / timeStep) + 1];
+			RandomVariable[][] valuesPortfolio = new RandomVariable[3][(int) (finalIMTimePortfolio / timeStep) + 1];
 
 			timeStart = System.currentTimeMillis();
 			for (int i = 0; i < finalIMTimePortfolio / timeStep + 1; i++) {
@@ -281,7 +281,7 @@ public class SIMMTest {
 		// Swap
 
 		if (isCalculateSwap) {
-			RandomVariableInterface[][] valuesSwap = new RandomVariableInterface[4][(int) (finalIMTimeSwap / timeStep) + 1];
+			RandomVariable[][] valuesSwap = new RandomVariable[4][(int) (finalIMTimeSwap / timeStep) + 1];
 
 			timeStart = System.currentTimeMillis();
 			for (int i = 0; i < finalIMTimeSwap / timeStep + 1; i++) {
@@ -345,7 +345,7 @@ public class SIMMTest {
 		// Swaption
 
 		if (isCalculateSwaption) {
-			RandomVariableInterface[][] valuesSwaption = new RandomVariableInterface[3][(int) (finalIMTimeSwaption / timeStep) + 1];
+			RandomVariable[][] valuesSwaption = new RandomVariable[3][(int) (finalIMTimeSwaption / timeStep) + 1];
 
 			timeStart = System.currentTimeMillis();
 			for (int i = 0; i < finalIMTimeSwaption / timeStep + 1; i++) {
@@ -401,7 +401,7 @@ public class SIMMTest {
 		// Bermudan
 
 		if (isCalculateBermudan) {
-			RandomVariableInterface[][] valuesBermudan = new RandomVariableInterface[3][(int) (finalIMTimeBermudan / timeStep) + 1];
+			RandomVariable[][] valuesBermudan = new RandomVariable[3][(int) (finalIMTimeBermudan / timeStep) + 1];
 
 			timeStart = System.currentTimeMillis();
 			for (int i = 0; i < finalIMTimeBermudan / timeStep + 1; i++) {
@@ -483,7 +483,7 @@ public class SIMMTest {
 		/*
 		 * Create Brownian motions
 		 */
-		final BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */, new RandomVariableFactory(false));
+		final BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */, new RandomVariableFactory(false));
 
 		// Create a volatility model: Piecewise constant volatility calibrated to Swaption Normal implied volatility of December 8, 2017
 		double[] volatility = new double[]{
@@ -569,8 +569,8 @@ public class SIMMTest {
 		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(false), properties);
 	}
 
-	public static RandomVariableInterface[] getRVAAD(double[] rates) {
-		RandomVariableInterface[] rv = new RandomVariableInterface[rates.length];
+	public static RandomVariable[] getRVAAD(double[] rates) {
+		RandomVariable[] rv = new RandomVariable[rates.length];
 		for (int i = 0; i < rv.length; i++) {
 			rv[i] = new RandomVariableDifferentiableAAD(rates[i]);
 		}
@@ -581,8 +581,8 @@ public class SIMMTest {
 		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
 
 		// Set brownian motion with one path
-		BrownianMotionInterface originalBM = model.getBrownianMotion();
-		BrownianMotionInterface brownianMotion = new BrownianMotion(originalBM.getTimeDiscretization(), originalBM.getNumberOfFactors(), 1 /* numberOfPaths */, 3141);
+		BrownianMotion originalBM = model.getBrownianMotion();
+		BrownianMotion brownianMotion = new BrownianMotionLazyInit(originalBM.getTimeDiscretization(), originalBM.getNumberOfFactors(), 1 /* numberOfPaths */, 3141);
 
 		// Get process
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
@@ -696,7 +696,7 @@ public class SIMMTest {
 		return calibrationItemsLMM;
 	}
 
-	public static Map<String, Object> getModelCalibrationPropertiesMap(double accuracy, double parameterStep, int maxIterations, int numberOfThreads, BrownianMotionInterface brownianMotion) {
+	public static Map<String, Object> getModelCalibrationPropertiesMap(double accuracy, double parameterStep, int maxIterations, int numberOfThreads, BrownianMotion brownianMotion) {
 		// Set model properties
 		Map<String, Object> properties = new HashMap<String, Object>();
 
@@ -724,7 +724,7 @@ public class SIMMTest {
 		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
 	}
 
-	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotionInterface brownianMotion, CalibrationProduct[] calibrationItems) {
+	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
 

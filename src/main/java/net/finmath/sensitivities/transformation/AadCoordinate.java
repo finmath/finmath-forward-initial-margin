@@ -2,7 +2,7 @@ package net.finmath.sensitivities.transformation;
 
 import java.util.stream.Stream;
 
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 
 /**
@@ -13,16 +13,16 @@ public interface AadCoordinate {
 	 * Returns the random variables with regard to which the differentiation shall happen.
 	 * @param simulation The {@link LIBORModelMonteCarloSimulationInterface} holding the differentiable simulation.
 	 * @param evaluationTime The evaluation time.
-	 * @return A stream of {@link RandomVariableDifferentiableInterface}s that can be used to identify the derivatives in the gradient vector.
+	 * @return A stream of {@link RandomVariableDifferentiable}s that can be used to identify the derivatives in the gradient vector.
 	 */
-	Stream<RandomVariableDifferentiableInterface> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation, double evaluationTime);
+	Stream<RandomVariableDifferentiable> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation, double evaluationTime);
 
 	/**
 	 * Returns the random variables with regard to which the differentiation shall happen, evaluated at time zero.
 	 * @param simulation The {@link LIBORModelMonteCarloSimulationInterface} holding the differentiable simulation.
-	 * @return A stream of {@link RandomVariableDifferentiableInterface}s that can be used to identify the derivatives in the gradient vector.
+	 * @return A stream of {@link RandomVariableDifferentiable}s that can be used to identify the derivatives in the gradient vector.
 	 */
-	default Stream<RandomVariableDifferentiableInterface> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation) {
+	default Stream<RandomVariableDifferentiable> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation) {
 		return getDomainVariables(simulation, 0.0);
 	}
 }

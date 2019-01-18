@@ -10,7 +10,7 @@ import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSim
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption;
 import net.finmath.optimizer.SolverException;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -68,13 +68,13 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	}
 
 	@Override
-	public RandomVariableInterface[] getDeltaSensitivities(AbstractSIMMProduct product,
+	public RandomVariable[] getDeltaSensitivities(AbstractSIMMProduct product,
 			String riskClass,
 			String curveIndexName,
 			double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
 
-		RandomVariableInterface[] maturityBucketSensis = null;
+		RandomVariable[] maturityBucketSensis = null;
 
 		switch (sensitivityMode) {
 
@@ -131,7 +131,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	}
 
 	@Override
-	public RandomVariableInterface[] getExactDeltaSensitivities(AbstractSIMMProduct product, String curveIndexName, String riskClass,
+	public RandomVariable[] getExactDeltaSensitivities(AbstractSIMMProduct product, String curveIndexName, String riskClass,
 			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		//@Todo: Distinguish different risk classes. Works currently only for "INTEREST_RATE"
@@ -158,12 +158,12 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	 * @throws SolverException
 	 */
 	@Override
-	public RandomVariableInterface[] getMeltedSensitivities(AbstractSIMMProduct product,
-			RandomVariableInterface[] sensitivities, double meltingZeroTime,
+	public RandomVariable[] getMeltedSensitivities(AbstractSIMMProduct product,
+			RandomVariable[] sensitivities, double meltingZeroTime,
 			double evaluationTime, String curveIndexName, String riskClass) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		boolean isMarketRateSensi = sensitivityMode == SensitivityMode.MELTINGSIMMBUCKETS || sensitivityMode == SensitivityMode.MELTINGSWAPRATEBUCKETS;
-		RandomVariableInterface[] meltedSensis = null;
+		RandomVariable[] meltedSensis = null;
 		int[] riskFactorDays = null;
 		// Get sensitivities to melt if not provided as input to the function
 		if (sensitivities == null) {
@@ -188,7 +188,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 					.filter(i -> riskFactorsSIMM[i] > (int) Math.round(365 * (evaluationTime - meltingZeroTime))).findFirst().getAsInt();
 
 			//Calculate melted sensitivities
-			meltedSensis = new RandomVariableInterface[sensitivities.length - firstIndex];
+			meltedSensis = new RandomVariable[sensitivities.length - firstIndex];
 
 			for (int i = 0; i < meltedSensis.length; i++) {
 				meltedSensis[i] = sensitivities[i + firstIndex].mult(1.0 - (double) Math.round(365 * (evaluationTime - meltingZeroTime)) / (double) riskFactorsSIMM[i + firstIndex]);
@@ -207,7 +207,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			int firstIndex = IntStream.range(0, riskFactorDaysLIBOR.length).filter(i -> riskFactorDaysLIBOR[i] > (int) Math.round(365 * (evaluationTime - meltingZeroTime))).findFirst().getAsInt();
 
 			//Calculate melted sensitivities
-			meltedSensis = new RandomVariableInterface[sensitivities.length - firstIndex];
+			meltedSensis = new RandomVariable[sensitivities.length - firstIndex];
 
 			for (int i = 0; i < meltedSensis.length; i++) {
 				meltedSensis[i] = sensitivities[i + firstIndex].mult(1.0 - (double) Math.round(365 * (evaluationTime - meltingZeroTime)) / (double) riskFactorDaysLIBOR[i + firstIndex]);
@@ -262,7 +262,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
 	 */
-	private RandomVariableInterface[] getInterpolatedSensitivities(AbstractSIMMProduct product,
+	private RandomVariable[] getInterpolatedSensitivities(AbstractSIMMProduct product,
 			String riskClass,
 			String curveIndexName,
 			double evaluationTime,
@@ -275,11 +275,11 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 		double finalTime = initialTime < product.getMeltingResetTime(model) ? Math.min(product.getMeltingResetTime(model), exactSensiTimes.getTime(initialIndex + 1)) : exactSensiTimes.getTime(initialIndex + 1);
 
 		// Get Sensitivities from exactDeltaCache
-		RandomVariableInterface[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
+		RandomVariable[] initialSensitivities = product.getExactDeltaFromCache(initialTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
 		// Map sensitivities on SIMM buckets
 		initialSensitivities = mapSensitivitiesOnBuckets(initialSensitivities, "INTEREST_RATE" /*riskClass*/, null, model);
 
-		RandomVariableInterface[] finalSensitivities = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
+		RandomVariable[] finalSensitivities = product.getExactDeltaFromCache(finalTime, riskClass, curveIndexName, true /*isMarketRateSensi*/);
 		// Map sensitivities on SIMM buckets
 		finalSensitivities = mapSensitivitiesOnBuckets(finalSensitivities, "INTEREST_RATE" /*riskClass*/, null, model);
 
@@ -291,9 +291,9 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			return finalSensitivities;
 		}
 
-		RandomVariableInterface[] interpolatedSensis = new RandomVariableInterface[initialSensitivities.length];
+		RandomVariable[] interpolatedSensis = new RandomVariable[initialSensitivities.length];
 		for (int bucketIndex = 0; bucketIndex < initialSensitivities.length; bucketIndex++) {
-			RandomVariableInterface slope = finalSensitivities[bucketIndex].sub(initialSensitivities[bucketIndex]).div(deltaT);
+			RandomVariable slope = finalSensitivities[bucketIndex].sub(initialSensitivities[bucketIndex]).div(deltaT);
 			interpolatedSensis[bucketIndex] = initialSensitivities[bucketIndex].add(slope.mult(deltaTEval));
 		}
 

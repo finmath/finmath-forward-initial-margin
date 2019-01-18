@@ -16,7 +16,7 @@ import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.SubCurve;
 import net.finmath.sensitivities.simm2.Vertex;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 import net.finmath.xva.initialmargin.simm2.specs.Simm2_0;
@@ -52,7 +52,7 @@ public class SimmIRSchemeTest {
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = PARAMETERS.getConcentrationThreshold(coordinate1m);
 
-		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(coordinate1m, new Scalar(marketSensitivity), coordinate3m, new Scalar(marketSensitivity));
+		Map<SimmCoordinate, RandomVariable> gradient = ImmutableMap.of(coordinate1m, new Scalar(marketSensitivity), coordinate3m, new Scalar(marketSensitivity));
 
 		//We have two weighted sensitivities in the same bucket
 		//These are the correlations needed from ISDA SIMM v2.0
@@ -78,7 +78,7 @@ public class SimmIRSchemeTest {
 		//USD and EUR also have the same threshold so we can re-use the value
 		final double marketSensitivity = PARAMETERS.getConcentrationThreshold(coordinateEur) * 2.0;
 
-		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(
+		Map<SimmCoordinate, RandomVariable> gradient = ImmutableMap.of(
 				coordinateEur, new Scalar(marketSensitivity), coordinateUsd, new Scalar(marketSensitivity)
 				);
 
@@ -116,7 +116,7 @@ public class SimmIRSchemeTest {
 
 		double v = PARAMETERS.getConcentrationThreshold(coordinate5Y) * 2.0;
 
-		final ImmutableMap<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(coordinate5Y, new Scalar(v), coordinate10Y, new Scalar(v));
+		final ImmutableMap<SimmCoordinate, RandomVariable> gradient = ImmutableMap.of(coordinate5Y, new Scalar(v), coordinate10Y, new Scalar(v));
 
 		double vr5Y = PARAMETERS.getRiskWeight(coordinate5Y) * v;
 		double vr10Y = PARAMETERS.getRiskWeight(coordinate10Y) * v;
@@ -134,7 +134,7 @@ public class SimmIRSchemeTest {
 
 		double v = PARAMETERS.getConcentrationThreshold(coordinateEur ) * 2.0;
 
-		final ImmutableMap<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(coordinateEur , new Scalar(v), coordinateUsd, new Scalar(v));
+		final ImmutableMap<SimmCoordinate, RandomVariable> gradient = ImmutableMap.of(coordinateEur , new Scalar(v), coordinateUsd, new Scalar(v));
 
 		double vrEur = PARAMETERS.getRiskWeight(coordinateEur ) * v;
 		double vrUsd = PARAMETERS.getRiskWeight(coordinateUsd) * v;

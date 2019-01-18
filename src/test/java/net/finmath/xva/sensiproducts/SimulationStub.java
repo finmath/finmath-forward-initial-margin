@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.BrownianMotionInterface;
+import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.MonteCarloSimulationInterface;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.TermStructureModelInterface;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationInterface;
 
 /**
@@ -78,8 +78,8 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return A new random variable.
 	 */
 	@Override
-	public RandomVariableInterface getRandomVariableForConstant(double value) {
-		return new RandomVariable(value);
+	public RandomVariable getRandomVariableForConstant(double value) {
+		return new RandomVariableFromDoubleArray(value);
 	}
 
 	/**
@@ -89,7 +89,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return A vector of positive weights which sums up to one
 	 */
 	@Override
-	public RandomVariableInterface getMonteCarloWeights(int timeIndex) {
+	public RandomVariable getMonteCarloWeights(int timeIndex) {
 		return null;
 	}
 
@@ -100,7 +100,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return A vector of positive weights which sums up to one
 	 */
 	@Override
-	public RandomVariableInterface getMonteCarloWeights(double time) {
+	public RandomVariable getMonteCarloWeights(double time) {
 		return null;
 	}
 
@@ -173,7 +173,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getLIBOR(int timeIndex, int liborIndex) throws CalculationException {
+	public RandomVariable getLIBOR(int timeIndex, int liborIndex) throws CalculationException {
 		return null;
 	}
 
@@ -185,8 +185,8 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface[] getLIBORs(int timeIndex) throws CalculationException {
-		return new RandomVariableInterface[0];
+	public RandomVariable[] getLIBORs(int timeIndex) throws CalculationException {
+		return new RandomVariable[0];
 	}
 
 	/**
@@ -195,7 +195,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return The Brownian motion used to simulate the curve.
 	 */
 	@Override
-	public BrownianMotionInterface getBrownianMotion() {
+	public BrownianMotion getBrownianMotion() {
 		return null;
 	}
 
@@ -209,7 +209,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getLIBOR(double time, double periodStart, double periodEnd) throws CalculationException {
+	public RandomVariable getLIBOR(double time, double periodStart, double periodEnd) throws CalculationException {
 		return null;
 	}
 
@@ -217,11 +217,11 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * Return the numeraire at a given time.
 	 *
 	 * @param time Time at which the process should be observed
-	 * @return The numeraire at the specified time as <code>RandomVariable</code>
+	 * @return The numeraire at the specified time as <code>RandomVariableFromDoubleArray</code>
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getNumeraire(double time) throws CalculationException {
+	public RandomVariable getNumeraire(double time) throws CalculationException {
 		return null;
 	}
 
@@ -238,7 +238,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	}
 
 	@Override
-	public Map<String, RandomVariableInterface> getModelParameters() {
+	public Map<String, RandomVariable> getModelParameters() {
 		return null;
 	}
 

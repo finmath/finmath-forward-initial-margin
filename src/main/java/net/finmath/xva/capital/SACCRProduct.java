@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.xva.tradespecifications.SACCRTradeSpecification;
 
 public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
@@ -31,7 +31,7 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 
 	}
 
-	RandomVariableInterface getUnderlyingNetValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	RandomVariable getUnderlyingNetValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		return tradeCollection.stream().map(trade -> {
 			try {
 				return trade.getUnderlyingValuationProduct().getValue(evaluationTime, model);
@@ -42,15 +42,15 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (evaluationTime > capitalReferenceTime) {
 			return model.getRandomVariableForConstant(0.0);
 		}
 
-		RandomVariableInterface V = this.getUnderlyingNetValue(evaluationTime, model);
-		RandomVariableInterface ReplacementCost = V.floor(0.0);
-		RandomVariableInterface pfe = this.getRegulatoryPotentialFutureExposure(V, evaluationTime);
+		RandomVariable V = this.getUnderlyingNetValue(evaluationTime, model);
+		RandomVariable ReplacementCost = V.floor(0.0);
+		RandomVariable pfe = this.getRegulatoryPotentialFutureExposure(V, evaluationTime);
 		ReplacementCost = ReplacementCost.add(pfe);
 		ReplacementCost = ReplacementCost.mult(SACCRAlphaMultiplier);
 
@@ -61,24 +61,24 @@ public class SACCRProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	// Paragraph 146
-	public RandomVariableInterface getRegulatoryPotentialFutureExposure(RandomVariableInterface marketValue, double atTime) {
+	public RandomVariable getRegulatoryPotentialFutureExposure(RandomVariable marketValue, double atTime) {
 		double addOn = getAggregateNotionalAddOn(atTime);
-		RandomVariableInterface V = marketValue;    /* May be adjusted for Collateral */
+		RandomVariable V = marketValue;    /* May be adjusted for Collateral */
 
-		RandomVariableInterface multiplier = null;
+		RandomVariable multiplier = null;
 		multiplier = this.getMultiplier(marketValue, addOn, atTime);
 
-		RandomVariableInterface pfe = multiplier.mult(addOn);
+		RandomVariable pfe = multiplier.mult(addOn);
 		return pfe;
 	}
 
-	public RandomVariableInterface getMultiplier(RandomVariableInterface marketValue, double addOn, double atTime) {
+	public RandomVariable getMultiplier(RandomVariable marketValue, double addOn, double atTime) {
 		double floor = 0.05;
 		double divisor = 2.0 * (1.0 - floor) * addOn;
 		if (divisor < 1.0E-9) {
 			divisor = 1.0;
 		}
-		RandomVariableInterface multiplier = marketValue.div(divisor);
+		RandomVariable multiplier = marketValue.div(divisor);
 		multiplier = multiplier.exp();
 		multiplier = multiplier.mult(1.0 - floor);
 		multiplier = multiplier.add(floor);

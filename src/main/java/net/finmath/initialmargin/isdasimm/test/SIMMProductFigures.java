@@ -5,7 +5,7 @@ import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSim
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * This class facilitates / expedites the initial margin calculation in the spreadsheet
@@ -24,7 +24,7 @@ public class SIMMProductFigures {
 	private boolean isConsiderOISSensis;
 	private double timeStep;
 	private double finalTime;
-	private RandomVariableInterface[] forwardIM = null;
+	private RandomVariable[] forwardIM = null;
 
 	public SIMMProductFigures(LIBORModelMonteCarloSimulationInterface model, AbstractSIMMProduct product, WeightMode weightMode, SensitivityMode sensitivityMode,
 			double interpolationStep, boolean isUseAnalyticSensitivities, boolean isConsiderOISSensis, double timeStep, double finalTime) {
@@ -73,7 +73,7 @@ public class SIMMProductFigures {
 	}
 
 	private void doCalculateIM() throws CalculationException {
-		this.forwardIM = new RandomVariableInterface[(int) (finalTime / timeStep) + 1];
+		this.forwardIM = new RandomVariable[(int) (finalTime / timeStep) + 1];
 		for (int i = 0; i <= (int) (finalTime / timeStep); i++) {
 			forwardIM[i] = product.getInitialMargin(i * timeStep, model, "EUR", sensitivityMode, weightMode, interpolationStep, isUseAnalyticSensitivities, isConsiderOISSensis);
 		}

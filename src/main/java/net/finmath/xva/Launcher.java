@@ -11,7 +11,7 @@ import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.GradientProductComposite;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.products.ApproximateAnnuity;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.xva.initialmargin.simm2.SimmModality;
 import net.finmath.xva.initialmargin.simm2.SimmProduct;
 import net.finmath.xva.tradespecifications.Indices;
@@ -37,6 +37,6 @@ public class Launcher {
 		SimmProduct product = new SimmProduct(marginCalculationTime, portfolioSensiProvider, new SimmModality(calculationCCY, 0.0));
 		LIBORMarketModel model = null;
 		LIBORModelMonteCarloSimulation simulation = null;
-		RandomVariableInterface result = product.getValue(4.0, simulation);
+		RandomVariable result = product.getValue(4.0, simulation);
 	}
 }

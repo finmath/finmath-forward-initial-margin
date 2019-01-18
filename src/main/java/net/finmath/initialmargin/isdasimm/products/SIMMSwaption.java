@@ -7,13 +7,13 @@ import java.util.Map;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.Swaption;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * This class describes a Swaption for SIMM initial margin (MVA) calculation.
@@ -89,16 +89,16 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariableInterface[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) {
 
 			if (sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 
 				// Calculate sensis analytically
-				RandomVariableInterface[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");
-				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model);
-				swapSensis = Arrays.stream(swapSensis).map(n -> n.mult(indicator)).toArray(RandomVariableInterface[]::new);
+				RandomVariable[] swapSensis = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "Libor");
+				RandomVariable indicator = getExerciseIndicator(evaluationTime, model);
+				swapSensis = Arrays.stream(swapSensis).map(n -> n.mult(indicator)).toArray(RandomVariable[]::new);
 				return swapSensis;
 			} else {
 				setSwapGradient(); // Set Gradient of delivery product to obtain sensitivities with AAD
@@ -109,12 +109,12 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariableInterface[] getOISModelSensitivities(String riskClass,
+	public RandomVariable[] getOISModelSensitivities(String riskClass,
 			double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		double[] futureDiscountTimes = null; // the times of the times after evaluation time at which the numeraire has been used for this product
-		RandomVariableInterface[] dVdP = null;
+		RandomVariable[] dVdP = null;
 
 		if (deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) {
 
@@ -126,8 +126,8 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 			if (sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 
 				dVdP = SIMMSimpleSwap.getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), model.getLiborPeriodDiscretization().getTimeStep(0), swap.getNotional(), model, "OIS");
-				RandomVariableInterface indicator = getExerciseIndicator(evaluationTime, model);
-				dVdP = Arrays.stream(dVdP).map(n -> n.mult(indicator)).toArray(RandomVariableInterface[]::new);
+				RandomVariable indicator = getExerciseIndicator(evaluationTime, model);
+				dVdP = Arrays.stream(dVdP).map(n -> n.mult(indicator)).toArray(RandomVariable[]::new);
 				futureDiscountTimes = Arrays.stream(swap.getPaymentDates()).filter(n -> n > evaluationTime).toArray();
 			} else {
 				setSwapGradient(); // Set gradient of delivery product to obtain sensitivities with AAD
@@ -138,7 +138,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// @TODO Implement proper caching
 		if (exerciseIndicator == null) {
 			exerciseIndicator = swaption.getExerciseIndicator(modelCache);
@@ -160,21 +160,21 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		// Swaption: Set paths on which we have not exercised to zero
-		RandomVariableInterface indicator = new RandomVariable(1.0);
+		RandomVariable indicator = new RandomVariableFromDoubleArray(1.0);
 		if (evaluationTime >= swaption.getExerciseDate()) {
 			indicator = getExerciseIndicator(evaluationTime, model); // 1 if exercised on this path
 		}
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
-		RandomVariableInterface[] regressor = new RandomVariableInterface[2];
+		RandomVariable[] regressor = new RandomVariable[2];
 		regressor[0] = model.getLIBOR(evaluationTime, evaluationTime, evaluationTime + model.getLiborPeriodDiscretization().getTimeStep(0));
 		regressor[1] = model.getLIBOR(evaluationTime, evaluationTime, model.getLiborPeriodDiscretization().getTime(model.getNumberOfLibors() - 1));
-		ArrayList<RandomVariableInterface> basisFunctions = getRegressionBasisFunctions(regressor, 2, indicator);
-		this.conditionalExpectationOperator = new MonteCarloConditionalExpectationRegression(basisFunctions.toArray(new RandomVariableInterface[0]));
+		ArrayList<RandomVariable> basisFunctions = getRegressionBasisFunctions(regressor, 2, indicator);
+		this.conditionalExpectationOperator = new MonteCarloConditionalExpectationRegression(basisFunctions.toArray(new RandomVariable[0]));
 	}
 
-	private static ArrayList<RandomVariableInterface> getRegressionBasisFunctions(RandomVariableInterface[] libors, int order, RandomVariableInterface indicator) {
-		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<RandomVariableInterface>();
+	private static ArrayList<RandomVariable> getRegressionBasisFunctions(RandomVariable[] libors, int order, RandomVariable indicator) {
+		ArrayList<RandomVariable> basisFunctions = new ArrayList<RandomVariable>();
 		// Create basis functions - here: 1, S, S^2, S^3, S^4
 
 		for (int liborIndex = 0; liborIndex < libors.length; liborIndex++) {
@@ -193,13 +193,13 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	private void setSwapGradient() throws CalculationException {
 		if (!super.isGradientOfDeliveryProduct) {
 			// Calculate the product value as of time 0.
-			RandomVariableInterface indicator = getExerciseIndicator(swaption.getExerciseDate() + 0.0001, null);
-			RandomVariableDifferentiableInterface productValue =
-					(RandomVariableDifferentiableInterface) swap.getValue(0.0, modelCache).mult(indicator);
+			RandomVariable indicator = getExerciseIndicator(swaption.getExerciseDate() + 0.0001, null);
+			RandomVariableDifferentiable productValue =
+					(RandomVariableDifferentiable) swap.getValue(0.0, modelCache).mult(indicator);
 			// Get the map of numeraire adjustments used specifically for this product
 			super.numeraireAdjustmentMap.putAll(modelCache.getNumeraireAdjustmentMap());
 			// Calculate the gradient
-			Map<Long, RandomVariableInterface> gradientOfProduct = productValue.getGradient();
+			Map<Long, RandomVariable> gradientOfProduct = productValue.getGradient();
 			// Set the gradient
 			super.gradient = gradientOfProduct;
 			super.isGradientOfDeliveryProduct = true;
@@ -216,7 +216,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	//----------------------------------------------------------------------------------------------------------------------------------
 
 	@Override
-	public RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime,
+	public RandomVariable[] getValueNumeraireSensitivities(double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) {
 			setSwapGradient();

@@ -8,7 +8,7 @@ package net.finmath.initialmargin.regression.products.indices;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.components.AbstractProductComponent;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * Base class for indices.
@@ -54,7 +54,7 @@ public abstract class AbstractIndex extends AbstractProductComponent {
 	}
 
 	@Override
-	public abstract RandomVariableInterface getValue(double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	public abstract RandomVariable getValue(double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Returns the name of the index.

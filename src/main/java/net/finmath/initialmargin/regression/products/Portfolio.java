@@ -9,10 +9,10 @@ import java.util.Set;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.components.AbstractProductComponent;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * Implements the pricing of a portfolio of AbstractLIBORMonteCarloProduct products
@@ -129,11 +129,11 @@ public class Portfolio extends AbstractProductComponent {
 	 * @TODO The conversion between different currencies is currently not performed.
 	 */
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface values = new RandomVariable(0.0);
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable values = new RandomVariableFromDoubleArray(0.0);
 
 		for (int productIndex = 0; productIndex < products.length; productIndex++) {
-			RandomVariableInterface valueOfProduct = products[productIndex].getValue(evaluationTime, model);
+			RandomVariable valueOfProduct = products[productIndex].getValue(evaluationTime, model);
 			double weightOfProduct = weights[productIndex];
 
 			values = valueOfProduct.mult(weightOfProduct).add(values);
@@ -142,11 +142,11 @@ public class Portfolio extends AbstractProductComponent {
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface cashFlows = new RandomVariable(0.0);
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable cashFlows = new RandomVariableFromDoubleArray(0.0);
 
 		for (int productIndex = 0; productIndex < products.length; productIndex++) {
-			RandomVariableInterface cashFlowsOfProduct = products[productIndex].getCF(initialTime, finalTime, model);
+			RandomVariable cashFlowsOfProduct = products[productIndex].getCF(initialTime, finalTime, model);
 			double weightOfProduct = weights[productIndex];
 			cashFlows = cashFlowsOfProduct.mult(weightOfProduct).add(cashFlows);
 		}
@@ -176,7 +176,7 @@ public class Portfolio extends AbstractProductComponent {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
+	public RandomVariable getValue(double evaluationTime, double fixingDate,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// TODO Auto-generated method stub
 		return null;

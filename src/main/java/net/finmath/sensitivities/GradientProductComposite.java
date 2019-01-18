@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.time.FloatingpointDate;
 
@@ -33,7 +33,7 @@ public class GradientProductComposite<C> implements GradientProduct<C> {
 	 * @return A map from coordinates to sensitivity values.
 	 */
 	@Override
-	public Map<C, RandomVariableInterface> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public Map<C, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		return underlyingTimelines.stream().
 				flatMap(timeline -> timeline.getGradient(evaluationTime, model).entrySet().stream()).
 				collect(Collectors.groupingBy(Map.Entry::getKey)).entrySet().stream().
@@ -41,9 +41,9 @@ public class GradientProductComposite<C> implements GradientProduct<C> {
 				collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 	}
 
-	private static <C> Pair<C, RandomVariableInterface> aggregateGroupedSensitivities(Map.Entry<C, List<Map.Entry<C, RandomVariableInterface>>> group) {
+	private static <C> Pair<C, RandomVariable> aggregateGroupedSensitivities(Map.Entry<C, List<Map.Entry<C, RandomVariable>>> group) {
 		return Pair.of(group.getKey(), group.getValue().stream().
 				map(Map.Entry::getValue).
-				reduce(new Scalar(0.0), RandomVariableInterface::add));
+				reduce(new Scalar(0.0), RandomVariable::add));
 	}
 }

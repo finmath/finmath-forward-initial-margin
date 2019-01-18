@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 
@@ -25,7 +25,7 @@ public abstract class SimmBaseScheme {
 	 * @param gradient The input gradient from a {@link SimmBaseScheme#getMargin(RiskClass, Map)} call.
 	 * @return Returns a stream of the gradient components used to calculate buckets.
 	 */
-	protected Stream<Map.Entry<SimmCoordinate, RandomVariableInterface>> streamGradient(Map<SimmCoordinate, RandomVariableInterface> gradient) {
+	protected Stream<Map.Entry<SimmCoordinate, RandomVariable>> streamGradient(Map<SimmCoordinate, RandomVariable> gradient) {
 		return gradient.entrySet().stream();
 	}
 
@@ -34,7 +34,7 @@ public abstract class SimmBaseScheme {
 	 *
 	 * @return A {@link BucketResult} containing the whole thing.
 	 */
-	protected abstract BucketResult getBucketAggregation(String bucketName, Map<SimmCoordinate, RandomVariableInterface> gradient);
+	protected abstract BucketResult getBucketAggregation(String bucketName, Map<SimmCoordinate, RandomVariable> gradient);
 
 	/**
 	 * Calculates the resulting delta margin according to ISDA SIMM v2.0 B.8 (d)
@@ -42,7 +42,7 @@ public abstract class SimmBaseScheme {
 	 * @param results A collection of per-bucket results.
 	 * @return The delta margin.
 	 */
-	RandomVariableInterface getMargin(Collection<BucketResult> results, RiskClass riskClass) {
+	RandomVariable getMargin(Collection<BucketResult> results, RiskClass riskClass) {
 		return results.stream().
 				flatMap(bK1 -> results.stream().
 						map(bK2 -> {
@@ -54,7 +54,7 @@ public abstract class SimmBaseScheme {
 									mult(bK1.getG(bK2)).
 									mult(parameter.getCrossBucketCorrelation(riskClass, bK1.getBucketName(), bK2.getBucketName()));
 						})).
-				reduce(new Scalar(0.0), RandomVariableInterface::add).
+				reduce(new Scalar(0.0), RandomVariable::add).
 				sqrt();
 	}
 
@@ -64,7 +64,7 @@ public abstract class SimmBaseScheme {
 	 * @param gradient A sensitivity gradient in SIMM coordinates.
 	 * @return The delta margin.
 	 */
-	public RandomVariableInterface getMargin(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
+	public RandomVariable getMargin(RiskClass riskClass, Map<SimmCoordinate, RandomVariable> gradient) {
 
 		Set<BucketResult> bucketResults = streamGradient(gradient).
 				collect(Collectors.groupingBy(e -> e.getKey().getSimmBucket(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))).

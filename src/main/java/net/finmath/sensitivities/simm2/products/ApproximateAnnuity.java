@@ -15,7 +15,7 @@ import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.FloatingpointDate;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
 
@@ -38,8 +38,8 @@ public class ApproximateAnnuity extends AbstractMonteCarloProduct implements Gra
 	 * @return A map from coordinates to sensitivity values.
 	 */
 	@Override
-	public Map<SimmCoordinate, RandomVariableInterface> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
-		RandomVariableInterface bpv;
+	public Map<SimmCoordinate, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+		RandomVariable bpv;
 		try {
 			bpv = getValue(evaluationTime, model);
 		} catch (CalculationException e) {
@@ -51,7 +51,7 @@ public class ApproximateAnnuity extends AbstractMonteCarloProduct implements Gra
 				collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 	}
 
-	private Pair<SimmCoordinate, RandomVariableInterface> getCoordinateSensitivityPair(RandomVariableInterface bpv, Map.Entry<Vertex, Double> vertexAndWeight) {
+	private Pair<SimmCoordinate, RandomVariable> getCoordinateSensitivityPair(RandomVariable bpv, Map.Entry<Vertex, Double> vertexAndWeight) {
 		return Pair.of(
 				new SimmCoordinate(vertexAndWeight.getKey(), tradeSpec.getIRCurve().getName(), tradeSpec.getIRCurve().getCurrency(),
 						RiskClass.INTEREST_RATE, MarginType.DELTA, ProductClass.RATES_FX),
@@ -59,7 +59,7 @@ public class ApproximateAnnuity extends AbstractMonteCarloProduct implements Gra
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, MonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, MonteCarloSimulationInterface model) throws CalculationException {
 		double bpv = tradeSpec.getNotional() * (tradeSpec.getIRCurve().getPeriodLength() / tradeSpec.getIRCurve().getDayInYears()) / 10000.0;
 
 		return model.getRandomVariableForConstant(bpv);

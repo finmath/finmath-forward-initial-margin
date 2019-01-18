@@ -8,7 +8,7 @@ package net.finmath.initialmargin.isdasimm.changedfinmath;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * Extension of the original interface net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface
@@ -21,11 +21,11 @@ import net.finmath.stochastic.RandomVariableInterface;
 public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface {
 
 	/**
-	 * Returns the map of <code> Double <code> (time) and <code> RandomVariableInterface <code> (numeraire Adjustment)
+	 * Returns the map of <code> Double <code> (time) and <code> RandomVariable <code> (numeraire Adjustment)
 	 *
 	 * @return The numeraire adjustment map
 	 */
-	Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap();
+	Map<Double, RandomVariable> getNumeraireAdjustmentMap();
 
 	/**
 	 * Returns the numeraire adjustment
@@ -34,7 +34,7 @@ public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.mon
 	 * @return
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
+	RandomVariable getNumeraireOISAdjustmentFactor(double time) throws CalculationException;
 
 	/**
 	 * Returns the forward bond P(T;t) on the forward curve. Calculated directly from Libors without using conditional expectation
@@ -44,7 +44,7 @@ public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.mon
 	 * @return P(T ; t)
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException;
+	RandomVariable getForwardBondLibor(double T, double t) throws CalculationException;
 
 	/**
 	 * Returns the forward bond P(T;t) from on the OIS curve for a given Libor market model
@@ -54,5 +54,5 @@ public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.mon
 	 * @return The forward bond P(T;t) on the OIS curve
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException;
+	RandomVariable getForwardBondOIS(double T, double t) throws CalculationException;
 }

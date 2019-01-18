@@ -17,7 +17,7 @@ import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
-import net.finmath.montecarlo.BrownianMotion;
+import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
@@ -52,7 +52,7 @@ public class AnalyticDiscountZeroCouponBondTest {
 
 		LIBORModelMonteCarloSimulation simulation = new LIBORModelMonteCarloSimulation(
 				new LIBORMarketModel(periodTenor, forwardCurve, covariance),
-				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 100, 42)));
+				new ProcessEulerScheme(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
 
 		double bondPriceIbor = new AnalyticZeroCouponBond(periodLength).getValue(0.0, simulation).getAverage();
 		double bondPriceDiscount = new AnalyticDiscountZeroCouponBond(periodLength).getValue(0.0, simulation).getAverage();
@@ -77,7 +77,7 @@ public class AnalyticDiscountZeroCouponBondTest {
 
 		LIBORModelMonteCarloSimulation simulation = new LIBORModelMonteCarloSimulation(
 				new LIBORMarketModel(periodTenor, forwardCurve, discountCurve, covariance),
-				new ProcessEulerScheme(new BrownianMotion(processTenor, 1, 100, 42)));
+				new ProcessEulerScheme(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
 
 		double bondPriceDiscount = new AnalyticDiscountZeroCouponBond(periodLength).getValue(0.0, simulation).getAverage();
 

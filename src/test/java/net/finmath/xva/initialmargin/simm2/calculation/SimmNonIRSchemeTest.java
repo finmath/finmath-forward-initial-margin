@@ -14,7 +14,7 @@ import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 import net.finmath.xva.initialmargin.simm2.specs.Simm2_0;
@@ -32,12 +32,12 @@ public class SimmNonIRSchemeTest {
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinate)*2.0;
 
-		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(
+		Map<SimmCoordinate, RandomVariable> gradient = ImmutableMap.of(
 				coordinate,
 				new Scalar(marketSensitivity)
 				);
 
-		final RandomVariableInterface result = scheme.getMargin(RiskClass.EQUITY, gradient);
+		final RandomVariable result = scheme.getMargin(RiskClass.EQUITY, gradient);
 
 		//For a single weighted sensitivity (one stock)
 		//the result should be the weighted sensitivity
@@ -58,12 +58,12 @@ public class SimmNonIRSchemeTest {
 		//By choosing a sensitivity above the threshold we don't have to care about it in the assertion
 		final double marketSensitivity = parameters.getConcentrationThreshold(coordinate)/ additionalWeight * 2.0;
 
-		Map<SimmCoordinate, RandomVariableInterface> gradient = ImmutableMap.of(
+		Map<SimmCoordinate, RandomVariable> gradient = ImmutableMap.of(
 				coordinate,
 				new Scalar(marketSensitivity)
 				);
 
-		final RandomVariableInterface result = scheme.getMargin(RiskClass.EQUITY, gradient);
+		final RandomVariable result = scheme.getMargin(RiskClass.EQUITY, gradient);
 
 		//For a single weighted sensitivity (one stock)
 		//the result should be the vega risk (VRW * HVR * RW * scale * marketSensitivity)

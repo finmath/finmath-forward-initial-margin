@@ -13,9 +13,9 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.sensitivities.transformation.TransformationAlgorithms;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 @RunWith(Theories.class)
@@ -36,17 +36,17 @@ public class TransformationAlgorithmsTest {
 	@Theory
 	public void testGetPseudoInverseByParallelAcmSvdWithDeterministicDiagonalMatrix(double[] diagonal) {
 
-		RandomVariableInterface[][] randomMatrix = new RandomVariableInterface[diagonal.length][diagonal.length];
+		RandomVariable[][] randomMatrix = new RandomVariable[diagonal.length][diagonal.length];
 
 		for (int i = 0; i < diagonal.length; i++) {
-			randomMatrix[i] = new RandomVariableInterface[diagonal.length];
+			randomMatrix[i] = new RandomVariable[diagonal.length];
 
 			for (int j = 0; j < diagonal.length; j++) {
 				randomMatrix[i][j] = new Scalar(i == j ? diagonal[i] : 0.0);
 			}
 		}
 
-		final RandomVariableInterface[][] pseudoInverse = TransformationAlgorithms.getPseudoInverseByParallelAcmSvd(randomMatrix);
+		final RandomVariable[][] pseudoInverse = TransformationAlgorithms.getPseudoInverseByParallelAcmSvd(randomMatrix);
 
 		assertThat(
 				IntStream.range(0, diagonal.length).
@@ -61,22 +61,22 @@ public class TransformationAlgorithmsTest {
 
 		int dimension = Math.max(diagonal1.length, diagonal2.length);
 
-		RandomVariableInterface[][] randomMatrix = new RandomVariableInterface[dimension][dimension];
+		RandomVariable[][] randomMatrix = new RandomVariable[dimension][dimension];
 
 		double[] nonDiagonal = new double[] { 0.0, 0.0 };
 
 		for (int i = 0; i < dimension; i++) {
-			randomMatrix[i] = new RandomVariableInterface[dimension];
+			randomMatrix[i] = new RandomVariable[dimension];
 
 			for (int j = 0; j < dimension; j++) {
-				randomMatrix[i][j] = new RandomVariable(Double.NEGATIVE_INFINITY, i == j ? new double[] {
+				randomMatrix[i][j] = new RandomVariableFromDoubleArray(Double.NEGATIVE_INFINITY, i == j ? new double[] {
 						i < diagonal1.length ? diagonal1[i] : 0.0,
 								i < diagonal2.length ? diagonal2[i] : 0.0,
 				} : nonDiagonal);
 			}
 		}
 
-		final RandomVariableInterface[][] pseudoInverse = TransformationAlgorithms.getPseudoInverseByParallelAcmSvd(randomMatrix);
+		final RandomVariable[][] pseudoInverse = TransformationAlgorithms.getPseudoInverseByParallelAcmSvd(randomMatrix);
 
 		assertThat(
 				IntStream.range(0, dimension).

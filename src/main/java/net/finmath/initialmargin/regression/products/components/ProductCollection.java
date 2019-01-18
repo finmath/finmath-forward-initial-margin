@@ -17,7 +17,7 @@ import net.finmath.concurrency.FutureWrapper;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * A collection of product components (like periods, options, etc.) paying the sum of their payouts.
@@ -95,32 +95,32 @@ public class ProductCollection extends AbstractProductComponent {
 	 * @see net.finmath.montecarlo.AbstractMonteCarloProduct#getValue(double, net.finmath.montecarlo.MonteCarloSimulationInterface)
 	 */
 	@Override
-	public RandomVariableInterface getValue(final double evaluationTime, final LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(final double evaluationTime, final LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		// Ignite asynchronous calculation if possible
-		ArrayList<Future<RandomVariableInterface>> results = new ArrayList<Future<RandomVariableInterface>>();
+		ArrayList<Future<RandomVariable>> results = new ArrayList<Future<RandomVariable>>();
 		for (final AbstractLIBORMonteCarloRegressionProduct product : products) {
-			Future<RandomVariableInterface> valueFuture;
+			Future<RandomVariable> valueFuture;
 			try {
 				valueFuture = executor.submit(
-						new Callable<RandomVariableInterface>() {
+						new Callable<RandomVariable>() {
 							@Override
-							public RandomVariableInterface call() throws CalculationException {
+							public RandomVariable call() throws CalculationException {
 								return product.getValue(evaluationTime, model);
 							}
 						}
 						);
 			} catch (RejectedExecutionException e) {
-				valueFuture = new FutureWrapper<RandomVariableInterface>(product.getValue(evaluationTime, model));
+				valueFuture = new FutureWrapper<RandomVariable>(product.getValue(evaluationTime, model));
 			}
 
 			results.add(valueFuture);
 		}
 
 		// Collect results
-		RandomVariableInterface values = model.getRandomVariableForConstant(0.0);
+		RandomVariable values = model.getRandomVariableForConstant(0.0);
 		try {
-			for (Future<RandomVariableInterface> valueFuture : results) {
+			for (Future<RandomVariable> valueFuture : results) {
 				values = values.add(valueFuture.get());
 			}
 		} catch (InterruptedException e) {
@@ -140,32 +140,32 @@ public class ProductCollection extends AbstractProductComponent {
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		// Ignite asynchronous calculation if possible
-		ArrayList<Future<RandomVariableInterface>> results = new ArrayList<Future<RandomVariableInterface>>();
+		ArrayList<Future<RandomVariable>> results = new ArrayList<Future<RandomVariable>>();
 		for (final AbstractLIBORMonteCarloRegressionProduct product : products) {
-			Future<RandomVariableInterface> valueFuture;
+			Future<RandomVariable> valueFuture;
 			try {
 				valueFuture = executor.submit(
-						new Callable<RandomVariableInterface>() {
+						new Callable<RandomVariable>() {
 							@Override
-							public RandomVariableInterface call() throws CalculationException {
+							public RandomVariable call() throws CalculationException {
 								return product.getCF(initialTime, finalTime, model);
 							}
 						}
 						);
 			} catch (RejectedExecutionException e) {
-				valueFuture = new FutureWrapper<RandomVariableInterface>(product.getCF(initialTime, finalTime, model));
+				valueFuture = new FutureWrapper<RandomVariable>(product.getCF(initialTime, finalTime, model));
 			}
 
 			results.add(valueFuture);
 		}
 
 		// Collect results
-		RandomVariableInterface values = model.getRandomVariableForConstant(0.0);
+		RandomVariable values = model.getRandomVariableForConstant(0.0);
 		try {
-			for (Future<RandomVariableInterface> valueFuture : results) {
+			for (Future<RandomVariable> valueFuture : results) {
 				values = values.add(valueFuture.get());
 			}
 		} catch (InterruptedException e) {
@@ -190,7 +190,7 @@ public class ProductCollection extends AbstractProductComponent {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
+	public RandomVariable getValue(double evaluationTime, double fixingDate,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return getValue(evaluationTime, model);
 	}

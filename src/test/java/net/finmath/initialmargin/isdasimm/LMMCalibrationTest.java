@@ -20,7 +20,7 @@ import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
-import net.finmath.montecarlo.BrownianMotionInterface;
+import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
@@ -174,7 +174,7 @@ public class LMMCalibrationTest {
 		/*
 		 * Create Brownian motions
 		 */
-		final BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */);
+		final BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretization, numberOfFactors, numberOfPaths, 31415 /* seed */);
 
 		// Create a volatility model: Piecewise constant volatility
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(new RandomVariableFactory(), timeDiscretization, liborPeriodDiscretization, new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.50 / 100}, true);
@@ -315,7 +315,7 @@ public class LMMCalibrationTest {
 		return calibrationItemsLMM;
 	}
 
-	public static Map<String, Object> getModelCalibrationPropertiesMap(double accuracy, double parameterStep, int maxIterations, int numberOfThreads, BrownianMotionInterface brownianMotion) {
+	public static Map<String, Object> getModelCalibrationPropertiesMap(double accuracy, double parameterStep, int maxIterations, int numberOfThreads, BrownianMotion brownianMotion) {
 		// Set model properties
 		Map<String, Object> properties = new HashMap<String, Object>();
 
@@ -343,7 +343,7 @@ public class LMMCalibrationTest {
 		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
 	}
 
-	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotionInterface brownianMotion, CalibrationProduct[] calibrationItems) {
+	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
 

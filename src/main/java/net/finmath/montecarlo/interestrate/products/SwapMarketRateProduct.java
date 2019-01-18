@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationInterface;
 
 /**
@@ -37,20 +37,20 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation)
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation)
 			throws CalculationException {
-		RandomVariableInterface numerator = IntStream.range(0, floatTenor.getNumberOfTimeSteps()).
+		RandomVariable numerator = IntStream.range(0, floatTenor.getNumberOfTimeSteps()).
 				mapToObj(i -> getFloatPaymentSummand(i, evaluationTime, simulation)).
-				reduce(simulation.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
+				reduce(simulation.getRandomVariableForConstant(0.0), RandomVariable::add);
 
-		RandomVariableInterface denominator = IntStream.range(0, fixTenor.getNumberOfTimeSteps()).
+		RandomVariable denominator = IntStream.range(0, fixTenor.getNumberOfTimeSteps()).
 				mapToObj(i -> getFixPaymentSummand(i, evaluationTime, simulation)).
-				reduce(simulation.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
+				reduce(simulation.getRandomVariableForConstant(0.0), RandomVariable::add);
 
 		return numerator.div(denominator);
 	}
 
-	private RandomVariableInterface getFixPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) {
+	private RandomVariable getFixPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) {
 		double periodStartTime = fixTenor.getTime(i);
 		double periodEndTime = fixTenor.getTime(i+1);
 		double periodLength = periodEndTime - periodStartTime;
@@ -61,14 +61,14 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 		}
 	}
 
-	private RandomVariableInterface getFloatPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) {
+	private RandomVariable getFloatPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) {
 		double periodStartTime = floatTenor.getTime(i);
 		double periodEndTime = floatTenor.getTime(i+1);
 		double periodLength = periodEndTime - periodStartTime;
 
 		try {
 			//floating rate is paid out at periodEndTime
-			RandomVariableInterface discountFactorToPeriodEnd = floatTenorDiscountFactors[i+1].getValue(evaluationTime, simulation);
+			RandomVariable discountFactorToPeriodEnd = floatTenorDiscountFactors[i+1].getValue(evaluationTime, simulation);
 
 			return simulation.getLIBOR(evaluationTime, periodStartTime, periodEndTime).mult(discountFactorToPeriodEnd).mult(periodLength);
 		} catch (CalculationException e) {

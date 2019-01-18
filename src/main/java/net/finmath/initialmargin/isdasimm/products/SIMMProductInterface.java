@@ -5,7 +5,7 @@ import java.util.Map;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.optimizer.SolverException;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * The interface to be implemented by all products whose initial margin (MVA) we are interested in, i.e. all classes
@@ -23,7 +23,7 @@ public interface SIMMProductInterface {
 	 * @return The forward initial margin
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface getInitialMargin(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String calculationCCY) throws CalculationException;
+	RandomVariable getInitialMargin(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String calculationCCY) throws CalculationException;
 
 	/**
 	 * Returns the sensitivity of the SimmProduct w.r.t the specified parameters if a sensitivity is available.
@@ -41,7 +41,7 @@ public interface SIMMProductInterface {
 	 * @throws CloneNotSupportedException
 	 * @throws SolverException
 	 */
-	RandomVariableInterface getSensitivity(String productClass,
+	RandomVariable getSensitivity(String productClass,
 			String riskClass,
 			String maturityBucket, // only for IR and Credit risk class, null otherwise
 			String curveIndexName, // null if riskClass not IR
@@ -56,7 +56,7 @@ public interface SIMMProductInterface {
 	 * @return The sensitivities of the product w.r.t. the LIBORs, dV/dL
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Calculates the delta sensitivities w.r.t. the OIS curve for equidistant time points of length equal
@@ -68,7 +68,7 @@ public interface SIMMProductInterface {
 	 * @return The delta sensitivities w.r.t. the OIS curve
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface[] getOISModelSensitivities(String riskClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	RandomVariable[] getOISModelSensitivities(String riskClass, double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Calculates the delta sensitivities w.r.t. the numeraire at all times the numeraire is used in the
@@ -81,7 +81,7 @@ public interface SIMMProductInterface {
 	 * corresponding delta sensitivities w.r.t. the numeraire.
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface[] getValueNumeraireSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	RandomVariable[] getValueNumeraireSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Returns an indicator of the paths on which we have exercised at the given time. 1 if exercised, 0 if not exercised.
@@ -91,7 +91,7 @@ public interface SIMMProductInterface {
 	 * @return The exercise indicator
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Set the conditional expectation operator for this product at a given time. We need the
@@ -109,7 +109,7 @@ public interface SIMMProductInterface {
 	 * @return The gradient of the product
 	 * @throws CalculationException
 	 */
-	Map<Long, RandomVariableInterface> getGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	Map<Long, RandomVariable> getGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
 
 	/**
 	 * Returns the final time of the product (maturity). This is important for sensitivity interpolation
@@ -143,5 +143,5 @@ public interface SIMMProductInterface {
 	 * @throws CloneNotSupportedException
 	 * @throws CalculationException
 	 */
-	RandomVariableInterface[] getExactDeltaFromCache(double time, String riskClass, String curveIndexName, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException;
+	RandomVariable[] getExactDeltaFromCache(double time, String riskClass, String curveIndexName, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException;
 }

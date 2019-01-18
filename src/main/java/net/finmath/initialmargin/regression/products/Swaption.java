@@ -15,9 +15,9 @@ import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.marketdata.products.Swap;
 import net.finmath.marketdata.products.SwapAnnuity;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -39,7 +39,7 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	private double[] periodLengths;    // Vector of payment dates (same length as fixing dates)
 	private double[] swaprates;        // Vector of strikes
 
-	private RandomVariableInterface barrierIndicator = null;
+	private RandomVariable barrierIndicator = null;
 	private AbstractLIBORMonteCarloRegressionProduct swap;
 	private final double notional;
 
@@ -125,8 +125,8 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface values;
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable values;
 		// CHANGED
 		if (evaluationTime > exerciseDate) {
 			if (barrierIndicator == null) {
@@ -135,14 +135,14 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 			if (swap == null) {
 				swap = new SimpleSwap(fixingDates, paymentDates, swaprates, true, notional);
 			}
-			RandomVariableInterface swapValue = swap.getValue(evaluationTime, model);
-			values = barrierIndicator.choose(new RandomVariable(0.0), swapValue);
+			RandomVariable swapValue = swap.getValue(evaluationTime, model);
+			values = barrierIndicator.choose(new RandomVariableFromDoubleArray(0.0), swapValue);
 		} else {
 
 			/*
 			 * Calculate value of the swap at exercise date on each path (beware of perfect foresight - all rates are simulationTime=exerciseDate)
 			 */
-			RandomVariableInterface valueOfSwapAtExerciseDate = model.getRandomVariableForConstant(/*fixingDates[fixingDates.length-1],*/0.0);
+			RandomVariable valueOfSwapAtExerciseDate = model.getRandomVariableForConstant(/*fixingDates[fixingDates.length-1],*/0.0);
 
 			// Calculate the value of the swap by working backward through all periods
 			for (int period = fixingDates.length - 1; period >= 0; period--) {
@@ -157,10 +157,10 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 				double periodLength = periodLengths != null ? periodLengths[period] : paymentDate - fixingDate;
 
 				// Get random variables - note that this is the rate at simulation time = exerciseDate
-				RandomVariableInterface libor = model.getLIBOR(exerciseDate, fixingDate, paymentDate);
+				RandomVariable libor = model.getLIBOR(exerciseDate, fixingDate, paymentDate);
 
 				// Calculate payoff
-				RandomVariableInterface payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
+				RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
 
 				// Calculated the adjustment for the discounting curve, assuming a deterministic basis
 				// @TODO: Need to check if the model fulfills the assumptions (all models implementing the interface currently do so).
@@ -187,12 +187,12 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 			 * Calculate swaption value
 			 */
 			values = valueOfSwapAtExerciseDate.floor(0.0);
-			RandomVariableInterface numeraire = model.getNumeraire(exerciseDate);
-			RandomVariableInterface monteCarloProbabilities = model.getMonteCarloWeights(exerciseDate);
+			RandomVariable numeraire = model.getNumeraire(exerciseDate);
+			RandomVariable monteCarloProbabilities = model.getMonteCarloWeights(exerciseDate);
 			values = values.div(numeraire).mult(monteCarloProbabilities);
 
-			RandomVariableInterface numeraireAtZero = model.getNumeraire(evaluationTime);
-			RandomVariableInterface monteCarloProbabilitiesAtZero = model.getMonteCarloWeights(evaluationTime);
+			RandomVariable numeraireAtZero = model.getNumeraire(evaluationTime);
+			RandomVariable monteCarloProbabilitiesAtZero = model.getMonteCarloWeights(evaluationTime);
 			values = values.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
 		}
 		return values;
@@ -238,9 +238,9 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (finalTime <= exerciseDate) {
-			return new RandomVariable(0.0);
+			return new RandomVariableFromDoubleArray(0.0);
 		}
 		if (swap == null) {
 			swap = new SimpleSwap(fixingDates, paymentDates, swaprates, true, notional);
@@ -248,8 +248,8 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 		if (barrierIndicator == null) {
 			barrierIndicator = getValue(exerciseDate, model).mult(-1.0);
 		}
-		RandomVariableInterface swapCF = swap.getCF(initialTime, finalTime, model);
-		RandomVariableInterface swapCFOnPathWhereExercised = barrierIndicator.choose(new RandomVariable(0.0), swapCF);
+		RandomVariable swapCF = swap.getCF(initialTime, finalTime, model);
+		RandomVariable swapCFOnPathWhereExercised = barrierIndicator.choose(new RandomVariableFromDoubleArray(0.0), swapCF);
 		return swapCFOnPathWhereExercised;
 	}
 }

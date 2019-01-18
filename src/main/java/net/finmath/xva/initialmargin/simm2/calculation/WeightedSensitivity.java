@@ -1,7 +1,7 @@
 package net.finmath.xva.initialmargin.simm2.calculation;
 
 import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 
 /**
@@ -9,10 +9,10 @@ import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
  */
 public class WeightedSensitivity {
 	private SimmCoordinate coordinate;
-	private RandomVariableInterface concentrationRiskFactor;
-	private RandomVariableInterface weightedSensitivity;
+	private RandomVariable concentrationRiskFactor;
+	private RandomVariable weightedSensitivity;
 
-	public WeightedSensitivity(SimmCoordinate coordinate, RandomVariableInterface concentrationRiskFactor, RandomVariableInterface weightedSensitivity) {
+	public WeightedSensitivity(SimmCoordinate coordinate, RandomVariable concentrationRiskFactor, RandomVariable weightedSensitivity) {
 		this.coordinate = coordinate;
 		this.concentrationRiskFactor = concentrationRiskFactor;
 		this.weightedSensitivity = weightedSensitivity;
@@ -24,7 +24,7 @@ public class WeightedSensitivity {
 	 * @param parameter The {@link ParameterSet} instance providing correlation parameters.
 	 * @return The term of <i>ρ<sub>kl</sub> × f<sub>kl</sub> × WS<sub>k</sub> × WS<sub>l</sub></i> in the formula for <i>K</i>.
 	 */
-	public RandomVariableInterface getCrossTermNonIR(WeightedSensitivity v, ParameterSet parameter) {
+	public RandomVariable getCrossTermNonIR(WeightedSensitivity v, ParameterSet parameter) {
 		return getCrossTermWithoutConcentration(v, parameter).
 				mult(getConcentrationRiskFactor().cap(v.getConcentrationRiskFactor())). //numerator f
 				div(getConcentrationRiskFactor().floor(v.getConcentrationRiskFactor())); //denominator f
@@ -36,7 +36,7 @@ public class WeightedSensitivity {
 	 * @param parameter The {@link ParameterSet} instance providing correlation parameters.
 	 * @return The term of <i>φ<sub>i,j</sub> × ρ<sub>k,l</sub> × WS<sub>k,i</sub> × WS<sub>l,j</sub></i> in the formula for <i>K</i>.
 	 */
-	public RandomVariableInterface getCrossTermWithoutConcentration(WeightedSensitivity v, ParameterSet parameter) {
+	public RandomVariable getCrossTermWithoutConcentration(WeightedSensitivity v, ParameterSet parameter) {
 		return getWeightedSensitivity().
 				mult(v.getWeightedSensitivity()).
 				mult(parameter.getIntraBucketCorrelation(getCoordinate(), v.getCoordinate())); //rho (times phi for IR)
@@ -45,14 +45,14 @@ public class WeightedSensitivity {
 	/**
 	 * @return Retrieves the concentration risk factor used for weighting the sensitivity.
 	 */
-	public RandomVariableInterface getConcentrationRiskFactor() {
+	public RandomVariable getConcentrationRiskFactor() {
 		return concentrationRiskFactor;
 	}
 
 	/**
 	 * @return Returns the net sensitivity multiplied with the risk weight and concentration risk factor.
 	 */
-	public RandomVariableInterface getWeightedSensitivity() {
+	public RandomVariable getWeightedSensitivity() {
 		return weightedSensitivity;
 	}
 

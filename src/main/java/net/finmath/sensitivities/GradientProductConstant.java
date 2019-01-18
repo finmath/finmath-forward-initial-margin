@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 /**
@@ -14,9 +14,9 @@ import net.finmath.stochastic.Scalar;
  */
 public class GradientProductConstant<C> implements GradientProduct<C> {
 
-	private Map<C, RandomVariableInterface> sensitivitiyMap;
+	private Map<C, RandomVariable> sensitivitiyMap;
 
-	private GradientProductConstant(Map<C, RandomVariableInterface> sensitivityMap) {
+	private GradientProductConstant(Map<C, RandomVariable> sensitivityMap) {
 		this.sensitivitiyMap = sensitivityMap;
 	}
 
@@ -27,7 +27,7 @@ public class GradientProductConstant<C> implements GradientProduct<C> {
 				collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
 	}
 
-	public static <C> GradientProductConstant<C> fromRandom(Map<C, RandomVariableInterface> sensitivities) {
+	public static <C> GradientProductConstant<C> fromRandom(Map<C, RandomVariable> sensitivities) {
 		return new GradientProductConstant(sensitivities);
 	}
 
@@ -39,7 +39,7 @@ public class GradientProductConstant<C> implements GradientProduct<C> {
 	 * @return The constant map from coordinates to sensitivity values.
 	 */
 	@Override
-	public Map<C, RandomVariableInterface> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public Map<C, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		return sensitivitiyMap;
 	}
 }

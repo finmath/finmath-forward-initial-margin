@@ -26,10 +26,10 @@ import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterface;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
-import net.finmath.montecarlo.BrownianMotionInterface;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.BrownianMotion;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.RandomVariableFactory;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
@@ -41,7 +41,7 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
 import net.finmath.time.TimeDiscretization;
@@ -51,7 +51,7 @@ public class SwapAnalyticVsAADSensitivities {
 	static final DecimalFormat formatterTime = new DecimalFormat("0.000");
 	static final DecimalFormat formatterSensi = new DecimalFormat("0.000000000");
 
-	public Map<Long, RandomVariableInterface> gradient;
+	public Map<Long, RandomVariable> gradient;
 
 	@Test
 	public void testAADVsAnalyticSensis() throws CalculationException {
@@ -105,8 +105,8 @@ public class SwapAnalyticVsAADSensitivities {
 
 		for (int timeIndex = 0; timeIndex < (int) (paymentDates[paymentDates.length - 1] / timeStep); timeIndex++) {
 			double time = timeStep * timeIndex;
-			RandomVariableInterface[] sensisAAD = getAADSwapLiborSensitivities(time, simpleSwap, model);
-			RandomVariableInterface[] sensisANA = getAnalyticSwapLiborSensitivities(time, periodLength, fixingDates, model);
+			RandomVariable[] sensisAAD = getAADSwapLiborSensitivities(time, simpleSwap, model);
+			RandomVariable[] sensisANA = getAnalyticSwapLiborSensitivities(time, periodLength, fixingDates, model);
 			System.out.println("Time" + "\t" + "LiborIndex" + "\t" + "SensisAAD" + "\t" + "SensisAnalytic");
 			for (int liborIndex = 0; liborIndex < sensisANA.length; liborIndex++) {
 				System.out.println(formatterTime.format(timeIndex * timeStep) + "\t" + liborIndex + "\t" +
@@ -136,7 +136,7 @@ public class SwapAnalyticVsAADSensitivities {
 	 * @return
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface[] getAnalyticSwapLiborSensitivities(double evaluationTime,
+	public RandomVariable[] getAnalyticSwapLiborSensitivities(double evaluationTime,
 			double periodLength,
 			double[] fixingDates,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
@@ -148,16 +148,16 @@ public class SwapAnalyticVsAADSensitivities {
 		int firstLiborIndex = fixingDates[0] > evaluationTime ? model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(fixingDates[0]) : model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(evaluationTime);
 		int numberOfRemainingLibors = getNumberOfRemainingLibors(evaluationTime, model);
 		int numberOfSensis = evaluationTime == getNextLiborTime(evaluationTime, model) ? numberOfRemainingLibors : numberOfRemainingLibors + 1;
-		RandomVariableInterface[] sensis = new RandomVariableInterface[numberOfSensis];
-		Arrays.fill(sensis, new RandomVariable(0.0));
+		RandomVariable[] sensis = new RandomVariable[numberOfSensis];
+		Arrays.fill(sensis, new RandomVariableFromDoubleArray(0.0));
 		int currentLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestLessOrEqual(evaluationTime);
-		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
+		RandomVariable numeraireAtEval = model.getNumeraire(evaluationTime);
 
 		for (int liborIndex = currentLiborIndex; liborIndex < numberOfSensis + currentLiborIndex; liborIndex++) {
 			int i = liborIndex < firstLiborIndex ? 0 : liborIndex - firstLiborIndex + 1;
 			if (!(i > fixingDates.length - periodIndex || i == 0)) { //fixingDates[i-1]+periodLength<evaluationTime
 				// Actual Sensitivity Calculation: dV/dL = P(T,t)*periodLength
-				RandomVariableInterface numeraireAtPayment = model.getNumeraire(fixingDates[periodIndex + i - 1] + periodLength);
+				RandomVariable numeraireAtPayment = model.getNumeraire(fixingDates[periodIndex + i - 1] + periodLength);
 				sensis[liborIndex - currentLiborIndex] = numeraireAtEval.div(numeraireAtPayment).mult(periodLength).getConditionalExpectation(cOperator);
 			}
 		}
@@ -171,21 +171,21 @@ public class SwapAnalyticVsAADSensitivities {
 	 * @return The forward sensisivity dVdL (as a row vector)
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface[] getAADSwapLiborSensitivities(double evaluationTime,
+	public RandomVariable[] getAADSwapLiborSensitivities(double evaluationTime,
 			AbstractLIBORMonteCarloProduct product,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (this.gradient == null) {
-			RandomVariableDifferentiableInterface value = (RandomVariableDifferentiableInterface) product.getValue(0.0, model);
+			RandomVariableDifferentiable value = (RandomVariableDifferentiable) product.getValue(0.0, model);
 			this.gradient = value.getGradient();
 		}
 
 		MonteCarloConditionalExpectationRegression cOperator = getConditionalExpectationOperator(evaluationTime, model);
-		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
+		RandomVariable numeraireAtEval = model.getNumeraire(evaluationTime);
 
 		// Calculate forward sensitivities
 		int numberOfRemainingLibors = getNumberOfRemainingLibors(evaluationTime, model);
 		int numberOfSensis = evaluationTime == getNextLiborTime(evaluationTime, model) ? numberOfRemainingLibors : numberOfRemainingLibors + 1;
-		RandomVariableInterface[] valueLiborSensitivities = new RandomVariableInterface[numberOfSensis];// exclude last libor
+		RandomVariable[] valueLiborSensitivities = new RandomVariable[numberOfSensis];// exclude last libor
 		int timeIndexAtEval = model.getTimeDiscretization().getTimeIndexNearestLessOrEqual(evaluationTime);
 
 		// Set all entries of dVdL
@@ -195,15 +195,15 @@ public class SwapAnalyticVsAADSensitivities {
 		if (numberOfSensis != numberOfRemainingLibors) {
 			indexAdjustment = 1;
 			double lastLiborTime = model.getLiborPeriodDiscretization().getTime(lastLiborIndex);
-			RandomVariableInterface lastLibor = model.getLIBOR(model.getTimeDiscretization().getTimeIndex(lastLiborTime), lastLiborIndex);
-			RandomVariableInterface dVdL = gradient.get(((RandomVariableDifferentiableInterface) lastLibor).getID());
+			RandomVariable lastLibor = model.getLIBOR(model.getTimeDiscretization().getTimeIndex(lastLiborTime), lastLiborIndex);
+			RandomVariable dVdL = gradient.get(((RandomVariableDifferentiable) lastLibor).getID());
 			valueLiborSensitivities[0] = dVdL.mult(numeraireAtEval);
 		}
 
 		for (int liborIndex = lastLiborIndex + indexAdjustment; liborIndex < model.getNumberOfLibors(); liborIndex++) {
-			RandomVariableInterface liborAtTimeIndex = model.getLIBOR(timeIndexAtEval, liborIndex);
-			RandomVariableInterface dVdL = gradient.get(((RandomVariableDifferentiableInterface) liborAtTimeIndex).getID());
-			valueLiborSensitivities[liborIndex - lastLiborIndex] = dVdL == null ? new RandomVariable(0.0) : dVdL.mult(numeraireAtEval).getConditionalExpectation(cOperator);
+			RandomVariable liborAtTimeIndex = model.getLIBOR(timeIndexAtEval, liborIndex);
+			RandomVariable dVdL = gradient.get(((RandomVariableDifferentiable) liborAtTimeIndex).getID());
+			valueLiborSensitivities[liborIndex - lastLiborIndex] = dVdL == null ? new RandomVariableFromDoubleArray(0.0) : dVdL.mult(numeraireAtEval).getConditionalExpectation(cOperator);
 		}
 		return valueLiborSensitivities;
 	}
@@ -304,7 +304,7 @@ public class SwapAnalyticVsAADSensitivities {
 
 		LIBORMarketModelInterface liborMarketModel = new LIBORMarketModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
 
-		BrownianMotionInterface brownianMotion = new net.finmath.montecarlo.BrownianMotion(timeDiscretization, numberOfFactors, numberOfPaths, 3141 /* seed */);
+		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretization, numberOfFactors, numberOfPaths, 3141 /* seed */);
 
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
 
@@ -365,15 +365,15 @@ public class SwapAnalyticVsAADSensitivities {
 	private static MonteCarloConditionalExpectationRegression getConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
-		RandomVariableInterface[] regressor = new RandomVariableInterface[2];
+		RandomVariable[] regressor = new RandomVariable[2];
 		regressor[0] = model.getLIBOR(evaluationTime, evaluationTime, evaluationTime + model.getLiborPeriodDiscretization().getTimeStep(0));
 		regressor[1] = model.getLIBOR(evaluationTime, evaluationTime, model.getLiborPeriodDiscretization().getTime(model.getNumberOfLibors() - 1));
-		ArrayList<RandomVariableInterface> basisFunctions = getRegressionBasisFunctions(regressor, 2);
-		return new MonteCarloConditionalExpectationRegression(basisFunctions.toArray(new RandomVariableInterface[0]));
+		ArrayList<RandomVariable> basisFunctions = getRegressionBasisFunctions(regressor, 2);
+		return new MonteCarloConditionalExpectationRegression(basisFunctions.toArray(new RandomVariable[0]));
 	}
 
-	private static ArrayList<RandomVariableInterface> getRegressionBasisFunctions(RandomVariableInterface[] libors, int order) {
-		ArrayList<RandomVariableInterface> basisFunctions = new ArrayList<RandomVariableInterface>();
+	private static ArrayList<RandomVariable> getRegressionBasisFunctions(RandomVariable[] libors, int order) {
+		ArrayList<RandomVariable> basisFunctions = new ArrayList<RandomVariable>();
 		// Create basis functions - here: 1, S, S^2, S^3, S^4
 		for (int liborIndex = 0; liborIndex < libors.length; liborIndex++) {
 			for (int powerOfRegressionMonomial = 0; powerOfRegressionMonomial <= order; powerOfRegressionMonomial++) {

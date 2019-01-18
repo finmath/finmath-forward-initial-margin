@@ -9,7 +9,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationInterface;
 
 /**
@@ -25,7 +25,7 @@ public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return initialMargins.stream()
 				.map(im -> {
 					try {
@@ -34,7 +34,7 @@ public class MvaProduct extends AbstractLIBORMonteCarloProduct {
 						return model.getRandomVariableForConstant(Double.NaN);
 					}
 				})
-				.reduce(RandomVariableInterface::add)
+				.reduce(RandomVariable::add)
 				.orElse(model.getRandomVariableForConstant(0.0));
 	}
 }

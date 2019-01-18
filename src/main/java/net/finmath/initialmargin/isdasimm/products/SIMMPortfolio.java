@@ -7,7 +7,7 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * This class is a wrapper of single <code> AbstractSIMMProduct </code> s into one portfolio.
@@ -54,7 +54,7 @@ public class SIMMPortfolio {
 	 * @return The forward initial margin for given time and model
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface getInitialMargin(double evaluationTime,
+	public RandomVariable getInitialMargin(double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model,
 			String calculationCCY,
 			SensitivityMode sensitivityMode,
@@ -77,7 +77,7 @@ public class SIMMPortfolio {
 	 * @return The forward initial margin for given time and model
 	 * @throws CalculationException
 	 */
-	public RandomVariableInterface getInitialMargin(double evaluationTime,
+	public RandomVariable getInitialMargin(double evaluationTime,
 			LIBORModelMonteCarloSimulationInterface model,
 			String calculationCCY,
 			SensitivityMode sensitivityMode,

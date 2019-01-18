@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.specs.ParameterSet;
 
@@ -25,25 +25,25 @@ public class SimmIRScheme extends SimmBaseScheme {
 	 * @return Returns the {@link BucketResult} for this bucket (i. e. currency).
 	 */
 	@Override
-	public BucketResult getBucketAggregation(String bucketName, Map<SimmCoordinate, RandomVariableInterface> gradient) {
+	public BucketResult getBucketAggregation(String bucketName, Map<SimmCoordinate, RandomVariable> gradient) {
 		double threshold = parameter.getConcentrationThreshold(gradient.keySet().stream().
 				findFirst().orElseThrow(() -> new IllegalArgumentException("Gradient is empty")));
 
-		RandomVariableInterface concentrationRiskFactor = gradient.values().stream().
-				reduce(new Scalar(0.0), RandomVariableInterface::add).abs().div(threshold).sqrt().cap(1.0);
+		RandomVariable concentrationRiskFactor = gradient.values().stream().
+				reduce(new Scalar(0.0), RandomVariable::add).abs().div(threshold).sqrt().cap(1.0);
 
 		Set<WeightedSensitivity> weightedSensitivities = gradient.entrySet().stream().
 				map(z-> new WeightedSensitivity(z.getKey(), concentrationRiskFactor, z.getValue().mult(concentrationRiskFactor).mult(parameter.getRiskWeight(z.getKey())))).
 				collect(Collectors.toSet());
 
-		RandomVariableInterface k = weightedSensitivities.stream().
+		RandomVariable k = weightedSensitivities.stream().
 				flatMap(w -> weightedSensitivities.stream().map(v -> w.getCrossTermWithoutConcentration(v, parameter))).
-				reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
+				reduce(new Scalar(0.0), RandomVariable::add).sqrt();
 
 		return new BucketResult(bucketName, weightedSensitivities, k);
 	}
 
-	public RandomVariableInterface getMargin(Map<SimmCoordinate, RandomVariableInterface> gradient) {
+	public RandomVariable getMargin(Map<SimmCoordinate, RandomVariable> gradient) {
 		return getMargin(RiskClass.INTEREST_RATE, gradient);
 	}
 }

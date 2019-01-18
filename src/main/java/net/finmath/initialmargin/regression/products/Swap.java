@@ -10,7 +10,7 @@ import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.components.AbstractNotional;
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.ScheduleInterface;
 
 /**
@@ -64,8 +64,8 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface value = legReceiver.getValue(evaluationTime, model);
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable value = legReceiver.getValue(evaluationTime, model);
 		if (legPayer != null) {
 			value = value.sub(legPayer.getValue(evaluationTime, model));
 		}
@@ -74,8 +74,8 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface cashFlow = legReceiver.getCF(initialTime, finalTime, model);
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable cashFlow = legReceiver.getCF(initialTime, finalTime, model);
 		if (legPayer != null) {
 			cashFlow = cashFlow.sub(legPayer.getCF(initialTime, finalTime, model));
 		}

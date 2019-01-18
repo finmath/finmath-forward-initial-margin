@@ -13,7 +13,7 @@ import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmCurvatureScheme;
 import net.finmath.xva.initialmargin.simm2.calculation.SimmIRScheme;
@@ -39,22 +39,22 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		this.curvatureScheme = new SimmCurvatureScheme(modality.getParams());
 	}
 
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (evaluationTime > marginCalculationTime) {
 			return model.getRandomVariableForConstant(0.0);
 		}
 
-		final RandomVariableInterface simmValue = gradientProduct.getGradient(evaluationTime, model).entrySet().stream().
+		final RandomVariable simmValue = gradientProduct.getGradient(evaluationTime, model).entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getProductClass())).entrySet().stream().
 				map(group -> getSimmForProductClass(group.getValue())).
-				reduce(model.getRandomVariableForConstant(0.0), RandomVariableInterface::add);
+				reduce(model.getRandomVariableForConstant(0.0), RandomVariable::add);
 
-		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
+		RandomVariable numeraireAtEval = model.getNumeraire(evaluationTime);
 		return simmValue.sub(this.getModality().getPostingThreshold()).floor(0.0).mult(numeraireAtEval);
 	}
 
-	private RandomVariableInterface getSimmForProductClass(List<Map.Entry<SimmCoordinate, RandomVariableInterface>> sensitivities) {
-		final Map<RiskClass, RandomVariableInterface> marginByRiskClass = sensitivities.stream().
+	private RandomVariable getSimmForProductClass(List<Map.Entry<SimmCoordinate, RandomVariable>> sensitivities) {
+		final Map<RiskClass, RandomVariable> marginByRiskClass = sensitivities.stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getRiskClass())).entrySet().stream().
 				map(group -> Pair.of(group.getKey(), getSimmForRiskClass(
 						group.getKey(),
@@ -65,14 +65,14 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		return marginByRiskClass.entrySet().stream().
 				flatMap(im1 -> marginByRiskClass.entrySet().stream().
 						map(im2 -> im1.getValue().mult(im2.getValue()).mult(modality.getParams().getRiskClassCorrelation(im1.getKey(), im2.getKey())))
-						).reduce(new Scalar(0.0), RandomVariableInterface::add).sqrt();
+						).reduce(new Scalar(0.0), RandomVariable::add).sqrt();
 	}
 
-	private RandomVariableInterface getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariableInterface> gradient) {
-		final Map<MarginType, Map<SimmCoordinate, RandomVariableInterface>> gradientsByMarginType = gradient.entrySet().stream().
+	private RandomVariable getSimmForRiskClass(RiskClass riskClass, Map<SimmCoordinate, RandomVariable> gradient) {
+		final Map<MarginType, Map<SimmCoordinate, RandomVariable>> gradientsByMarginType = gradient.entrySet().stream().
 				collect(Collectors.groupingBy(e -> e.getKey().getMarginType(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-		return gradientsByMarginType.entrySet().stream().reduce((RandomVariableInterface)new Scalar(0.0),
+		return gradientsByMarginType.entrySet().stream().reduce((RandomVariable)new Scalar(0.0),
 				(accum, e) -> {
 					if (e.getKey() == MarginType.CURVATURE) {
 						return accum.add(curvatureScheme.getMargin(riskClass, gradient));
@@ -82,7 +82,7 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 					}
 
 					return accum.add(nonIRScheme.getMargin(riskClass, gradient));
-				}, RandomVariableInterface::add);
+				}, RandomVariable::add);
 	}
 
 	public SimmModality getModality() {

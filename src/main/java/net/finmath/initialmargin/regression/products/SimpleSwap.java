@@ -8,9 +8,9 @@ package net.finmath.initialmargin.regression.products;
 import java.util.Arrays;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * Implements the valuation of a swap under a LIBORModelMonteCarloSimulationInterface
@@ -74,8 +74,8 @@ public class SimpleSwap extends AbstractLIBORMonteCarloRegressionProduct {
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface values = model.getRandomVariableForConstant(0.0);
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable values = model.getRandomVariableForConstant(0.0);
 
 		for (int period = 0; period < fixingDates.length; period++) {
 			double fixingDate = fixingDates[period];
@@ -88,21 +88,21 @@ public class SimpleSwap extends AbstractLIBORMonteCarloRegressionProduct {
 			}
 
 			// Get random variables
-			RandomVariableInterface libor = model.getLIBOR(fixingDate, fixingDate, paymentDate);
-			RandomVariableInterface payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
+			RandomVariable libor = model.getLIBOR(fixingDate, fixingDate, paymentDate);
+			RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
 			if (!isPayFix) {
 				payoff = payoff.mult(-1.0);
 			}
 
-			RandomVariableInterface numeraire = model.getNumeraire(paymentDate);
-			RandomVariableInterface monteCarloProbabilities = model.getMonteCarloWeights(paymentDate);
+			RandomVariable numeraire = model.getNumeraire(paymentDate);
+			RandomVariable monteCarloProbabilities = model.getMonteCarloWeights(paymentDate);
 			payoff = payoff.div(numeraire).mult(monteCarloProbabilities);
 
 			values = values.add(payoff);
 		}
 
-		RandomVariableInterface numeraireAtEvalTime = model.getNumeraire(evaluationTime);
-		RandomVariableInterface monteCarloProbabilitiesAtEvalTime = model.getMonteCarloWeights(evaluationTime);
+		RandomVariable numeraireAtEvalTime = model.getNumeraire(evaluationTime);
+		RandomVariable monteCarloProbabilitiesAtEvalTime = model.getMonteCarloWeights(evaluationTime);
 		values = values.mult(numeraireAtEvalTime).div(monteCarloProbabilitiesAtEvalTime);
 
 		return values;
@@ -117,10 +117,10 @@ public class SimpleSwap extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime,
+	public RandomVariable getCF(double initialTime, double finalTime,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// find paymentDate in interval [initialTime, finalTime]
-		RandomVariableInterface CF = new RandomVariable(0.0);
+		RandomVariable CF = new RandomVariableFromDoubleArray(0.0);
 		for (int period = 0; period < paymentDates.length; period++) {
 			if (paymentDates[period] >= initialTime && paymentDates[period] < finalTime) {
 				double fixingDate = fixingDates[period];
@@ -129,10 +129,10 @@ public class SimpleSwap extends AbstractLIBORMonteCarloRegressionProduct {
 				double periodLength = paymentDate - fixingDate;
 
 				// Get random variables
-				RandomVariableInterface libor = model.getLIBOR(fixingDate, fixingDate, paymentDate);
+				RandomVariable libor = model.getLIBOR(fixingDate, fixingDate, paymentDate);
 				CF = libor.sub(swaprate).mult(periodLength).mult(notional);
-				RandomVariableInterface numeraire = model.getNumeraire(paymentDate);
-				RandomVariableInterface numeraireAtEval = model.getNumeraire(initialTime);
+				RandomVariable numeraire = model.getNumeraire(paymentDate);
+				RandomVariable numeraireAtEval = model.getNumeraire(initialTime);
 				CF = CF.div(numeraire).mult(numeraireAtEval);
 				if (!isPayFix) {
 					CF = CF.mult(-1.0);

@@ -20,13 +20,13 @@ import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSim
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMPortfolio;
 import net.finmath.initialmargin.isdasimm.products.SIMMSimpleSwap;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.OptimizerInterface;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.SolverException;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 /**
@@ -214,10 +214,10 @@ public class CalculationSchemeInitialMarginISDA {
 		this.IRCurveIndexNames = product.getCurveIndexNames();
 	}
 
-	public RandomVariableInterface getValue(double evaluationTime) throws CalculationException {
-		RandomVariableInterface SIMMValue = null;
+	public RandomVariable getValue(double evaluationTime) throws CalculationException {
+		RandomVariable SIMMValue = null;
 		for (String productClass : productClassKeys) { // RATES_FX, CREDIT etc.
-			RandomVariableInterface SIMMProductValue = this.getSIMMProduct(productClass, evaluationTime);
+			RandomVariable SIMMProductValue = this.getSIMMProduct(productClass, evaluationTime);
 			SIMMValue = SIMMValue == null ? SIMMProductValue : SIMMValue.add(SIMMProductValue);
 		}
 		return SIMMValue;
@@ -230,14 +230,14 @@ public class CalculationSchemeInitialMarginISDA {
 		this.parameterCollection = new ParameterCollection();
 	}
 
-	public RandomVariableInterface getValue(AbstractSIMMProduct product, double evaluationTime) throws CalculationException {
-		RandomVariableInterface SIMMValue = null;
+	public RandomVariable getValue(AbstractSIMMProduct product, double evaluationTime) throws CalculationException {
+		RandomVariable SIMMValue = null;
 		this.products = new AbstractSIMMProduct[]{product};
 		this.productClassKeys = new String[]{product.getProductClass()};
 		this.riskClassKeys = product.getRiskClasses();
 		this.IRCurveIndexNames = product.getCurveIndexNames();
 		for (String productClass : productClassKeys) { // RATES_FX, CREDIT etc.
-			RandomVariableInterface SIMMProductValue = this.getSIMMProduct(productClass, evaluationTime);
+			RandomVariable SIMMProductValue = this.getSIMMProduct(productClass, evaluationTime);
 			SIMMValue = SIMMValue == null ? SIMMProductValue : SIMMValue.add(SIMMProductValue);
 		}
 		return SIMMValue;
@@ -256,39 +256,39 @@ public class CalculationSchemeInitialMarginISDA {
 	}
 
 	// returns IM for productClass e.g. RATES_FX
-	public RandomVariableInterface getSIMMProduct(String productClass, double atTime) {
+	public RandomVariable getSIMMProduct(String productClass, double atTime) {
 
 		Set<String> riskClassList = Stream.of(riskClassKeys).collect(Collectors.toSet());
 
 		// contributions of risk classes to IM within that product class
-		RandomVariableInterface[] contributions = new RandomVariableInterface[riskClassKeys.length];
+		RandomVariable[] contributions = new RandomVariable[riskClassKeys.length];
 		int i = 0;
 		//this.portfolioProducts[0].get//this.nettingset.getActiveProduct(this.nettingset.getActiveProductKeys()[0]).getSensitivitySet(atTime).getPathDimension();
 		for (String iRiskClass : riskClassKeys) {
 			if (riskClassList.contains(iRiskClass)) { // riskClassList == iRiskClass?
-				RandomVariableInterface iIM = this.getIMForRiskClass(iRiskClass, productClass, atTime);
+				RandomVariable iIM = this.getIMForRiskClass(iRiskClass, productClass, atTime);
 				contributions[i] = iIM;
 			} else {
-				contributions[i] = new RandomVariable(atTime, 0.0);
+				contributions[i] = new RandomVariableFromDoubleArray(atTime, 0.0);
 			}
 			i++;
 		}
 
-		RandomVariableInterface simmProductClass = CalculationSchemeInitialMarginISDA.getVarianceCovarianceAggregation(contributions, parameterCollection.CrossRiskClassCorrelationMatrix);
+		RandomVariable simmProductClass = CalculationSchemeInitialMarginISDA.getVarianceCovarianceAggregation(contributions, parameterCollection.CrossRiskClassCorrelationMatrix);
 		resultMap.put(productClass, simmProductClass.getAverage());
 		return simmProductClass;
 	}
 
-	//    public RandomVariableInterface getIMForRiskClass(String riskClassKey,String productClass, double atTime){
-	//        RandomVariableInterface    deltaMargin = this.getDeltaMargin(riskClassKey,productClass,atTime);
-	//        //RandomVariableInterface    vegaMargin = this.getVegaMargin(riskClassKey,productClass,atTime);
-	//        //RandomVariableInterface    curatureMargin = this.getDeltaMargin(riskClassKey,productClass, atTime);
+	//    public RandomVariable getIMForRiskClass(String riskClassKey,String productClass, double atTime){
+	//        RandomVariable    deltaMargin = this.getDeltaMargin(riskClassKey,productClass,atTime);
+	//        //RandomVariable    vegaMargin = this.getVegaMargin(riskClassKey,productClass,atTime);
+	//        //RandomVariable    curatureMargin = this.getDeltaMargin(riskClassKey,productClass, atTime);
 	//        resultMap.put(productClass+"-"+riskClassKey+"-DeltaMargin",deltaMargin.getAverage());
 	//        return deltaMargin; //.add(vegaMargin);//.add(vegaMargin).add(curatureMargin);
 	//    }
 
-	//    public RandomVariableInterface getDeltaMargin(String riskClassKey,String productClassKey, double atTime){
-	//        RandomVariableInterface deltaMargin = null;
+	//    public RandomVariable getDeltaMargin(String riskClassKey,String productClassKey, double atTime){
+	//        RandomVariable deltaMargin = null;
 	//        //DeltaMarginSchemeNonIR DeltaScheme = new DeltaMarginSchemeNonIR(this,"Risk_IRCurve",productClassKey,
 	//        //                                        this.riskClassRiskWeightMap.get(riskClassKey),this.riskClassCorrelationMap.get(riskClassKey),this.riskClassThresholdMap.get(riskClassKey));
 	//
@@ -323,18 +323,18 @@ public class CalculationSchemeInitialMarginISDA {
 	//        return deltaMargin;
 	//    }
 
-	public RandomVariableInterface getIMForRiskClass(String riskClassKey, String productClass, double atTime) {
-		RandomVariableInterface deltaMargin = this.getDeltaMargin(riskClassKey, productClass, atTime);
-		RandomVariableInterface vegaMargin = this.getVegaMargin(riskClassKey, productClass, atTime);
-		//RandomVariableInterface    curatureMargin = this.getDeltaMargin(riskClassKey,productClass, atTime);
+	public RandomVariable getIMForRiskClass(String riskClassKey, String productClass, double atTime) {
+		RandomVariable deltaMargin = this.getDeltaMargin(riskClassKey, productClass, atTime);
+		RandomVariable vegaMargin = this.getVegaMargin(riskClassKey, productClass, atTime);
+		//RandomVariable    curatureMargin = this.getDeltaMargin(riskClassKey,productClass, atTime);
 		resultMap.put(productClass + "-" + riskClassKey + "-DeltaMargin", deltaMargin.getAverage());
 		resultMap.put(productClass + "-" + riskClassKey + "-VegaMargin", vegaMargin.getAverage());
 
 		return deltaMargin.add(vegaMargin);//.add(vegaMargin).add(curatureMargin);
 	}
 
-	public RandomVariableInterface getDeltaMargin(String riskClassKey, String productClassKey, double atTime) {
-		RandomVariableInterface deltaMargin = null;
+	public RandomVariable getDeltaMargin(String riskClassKey, String productClassKey, double atTime) {
+		RandomVariable deltaMargin = null;
 		//DeltaMarginSchemeNonIR DeltaScheme = new DeltaMarginSchemeNonIR(this,"Risk_IRCurve",productClassKey,
 		//                                        this.riskClassRiskWeightMap.get(riskClassKey),this.riskClassCorrelationMap.get(riskClassKey),this.riskClassThresholdMap.get(riskClassKey));
 
@@ -368,25 +368,25 @@ public class CalculationSchemeInitialMarginISDA {
 		return deltaMargin;
 	}
 
-	public RandomVariableInterface getVegaMargin(String riskClassKey, String productClassKey, double atTime) {
+	public RandomVariable getVegaMargin(String riskClassKey, String productClassKey, double atTime) {
 		// MarginSchemeDeltaVega VegaScheme = new MarginSchemeDeltaVega(this,riskClassKey,productClassKey,"vega");
-		return new RandomVariable(0.0);//VegaScheme.getValue(atTime);
+		return new RandomVariableFromDoubleArray(0.0);//VegaScheme.getValue(atTime);
 	}
 
-	public RandomVariableInterface getCurvatureMargin(String riskClassKey, String productClassKey, double atTime) {
+	public RandomVariable getCurvatureMargin(String riskClassKey, String productClassKey, double atTime) {
 		throw new RuntimeException();
 	}
 
-	public static RandomVariableInterface getVarianceCovarianceAggregation(RandomVariableInterface[] contributions, Double[][] correlation) {
+	public static RandomVariable getVarianceCovarianceAggregation(RandomVariable[] contributions, Double[][] correlation) {
 		int i = 0;
-		RandomVariableInterface value = null;
-		for (RandomVariableInterface contribution1 : contributions) {
+		RandomVariable value = null;
+		for (RandomVariable contribution1 : contributions) {
 			int j = 0;
 			if (contribution1 != null) {
 				value = value == null ? contribution1.squared() : value.add(contribution1.squared());
-				for (RandomVariableInterface contribution2 : contributions) {
+				for (RandomVariable contribution2 : contributions) {
 					if (contribution2 != null && i != j) {
-						RandomVariableInterface contribution = contribution1.mult(contribution2).mult(correlation[i][j]);
+						RandomVariable contribution = contribution1.mult(contribution2).mult(correlation[i][j]);
 						value = value == null ? contribution : value.add(contribution);
 					}
 					j++;
@@ -398,13 +398,13 @@ public class CalculationSchemeInitialMarginISDA {
 		return value;
 	}
 
-	public static RandomVariableInterface getVarianceCovarianceAggregation(RandomVariableInterface[] contributions, Double correlation) {
+	public static RandomVariable getVarianceCovarianceAggregation(RandomVariable[] contributions, Double correlation) {
 		int i = 0;
-		RandomVariableInterface value = null;
-		for (RandomVariableInterface contribution1 : contributions) {
+		RandomVariable value = null;
+		for (RandomVariable contribution1 : contributions) {
 			int j = 0;
-			for (RandomVariableInterface contribution2 : contributions) {
-				RandomVariableInterface contribution = null;
+			for (RandomVariable contribution2 : contributions) {
+				RandomVariable contribution = null;
 				if (i != j) {
 					contribution = contribution1.mult(contribution2).mult(correlation);
 				} else {
@@ -420,9 +420,9 @@ public class CalculationSchemeInitialMarginISDA {
 	}
 
 	// BUCKET IS CURRENCY FOR IR   risk Factor = index Name (e.g. Libor6m)
-	public RandomVariableInterface getNetSensitivity(String productClassKey, String riskClassKey, String maturityBucket, String riskFactor, String bucketKey, String riskType, double atTime) {
+	public RandomVariable getNetSensitivity(String productClassKey, String riskClassKey, String maturityBucket, String riskFactor, String bucketKey, String riskType, double atTime) {
 
-		RandomVariableInterface isdasimmsensiofAllProducts = Stream.of(products).map(
+		RandomVariable isdasimmsensiofAllProducts = Stream.of(products).map(
 				product -> {
 					try {
 						return product.getSensitivity(productClassKey,

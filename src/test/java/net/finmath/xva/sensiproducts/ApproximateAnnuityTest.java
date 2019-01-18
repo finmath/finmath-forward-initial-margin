@@ -24,7 +24,7 @@ import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
 import net.finmath.sensitivities.simm2.products.ApproximateAnnuity;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.xva.tradespecifications.IRCurveSpec;
 import net.finmath.xva.tradespecifications.Indices;
@@ -82,10 +82,10 @@ public class ApproximateAnnuityTest {
 				);
 	}
 
-	private FeatureMatcher<RandomVariableInterface, Double> average(Matcher<Double> matcher) {
-		return new FeatureMatcher<RandomVariableInterface, Double>(matcher, "average of rv", "average") {
+	private FeatureMatcher<RandomVariable, Double> average(Matcher<Double> matcher) {
+		return new FeatureMatcher<RandomVariable, Double>(matcher, "average of rv", "average") {
 			@Override
-			protected Double featureValueOf(RandomVariableInterface x) {
+			protected Double featureValueOf(RandomVariable x) {
 				return x.getAverage();
 			}
 		};

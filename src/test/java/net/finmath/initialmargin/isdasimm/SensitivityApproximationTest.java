@@ -30,8 +30,8 @@ import net.finmath.initialmargin.isdasimm.test.SIMMTest;
 import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * @author Mario Viehmann
@@ -419,12 +419,12 @@ public class SensitivityApproximationTest {
 
 		Map<Double, Double> expectedIM = new HashMap<Double, Double>();
 
-		RandomVariableInterface forwardBond;
-		RandomVariableInterface MVA = new RandomVariable(0.0);
+		RandomVariable forwardBond;
+		RandomVariable MVA = new RandomVariableFromDoubleArray(0.0);
 		for (int i = 0; i < (int) (finalIMTime / timeStep)+1; i++) {
 			double time = i * timeStep;
 			double timeNext = (i+1) * timeStep;
-			RandomVariableInterface initialMargin = product.getInitialMargin(time, model, "EUR", sensitivityMode, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
+			RandomVariable initialMargin = product.getInitialMargin(time, model, "EUR", sensitivityMode, weightMode, 1.0, isUseAnalyticSwapSensis, isConsiderOISSensis);
 			forwardBond = model.getNumeraire((i + 1) * timeStep).mult(Math.exp(timeNext * fundingSpread)).invert();
 			forwardBond = forwardBond.sub(model.getNumeraire(time).mult(Math.exp(time * fundingSpread)).invert());
 			if (mvaMode == MVAMode.APPROXIMATION) {

@@ -13,7 +13,7 @@ import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelInterface;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 /**
@@ -31,12 +31,12 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 	}
 
 	@Override
-	public Map<Double, RandomVariableInterface> getNumeraireAdjustmentMap() {
+	public Map<Double, RandomVariable> getNumeraireAdjustmentMap() {
 		return ((LIBORMarketModel) getModel()).getNumeraireAdjustments();
 	}
 
 	@Override
-	public RandomVariableInterface getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
+	public RandomVariable getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		/*
 		if (((LIBORMarketModel) getModel()).getNumeraireAdjustments().containsKey(time)) {
 			return ((LIBORMarketModel) getModel()).getNumeraireAdjustments().get(time);
@@ -48,15 +48,15 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 		/*
 		// Get unadjusted Numeraire
-		RandomVariableInterface numeraireUnadjusted = ((LIBORMarketModel) getModel()).getNumerairetUnAdjusted(time);
-		RandomVariableInterface adjustment = getRandomVariableForConstant(numeraireUnadjusted.invert().getAverage()).div(getModel().getDiscountCurve().getDiscountFactor(time));
+		RandomVariable numeraireUnadjusted = ((LIBORMarketModel) getModel()).getNumerairetUnAdjusted(time);
+		RandomVariable adjustment = getRandomVariableForConstant(numeraireUnadjusted.invert().getAverage()).div(getModel().getDiscountCurve().getDiscountFactor(time));
 
 		return adjustment;
 		 */
 	}
 
 	@Override
-	public RandomVariableInterface getForwardBondLibor(double T, double t) throws CalculationException {
+	public RandomVariable getForwardBondLibor(double T, double t) throws CalculationException {
 		if(t > T) return new Scalar(0);
 
 		return this.getLIBOR(t, t, T).mult(T - t).add(1.0).invert();
@@ -65,12 +65,12 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 	}
 
 	@Override
-	public RandomVariableInterface getForwardBondOIS(double T, double t) throws CalculationException {
+	public RandomVariable getForwardBondOIS(double T, double t) throws CalculationException {
 		return new Scalar(getModel().getDiscountCurve().getDiscountFactor(T) / getModel().getDiscountCurve().getDiscountFactor(t));
 		/*
 		// Get bondOIS = P^OIS(T;t) = P^L(T;t)*a_t/a_T
-		RandomVariableInterface adjustment_t = getNumeraireOISAdjustmentFactor(t);
-		RandomVariableInterface adjustment_T = getNumeraireOISAdjustmentFactor(T);
+		RandomVariable adjustment_t = getNumeraireOISAdjustmentFactor(t);
+		RandomVariable adjustment_T = getNumeraireOISAdjustmentFactor(T);
 
 		return getForwardBondLibor(T, t).mult(adjustment_t).div(adjustment_T);
 		 */

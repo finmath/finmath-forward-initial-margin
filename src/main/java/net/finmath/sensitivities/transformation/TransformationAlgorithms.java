@@ -6,8 +6,8 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 public final class TransformationAlgorithms {
@@ -15,10 +15,10 @@ public final class TransformationAlgorithms {
 
 	/**
 	 * Calculates the pseudo-inverse of a matrix by calling Apache Commons Math's SVD algorithm parallel on each path.
-	 * @param matrix A random matrix, represented by a jagged array (row-column) of {@link RandomVariableInterface}s.
+	 * @param matrix A random matrix, represented by a jagged array (row-column) of {@link RandomVariable}s.
 	 * @return The pseudo-inverse, using the same convention as the input matrix.
 	 */
-	public static RandomVariableInterface[][] getPseudoInverseByParallelAcmSvd(RandomVariableInterface[][] matrix) {
+	public static RandomVariable[][] getPseudoInverseByParallelAcmSvd(RandomVariable[][] matrix) {
 
 		//Assume that all random variable entries have the same path count and filtration time
 		//This might break if we have deterministic values mixed with sampled ones (or even worse different path counts)
@@ -51,24 +51,24 @@ public final class TransformationAlgorithms {
 			}
 		});
 
-		RandomVariableInterface[][] pseudoInverse = new RandomVariableInterface[columnCount][rowCount];
+		RandomVariable[][] pseudoInverse = new RandomVariable[columnCount][rowCount];
 		for (int i = 0; i < pseudoInverse.length; i++) {
 			for (int j = 0; j < pseudoInverse[0].length; j++) {
-				pseudoInverse[i][j] = new RandomVariable(filtrationTime, resultByRowColPath[i][j]);
+				pseudoInverse[i][j] = new RandomVariableFromDoubleArray(filtrationTime, resultByRowColPath[i][j]);
 			}
 		}
 
 		return pseudoInverse;
 	}
 
-	public static RandomVariableInterface[] multiplyVectorMatrix(RandomVariableInterface[] vector, RandomVariableInterface[][] matrix) {
+	public static RandomVariable[] multiplyVectorMatrix(RandomVariable[] vector, RandomVariable[][] matrix) {
 		final int columnCount = matrix[0].length;
-		RandomVariableInterface[] product = new RandomVariableInterface[columnCount];
+		RandomVariable[] product = new RandomVariable[columnCount];
 
 		for (int column = 0; column < columnCount; column++) {
 			product[column] = new Scalar(0.0);
 			for (int row = 0; row < vector.length; row++) {
-				RandomVariableInterface currentEntry;
+				RandomVariable currentEntry;
 
 				if (vector[row] == null || matrix[row][column] == null) {
 					currentEntry = new Scalar(0.0);

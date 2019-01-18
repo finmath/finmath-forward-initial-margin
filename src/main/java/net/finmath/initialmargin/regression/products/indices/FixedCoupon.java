@@ -8,9 +8,9 @@ package net.finmath.initialmargin.regression.products.indices;
 import java.util.Set;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * A fixed coupon index paying constant coupon..
@@ -21,7 +21,7 @@ public class FixedCoupon extends AbstractIndex {
 
 	private static final long serialVersionUID = 5375406324063846793L;
 
-	private final RandomVariableInterface coupon;
+	private final RandomVariable coupon;
 
 	/**
 	 * Creates a fixed coupon index paying constant coupon.
@@ -30,11 +30,11 @@ public class FixedCoupon extends AbstractIndex {
 	 */
 	public FixedCoupon(double coupon) {
 		super();
-		this.coupon = new RandomVariable(coupon);
+		this.coupon = new RandomVariableFromDoubleArray(coupon);
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
 		return coupon;
 	}
 
@@ -43,7 +43,7 @@ public class FixedCoupon extends AbstractIndex {
 	 *
 	 * @return the coupon
 	 */
-	public RandomVariableInterface getCoupon() {
+	public RandomVariable getCoupon() {
 		return coupon;
 	}
 
@@ -60,13 +60,13 @@ public class FixedCoupon extends AbstractIndex {
 
 	// INSERTED
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, double fixingDate,
+	public RandomVariable getValue(double evaluationTime, double fixingDate,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return coupon;
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime,
+	public RandomVariable getCF(double initialTime, double finalTime,
 			LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;

@@ -10,7 +10,7 @@ import java.util.Set;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * A forward rate index for a given period start offset (offset from fixing) and period length.
@@ -48,12 +48,12 @@ public class LIBORIndex extends AbstractIndex {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
 			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
 		}
-		RandomVariableInterface forwardRate = model.getLIBOR(evaluationTime, evaluationTime + periodStartOffset, evaluationTime + periodStartOffset + periodLength);
+		RandomVariable forwardRate = model.getLIBOR(evaluationTime, evaluationTime + periodStartOffset, evaluationTime + periodStartOffset + periodLength);
 		return forwardRate;
 	}
 
@@ -91,17 +91,17 @@ public class LIBORIndex extends AbstractIndex {
 
 	// INSERTED
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
 			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
 		}
-		RandomVariableInterface forwardRate = model.getLIBOR(Math.min(evaluationTime, fixingTime), fixingTime + periodStartOffset, fixingTime + periodStartOffset + periodLength);
+		RandomVariable forwardRate = model.getLIBOR(Math.min(evaluationTime, fixingTime), fixingTime + periodStartOffset, fixingTime + periodStartOffset + periodLength);
 		return forwardRate;
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime,
+	public RandomVariable getCF(double initialTime, double finalTime,
 			LIBORModelMonteCarloSimulationInterface model) {
 		// TODO Auto-generated method stub
 		return null;

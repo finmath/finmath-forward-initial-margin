@@ -3,8 +3,8 @@ package net.finmath.initialmargin.isdasimm.aggregationscheme;
 import java.util.Map;
 import java.util.Optional;
 
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 
@@ -36,29 +36,29 @@ public class MarginSchemeIRDelta {
 		this.bucketKeys = calculationSchemeInitialMarginISDA.getInterestRateDeltaBucketKeys();
 	}
 
-	public RandomVariableInterface getValue(double atTime) {
+	public RandomVariable getValue(double atTime) {
 
 		if (this.bucketKeys.length == 0) {
-			return new RandomVariable(atTime, 0.0);
+			return new RandomVariableFromDoubleArray(atTime, 0.0);
 		}
 
-		RandomVariableInterface[] S1Contributions = new RandomVariableInterface[this.bucketKeys.length];
-		RandomVariableInterface[] KContributions = new RandomVariableInterface[this.bucketKeys.length];
+		RandomVariable[] S1Contributions = new RandomVariable[this.bucketKeys.length];
+		RandomVariable[] KContributions = new RandomVariable[this.bucketKeys.length];
 		int i = 0;
 
-		RandomVariableInterface[] concentrationFactors = new RandomVariableInterface[this.bucketKeys.length];
+		RandomVariable[] concentrationFactors = new RandomVariable[this.bucketKeys.length];
 		for (String bucketKey : this.bucketKeys) {
-			RandomVariableInterface[][] netSensitivities = this.getNetSensitivities(bucketKey, atTime);
+			RandomVariable[][] netSensitivities = this.getNetSensitivities(bucketKey, atTime);
 			concentrationFactors[i] = getConcentrationRiskFactor(bucketKey, netSensitivities, atTime);
-			RandomVariableInterface K1 = this.getAggregatedSensitivityForBucket(bucketKey, netSensitivities, concentrationFactors[i], atTime);
-			RandomVariableInterface S1 = this.getFactorS(bucketKey, K1, netSensitivities, concentrationFactors[i], atTime);
+			RandomVariable K1 = this.getAggregatedSensitivityForBucket(bucketKey, netSensitivities, concentrationFactors[i], atTime);
+			RandomVariable S1 = this.getFactorS(bucketKey, K1, netSensitivities, concentrationFactors[i], atTime);
 			S1Contributions[i] = S1;
 			KContributions[i] = K1;
 			i++;
 		}
 
-		RandomVariableInterface deltaMargin = null;
-		RandomVariableInterface VarCovar = null;
+		RandomVariable deltaMargin = null;
+		RandomVariable VarCovar = null;
 		Double[][] correlationMatrix = null;
 
 		double singleCorrelation = calculationSchemeInitialMarginISDA.getParameterCollection().IRCorrelationCrossCurrency;
@@ -75,8 +75,8 @@ public class MarginSchemeIRDelta {
 
 		/*Adjustment on Diagonal*/
 		VarCovar = VarCovar.squared();
-		RandomVariableInterface SSumSQ = null;
-		RandomVariableInterface KSumSQ = null;
+		RandomVariable SSumSQ = null;
+		RandomVariable KSumSQ = null;
 		for (int k = 0; k < S1Contributions.length; k++) {
 			SSumSQ = SSumSQ == null ? SSumSQ = S1Contributions[k].squared() : SSumSQ.add(S1Contributions[k].squared());
 			KSumSQ = KSumSQ == null ? KSumSQ = KContributions[k].squared() : KSumSQ.add(KContributions[k].squared());
@@ -87,10 +87,10 @@ public class MarginSchemeIRDelta {
 		return deltaMargin;
 	}
 
-	private RandomVariableInterface[][] getNetSensitivities(String bucketKey, double atTime) {
+	private RandomVariable[][] getNetSensitivities(String bucketKey, double atTime) {
 		int nTenors = calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets.length;
 		int nCurves = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames.length; //calculationSchemeInitialMarginISDA.getIRCurveIndexNames().length;
-		RandomVariableInterface[][] netSensitivities = new RandomVariableInterface[nCurves][nTenors];
+		RandomVariable[][] netSensitivities = new RandomVariable[nCurves][nTenors];
 
 		for (int iCurve = 0; iCurve < nCurves; iCurve++) {
 			String curveKey = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iCurve];
@@ -103,25 +103,25 @@ public class MarginSchemeIRDelta {
 		return netSensitivities;
 	}
 
-	private RandomVariableInterface getAggregatedSensitivityForBucket(String bucketKey, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double atTime) {
-		RandomVariableInterface aggregatedSensi = null;
+	private RandomVariable getAggregatedSensitivityForBucket(String bucketKey, RandomVariable[][] netSensitivities, RandomVariable concentrationRiskFactor, double atTime) {
+		RandomVariable aggregatedSensi = null;
 
 		int nTenors = calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets.length;
 		int nCurves = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames.length;
 
 		int dimensionTotal = nTenors * nCurves + 2;
-		RandomVariableInterface[] contributions = new RandomVariableInterface[dimensionTotal];
+		RandomVariable[] contributions = new RandomVariable[dimensionTotal];
 
 		for (int iCurve = 0; iCurve < nCurves; iCurve++) {
 			for (int iTenor = 0; iTenor < nTenors; iTenor++) {
 				String curveKey = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iCurve];
-				RandomVariableInterface iBucketSensi = this.getWeightedNetSensitivity(iTenor, iCurve, curveKey, bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+				RandomVariable iBucketSensi = this.getWeightedNetSensitivity(iTenor, iCurve, curveKey, bucketKey, netSensitivities, concentrationRiskFactor, atTime);
 				contributions[iCurve * nTenors + iTenor] = iBucketSensi;
 			}
 		}
 
-		RandomVariableInterface inflationSensi = this.getWeightedNetSensitivity(0, 0, "inflation", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
-		RandomVariableInterface ccyBasisSensi = this.getWeightedNetSensitivity(0, 0, "ccybasis", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+		RandomVariable inflationSensi = this.getWeightedNetSensitivity(0, 0, "inflation", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+		RandomVariable ccyBasisSensi = this.getWeightedNetSensitivity(0, 0, "ccybasis", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
 		contributions[dimensionTotal - 2] = inflationSensi;
 		contributions[dimensionTotal - 1] = ccyBasisSensi;
 
@@ -132,7 +132,7 @@ public class MarginSchemeIRDelta {
 		return aggregatedSensi;
 	}
 
-	private RandomVariableInterface getWeightedNetSensitivity(int iRateTenor, int iIndex, String indexName, String bucketKey, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double atTime) {
+	private RandomVariable getWeightedNetSensitivity(int iRateTenor, int iIndex, String indexName, String bucketKey, RandomVariable[][] netSensitivities, RandomVariable concentrationRiskFactor, double atTime) {
 		double riskWeight = 0;
 
 		if (!indexName.equals("inflation") && !indexName.equals("ccybasis")) {
@@ -146,17 +146,17 @@ public class MarginSchemeIRDelta {
 			currencyMapKey = currencyMapKey.replace("_Traded", "").replace("_Well", "").replace("_Less", "");
 			Double[] riskWeights = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("INTEREST_RATE").get(currencyMapKey)[0];
 			riskWeight = riskWeights[iRateTenor];
-			RandomVariableInterface netSensi = netSensitivities[iIndex][iRateTenor];
+			RandomVariable netSensi = netSensitivities[iIndex][iRateTenor];
 			if (netSensi != null) {
 				return netSensi.mult(riskWeight).mult(concentrationRiskFactor);
 			} else {
 				// @TODO: Should use factory here
-				return new RandomVariable(atTime, 0.0);
+				return new RandomVariableFromDoubleArray(atTime, 0.0);
 			}
 		} else { /* Inflation or CCYBasis*/
 			riskWeight = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassRiskweightMap.get(riskTypeKey).get("INTEREST_RATE").get(indexName)[0][0];
 			String maturityBucket = calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets[iRateTenor];
-			RandomVariableInterface netSensi = calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, maturityBucket, indexName, bucketKey, this.riskTypeKey, atTime);
+			RandomVariable netSensi = calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, maturityBucket, indexName, bucketKey, this.riskTypeKey, atTime);
 			if (netSensi != null) {
 				netSensi = netSensi.mult(riskWeight);
 				if (!indexName.equals("ccybasis")) {
@@ -169,49 +169,49 @@ public class MarginSchemeIRDelta {
 		}
 	}
 
-	public RandomVariableInterface getParameterG(RandomVariableInterface CR1, RandomVariableInterface CR2) {
-		RandomVariableInterface min = CR1.sub(CR2).choose(CR2, CR1);
-		RandomVariableInterface max = CR1.sub(CR2).choose(CR1, CR2);
+	public RandomVariable getParameterG(RandomVariable CR1, RandomVariable CR2) {
+		RandomVariable min = CR1.sub(CR2).choose(CR2, CR1);
+		RandomVariable max = CR1.sub(CR2).choose(CR1, CR2);
 		return min.div(max);
 	}
 
-	public RandomVariableInterface getFactorS(String bucketKey, RandomVariableInterface K, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double atTime) {
-		RandomVariableInterface sum = this.getWeightedSensitivitySum(bucketKey, netSensitivities, concentrationRiskFactor, atTime);
-		RandomVariableInterface S1 = sum.sub(K).choose(K, sum);
-		RandomVariableInterface KNegative = K.mult(-1);
+	public RandomVariable getFactorS(String bucketKey, RandomVariable K, RandomVariable[][] netSensitivities, RandomVariable concentrationRiskFactor, double atTime) {
+		RandomVariable sum = this.getWeightedSensitivitySum(bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+		RandomVariable S1 = sum.sub(K).choose(K, sum);
+		RandomVariable KNegative = K.mult(-1);
 		S1 = S1.sub(KNegative).choose(S1, KNegative);
 		return S1;
 	}
 
-	private RandomVariableInterface getWeightedSensitivitySum(String bucketKey, RandomVariableInterface[][] netSensitivities, RandomVariableInterface concentrationRiskFactor, double atTime) {
-		RandomVariableInterface aggregatedSensi = new RandomVariable(atTime, 0.0);
+	private RandomVariable getWeightedSensitivitySum(String bucketKey, RandomVariable[][] netSensitivities, RandomVariable concentrationRiskFactor, double atTime) {
+		RandomVariable aggregatedSensi = new RandomVariableFromDoubleArray(atTime, 0.0);
 
 		for (int iIndex = 0; iIndex < calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames.length; iIndex++) {
 			for (int iTenor = 0; iTenor < calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets.length; iTenor++) {
 				String key = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iIndex];
-				RandomVariableInterface summand = getWeightedNetSensitivity(iTenor, iIndex, key, bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+				RandomVariable summand = getWeightedNetSensitivity(iTenor, iIndex, key, bucketKey, netSensitivities, concentrationRiskFactor, atTime);
 				if (summand != null) {
 					aggregatedSensi = aggregatedSensi == null ? aggregatedSensi = summand : aggregatedSensi.add(summand);
 				}
 			}
 		}
-		RandomVariableInterface inflationSensi = this.getWeightedNetSensitivity(0, 0, "inflation", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
-		RandomVariableInterface ccyBasisSensi = this.getWeightedNetSensitivity(0, 0, "ccybasis", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+		RandomVariable inflationSensi = this.getWeightedNetSensitivity(0, 0, "inflation", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
+		RandomVariable ccyBasisSensi = this.getWeightedNetSensitivity(0, 0, "ccybasis", bucketKey, netSensitivities, concentrationRiskFactor, atTime);
 		return aggregatedSensi.add(inflationSensi.add(ccyBasisSensi));
 	}
 
-	public RandomVariableInterface getConcentrationRiskFactor(String bucketKey, RandomVariableInterface[][] netSensitivities, double atTime) {
-		RandomVariableInterface sensitivitySum = new RandomVariable(atTime, 0.0);
+	public RandomVariable getConcentrationRiskFactor(String bucketKey, RandomVariable[][] netSensitivities, double atTime) {
+		RandomVariable sensitivitySum = new RandomVariableFromDoubleArray(atTime, 0.0);
 		for (int iIndex = 0; iIndex < calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames.length; iIndex++) {
 			for (int iTenor = 0; iTenor < calculationSchemeInitialMarginISDA.getParameterCollection().IRMaturityBuckets.length; iTenor++) {
 				String key = calculationSchemeInitialMarginISDA.getParameterCollection().IRCurveIndexNames[iIndex];
-				RandomVariableInterface summand = netSensitivities[iIndex][iTenor];//calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey,this.riskClassKey,iTenor,key,bucketKey,"delta",atTime);//"ccybasis",bucketKey,"delta",atTime);//getWeightedNetSensitivity(iTenor, key, bucketKey, atTime);
+				RandomVariable summand = netSensitivities[iIndex][iTenor];//calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey,this.riskClassKey,iTenor,key,bucketKey,"delta",atTime);//"ccybasis",bucketKey,"delta",atTime);//getWeightedNetSensitivity(iTenor, key, bucketKey, atTime);
 				if (summand != null) {
 					sensitivitySum = sensitivitySum == null ? sensitivitySum = summand : sensitivitySum.add(summand);
 				}
 			}
 		}
-		RandomVariableInterface inflationSensi = calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, "", "inflation", bucketKey, "delta", atTime);
+		RandomVariable inflationSensi = calculationSchemeInitialMarginISDA.getNetSensitivity(this.productClassKey, this.riskClassKey, "", "inflation", bucketKey, "delta", atTime);
 		if (sensitivitySum != null && inflationSensi != null) {
 			sensitivitySum = sensitivitySum.add(inflationSensi); // Inflation Sensi are included in Sum, CCYBasis not
 		}
@@ -225,7 +225,7 @@ public class MarginSchemeIRDelta {
 		}
 
 		double concentrationThreshold = calculationSchemeInitialMarginISDA.getParameterCollection().MapRiskClassThresholdMap.get(this.riskTypeKey).get(riskClassKey).get(currencyMapKey)[0][0];
-		RandomVariableInterface CR = (sensitivitySum.abs().div(concentrationThreshold)).sqrt();
+		RandomVariable CR = (sensitivitySum.abs().div(concentrationThreshold)).sqrt();
 		CR = CR.sub(1.0).choose(CR, new Scalar(1.0));
 		return CR;
 	}

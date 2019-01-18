@@ -4,9 +4,9 @@
 package net.finmath.initialmargin.regression.products.components;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * A period. A period has references to the index (coupon) and the notional.
@@ -102,20 +102,20 @@ public class Period extends AbstractPeriod {
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		if (evaluationTime >= this.getPaymentDate()) {
-			return new RandomVariable(0.0);
+			return new RandomVariableFromDoubleArray(0.0);
 		}
 
 		// Get random variables
-		RandomVariableInterface notionalAtPeriodStart = getNotional().getNotionalAtPeriodStart(this, model);
-		RandomVariableInterface numeraireAtEval = model.getNumeraire(evaluationTime);
-		RandomVariableInterface numeraire = model.getNumeraire(getPaymentDate());
+		RandomVariable notionalAtPeriodStart = getNotional().getNotionalAtPeriodStart(this, model);
+		RandomVariable numeraireAtEval = model.getNumeraire(evaluationTime);
+		RandomVariable numeraire = model.getNumeraire(getPaymentDate());
 		// @TODO: Add support for weighted Monte-Carlo.
-		//        RandomVariableInterface	monteCarloProbabilities	= model.getMonteCarloWeights(getPaymentDate());
+		//        RandomVariable	monteCarloProbabilities	= model.getMonteCarloWeights(getPaymentDate());
 
-		RandomVariableInterface values;
+		RandomVariable values;
 
 		// Calculate numeraire relative value of coupon flows
 		if (couponFlow) {
@@ -130,20 +130,20 @@ public class Period extends AbstractPeriod {
 				values = values.mult(nonAccruedInterestRatio);
 			}
 		} else {
-			values = new RandomVariable(0.0, 0.0);
+			values = new RandomVariableFromDoubleArray(0.0, 0.0);
 		}
 
 		// Apply notional exchange
 		if (notionalFlow) {
-			RandomVariableInterface nationalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
+			RandomVariable nationalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
 
 			if (getPeriodStart() > evaluationTime) {
-				RandomVariableInterface numeraireAtPeriodStart = model.getNumeraire(getPeriodStart());
+				RandomVariable numeraireAtPeriodStart = model.getNumeraire(getPeriodStart());
 				values = values.subRatio(notionalAtPeriodStart, numeraireAtPeriodStart);
 			}
 
 			if (getPeriodEnd() > evaluationTime) {
-				RandomVariableInterface numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
+				RandomVariable numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
 				values = values.addRatio(nationalAtPeriodEnd, numeraireAtPeriodEnd);
 			}
 		}
@@ -159,15 +159,15 @@ public class Period extends AbstractPeriod {
 	}
 
 	@Override
-	public RandomVariableInterface getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		return getValue(evaluationTime, model);
 	}
 
 	@Override
-	public RandomVariableInterface getCoupon(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCoupon(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// Calculate percentage value of coupon (not multiplied with notional, not discounted)
-		RandomVariableInterface values = getIndex().getValue(getFixingDate(), model);
+		RandomVariable values = getIndex().getValue(getFixingDate(), model);
 
 		// Apply daycount fraction
 		double periodDaycountFraction = getDaycountFraction();
@@ -177,9 +177,9 @@ public class Period extends AbstractPeriod {
 	}
 
 	//INSERTED: We use this to get the future value without conditional expectation
-	public RandomVariableInterface getCoupon(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCoupon(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		// Calculate percentage value of coupon (not multiplied with notional, not discounted)
-		RandomVariableInterface values = getIndex().getValue(evaluationTime, getFixingDate(), model);
+		RandomVariable values = getIndex().getValue(evaluationTime, getFixingDate(), model);
 
 		// Apply daycount fraction
 		double periodDaycountFraction = getDaycountFraction();
@@ -196,13 +196,13 @@ public class Period extends AbstractPeriod {
 	}
 
 	@Override
-	public RandomVariableInterface getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
-		RandomVariableInterface values = new RandomVariable(0.0);
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+		RandomVariable values = new RandomVariableFromDoubleArray(0.0);
 		if (initialTime >= this.getPaymentDate() || finalTime < this.getPaymentDate()) {
 			// Apply notional exchange
 			if (notionalFlow && finalTime >= getPeriodEnd()) {
-				RandomVariableInterface notionalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
-				RandomVariableInterface numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
+				RandomVariable notionalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
+				RandomVariable numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
 				values = values.addRatio(notionalAtPeriodEnd, numeraireAtPeriodEnd);
 			} else {
 				return values;
@@ -210,10 +210,10 @@ public class Period extends AbstractPeriod {
 		} else {
 
 			// Get random variables
-			RandomVariableInterface notionalAtPeriodStart = getNotional().getNotionalAtPeriodStart(this, model);
-			RandomVariableInterface numeraire = model.getNumeraire(getPaymentDate());
+			RandomVariable notionalAtPeriodStart = getNotional().getNotionalAtPeriodStart(this, model);
+			RandomVariable numeraire = model.getNumeraire(getPaymentDate());
 			// @TODO: Add support for weighted Monte-Carlo.
-			//        RandomVariableInterface	monteCarloProbabilities	= model.getMonteCarloWeights(getPaymentDate());
+			//        RandomVariable	monteCarloProbabilities	= model.getMonteCarloWeights(getPaymentDate());
 
 			// Calculate numeraire relative value of coupon flows
 			if (couponFlow) {
@@ -225,13 +225,13 @@ public class Period extends AbstractPeriod {
 					values = values.mult(nonAccruedInterestRatio);
 				}
 			} else {
-				values = new RandomVariable(0.0, 0.0);
+				values = new RandomVariableFromDoubleArray(0.0, 0.0);
 			}
 
 			// Apply notional exchange
 			if (notionalFlow && finalTime >= getPeriodEnd()) {
-				RandomVariableInterface notionalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
-				RandomVariableInterface numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
+				RandomVariable notionalAtPeriodEnd = getNotional().getNotionalAtPeriodEnd(this, model);
+				RandomVariable numeraireAtPeriodEnd = model.getNumeraire(getPeriodEnd());
 				values = values.addRatio(notionalAtPeriodEnd, numeraireAtPeriodEnd);
 			}
 		}
@@ -239,7 +239,7 @@ public class Period extends AbstractPeriod {
 		if (payer) {
 			values = values.mult(-1.0);
 		}
-		RandomVariableInterface numeraireAtEval = model.getNumeraire(initialTime); // was finalTime
+		RandomVariable numeraireAtEval = model.getNumeraire(initialTime); // was finalTime
 		values = values.mult(numeraireAtEval);
 
 		// Return values

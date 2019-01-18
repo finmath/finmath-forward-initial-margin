@@ -8,7 +8,7 @@ package net.finmath.initialmargin.regression.products.components;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.stochastic.RandomVariable;
 
 /**
  * @author Christian Fries
@@ -37,12 +37,12 @@ public class AccruingNotional implements AbstractNotional {
 	}
 
 	@Override
-	public RandomVariableInterface getNotionalAtPeriodStart(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getNotionalAtPeriodStart(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return previousPeriodNotional.getNotionalAtPeriodEnd(previousPeriod, model).mult(previousPeriod.getCoupon(model).add(1.0));
 	}
 
 	@Override
-	public RandomVariableInterface getNotionalAtPeriodEnd(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getNotionalAtPeriodEnd(AbstractPeriod period, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		return getNotionalAtPeriodStart(period, model);
 	}
 }
