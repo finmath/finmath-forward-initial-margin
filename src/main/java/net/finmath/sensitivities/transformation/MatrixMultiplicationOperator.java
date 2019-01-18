@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.Streams;
 
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariable;
 
@@ -20,9 +20,9 @@ class MatrixMultiplicationOperator<C> implements TransformationOperator<C> {
 	private final RandomVariable[][] matrix;
 	private final Set<Long> modelVariableIDs;
 	private final List<C> targetCoordinates;
-	private final LIBORModelMonteCarloSimulationInterface simulation;
+	private final LIBORModelMonteCarloSimulationModel simulation;
 
-	MatrixMultiplicationOperator(RandomVariable[][] matrix, Set<Long> modelVariableIDs, List<C> targetCoordinates, LIBORModelMonteCarloSimulationInterface simulation) {
+	MatrixMultiplicationOperator(RandomVariable[][] matrix, Set<Long> modelVariableIDs, List<C> targetCoordinates, LIBORModelMonteCarloSimulationModel simulation) {
 		this.simulation = simulation;
 		this.matrix = matrix;
 		this.modelVariableIDs = modelVariableIDs;

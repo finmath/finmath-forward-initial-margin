@@ -7,8 +7,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
-import net.finmath.montecarlo.MonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.MonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
@@ -38,7 +38,7 @@ public class ApproximateAnnuity extends AbstractMonteCarloProduct implements Gra
 	 * @return A map from coordinates to sensitivity values.
 	 */
 	@Override
-	public Map<SimmCoordinate, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public Map<SimmCoordinate, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		RandomVariable bpv;
 		try {
 			bpv = getValue(evaluationTime, model);
@@ -59,7 +59,7 @@ public class ApproximateAnnuity extends AbstractMonteCarloProduct implements Gra
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, MonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, MonteCarloSimulationModel model) throws CalculationException {
 		double bpv = tradeSpec.getNotional() * (tradeSpec.getIRCurve().getPeriodLength() / tradeSpec.getIRCurve().getDayInYears()) / 10000.0;
 
 		return model.getRandomVariableForConstant(bpv);

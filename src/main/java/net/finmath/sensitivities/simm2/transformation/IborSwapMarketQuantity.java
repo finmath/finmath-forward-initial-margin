@@ -1,6 +1,6 @@
 package net.finmath.sensitivities.simm2.transformation;
 
-import net.finmath.montecarlo.AbstractMonteCarloProduct;
+import net.finmath.montecarlo.MonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.SwapRateBuilder;
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
@@ -38,7 +38,7 @@ public class IborSwapMarketQuantity implements TargetQuantity<SimmCoordinate> {
 	}
 
 	@Override
-	public AbstractMonteCarloProduct getProduct(double evaluationTime) {
+	public MonteCarloProduct getProduct(double evaluationTime) {
 		return SwapRateBuilder.startingAt(evaluationTime).
 				withTenor(tenor.getIdealizedYcf()).
 				floatPaysEvery(iborPeriod).

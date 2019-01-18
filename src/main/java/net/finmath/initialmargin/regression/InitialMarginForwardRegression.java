@@ -6,7 +6,7 @@ import net.finmath.exception.CalculationException;
 import net.finmath.functions.NormalDistribution;
 import net.finmath.initialmargin.regression.products.Portfolio;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationFromArray;
@@ -27,11 +27,11 @@ public class InitialMarginForwardRegression {
 	private Method method;
 	private int polynomialOrder;                 // The order of the regression polynomial
 
-	private LIBORModelMonteCarloSimulationInterface model;
+	private LIBORModelMonteCarloSimulationModel model;
 	private Portfolio portfolio;
 
 	public InitialMarginForwardRegression(Portfolio portfolio,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			int polynomialOrder,
 			String method) {
 		this.model = model;
@@ -95,7 +95,7 @@ public class InitialMarginForwardRegression {
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
-	public RandomVariable getVarianceForecast(double forwardVaRTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getVarianceForecast(double forwardVaRTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		RandomVariable cleanValueChange = getCleanPortfolioValueChange(forwardVaRTime);
 
 		ConditionalExpectationEstimator condExpEstimator = getConditionalExpectationEstimator(forwardVaRTime, model);
@@ -148,7 +148,7 @@ public class InitialMarginForwardRegression {
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
-	public RandomVariable[] getVarianceForecast(TimeDiscretization forwardVaRTimes, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getVarianceForecast(TimeDiscretization forwardVaRTimes, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		RandomVariable[] VaRForecast = new RandomVariable[forwardVaRTimes.getNumberOfTimes()];
 		for (int timeIndex = 0; timeIndex < forwardVaRTimes.getNumberOfTimes(); timeIndex++) {
@@ -166,7 +166,7 @@ public class InitialMarginForwardRegression {
 	 * @return The conditional expectation estimator suitable for this product
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
-	private ConditionalExpectationEstimator getConditionalExpectationEstimator(double forwardVaRTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	private ConditionalExpectationEstimator getConditionalExpectationEstimator(double forwardVaRTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		MonteCarloConditionalExpectationRegression condExpEstimator = new MonteCarloConditionalExpectationRegression(
 				getRegressionBasisFunctions(forwardVaRTime, model)
 				);
@@ -184,7 +184,7 @@ public class InitialMarginForwardRegression {
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	private RandomVariable[] getRegressionBasisFunctions(double forwardVaRTime,
-			LIBORModelMonteCarloSimulationInterface model
+			LIBORModelMonteCarloSimulationModel model
 			) throws CalculationException {
 		// If Libor for last CF is not yet fixed
 		RandomVariable NPV = portfolio.getValue(forwardVaRTime, model);
@@ -216,7 +216,7 @@ public class InitialMarginForwardRegression {
 	 * @return
 	 * @throws CalculationException
 	 */
-	private ConditionalExpectationEstimator getConditionalExpectationEstimatorLibor(double forwardVaRTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	private ConditionalExpectationEstimator getConditionalExpectationEstimatorLibor(double forwardVaRTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		MonteCarloConditionalExpectationRegression condExpEstimator = new MonteCarloConditionalExpectationRegression(
 				getRegressionBasisFunctionsLibor(forwardVaRTime, model)
 				);
@@ -232,7 +232,7 @@ public class InitialMarginForwardRegression {
 	 * @throws CalculationException
 	 */
 	private RandomVariable[] getRegressionBasisFunctionsLibor(double forwardVaRTime,
-			LIBORModelMonteCarloSimulationInterface model
+			LIBORModelMonteCarloSimulationModel model
 			) throws CalculationException {
 
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<RandomVariable>();

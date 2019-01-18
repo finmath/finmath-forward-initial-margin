@@ -33,10 +33,10 @@ import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
-import net.finmath.montecarlo.interestrate.LIBORModelInterface;
+import net.finmath.montecarlo.interestrate.LIBORModel;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.modelplugins.BlendedLocalVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModel;
@@ -46,7 +46,7 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelPiecewiseConstant;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.SwaptionSimple;
-import net.finmath.montecarlo.process.ProcessEulerScheme;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.optimizer.OptimizerFactory;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.stochastic.RandomVariable;
@@ -544,10 +544,10 @@ public class SIMMTest {
 		Map<String, Object> properties = new HashMap<String, Object>();
 
 		// Choose the simulation measure
-		properties.put("measure", LIBORMarketModel.Measure.SPOT.name());
+		properties.put("measure", LIBORMarketModelFromCovarianceModel.Measure.SPOT.name());
 
 		// Choose normal state space for the Euler scheme (the covariance model above carries a linear local volatility model, such that the resulting model is log-normal).
-		properties.put("stateSpace", LIBORMarketModel.StateSpace.NORMAL.name());
+		properties.put("stateSpace", LIBORMarketModelFromCovarianceModel.StateSpace.NORMAL.name());
 
 		// Empty array of calibration items - hence, model will use given covariance
 		CalibrationProduct[] calibrationItems = new CalibrationProduct[0];
@@ -556,9 +556,9 @@ public class SIMMTest {
 		 * Create corresponding LIBOR Market Model
 		 */
 
-		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
-		LIBORMarketModelInterface liborMarketModel = new LIBORMarketModel(liborPeriodDiscretization, new AnalyticModel(new CurveInterface[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModel(new CurveInterface[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
 
 		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
 	}
@@ -585,7 +585,7 @@ public class SIMMTest {
 		BrownianMotion brownianMotion = new BrownianMotionLazyInit(originalBM.getTimeDiscretization(), originalBM.getNumberOfFactors(), 1 /* numberOfPaths */, 3141);
 
 		// Get process
-		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
 		// Create zero volatility model
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.0}/*volatility*/, false);
@@ -602,10 +602,10 @@ public class SIMMTest {
 
 		Map<String, Object> dataModified = new HashMap<>();
 		dataModified.put("covarianceModel", covarianceModelBlended);
-		return new LIBORModelMonteCarloSimulation((LIBORModelInterface) model.getModel().getCloneWithModifiedData(dataModified), process);
+		return new LIBORModelMonteCarloSimulation((LIBORModel) model.getModel().getCloneWithModifiedData(dataModified), process);
 	}
 
-	public static Map<String, Object> getModelPropertiesMap(LIBORMarketModel.Measure measure, LIBORMarketModel.StateSpace stateSpace) {
+	public static Map<String, Object> getModelPropertiesMap(LIBORMarketModelFromCovarianceModel.Measure measure, LIBORMarketModelFromCovarianceModel.StateSpace stateSpace) {
 		Map<String, Object> properties = new HashMap<String, Object>();
 
 		// simulation measure
@@ -701,10 +701,10 @@ public class SIMMTest {
 		Map<String, Object> properties = new HashMap<String, Object>();
 
 		// Choose the simulation measure
-		properties.put("measure", LIBORMarketModel.Measure.SPOT.name());
+		properties.put("measure", LIBORMarketModelFromCovarianceModel.Measure.SPOT.name());
 
 		// Choose normal state space for the Euler scheme (the covariance model above carries a linear local volatility model, such that the resulting model is log-normal).
-		properties.put("stateSpace", LIBORMarketModel.StateSpace.NORMAL.name());
+		properties.put("stateSpace", LIBORMarketModelFromCovarianceModel.StateSpace.NORMAL.name());
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
 		OptimizerFactory optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
@@ -720,12 +720,12 @@ public class SIMMTest {
 		return properties;
 	}
 
-	public static double[] getCalibratedParameters(LIBORModelInterface liborMarketModelCalibrated) {
-		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
+	public static double[] getCalibratedParameters(LIBORModel liborMarketModelCalibrated) {
+		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModelFromCovarianceModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
 	}
 
-	public static double[] getTargetValuesUnderCalibratedModel(LIBORModelInterface liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
-		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
+	public static double[] getTargetValuesUnderCalibratedModel(LIBORModel liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
 
 		double[] valueModel = new double[calibrationItems.length];
@@ -739,7 +739,7 @@ public class SIMMTest {
 		return valueModel;
 	}
 
-	public static double[] getCalibratedVolatilities(LIBORModelInterface liborMarketModelCalibrated) {
+	public static double[] getCalibratedVolatilities(LIBORModel liborMarketModelCalibrated) {
 		double[] calibratedParameters = getCalibratedParameters(liborMarketModelCalibrated);
 		double[] calibratedVols = new double[calibratedParameters.length - 2];
 		for (int i = 0; i < calibratedVols.length; i++) {
@@ -748,7 +748,7 @@ public class SIMMTest {
 		return calibratedVols;
 	}
 
-	public static double getCalibratedBlendingParameter(LIBORModelInterface liborMarketModelCalibrated) {
+	public static double getCalibratedBlendingParameter(LIBORModel liborMarketModelCalibrated) {
 		double[] calibratedParameters = getCalibratedParameters(liborMarketModelCalibrated);
 		return calibratedParameters[calibratedParameters.length - 1];
 	}

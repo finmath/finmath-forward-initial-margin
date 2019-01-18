@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.simm2.MarginType;
@@ -39,7 +39,7 @@ public class SimmProduct extends AbstractLIBORMonteCarloProduct {
 		this.curvatureScheme = new SimmCurvatureScheme(modality.getParams());
 	}
 
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		if (evaluationTime > marginCalculationTime) {
 			return model.getRandomVariableForConstant(0.0);
 		}

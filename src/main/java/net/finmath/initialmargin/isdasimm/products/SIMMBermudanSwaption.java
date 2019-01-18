@@ -12,9 +12,9 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.BermudanSwaption;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
+import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariable;
 
@@ -86,7 +86,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time) {
+	public TermStructureMonteCarloProduct getLIBORMonteCarloProduct(double time) {
 		return this.bermudan;
 	}
 

@@ -20,6 +20,7 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
+import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
@@ -94,7 +95,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	//private RandomVariable vegaSensitivity=null;
 
 	/**
-	 * The cache of numeraire OIS adjustment factors used in the evaluation of this product in the <code> LIBORMarketModel </code>.
+	 * The cache of numeraire OIS adjustment factors used in the evaluation of this product in the <code> LIBORMarketModelFromCovarianceModel </code>.
 	 * This data is the basis of the OIS curve sensitivities, which we calculate by applying AAD to the numeraire adjustments
 	 */
 	protected Map<Double, RandomVariable> numeraireAdjustmentMap = new HashMap<>();
@@ -393,7 +394,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	/**
 	 * Calculate the sensitivities w.r.t. the OIS Bonds: dV/dP. These sensitivities are calculated using the numeraire adjustments at future
-	 * discount times (times at which the model has called the <code> getNumeraire </code> function of the <code> LIBORMarketModel </code>.
+	 * discount times (times at which the model has called the <code> getNumeraire </code> function of the <code> LIBORMarketModelFromCovarianceModel </code>.
 	 * The function calculates the AAD derivatives dV/dA i.e. w.r.t. the adjustments at the future discount times and converts them into
 	 * dV/dP (sensitivties w.r.t. the OIS Bonds P_{OIS}(t+i\Delta_T, t)).
 	 * dV(t)/dP_{OIS}(t_cf;t), i.e. the bond sensitivities at the CF times, may be provided as input to this function such that only the
@@ -517,7 +518,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		this.isGradientOfDeliveryProduct = false; // for (bermudan) swaptions
 	}
 
-	public abstract net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time);
+	public abstract TermStructureMonteCarloProduct getLIBORMonteCarloProduct(double time);
 
 	public String getProductClass() {
 		return this.productClass;

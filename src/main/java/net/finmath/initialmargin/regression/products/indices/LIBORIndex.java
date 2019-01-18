@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -48,7 +48,7 @@ public class LIBORIndex extends AbstractIndex {
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
 			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
@@ -91,7 +91,7 @@ public class LIBORIndex extends AbstractIndex {
 
 	// INSERTED
 	@Override
-	public RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (model.getModel().getForwardRateCurve().getName() != null && getName() != null && !model.getModel().getForwardRateCurve().getName().contains(getName())) {
 			throw new IllegalArgumentException("No curve for index " + getName() + " found in model.");
@@ -102,7 +102,7 @@ public class LIBORIndex extends AbstractIndex {
 
 	@Override
 	public RandomVariable getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) {
+			LIBORModelMonteCarloSimulationModel model) {
 		// TODO Auto-generated method stub
 		return null;
 	}

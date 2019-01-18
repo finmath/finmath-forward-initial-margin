@@ -8,8 +8,8 @@ import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSim
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
+import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationFromArray;
 
@@ -157,7 +157,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public AbstractLIBORMonteCarloProduct getLIBORMonteCarloProduct(double time) {
+	public TermStructureMonteCarloProduct getLIBORMonteCarloProduct(double time) {
 		return this.swap;
 	}
 

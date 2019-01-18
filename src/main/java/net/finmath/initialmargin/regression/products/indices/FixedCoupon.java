@@ -9,7 +9,7 @@ import java.util.Set;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -34,7 +34,7 @@ public class FixedCoupon extends AbstractIndex {
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		return coupon;
 	}
 
@@ -61,13 +61,13 @@ public class FixedCoupon extends AbstractIndex {
 	// INSERTED
 	@Override
 	public RandomVariable getValue(double evaluationTime, double fixingDate,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		return coupon;
 	}
 
 	@Override
 	public RandomVariable getCF(double initialTime, double finalTime,
-			LIBORModelMonteCarloSimulationInterface model) {
+			LIBORModelMonteCarloSimulationModel model) {
 		// TODO Auto-generated method stub
 		return null;
 	}

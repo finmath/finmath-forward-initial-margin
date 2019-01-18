@@ -11,7 +11,7 @@ import net.finmath.stochastic.RandomVariable;
 
 /**
  * This class is a wrapper of single <code> AbstractSIMMProduct </code> s into one portfolio.
- * Within the portfolio all products share the same <code> LIBORModelMonteCarloSimulationInterface </code>,
+ * Within the portfolio all products share the same <code> LIBORModelMonteCarloSimulationModel </code>,
  * have the same sensitivity mapping <code> SIMMSensitivityMapping </code> (i.e. the weights used for converting
  * LIBOR sensitivities into Swap-rate sensitivities are the same for all products. Moreover, the WeightMode and
  * SensitivityMode (Exact, Melting, Interpolation) are the same for all products.

@@ -16,13 +16,13 @@ import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.marketdata.products.Swap;
 import net.finmath.marketdata.products.SwapAnnuity;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
 
 /**
- * Implements the valuation of a swaption under a LIBORModelMonteCarloSimulationInterface
+ * Implements the valuation of a swaption under a LIBORModelMonteCarloSimulationModel
  * <p>
  * Important: If the LIBOR Market Model is a multi-curve model in the sense that the
  * numeraire is not calculated from the forward curve, then this valuation does
@@ -125,7 +125,7 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		RandomVariable values;
 		// CHANGED
 		if (evaluationTime > exerciseDate) {
@@ -238,7 +238,7 @@ public class Swaption extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		if (finalTime <= exerciseDate) {
 			return new RandomVariableFromDoubleArray(0.0);
 		}

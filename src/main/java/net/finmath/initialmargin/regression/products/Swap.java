@@ -9,7 +9,7 @@ package net.finmath.initialmargin.regression.products;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.components.AbstractNotional;
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.Schedule;
 
@@ -64,7 +64,7 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		RandomVariable value = legReceiver.getValue(evaluationTime, model);
 		if (legPayer != null) {
 			value = value.sub(legPayer.getValue(evaluationTime, model));
@@ -74,7 +74,7 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	}
 
 	@Override
-	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		RandomVariable cashFlow = legReceiver.getCF(initialTime, finalTime, model);
 		if (legPayer != null) {
 			cashFlow = cashFlow.sub(legPayer.getCF(initialTime, finalTime, model));

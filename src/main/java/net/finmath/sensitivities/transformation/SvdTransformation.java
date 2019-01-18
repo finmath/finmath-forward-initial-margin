@@ -6,10 +6,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.AbstractMonteCarloProduct;
-import net.finmath.montecarlo.MonteCarloSimulationInterface;
+import net.finmath.montecarlo.MonteCarloProduct;
+import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -32,7 +32,7 @@ public class SvdTransformation<C> implements Transformation {
 		this.pseudoInverter = TransformationAlgorithms::getPseudoInverseByParallelAcmSvd;
 	}
 
-	static RandomVariableDifferentiable getValueAsDifferentiable(AbstractMonteCarloProduct product, double time, MonteCarloSimulationInterface simulation) {
+	static RandomVariableDifferentiable getValueAsDifferentiable(MonteCarloProduct product, double time, MonteCarloSimulationModel simulation) {
 		RandomVariable x;
 		try {
 			x = product.getValue(time, simulation);
@@ -47,7 +47,7 @@ public class SvdTransformation<C> implements Transformation {
 		throw new RuntimeException("Given model does not have automatic differentiation capabilities.");
 	}
 
-	private RandomVariable[][] getTransformationMatrix(double time, LIBORModelMonteCarloSimulationInterface simulation) {
+	private RandomVariable[][] getTransformationMatrix(double time, LIBORModelMonteCarloSimulationModel simulation) {
 
 		Set<Long> modelQuantityIDs = modelQuantities.stream().
 				flatMap(c -> c.getDomainVariables(simulation)).
@@ -61,7 +61,7 @@ public class SvdTransformation<C> implements Transformation {
 	}
 
 	@Override
-	public TransformationOperator<C> getTransformationOperator(double time, LIBORModelMonteCarloSimulationInterface simulation) {
+	public TransformationOperator<C> getTransformationOperator(double time, LIBORModelMonteCarloSimulationModel simulation) {
 		Set<Long> modelVariableIDs = modelQuantities.stream().
 				flatMap(x -> x.getDomainVariables(simulation)).
 				map(RandomVariableDifferentiable::getID).

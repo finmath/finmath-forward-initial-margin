@@ -21,16 +21,16 @@ import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModelExponentialDecay;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelFromGivenMatrix;
-import net.finmath.montecarlo.process.ProcessEulerScheme;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.Schedule;
 import net.finmath.time.TimeDiscretizationFromArray;
@@ -62,11 +62,11 @@ public class InitialMarginRegressionTest {
 				new double[]{0.02, 0.02, 0.02, 0.02, 0.02},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(new RandomVariableFactory(), numberOfPaths, numberOfFactors,
+		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(new RandomVariableFactory(), numberOfPaths, numberOfFactors,
 				discountCurve,
 				forwardCurve, 0.0 /* Correlation */, volatilityParameter);
 		// Another model with different volatility structure.
-		//LIBORModelMonteCarloSimulationInterface model2 = createLIBORMarketModel2(1000, 2, 0.2);
+		//LIBORModelMonteCarloSimulationModel model2 = createLIBORMarketModel2(1000, 2, 0.2);
 
 		// IM Portfolio Products. First test: Simple IR Swap
 		AbstractLIBORMonteCarloRegressionProduct[] products = new Swap[1];
@@ -86,7 +86,7 @@ public class InitialMarginRegressionTest {
 		}
 	}
 
-	public static LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(
+	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(
 			AbstractRandomVariableFactory randomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurve forwardCurve, double correlationDecayParam, double volatilityParameter) throws CalculationException {
 
@@ -161,10 +161,10 @@ public class InitialMarginRegressionTest {
 		Map<String, String> properties = new HashMap<String, String>();
 
 		// Choose the simulation measure
-		properties.put("measure", LIBORMarketModel.Measure.SPOT.name());
+		properties.put("measure", LIBORMarketModelFromCovarianceModel.Measure.SPOT.name());
 
 		// Choose log normal model
-		properties.put("stateSpace", LIBORMarketModel.StateSpace.LOGNORMAL.name());
+		properties.put("stateSpace", LIBORMarketModelFromCovarianceModel.StateSpace.LOGNORMAL.name());
 
 		// Empty array of calibration items - hence, model will use given covariance
 		CalibrationProduct[] calibrationItems = new CalibrationProduct[0];
@@ -173,13 +173,13 @@ public class InitialMarginRegressionTest {
 		 * Create corresponding LIBOR Market Model
 		 */
 
-		LIBORMarketModelInterface liborMarketModel = new LIBORMarketModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
 
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 3141 /* seed */);
 
-		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
-		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
+		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
 	public static AbstractLIBORMonteCarloRegressionProduct[] createSwaps(String[] maturities) {

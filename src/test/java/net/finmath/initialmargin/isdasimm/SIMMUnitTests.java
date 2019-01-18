@@ -2,16 +2,16 @@ package net.finmath.initialmargin.isdasimm;
 
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
-import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORModelInterface;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.process.ProcessEulerScheme;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelFromCovarianceModel;
+import net.finmath.montecarlo.interestrate.LIBORModel;
+import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.time.TimeDiscretizationFromArray;
 
 public class SIMMUnitTests {
 
-	public LIBORModelMonteCarloSimulationInterface getDummySimulation() throws Exception {
+	public LIBORModelMonteCarloSimulationModel getDummySimulation() throws Exception {
 		double lastTime = 30.0;
 		double dt = 0.1;
 		TimeDiscretizationFromArray timeDiscretizationFromArray = new TimeDiscretizationFromArray(0.0, (int) (lastTime / dt), dt);
@@ -26,7 +26,7 @@ public class SIMMUnitTests {
 		double liborRateTimeHorzion = 30.0;
 		TimeDiscretizationFromArray liborPeriodDiscretization = new TimeDiscretizationFromArray(0.0, (int) (liborRateTimeHorzion / liborPeriodLength), liborPeriodLength);
 		final BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 31415 /* seed */);
-		LIBORModelInterface liborMarketModelCalibrated = new LIBORMarketModel(
+		LIBORModel liborMarketModelCalibrated = new LIBORMarketModelFromCovarianceModel(
 				liborPeriodDiscretization,
 				null,
 				null, null,
@@ -34,8 +34,8 @@ public class SIMMUnitTests {
 				null,
 				null,
 				null);
-		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
-		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
+		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 		return simulationCalibrated;
 	}
 }

@@ -1,7 +1,7 @@
 package net.finmath.montecarlo.interestrate.products;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 public class AnalyticDiscountZeroCouponBond extends AnalyticZeroCouponBond {
@@ -15,7 +15,7 @@ public class AnalyticDiscountZeroCouponBond extends AnalyticZeroCouponBond {
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel simulation) throws CalculationException {
 		RandomVariable liborPriceAtEvaluation = super.getValue(evaluationTime, simulation);
 		double liborBondPriceAtZero = super.getValue(0.0, simulation).getAverage();
 		double discountBondPriceAtZero = simulation.getModel().getDiscountCurve().getDiscountFactor(simulation.getModel().getAnalyticModel(), getMaturity());

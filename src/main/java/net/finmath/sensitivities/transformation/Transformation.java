@@ -1,7 +1,7 @@
 package net.finmath.sensitivities.transformation;
 
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 
 public interface Transformation<C> {
-	TransformationOperator<C> getTransformationOperator(double time, LIBORModelMonteCarloSimulationInterface simulation);
+	TransformationOperator<C> getTransformationOperator(double time, LIBORModelMonteCarloSimulationModel simulation);
 }

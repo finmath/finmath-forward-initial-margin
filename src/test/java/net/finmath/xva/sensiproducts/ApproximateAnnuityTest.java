@@ -17,7 +17,7 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.ProductClass;
 import net.finmath.sensitivities.simm2.RiskClass;
@@ -53,7 +53,7 @@ public class ApproximateAnnuityTest {
 		return IntStream.range(0, 11).mapToDouble(i -> 1000000 * i).toArray();
 	}
 
-	private static LIBORModelMonteCarloSimulationInterface getDummyModel() {
+	private static LIBORModelMonteCarloSimulationModel getDummyModel() {
 		return new SimulationStub(new TimeDiscretizationFromArray(0.0));
 	}
 

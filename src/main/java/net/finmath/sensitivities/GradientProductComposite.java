@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.time.FloatingpointDate;
@@ -33,7 +33,7 @@ public class GradientProductComposite<C> implements GradientProduct<C> {
 	 * @return A map from coordinates to sensitivity values.
 	 */
 	@Override
-	public Map<C, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public Map<C, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		return underlyingTimelines.stream().
 				flatMap(timeline -> timeline.getGradient(evaluationTime, model).entrySet().stream()).
 				collect(Collectors.groupingBy(Map.Entry::getKey)).entrySet().stream().

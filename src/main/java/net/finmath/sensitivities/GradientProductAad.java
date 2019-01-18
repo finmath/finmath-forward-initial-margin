@@ -2,7 +2,7 @@ package net.finmath.sensitivities;
 
 import java.util.Map;
 
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.sensitivities.transformation.Transformation;
 import net.finmath.stochastic.RandomVariable;
@@ -28,7 +28,7 @@ public class GradientProductAad<C> implements GradientProduct<C> {
 	 * @return A map from coordinates to sensitivity values.
 	 */
 	@Override
-	public Map<C, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	public Map<C, RandomVariable> getGradient(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		//TODO Rethink whether the operator itself has to know the product and thus the time
 		return transformation.getTransformationOperator(evaluationTime, model).apply(evaluationTime, marginedProduct);
 	}

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 
@@ -14,18 +14,18 @@ import net.finmath.time.TimeDiscretization;
 public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 	private final TimeDiscretization floatTenor;
 	private final TimeDiscretization fixTenor;
-	private final AbstractLIBORMonteCarloProduct[] floatTenorDiscountFactors;
-	private final AbstractLIBORMonteCarloProduct[]fixTenorDiscountFactors;
+	private final TermStructureMonteCarloProduct[] floatTenorDiscountFactors;
+	private final TermStructureMonteCarloProduct[]fixTenorDiscountFactors;
 
 	public SwapMarketRateProduct(TimeDiscretization floatTenor, TimeDiscretization fixTenor) {
 		this.floatTenor = floatTenor;
 		this.fixTenor = fixTenor;
 		floatTenorDiscountFactors = Arrays.stream(floatTenor.getAsDoubleArray()).
 				mapToObj(AnalyticDiscountZeroCouponBond::new).
-				toArray(AbstractLIBORMonteCarloProduct[]::new);
+				toArray(TermStructureMonteCarloProduct[]::new);
 		fixTenorDiscountFactors = Arrays.stream(fixTenor.getAsDoubleArray()).
 				mapToObj(AnalyticDiscountZeroCouponBond::new).
-				toArray(AbstractLIBORMonteCarloProduct[]::new);
+				toArray(TermStructureMonteCarloProduct[]::new);
 	}
 
 	public TimeDiscretization getFloatTenor() {
@@ -37,7 +37,7 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation)
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel simulation)
 			throws CalculationException {
 		RandomVariable numerator = IntStream.range(0, floatTenor.getNumberOfTimeSteps()).
 				mapToObj(i -> getFloatPaymentSummand(i, evaluationTime, simulation)).
@@ -50,7 +50,7 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 		return numerator.div(denominator);
 	}
 
-	private RandomVariable getFixPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) {
+	private RandomVariable getFixPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationModel simulation) {
 		double periodStartTime = fixTenor.getTime(i);
 		double periodEndTime = fixTenor.getTime(i+1);
 		double periodLength = periodEndTime - periodStartTime;
@@ -61,7 +61,7 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 		}
 	}
 
-	private RandomVariable getFloatPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationInterface simulation) {
+	private RandomVariable getFloatPaymentSummand(int i, double evaluationTime, LIBORModelMonteCarloSimulationModel simulation) {
 		double periodStartTime = floatTenor.getTime(i);
 		double periodEndTime = floatTenor.getTime(i+1);
 		double periodLength = periodEndTime - periodStartTime;

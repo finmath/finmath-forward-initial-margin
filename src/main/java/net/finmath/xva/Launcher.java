@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelFromCovarianceModel;
+import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.sensitivities.GradientProduct;
 import net.finmath.sensitivities.GradientProductComposite;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
@@ -35,8 +35,8 @@ public class Launcher {
 
 		double marginCalculationTime = 5.0;
 		SimmProduct product = new SimmProduct(marginCalculationTime, portfolioSensiProvider, new SimmModality(calculationCCY, 0.0));
-		LIBORMarketModel model = null;
-		LIBORModelMonteCarloSimulation simulation = null;
+		LIBORMarketModelFromCovarianceModel model = null;
+		LIBORMonteCarloSimulationFromLIBORModel simulation = null;
 		RandomVariable result = product.getValue(4.0, simulation);
 	}
 }

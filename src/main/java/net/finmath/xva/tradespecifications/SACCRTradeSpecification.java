@@ -2,11 +2,11 @@ package net.finmath.xva.tradespecifications;
 
 import java.time.LocalDate;
 
-import net.finmath.montecarlo.AbstractMonteCarloProduct;
+import net.finmath.montecarlo.MonteCarloProduct;
 
 public class SACCRTradeSpecification {
 
-	AbstractMonteCarloProduct underlyingValuationProduct;
+	MonteCarloProduct underlyingValuationProduct;
 
 	public enum CreditRating {
 		AAA,
@@ -46,7 +46,7 @@ public class SACCRTradeSpecification {
 
 	}
 
-	public AbstractMonteCarloProduct getUnderlyingValuationProduct() {
+	public MonteCarloProduct getUnderlyingValuationProduct() {
 		return this.underlyingValuationProduct;
 	}
 

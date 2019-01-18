@@ -3,7 +3,7 @@ package net.finmath.initialmargin.regression.products.components;
 import java.util.Set;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -27,12 +27,12 @@ public abstract class AbstractPeriod extends AbstractProductComponent {
 	private final double daycountFraction;
 
 	@Override
-	public abstract RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	public abstract RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException;
 
 	@Override
-	public abstract RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	public abstract RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException;
 
-	public abstract RandomVariable getCoupon(LIBORModelMonteCarloSimulationInterface model) throws CalculationException;
+	public abstract RandomVariable getCoupon(LIBORModelMonteCarloSimulationModel model) throws CalculationException;
 
 	/**
 	 * Initialize basic properties of the period.

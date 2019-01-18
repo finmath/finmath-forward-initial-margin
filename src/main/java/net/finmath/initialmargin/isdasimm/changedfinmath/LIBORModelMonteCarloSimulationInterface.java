@@ -11,14 +11,14 @@ import net.finmath.exception.CalculationException;
 import net.finmath.stochastic.RandomVariable;
 
 /**
- * Extension of the original interface net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface
+ * Extension of the original interface net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel
  *
  * @author Mario Viehmann
  * @author Christian Fries
  * @version 1.0
  */
 
-public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface {
+public interface LIBORModelMonteCarloSimulationInterface extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel {
 
 	/**
 	 * Returns the map of <code> Double <code> (time) and <code> RandomVariable <code> (numeraire Adjustment)

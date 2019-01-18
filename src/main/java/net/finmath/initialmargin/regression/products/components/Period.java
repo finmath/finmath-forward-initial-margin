@@ -5,7 +5,7 @@ package net.finmath.initialmargin.regression.products.components;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -102,7 +102,7 @@ public class Period extends AbstractPeriod {
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
 	@Override
-	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (evaluationTime >= this.getPaymentDate()) {
 			return new RandomVariableFromDoubleArray(0.0);
@@ -159,13 +159,13 @@ public class Period extends AbstractPeriod {
 	}
 
 	@Override
-	public RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(double evaluationTime, double fixingTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		return getValue(evaluationTime, model);
 	}
 
 	@Override
-	public RandomVariable getCoupon(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCoupon(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// Calculate percentage value of coupon (not multiplied with notional, not discounted)
 		RandomVariable values = getIndex().getValue(getFixingDate(), model);
 
@@ -177,7 +177,7 @@ public class Period extends AbstractPeriod {
 	}
 
 	//INSERTED: We use this to get the future value without conditional expectation
-	public RandomVariable getCoupon(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCoupon(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// Calculate percentage value of coupon (not multiplied with notional, not discounted)
 		RandomVariable values = getIndex().getValue(evaluationTime, getFixingDate(), model);
 
@@ -196,7 +196,7 @@ public class Period extends AbstractPeriod {
 	}
 
 	@Override
-	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		RandomVariable values = new RandomVariableFromDoubleArray(0.0);
 		if (initialTime >= this.getPaymentDate() || finalTime < this.getPaymentDate()) {
 			// Apply notional exchange

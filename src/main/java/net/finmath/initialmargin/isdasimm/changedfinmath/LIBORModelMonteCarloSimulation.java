@@ -9,37 +9,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORModelInterface;
-import net.finmath.montecarlo.process.AbstractProcess;
-import net.finmath.montecarlo.process.AbstractProcessInterface;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelFromCovarianceModel;
+import net.finmath.montecarlo.interestrate.LIBORModel;
+import net.finmath.montecarlo.process.MonteCarloProcessFromProcessModel;
+import net.finmath.montecarlo.process.MonteCarloProcess;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 
 /**
  * Implements convenient methods for a LIBOR market model,
- * based on a given <code>LIBORMarketModel</code> model
+ * based on a given <code>LIBORMarketModelFromCovarianceModel</code> model
  * and <code>AbstractLogNormalProcess</code> process.
  *
  * @author Christian Fries
  * @version 0.7
  */
-public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation implements LIBORModelMonteCarloSimulationInterface {
+public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel implements LIBORModelMonteCarloSimulationInterface {
 
-	public LIBORModelMonteCarloSimulation(LIBORModelInterface model, AbstractProcessInterface process) {
+	public LIBORModelMonteCarloSimulation(LIBORModel model, MonteCarloProcess process) {
 		super(model, process);
 	}
 
 	@Override
 	public Map<Double, RandomVariable> getNumeraireAdjustmentMap() {
-		return ((LIBORMarketModel) getModel()).getNumeraireAdjustments();
+		return ((LIBORMarketModelFromCovarianceModel) getModel()).getNumeraireAdjustments();
 	}
 
 	@Override
 	public RandomVariable getNumeraireOISAdjustmentFactor(double time) throws CalculationException {
 		/*
-		if (((LIBORMarketModel) getModel()).getNumeraireAdjustments().containsKey(time)) {
-			return ((LIBORMarketModel) getModel()).getNumeraireAdjustments().get(time);
+		if (((LIBORMarketModelFromCovarianceModel) getModel()).getNumeraireAdjustments().containsKey(time)) {
+			return ((LIBORMarketModelFromCovarianceModel) getModel()).getNumeraireAdjustments().get(time);
 		}
 		 */
 
@@ -48,7 +48,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 		/*
 		// Get unadjusted Numeraire
-		RandomVariable numeraireUnadjusted = ((LIBORMarketModel) getModel()).getNumerairetUnAdjusted(time);
+		RandomVariable numeraireUnadjusted = ((LIBORMarketModelFromCovarianceModel) getModel()).getNumerairetUnAdjusted(time);
 		RandomVariable adjustment = getRandomVariableForConstant(numeraireUnadjusted.invert().getAverage()).div(getModel().getDiscountCurve().getDiscountFactor(time));
 
 		return adjustment;
@@ -61,7 +61,7 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 		return this.getLIBOR(t, t, T).mult(T - t).add(1.0).invert();
 		//		return (new LIBORBond(T)).getValue(t, this);
-		//		return ((LIBORMarketModelInterface) getModel()).getForwardBondLibor(T, t);
+		//		return ((LIBORMarketModel) getModel()).getForwardBondLibor(T, t);
 	}
 
 	@Override
@@ -78,13 +78,13 @@ public class LIBORModelMonteCarloSimulation extends net.finmath.montecarlo.inter
 
 	@Override
 	public Object getCloneWithModifiedSeed(int seed) {
-		AbstractProcess process = (AbstractProcess) ((AbstractProcess) getProcess()).getCloneWithModifiedSeed(seed);
+		MonteCarloProcessFromProcessModel process = (MonteCarloProcessFromProcessModel) ((MonteCarloProcessFromProcessModel) getProcess()).getCloneWithModifiedSeed(seed);
 		return new LIBORModelMonteCarloSimulation(getModel(), process);
 	}
 
 	@Override
 	public LIBORModelMonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) throws CalculationException {
-		LIBORModelInterface modelClone = getModel().getCloneWithModifiedData(dataModified);
+		LIBORModel modelClone = getModel().getCloneWithModifiedData(dataModified);
 		if (dataModified.containsKey("discountCurve") && dataModified.size() == 1) {
 			// In this case we may re-use the underlying process
 			LIBORModelMonteCarloSimulation lmmSimClone = new LIBORModelMonteCarloSimulation(modelClone, getProcess());

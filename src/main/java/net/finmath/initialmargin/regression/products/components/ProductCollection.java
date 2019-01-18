@@ -16,7 +16,7 @@ import java.util.concurrent.RejectedExecutionException;
 import net.finmath.concurrency.FutureWrapper;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -92,10 +92,10 @@ public class ProductCollection extends AbstractProductComponent {
 	 * @param model          The model used to price the product.
 	 * @return The random variable representing the value of the product discounted to evaluation time
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
-	 * @see net.finmath.montecarlo.AbstractMonteCarloProduct#getValue(double, net.finmath.montecarlo.MonteCarloSimulationInterface)
+	 * @see net.finmath.montecarlo.AbstractMonteCarloProduct#getValue(double, net.finmath.montecarlo.MonteCarloSimulationModel)
 	 */
 	@Override
-	public RandomVariable getValue(final double evaluationTime, final LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getValue(final double evaluationTime, final LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Ignite asynchronous calculation if possible
 		ArrayList<Future<RandomVariable>> results = new ArrayList<Future<RandomVariable>>();
@@ -140,7 +140,7 @@ public class ProductCollection extends AbstractProductComponent {
 	}
 
 	@Override
-	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getCF(double initialTime, double finalTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Ignite asynchronous calculation if possible
 		ArrayList<Future<RandomVariable>> results = new ArrayList<Future<RandomVariable>>();
@@ -191,7 +191,7 @@ public class ProductCollection extends AbstractProductComponent {
 
 	@Override
 	public RandomVariable getValue(double evaluationTime, double fixingDate,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		return getValue(evaluationTime, model);
 	}
 }

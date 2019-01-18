@@ -1,6 +1,7 @@
 package net.finmath.sensitivities.transformation;
 
 import net.finmath.montecarlo.AbstractMonteCarloProduct;
+import net.finmath.montecarlo.MonteCarloProduct;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 
 /**
@@ -21,5 +22,5 @@ public interface TargetQuantity<C> {
 	 *                       a different schedule at different times.
 	 * @return An {@link AbstractMonteCarloProduct} able to calculate the quantity at given times and for given simulations.
 	 */
-	AbstractMonteCarloProduct getProduct(double evaluationTime);
+	MonteCarloProduct getProduct(double evaluationTime);
 }

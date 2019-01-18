@@ -5,18 +5,18 @@ import java.util.Map;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.BrownianMotion;
-import net.finmath.montecarlo.MonteCarloSimulationInterface;
+import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.TermStructureModelInterface;
-import net.finmath.montecarlo.process.AbstractProcessInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.TermStructureModel;
+import net.finmath.montecarlo.process.MonteCarloProcess;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 
 /**
  * A stub that only provides a time discretization and constants.
  */
-class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
+class SimulationStub implements LIBORModelMonteCarloSimulationModel {
 	private TimeDiscretization timeDiscretization;
 
 	SimulationStub(TimeDiscretization timeDiscretization) {
@@ -72,7 +72,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 
 	/**
 	 * Returns a random variable which is initialized to a constant,
-	 * but has exactly the same number of paths or discretization points as the ones used by this <code>MonteCarloSimulationInterface</code>.
+	 * but has exactly the same number of paths or discretization points as the ones used by this <code>MonteCarloSimulationModel</code>.
 	 *
 	 * @param value The constant value to be used for initialized the random variable.
 	 * @return A new random variable.
@@ -111,7 +111,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return Returns a clone of this model, with some data modified (then it is no longer a clone :-)
 	 */
 	@Override
-	public MonteCarloSimulationInterface getCloneWithModifiedData(Map<String, Object> dataModified) {
+	public MonteCarloSimulationModel getCloneWithModifiedData(Map<String, Object> dataModified) {
 		return null;
 	}
 
@@ -233,7 +233,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return The underlying model
 	 */
 	@Override
-	public TermStructureModelInterface getModel() {
+	public TermStructureModel getModel() {
 		return null;
 	}
 
@@ -246,7 +246,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return The implementation of the process
 	 */
 	@Override
-	public AbstractProcessInterface getProcess() {
+	public MonteCarloProcess getProcess() {
 		return null;
 	}
 

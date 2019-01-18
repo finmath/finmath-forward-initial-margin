@@ -32,15 +32,15 @@ import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
+import net.finmath.montecarlo.interestrate.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
-import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModelExponentialDecay;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelFromGivenMatrix;
-import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
-import net.finmath.montecarlo.process.ProcessEulerScheme;
+import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.Schedule;
@@ -91,7 +91,7 @@ public class SwapAnalyticVsAADSensitivities {
 		Arrays.fill(swapRates, constantSwapRate);
 
 		// Create Products
-		AbstractLIBORMonteCarloProduct simpleSwap = new SimpleSwap(fixingDates, paymentDates, swapRates, 1.0); //Notional 1
+		TermStructureMonteCarloProduct simpleSwap = new SimpleSwap(fixingDates, paymentDates, swapRates, 1.0); //Notional 1
 
 		// ------------------------------------------------------------------------------------------------------------
 		// Compare Sensis
@@ -172,7 +172,7 @@ public class SwapAnalyticVsAADSensitivities {
 	 * @throws CalculationException
 	 */
 	public RandomVariable[] getAADSwapLiborSensitivities(double evaluationTime,
-			AbstractLIBORMonteCarloProduct product,
+			TermStructureMonteCarloProduct product,
 			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 		if (this.gradient == null) {
 			RandomVariableDifferentiable value = (RandomVariableDifferentiable) product.getValue(0.0, model);
@@ -290,10 +290,10 @@ public class SwapAnalyticVsAADSensitivities {
 		Map<String, String> properties = new HashMap<String, String>();
 
 		// Choose the simulation measure
-		properties.put("measure", LIBORMarketModel.Measure.SPOT.name());
+		properties.put("measure", LIBORMarketModelFromCovarianceModel.Measure.SPOT.name());
 
 		// Choose log normal model
-		properties.put("stateSpace", LIBORMarketModel.StateSpace.LOGNORMAL.name());
+		properties.put("stateSpace", LIBORMarketModelFromCovarianceModel.StateSpace.LOGNORMAL.name());
 
 		// Empty array of calibration items - hence, model will use given covariance
 		CalibrationProduct[] calibrationItems = new CalibrationProduct[0];
@@ -302,17 +302,17 @@ public class SwapAnalyticVsAADSensitivities {
 		 * Create corresponding LIBOR Market Model
 		 */
 
-		LIBORMarketModelInterface liborMarketModel = new LIBORMarketModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
 
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 3141 /* seed */);
 
-		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion, ProcessEulerScheme.Scheme.EULER_FUNCTIONAL);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
 		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
 	}
 
-	public static AbstractLIBORMonteCarloProduct[] createSwaps(String[] maturities) {
-		AbstractLIBORMonteCarloProduct[] swaps = new AbstractLIBORMonteCarloProduct[maturities.length];
+	public static TermStructureMonteCarloProduct[] createSwaps(String[] maturities) {
+		TermStructureMonteCarloProduct[] swaps = new TermStructureMonteCarloProduct[maturities.length];
 		// 1) Create Portfolio of swaps -------------------------------------------------------------------------------
 		for (int swapIndex = 0; swapIndex < maturities.length; swapIndex++) {
 			// Floating Leg
@@ -350,7 +350,7 @@ public class SwapAnalyticVsAADSensitivities {
 			SwapLeg legF = new SwapLeg(scheduleF, notionalF, indexF, spreadF, false /* isNotionalExchanged */);
 
 			// Swap
-			AbstractLIBORMonteCarloProduct swap = new Swap(leg, legF);
+			TermStructureMonteCarloProduct swap = new Swap(leg, legF);
 			swaps[swapIndex] = swap;
 		}
 		return swaps;

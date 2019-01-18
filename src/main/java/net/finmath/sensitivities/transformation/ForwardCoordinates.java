@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
-import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -23,7 +23,7 @@ public class ForwardCoordinates implements AadCoordinate {
 	}
 
 	@Override
-	public Stream<RandomVariableDifferentiable> getDomainVariables(LIBORModelMonteCarloSimulationInterface simulation, double evaluationTime) {
+	public Stream<RandomVariableDifferentiable> getDomainVariables(LIBORModelMonteCarloSimulationModel simulation, double evaluationTime) {
 		int evaluationTimeIndex = simulation.getTimeIndex(evaluationTime);
 
 		return IntStream.range(0, simulation.getLiborPeriodDiscretization().getNumberOfTimes()).mapToObj(i -> {
