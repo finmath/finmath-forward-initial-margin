@@ -21,10 +21,10 @@ import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMPortfolio;
 import net.finmath.initialmargin.isdasimm.products.SIMMSimpleSwap;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.optimizer.OptimizerFactoryInterface;
+import net.finmath.optimizer.OptimizerFactory;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
-import net.finmath.optimizer.OptimizerInterface;
-import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
+import net.finmath.optimizer.Optimizer;
+import net.finmath.optimizer.Optimizer.ObjectiveFunction;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
@@ -487,11 +487,11 @@ public class CalculationSchemeInitialMarginISDA {
 		Arrays.fill(zero, 0);
 
 		int numberOfThreads = 2;
-		OptimizerFactoryInterface optimizerFactoryParameter = (OptimizerFactoryInterface) calibrationParameters.get("optimizerFactory");
+		OptimizerFactory optimizerFactoryParameter = (OptimizerFactory) calibrationParameters.get("optimizerFactory");
 
 		int maxIterations = maxIterationsParameter != null ? maxIterationsParameter.intValue() : 2000;
 		double accuracy = accuracyParameter != null ? accuracyParameter.doubleValue() : 1E-5;
-		OptimizerFactoryInterface optimizerFactory = optimizerFactoryParameter != null ? optimizerFactoryParameter : new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
+		OptimizerFactory optimizerFactory = optimizerFactoryParameter != null ? optimizerFactoryParameter : new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 
 		//int numberOfThreadsForProductValuation = 2 * Math.max(2, Runtime.getRuntime().availableProcessors());
 		final ExecutorService executor = null;//Executors.newFixedThreadPool(numberOfThreadsForProductValuation);
@@ -543,7 +543,7 @@ public class CalculationSchemeInitialMarginISDA {
 			}
 		};
 
-		OptimizerInterface optimizer = optimizerFactory.getOptimizer(calibrationError, initialParameters, lowerBound, upperBound, parameterStep, calibrationTargetValues);
+		Optimizer optimizer = optimizerFactory.getOptimizer(calibrationError, initialParameters, lowerBound, upperBound, parameterStep, calibrationTargetValues);
 		try {
 			optimizer.run();
 		} catch (SolverException e) {

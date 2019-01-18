@@ -35,7 +35,7 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelPiec
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.SwaptionSimple;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
-import net.finmath.optimizer.OptimizerFactoryInterface;
+import net.finmath.optimizer.OptimizerFactory;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.businessdaycalendar.AbstractBusinessdayCalendar;
@@ -201,7 +201,7 @@ public class LMMCalibrationTest {
 		Double accuracy = new Double(1E-5);    // Lower accuracy to reduce runtime of the unit test
 		int maxIterations = 200;
 		int numberOfThreads = 4;
-		OptimizerFactoryInterface optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
+		OptimizerFactory optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 
 		double[] parameterStandardDeviation = new double[covarianceModelParametric.getParameter().length];
 		double[] parameterLowerBound = new double[covarianceModelParametric.getParameter().length];
@@ -326,7 +326,7 @@ public class LMMCalibrationTest {
 		properties.put("stateSpace", LIBORMarketModel.StateSpace.NORMAL.name());
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
-		OptimizerFactoryInterface optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
+		OptimizerFactory optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
 		Map<String, Object> calibrationParameters = new HashMap<String, Object>();
