@@ -38,7 +38,7 @@ import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.time.TimeDiscretizationFromArray;
-import net.finmath.time.businessdaycalendar.BusinessdayCalendar;
+import net.finmath.time.businessdaycalendar.AbstractBusinessdayCalendar;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
 import net.finmath.time.daycount.DayCountConventionInterface;
 import net.finmath.time.daycount.DayCountConvention_ACT_365;
@@ -130,8 +130,8 @@ public class LMMCalibrationTest {
 		DayCountConvention_ACT_365 modelDC = new DayCountConvention_ACT_365();
 		for (int i = 0; i < atmNormalVolatilities.length; i++) {
 
-			LocalDate exerciseDate = cal.createDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
-			LocalDate tenorEndDate = cal.createDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
+			LocalDate exerciseDate = cal.getDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
+			LocalDate tenorEndDate = cal.getDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
 			double exercise = modelDC.getDaycountFraction(referenceDate, exerciseDate);
 			double tenor = modelDC.getDaycountFraction(exerciseDate, tenorEndDate);
 
@@ -277,14 +277,14 @@ public class LMMCalibrationTest {
 		return net.finmath.marketdata.products.Swap.getForwardSwapRate(new TimeDiscretizationFromArray(swapTenor), new TimeDiscretizationFromArray(swapTenor), forwardCurve, discountCurve);
 	}
 
-	public static CalibrationProduct[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, BusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
+	public static CalibrationProduct[] createCalibrationItems(ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, String[] atmExpiries, String[] atmTenors, double[] atmNormalVolatilities, LocalDate referenceDate, AbstractBusinessdayCalendar cal, DayCountConventionInterface modelDC, double swapPeriodLength) throws CalculationException {
 
 		final ArrayList<CalibrationProduct> calibrationProducts = new ArrayList<CalibrationProduct>();
 
 		for (int i = 0; i < atmNormalVolatilities.length; i++) {
 
-			LocalDate exerciseDate = cal.createDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
-			LocalDate tenorEndDate = cal.createDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
+			LocalDate exerciseDate = cal.getDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
+			LocalDate tenorEndDate = cal.getDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
 			double exercise = modelDC.getDaycountFraction(referenceDate, exerciseDate);
 			double tenor = modelDC.getDaycountFraction(exerciseDate, tenorEndDate);
 
