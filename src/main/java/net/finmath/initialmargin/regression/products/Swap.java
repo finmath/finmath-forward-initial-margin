@@ -11,7 +11,7 @@ import net.finmath.initialmargin.regression.products.components.AbstractNotional
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.ScheduleInterface;
+import net.finmath.time.Schedule;
 
 /**
  * Create a swap from schedules, notional, indices and spreads (fixed coupons).
@@ -53,9 +53,9 @@ public class Swap extends AbstractLIBORMonteCarloRegressionProduct {
 	 * @param spreadPayLeg       The constant spread or fixed coupon rate of the payer leg.
 	 */
 	public Swap(AbstractNotional notional,
-			ScheduleInterface scheduleReceiveLeg,
+			Schedule scheduleReceiveLeg,
 			AbstractIndex indexReceiveLeg, double spreadReceiveLeg,
-			ScheduleInterface schedulePayLeg, AbstractIndex indexPayLeg,
+			Schedule schedulePayLeg, AbstractIndex indexPayLeg,
 			double spreadPayLeg) {
 		super();
 

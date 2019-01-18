@@ -11,15 +11,15 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterfa
 import net.finmath.montecarlo.interestrate.TermStructureModelInterface;
 import net.finmath.montecarlo.process.AbstractProcessInterface;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretizationInterface;
+import net.finmath.time.TimeDiscretization;
 
 /**
  * A stub that only provides a time discretization and constants.
  */
 class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
-	private TimeDiscretizationInterface timeDiscretization;
+	private TimeDiscretization timeDiscretization;
 
-	SimulationStub(TimeDiscretizationInterface timeDiscretization) {
+	SimulationStub(TimeDiscretization timeDiscretization) {
 		this.timeDiscretization = timeDiscretization;
 	}
 
@@ -39,12 +39,12 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	}
 
 	/**
-	 * Returns the timeDiscretization.
+	 * Returns the timeDiscretizationFromArray.
 	 *
-	 * @return Returns the timeDiscretization.
+	 * @return Returns the timeDiscretizationFromArray.
 	 */
 	@Override
-	public TimeDiscretizationInterface getTimeDiscretization() {
+	public TimeDiscretization getTimeDiscretization() {
 		return timeDiscretization;
 	}
 
@@ -129,7 +129,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * @return Returns the libor period discretization
 	 */
 	@Override
-	public TimeDiscretizationInterface getLiborPeriodDiscretization() {
+	public TimeDiscretization getLiborPeriodDiscretization() {
 		return null;
 	}
 
@@ -168,7 +168,7 @@ class SimulationStub implements LIBORModelMonteCarloSimulationInterface {
 	 * Return the forward rate for a given simulation time index and a given forward rate index.
 	 *
 	 * @param timeIndex  Simulation time index.
-	 * @param liborIndex Tenor time index (index corresponding to the fixing of the forward rate).
+	 * @param liborIndex TenorFromArray time index (index corresponding to the fixing of the forward rate).
 	 * @return The forward rate as a random variable.
 	 * @throws CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */

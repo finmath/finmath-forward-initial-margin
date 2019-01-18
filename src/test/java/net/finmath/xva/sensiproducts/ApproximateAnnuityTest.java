@@ -25,7 +25,7 @@ import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
 import net.finmath.sensitivities.simm2.products.ApproximateAnnuity;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.xva.tradespecifications.IRCurveSpec;
 import net.finmath.xva.tradespecifications.Indices;
 import net.finmath.xva.tradespecifications.SIMMTradeSpecification;
@@ -54,7 +54,7 @@ public class ApproximateAnnuityTest {
 	}
 
 	private static LIBORModelMonteCarloSimulationInterface getDummyModel() {
-		return new SimulationStub(new TimeDiscretization(0.0));
+		return new SimulationStub(new TimeDiscretizationFromArray(0.0));
 	}
 
 	@Theory

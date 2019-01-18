@@ -23,8 +23,8 @@ import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentia
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.time.TimeDiscretizationInterface;
 
 /**
  * This class contains the functions and methods which are shared by all products to be considered for
@@ -455,7 +455,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		RandomVariable[][] dPdP = new RandomVariable[discountTimes.length][numberOfP];
 
 		double deltaT = model.getLiborPeriodDiscretization().getTimeStep(0);
-		TimeDiscretizationInterface timesP = new TimeDiscretization(evaluationTime, numberOfP, deltaT);
+		TimeDiscretization timesP = new TimeDiscretizationFromArray(evaluationTime, numberOfP, deltaT);
 		for (int cfIndex = 0; cfIndex < dPdP.length; cfIndex++) {
 			int lowerIndex = timesP.getTimeIndexNearestLessOrEqual(discountTimes[cfIndex]);
 			double alpha = (discountTimes[cfIndex] - timesP.getTime(lowerIndex)) / deltaT;

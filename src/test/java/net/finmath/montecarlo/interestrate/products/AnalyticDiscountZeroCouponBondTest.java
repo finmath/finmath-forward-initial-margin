@@ -23,8 +23,8 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelExponentialForm5Param;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.time.TimeDiscretizationInterface;
 
 @RunWith(Theories.class)
 public class AnalyticDiscountZeroCouponBondTest {
@@ -42,9 +42,9 @@ public class AnalyticDiscountZeroCouponBondTest {
 	public void testGetValueSinglePeriodInSingleCurve(@FromDataPoints("forwardRates") double forwardRate, @FromDataPoints("timeSpans") double periodLength)
 			throws CalculationException {
 
-		TimeDiscretizationInterface periodTenor = new TimeDiscretization(0.0, periodLength);
-		TimeDiscretizationInterface processTenor = periodTenor.union(
-				new TimeDiscretization(0.0, periodLength, 0.1, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END));
+		TimeDiscretization periodTenor = new TimeDiscretizationFromArray(0.0, periodLength);
+		TimeDiscretization processTenor = periodTenor.union(
+				new TimeDiscretizationFromArray(0.0, periodLength, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
 		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
 				new double[] {0.0}, new double[] {forwardRate}, periodLength);
@@ -66,9 +66,9 @@ public class AnalyticDiscountZeroCouponBondTest {
 			@FromDataPoints("timeSpans") double periodLength)
 					throws CalculationException {
 
-		TimeDiscretizationInterface periodTenor = new TimeDiscretization(0.0, periodLength);
-		TimeDiscretizationInterface processTenor = periodTenor.union(
-				new TimeDiscretization(0.0, periodLength, 0.1, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END));
+		TimeDiscretization periodTenor = new TimeDiscretizationFromArray(0.0, periodLength);
+		TimeDiscretization processTenor = periodTenor.union(
+				new TimeDiscretizationFromArray(0.0, periodLength, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
 		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
 				new double[] {0.0}, new double[] {forwardRate}, periodLength);

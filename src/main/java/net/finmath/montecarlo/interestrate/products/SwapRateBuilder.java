@@ -1,7 +1,7 @@
 package net.finmath.montecarlo.interestrate.products;
 
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.time.TimeDiscretizationInterface;
 
 public final class SwapRateBuilder {
 
@@ -112,12 +112,12 @@ public final class SwapRateBuilder {
 			return new SwapMarketRateProduct(getFloatTD(), getFixTD());
 		}
 
-		private TimeDiscretizationInterface getFixTD() {
-			return new TimeDiscretization(startTime, endTime, fixFrequency, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_START);
+		private TimeDiscretization getFixTD() {
+			return new TimeDiscretizationFromArray(startTime, endTime, fixFrequency, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_START);
 		}
 
-		private TimeDiscretizationInterface getFloatTD() {
-			return new TimeDiscretization(startTime, endTime, floatFrequency, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_START);
+		private TimeDiscretization getFloatTD() {
+			return new TimeDiscretizationFromArray(startTime, endTime, floatFrequency, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_START);
 
 		}
 	}

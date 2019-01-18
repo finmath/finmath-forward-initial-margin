@@ -11,8 +11,8 @@ import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariable;
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.time.TimeDiscretizationInterface;
 
 /**
  * This class performs linear sensitivity melting of sensitivities.
@@ -269,7 +269,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		// time of initial and final sensitivities
-		TimeDiscretizationInterface exactSensiTimes = new TimeDiscretization(0, 50, interpolationStep);
+		TimeDiscretization exactSensiTimes = new TimeDiscretizationFromArray(0, 50, interpolationStep);
 		int initialIndex = exactSensiTimes.getTimeIndexNearestLessOrEqual(evaluationTime);
 		double initialTime = (exactSensiTimes.getTime(initialIndex) <= product.getMeltingResetTime(model)) && (exactSensiTimes.getTime(initialIndex + 1) > product.getMeltingResetTime(model)) ? product.getMeltingResetTime(model) : exactSensiTimes.getTime(initialIndex);
 		double finalTime = initialTime < product.getMeltingResetTime(model) ? Math.min(product.getMeltingResetTime(model), exactSensiTimes.getTime(initialIndex + 1)) : exactSensiTimes.getTime(initialIndex + 1);

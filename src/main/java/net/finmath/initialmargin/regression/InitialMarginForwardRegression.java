@@ -9,8 +9,8 @@ import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpect
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.time.TimeDiscretizationInterface;
 
 /**
  * This class implements the Dynamic Initial Margin by Regression as described in
@@ -79,7 +79,7 @@ public class InitialMarginForwardRegression {
 		return initialMargin;
 	}
 
-	public double[] getInitialMargin(TimeDiscretization initialMarginTimes) throws CalculationException {
+	public double[] getInitialMargin(TimeDiscretizationFromArray initialMarginTimes) throws CalculationException {
 		double[] initialMargin = new double[initialMarginTimes.getNumberOfTimes()];
 		for (int timeIndex = 0; timeIndex < initialMarginTimes.getNumberOfTimes(); timeIndex++) {
 			initialMargin[timeIndex] = getInitialMargin(initialMarginTimes.getTime(timeIndex));
@@ -148,7 +148,7 @@ public class InitialMarginForwardRegression {
 	 * @return The variance of the clean portfolio value change over the MPR
 	 * @throws CalculationException
 	 */
-	public RandomVariable[] getVarianceForecast(TimeDiscretizationInterface forwardVaRTimes, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getVarianceForecast(TimeDiscretization forwardVaRTimes, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
 
 		RandomVariable[] VaRForecast = new RandomVariable[forwardVaRTimes.getNumberOfTimes()];
 		for (int timeIndex = 0; timeIndex < forwardVaRTimes.getNumberOfTimes(); timeIndex++) {

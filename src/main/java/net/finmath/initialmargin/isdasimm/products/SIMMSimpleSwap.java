@@ -11,7 +11,7 @@ import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpect
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
  * This class describes a Swap for SIMM initial margin (MVA) calculation.
@@ -89,7 +89,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 		RandomVariable[] sensis = null;
 
 		// periodIndex: Index of the swap period at evaluationTime
-		int periodIndex = new TimeDiscretization(fixingDates).getTimeIndexNearestLessOrEqual(evaluationTime);
+		int periodIndex = new TimeDiscretizationFromArray(fixingDates).getTimeIndexNearestLessOrEqual(evaluationTime);
 		periodIndex = periodIndex < 0 ? 0 : periodIndex;
 
 		// firstLiborIndex: Index of the Libor on the first period of the swap

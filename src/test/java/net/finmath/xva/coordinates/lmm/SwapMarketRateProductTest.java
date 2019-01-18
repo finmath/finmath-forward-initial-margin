@@ -26,15 +26,15 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelExpo
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.SwapMarketRateProduct;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
+import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
-import net.finmath.time.TimeDiscretizationInterface;
 
 @RunWith(Theories.class)
 public class SwapMarketRateProductTest {
 
 	@DataPoints
-	public static TimeDiscretizationInterface[] discretizations = new TimeDiscretizationInterface[] {
-			new TimeDiscretization(0.0, 5.0, 1.0, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END)
+	public static TimeDiscretization[] discretizations = new TimeDiscretization[] {
+			new TimeDiscretizationFromArray(0.0, 5.0, 1.0, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END)
 	};
 
 	@DataPoints
@@ -47,7 +47,7 @@ public class SwapMarketRateProductTest {
 	public static double[][] discountFactors = new double[][] { { 0.98, 0.95, 0.94, 0.92, 0.9 }};
 
 	@Theory
-	public void testGetValue(TimeDiscretizationInterface floatTenor, TimeDiscretizationInterface fixTenor,
+	public void testGetValue(TimeDiscretization floatTenor, TimeDiscretization fixTenor,
 			@FromDataPoints("discountFactors") double[] discountFactors,
 			@FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
 					throws CalculationException {
@@ -56,9 +56,9 @@ public class SwapMarketRateProductTest {
 
 		final double lastTime = Math.max(floatTenor.getTime(floatTenor.getNumberOfTimeSteps()), fixTenor.getTime(fixTenor.getNumberOfTimeSteps()));
 
-		TimeDiscretizationInterface periodTenor = new TimeDiscretization(0.0, lastTime, periodLength, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END);
-		TimeDiscretizationInterface processTenor = periodTenor.union(
-				new TimeDiscretization(0.0, lastTime, 0.1, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END));
+		TimeDiscretization periodTenor = new TimeDiscretizationFromArray(0.0, lastTime, periodLength, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END);
+		TimeDiscretization processTenor = periodTenor.union(
+				new TimeDiscretizationFromArray(0.0, lastTime, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
 		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
 				Arrays.stream(floatTenor.getAsDoubleArray()).skip(1).toArray(), forwardRates, periodLength);
@@ -83,7 +83,7 @@ public class SwapMarketRateProductTest {
 	}
 
 	@Theory
-	public void testGetValuePutIntoSwap(TimeDiscretizationInterface uniTenor,
+	public void testGetValuePutIntoSwap(TimeDiscretization uniTenor,
 			@FromDataPoints("discountFactors") double[] discountFactors,
 			@FromDataPoints("forwardRates") double[] forwardRates, double periodLength)
 					throws CalculationException {
@@ -92,9 +92,9 @@ public class SwapMarketRateProductTest {
 
 		final double lastTime = uniTenor.getTime(uniTenor.getNumberOfTimeSteps());
 
-		TimeDiscretizationInterface periodTenor = new TimeDiscretization(0.0, lastTime, periodLength, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END);
-		TimeDiscretizationInterface processTenor = periodTenor.union(
-				new TimeDiscretization(0.0, lastTime, 0.1, TimeDiscretization.ShortPeriodLocation.SHORT_PERIOD_AT_END));
+		TimeDiscretization periodTenor = new TimeDiscretizationFromArray(0.0, lastTime, periodLength, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END);
+		TimeDiscretization processTenor = periodTenor.union(
+				new TimeDiscretizationFromArray(0.0, lastTime, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
 		final double[] timesFromStart = Arrays.stream(uniTenor.getAsDoubleArray()).limit(uniTenor.getNumberOfTimeSteps()).toArray();
 		final double[] timesFromEnd = Arrays.stream(uniTenor.getAsDoubleArray()).skip(1).toArray();

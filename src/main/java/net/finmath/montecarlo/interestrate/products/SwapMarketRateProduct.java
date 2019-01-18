@@ -6,18 +6,18 @@ import java.util.stream.IntStream;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretizationInterface;
+import net.finmath.time.TimeDiscretization;
 
 /**
  * Calculates the par-swap rate for a given float versus fix tenor structure.
  */
 public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
-	private final TimeDiscretizationInterface floatTenor;
-	private final TimeDiscretizationInterface fixTenor;
+	private final TimeDiscretization floatTenor;
+	private final TimeDiscretization fixTenor;
 	private final AbstractLIBORMonteCarloProduct[] floatTenorDiscountFactors;
 	private final AbstractLIBORMonteCarloProduct[]fixTenorDiscountFactors;
 
-	public SwapMarketRateProduct(TimeDiscretizationInterface floatTenor, TimeDiscretizationInterface fixTenor) {
+	public SwapMarketRateProduct(TimeDiscretization floatTenor, TimeDiscretization fixTenor) {
 		this.floatTenor = floatTenor;
 		this.fixTenor = fixTenor;
 		floatTenorDiscountFactors = Arrays.stream(floatTenor.getAsDoubleArray()).
@@ -28,11 +28,11 @@ public class SwapMarketRateProduct extends AbstractLIBORMonteCarloProduct {
 				toArray(AbstractLIBORMonteCarloProduct[]::new);
 	}
 
-	public TimeDiscretizationInterface getFloatTenor() {
+	public TimeDiscretization getFloatTenor() {
 		return floatTenor;
 	}
 
-	public TimeDiscretizationInterface getFixTenor() {
+	public TimeDiscretization getFixTenor() {
 		return fixTenor;
 	}
 
