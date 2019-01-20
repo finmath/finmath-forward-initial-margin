@@ -203,9 +203,9 @@ public class LMMCalibrationTest {
 		int numberOfThreads = 4;
 		OptimizerFactory optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 
-		double[] parameterStandardDeviation = new double[covarianceModelParametric.getParameter().length];
-		double[] parameterLowerBound = new double[covarianceModelParametric.getParameter().length];
-		double[] parameterUpperBound = new double[covarianceModelParametric.getParameter().length];
+		double[] parameterStandardDeviation = new double[covarianceModelParametric.getParameterAsDouble().length];
+		double[] parameterLowerBound = new double[covarianceModelParametric.getParameterAsDouble().length];
+		double[] parameterUpperBound = new double[covarianceModelParametric.getParameterAsDouble().length];
 		Arrays.fill(parameterStandardDeviation, 0.20 / 100.0);
 		Arrays.fill(parameterLowerBound, 0.0);
 		Arrays.fill(parameterUpperBound, Double.POSITIVE_INFINITY);
@@ -239,7 +239,7 @@ public class LMMCalibrationTest {
 		long millisCalibrationEnd = System.currentTimeMillis();
 
 		System.out.println("\nCalibrated parameters are:");
-		double[] param = ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModelFromCovarianceModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
+		double[] param = ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModelFromCovarianceModel) liborMarketModelCalibrated).getCovarianceModel()).getParameterAsDouble();
 		for (double p : param) {
 			System.out.println(p);
 		}
@@ -340,7 +340,7 @@ public class LMMCalibrationTest {
 	}
 
 	public static double[] getCalibratedParameters(LIBORModel liborMarketModelCalibrated) {
-		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModelFromCovarianceModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
+		return ((AbstractLIBORCovarianceModelParametric) ((LIBORMarketModelFromCovarianceModel) liborMarketModelCalibrated).getCovarianceModel()).getParameterAsDouble();
 	}
 
 	public static double[] getTargetValuesUnderCalibratedModel(LIBORModel liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {

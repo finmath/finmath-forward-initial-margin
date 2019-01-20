@@ -21,7 +21,7 @@ import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
-import net.finmath.montecarlo.interestrate.models.modelplugins.AbstractLIBORCovarianceModel;
+import net.finmath.montecarlo.interestrate.models.modelplugins.LIBORCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.modelplugins.LIBORCovarianceModelExponentialForm5Param;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.SwapMarketRateProduct;
@@ -64,7 +64,7 @@ public class SwapMarketRateProductTest {
 				Arrays.stream(floatTenor.getAsDoubleArray()).skip(1).toArray(), forwardRates, periodLength);
 		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("",
 				Arrays.stream(fixTenor.getAsDoubleArray()).skip(1).toArray(), discountFactors);
-		AbstractLIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
+		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
 		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(
 				new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, discountCurve, covariance),
@@ -102,7 +102,7 @@ public class SwapMarketRateProductTest {
 				timesFromEnd, forwardRates, periodLength);
 		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("",
 				timesFromEnd, discountFactors);
-		AbstractLIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
+		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
 		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(
 				new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, discountCurve, covariance),
