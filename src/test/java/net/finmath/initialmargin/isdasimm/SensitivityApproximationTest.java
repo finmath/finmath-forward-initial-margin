@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -110,6 +111,7 @@ public class SensitivityApproximationTest {
 	}
 
 	@Test
+	@Ignore
 	public void test() throws CalculationException {
 
 		/*
