@@ -13,11 +13,11 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.exception.CalculationException;
-import net.finmath.marketdata.model.curves.DiscountCurve;
-import net.finmath.marketdata.model.curves.DiscountCurveInterface;
-import net.finmath.marketdata.model.curves.ForwardCurve;
-import net.finmath.marketdata.model.curves.ForwardCurveInterface;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
@@ -26,8 +26,8 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceMode
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.SwapMarketRateProduct;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
-import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 
 @RunWith(Theories.class)
 public class SwapMarketRateProductTest {
@@ -60,9 +60,9 @@ public class SwapMarketRateProductTest {
 		TimeDiscretization processTenor = periodTenor.union(
 				new TimeDiscretizationFromArray(0.0, lastTime, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
-		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
+		ForwardCurveInterpolation forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards("",
 				Arrays.stream(floatTenor.getAsDoubleArray()).skip(1).toArray(), forwardRates, periodLength);
-		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("",
+		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("",
 				Arrays.stream(fixTenor.getAsDoubleArray()).skip(1).toArray(), discountFactors);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
@@ -98,9 +98,9 @@ public class SwapMarketRateProductTest {
 
 		final double[] timesFromStart = Arrays.stream(uniTenor.getAsDoubleArray()).limit(uniTenor.getNumberOfTimeSteps()).toArray();
 		final double[] timesFromEnd = Arrays.stream(uniTenor.getAsDoubleArray()).skip(1).toArray();
-		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
+		ForwardCurveInterpolation forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards("",
 				timesFromEnd, forwardRates, periodLength);
-		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("",
+		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("",
 				timesFromEnd, discountFactors);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
