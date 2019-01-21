@@ -13,10 +13,12 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.DiscountCurve;
-import net.finmath.marketdata.model.curves.DiscountCurveInterface;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurve;
-import net.finmath.marketdata.model.curves.ForwardCurveInterface;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
@@ -46,7 +48,7 @@ public class AnalyticDiscountZeroCouponBondTest {
 		TimeDiscretization processTenor = periodTenor.union(
 				new TimeDiscretizationFromArray(0.0, periodLength, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
-		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
+		ForwardCurveInterpolation forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards("",
 				new double[] {0.0}, new double[] {forwardRate}, periodLength);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
@@ -70,9 +72,9 @@ public class AnalyticDiscountZeroCouponBondTest {
 		TimeDiscretization processTenor = periodTenor.union(
 				new TimeDiscretizationFromArray(0.0, periodLength, 0.1, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END));
 
-		ForwardCurveInterface forwardCurve = ForwardCurve.createForwardCurveFromForwards("",
+		ForwardCurveInterpolation forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards("",
 				new double[] {0.0}, new double[] {forwardRate}, periodLength);
-		DiscountCurveInterface discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("", new double[] { periodLength}, new double[] { discountFactor });
+		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("", new double[] { periodLength}, new double[] { discountFactor });
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
 		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(

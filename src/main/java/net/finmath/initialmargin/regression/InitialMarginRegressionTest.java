@@ -14,10 +14,10 @@ import net.finmath.initialmargin.regression.products.components.AbstractNotional
 import net.finmath.initialmargin.regression.products.components.Notional;
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.initialmargin.regression.products.indices.LIBORIndex;
-import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
-import net.finmath.marketdata.model.curves.DiscountCurveInterface;
-import net.finmath.marketdata.model.curves.ForwardCurve;
+import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
@@ -39,7 +39,7 @@ import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHo
 //import org.joda.time.DateTimeConstants;
 //import org.joda.time.LocalDate;
 //import initialmargin.simm.changedfinmath.LIBORMarketModel;
-//import net.finmath.analytic.model.curves.DiscountCurve;
+//import net.finmath.analytic.model.curves.DiscountCurveInterpolation;
 
 public class InitialMarginRegressionTest {
 	static final DecimalFormat formatterTime = new DecimalFormat("0.000");
@@ -54,10 +54,10 @@ public class InitialMarginRegressionTest {
 		double volatilityParameter = 0.2;
 
 		// Create Libor market model
-		DiscountCurve discountCurve = DiscountCurve.createDiscountCurveFromDiscountFactors("discountCurve",
+		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("discountCurve",
 				new double[]{0.5, 1.0, 2.0, 5.0, 30.0} /*times*/,
 				new double[]{0.996, 0.995, 0.994, 0.993, 0.98} /*discountFactors*/);
-		ForwardCurve forwardCurve = ForwardCurve.createForwardCurveFromForwards("forwardCurve",
+		ForwardCurveInterpolation forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards("forwardCurve",
 				new double[]{0.5, 1.0, 2.0, 5.0, 30.0}    /* fixings of the forward */,
 				new double[]{0.02, 0.02, 0.02, 0.02, 0.02},
 				0.5/* tenor / period length */);
@@ -88,7 +88,7 @@ public class InitialMarginRegressionTest {
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(
 			AbstractRandomVariableFactory randomVariableFactory,
-			int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurve forwardCurve, double correlationDecayParam, double volatilityParameter) throws CalculationException {
+			int numberOfPaths, int numberOfFactors, DiscountCurveInterpolation discountCurve, ForwardCurveInterpolation forwardCurve, double correlationDecayParam, double volatilityParameter) throws CalculationException {
 
 		/*
 		 * Create the libor tenor structure and the initial values
@@ -97,7 +97,7 @@ public class InitialMarginRegressionTest {
 		double liborRateTimeHorzion = 10.0;
 		TimeDiscretizationFromArray liborPeriodDiscretization = new TimeDiscretizationFromArray(0.0, (int) (liborRateTimeHorzion / liborPeriodLength), liborPeriodLength);
 
-		DiscountCurveInterface appliedDiscountCurve;
+		DiscountCurve appliedDiscountCurve;
 		if (discountCurve == null) {
 			appliedDiscountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
 		} else {

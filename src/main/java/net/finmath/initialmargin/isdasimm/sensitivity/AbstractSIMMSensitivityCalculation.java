@@ -15,7 +15,8 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
-import net.finmath.marketdata.model.curves.DiscountCurveInterface;
+import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.optimizer.SolverException;
@@ -88,8 +89,8 @@ public abstract class AbstractSIMMSensitivityCalculation {
 	public static final RandomVariable[] zeroBucketsIR = IntStream.range(0, 12 /*IRMaturityBuckets.length*/).mapToObj(i -> new RandomVariableFromDoubleArray(0.0)).toArray(RandomVariable[]::new);
 
 	private WeightMode weightTransformationMethod;
-	private HashMap<Double /*time*/, RandomVariable[][]> riskWeightMapLibor = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the Forward Curve.
-	private HashMap<Double /*time*/, RandomVariable[][]> riskWeightMapOIS = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the OIS Curve.
+	private HashMap<Double /*time*/, RandomVariable[][]> riskWeightMapLibor = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the Forward CurveFromInterpolationPoints.
+	private HashMap<Double /*time*/, RandomVariable[][]> riskWeightMapOIS = new HashMap<>(); // Contains the weights for conversion from model sensitivities to market sensitivities for the OIS CurveFromInterpolationPoints.
 
 	/*
 	 * Reference for sensitivity cache in case OIS - LIBOR dependencies are considered. Not used in the thesis! In this case we must calculate
@@ -816,7 +817,7 @@ public abstract class AbstractSIMMSensitivityCalculation {
 		RandomVariable sumLiborTimesBondOIS = new RandomVariableFromDoubleArray(0.0);
 
 		RandomVariable expectationNumeraireEval = model.getNumeraire(evaluationTime).pow(-1.0).average();
-		DiscountCurveInterface discountCurveLibor = model.getModel().getAnalyticModel().getDiscountCurve("DiscountCurveFromForwardCurveLibor6m)");
+		DiscountCurve discountCurveLibor = model.getModel().getAnalyticModel().getDiscountCurve("DiscountCurveFromForwardCurveLibor6m)");
 
 		for (int i = 0; i < numberOfPeriods; i++) {// Libor Swap Rate
 			double maturity = evaluationTime + (i + 1) * periodLength;
