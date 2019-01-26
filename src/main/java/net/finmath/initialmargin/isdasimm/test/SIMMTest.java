@@ -20,7 +20,7 @@ import net.finmath.initialmargin.isdasimm.products.SIMMSwaption;
 import net.finmath.initialmargin.isdasimm.products.SIMMSwaption.DeliveryType;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
-import net.finmath.marketdata.model.AnalyticModelFromCuvesAndVols;
+import net.finmath.marketdata.model.AnalyticModelFromCurvesAndVols;
 import net.finmath.marketdata.model.curves.Curve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
@@ -558,7 +558,7 @@ public class SIMMTest {
 
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
-		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModelFromCuvesAndVols(new Curve[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModelFromCurvesAndVols(new Curve[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
 
 		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
 	}
