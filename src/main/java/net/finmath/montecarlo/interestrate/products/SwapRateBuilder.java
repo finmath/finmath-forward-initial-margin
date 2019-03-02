@@ -1,7 +1,7 @@
 package net.finmath.montecarlo.interestrate.products;
 
-import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 
 public final class SwapRateBuilder {
 

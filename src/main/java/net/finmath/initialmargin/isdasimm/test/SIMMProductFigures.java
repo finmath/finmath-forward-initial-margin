@@ -1,10 +1,10 @@
 package net.finmath.initialmargin.isdasimm.test;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -15,7 +15,7 @@ import net.finmath.stochastic.RandomVariable;
  */
 public class SIMMProductFigures {
 
-	private LIBORModelMonteCarloSimulationInterface model;
+	private LIBORModelMonteCarloSimulationModel model;
 	private AbstractSIMMProduct product;
 	private WeightMode weightMode;
 	private SensitivityMode sensitivityMode;
@@ -26,7 +26,7 @@ public class SIMMProductFigures {
 	private double finalTime;
 	private RandomVariable[] forwardIM = null;
 
-	public SIMMProductFigures(LIBORModelMonteCarloSimulationInterface model, AbstractSIMMProduct product, WeightMode weightMode, SensitivityMode sensitivityMode,
+	public SIMMProductFigures(LIBORModelMonteCarloSimulationModel model, AbstractSIMMProduct product, WeightMode weightMode, SensitivityMode sensitivityMode,
 			double interpolationStep, boolean isUseAnalyticSensitivities, boolean isConsiderOISSensis, double timeStep, double finalTime) {
 		this.model = model;
 		this.product = product;

@@ -14,16 +14,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.DiscountCurve;
-import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurve;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.models.covariance.BlendedLocalVolatilityModel;
@@ -245,7 +245,7 @@ public class LMMCalibrationTest {
 		}
 
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
-		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
+		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 
 		System.out.println("\nValuation on calibrated model:");
 		double deviationSum = 0.0;
@@ -345,7 +345,7 @@ public class LMMCalibrationTest {
 
 	public static double[] getTargetValuesUnderCalibratedModel(LIBORModel liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
-		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
+		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 
 		double[] valueModel = new double[calibrationItems.length];
 		for (int i = 0; i < calibrationItems.length; i++) {

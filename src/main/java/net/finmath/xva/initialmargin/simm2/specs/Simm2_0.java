@@ -1,15 +1,17 @@
 package net.finmath.xva.initialmargin.simm2.specs;
 
+import static net.finmath.functions.NormalDistribution.inverseCumulativeDistribution;
+
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.ImmutableSet;
+
 import net.finmath.sensitivities.simm2.MarginType;
 import net.finmath.sensitivities.simm2.RiskClass;
 import net.finmath.sensitivities.simm2.SimmCoordinate;
 import net.finmath.sensitivities.simm2.Vertex;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.Set;
-
-import static net.finmath.functions.NormalDistribution.inverseCumulativeDistribution;
 
 public final class Simm2_0 implements ParameterSet {
 	private static final String RESIDUAL_BUCKET = "Residual";

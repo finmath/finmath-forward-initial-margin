@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption.ExerciseType;
@@ -22,20 +20,22 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
 import net.finmath.marketdata.model.AnalyticModelFromCurvesAndVols;
 import net.finmath.marketdata.model.curves.Curve;
-import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
-import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.DiscountCurve;
-import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
+import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurve;
+import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
-import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.BrownianMotion;
+import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.models.covariance.BlendedLocalVolatilityModel;
@@ -93,11 +93,11 @@ public class SIMMTest {
 				new double[]{-0.002630852, -6.82E-04, 0.002757708, 0.005260602, 0.007848164, 0.010749576, 0.012628982, 0.014583704, 0.017103188, 0.017791957, 0.01917447, 0.019788258, 0.020269155, 0.02327218, 0.01577317, 0.026503375, 0.017980753, 0.016047889, 0.024898978, 0.010798547, 0.027070148, 0.014816786, 0.018220786, 0.016549747, 0.008028913, 0.020022068, 0.015134412, 0.016604122, 0.014386016, 0.026732673, 0.003643934, 0.024595029, 0.002432369, 0.02233176, 0.003397059, 0.020576206},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(false, randomVariableFactory, numberOfPaths, 1 /*numberOfFactors*/,
+		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(false, randomVariableFactory, numberOfPaths, 1 /*numberOfFactors*/,
 				discountCurve,
 				forwardCurve);
 
-		LIBORModelMonteCarloSimulationInterface zeroVolatilityModel = getZeroVolatilityModel(model);
+		LIBORModelMonteCarloSimulationModel zeroVolatilityModel = getZeroVolatilityModel(model);
 
 
 		/*
@@ -455,13 +455,13 @@ public class SIMMTest {
 		}
 	}
 
-	public static LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(boolean isUseTenorRefinement,
+	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(boolean isUseTenorRefinement,
 			AbstractRandomVariableFactory randomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurveInterpolation forwardCurve) throws CalculationException {
 		return createLIBORMarketModel(isUseTenorRefinement, randomVariableFactory, numberOfPaths, numberOfFactors, discountCurve, forwardCurve, 0.1);
 	}
 
-	public static LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(boolean isUseTenorRefinement,
+	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(boolean isUseTenorRefinement,
 			AbstractRandomVariableFactory randomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurveInterpolation forwardCurve, double simulationTimeDt) throws CalculationException {
 
@@ -560,7 +560,7 @@ public class SIMMTest {
 
 		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModelFromCurvesAndVols(new Curve[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
 
-		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
+		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
 	public static AbstractRandomVariableFactory createRandomVariableFactoryAAD() {
@@ -577,7 +577,7 @@ public class SIMMTest {
 		return rv;
 	}
 
-	public static LIBORModelMonteCarloSimulationInterface getZeroVolatilityModel(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public static LIBORModelMonteCarloSimulationModel getZeroVolatilityModel(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
 
 		// Set brownian motion with one path
@@ -602,7 +602,7 @@ public class SIMMTest {
 
 		Map<String, Object> dataModified = new HashMap<>();
 		dataModified.put("covarianceModel", covarianceModelBlended);
-		return new LIBORModelMonteCarloSimulation((LIBORModel) model.getModel().getCloneWithModifiedData(dataModified), process);
+		return new LIBORMonteCarloSimulationFromLIBORModel((LIBORModel) model.getModel().getCloneWithModifiedData(dataModified), process);
 	}
 
 	public static Map<String, Object> getModelPropertiesMap(LIBORMarketModelFromCovarianceModel.Measure measure, LIBORMarketModelFromCovarianceModel.StateSpace stateSpace) {
@@ -726,7 +726,7 @@ public class SIMMTest {
 
 	public static double[] getTargetValuesUnderCalibratedModel(LIBORModel liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
-		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
+		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 
 		double[] valueModel = new double[calibrationItems.length];
 		for (int i = 0; i < calibrationItems.length; i++) {

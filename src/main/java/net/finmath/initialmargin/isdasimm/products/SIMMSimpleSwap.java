@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModelFromCovarianceModelUtilities;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
 import net.finmath.stochastic.RandomVariable;
@@ -75,7 +76,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 			double[] swapRates, /* Only relevant for OIS derivative*/
 			double periodLength,
 			double[] notional,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			String withRespectTo) throws CalculationException {
 
 		/*
@@ -117,7 +118,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 			int i = liborIndex < firstLiborIndex ? 0 : liborIndex - firstLiborIndex + 1;
 			if (!(i > fixingDates.length - periodIndex || i == 0)) {
 				double paymentTime = fixingDates[periodIndex + i - 1] + periodLength;
-				sensis[liborIndex - currentLiborIndex] = model.getForwardBondOIS(paymentTime, evaluationTime).mult(periodLength);
+				sensis[liborIndex - currentLiborIndex] = LIBORMarketModelFromCovarianceModelUtilities.getForwardBondOIS(model, paymentTime, evaluationTime).mult(periodLength);
 			}
 		}
 		break;
@@ -150,7 +151,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 
 	public RandomVariable[] getAnalyticSensitivities(double evaluationTime,
 			double periodLength,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			String withRespectTo) throws CalculationException {
 
 		return getAnalyticSensitivities(evaluationTime, swap.getFixingDates(), swap.getSwapRates(), periodLength, swap.getNotional(), model, withRespectTo);
@@ -162,7 +163,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (sensitivityCalculationScheme.isUseAnalyticSwapSensitivities) {
 
@@ -176,7 +177,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	@Override
 	public RandomVariable[] getOISModelSensitivities(String riskClass,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		double[] futureDiscountTimes = null; // the times of the times after evaluation time at which the numeraire has been used for this product
 		RandomVariable[] dVdP = null;
@@ -197,7 +198,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) {
+	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationModel model) {
 		return new RandomVariableFromDoubleArray(1.0);
 	}
 
@@ -207,12 +208,12 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model) {
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationModel model) {
 		return 0; // No Reset
 	}
 
 	@Override
-	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
 		RandomVariable[] regressor = new RandomVariable[2];
@@ -241,7 +242,7 @@ public class SIMMSimpleSwap extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariable[] getValueNumeraireSensitivities(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// No need to adjust sensitivities on paths.
 		return getValueNumeraireSensitivitiesAAD(evaluationTime, model);
 	}

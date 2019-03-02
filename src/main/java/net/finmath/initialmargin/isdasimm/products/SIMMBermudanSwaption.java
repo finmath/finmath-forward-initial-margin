@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.products.BermudanSwaption;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
@@ -91,7 +91,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Get Bermudan sensitivities
 		RandomVariable[] bermudanSensis = super.getLiborModelSensitivities(evaluationTime, model);
@@ -150,7 +150,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	@Override
 	public RandomVariable[] getOISModelSensitivities(String riskClass,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Get Bermudan sensitivities
 		double[] futureDiscountTimes = null; // the vector of the times after evaluation time at which the numeraire has been used for this product
@@ -229,7 +229,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	 * @throws SolverException
 	 * @throws CloneNotSupportedException
 	 */
-	public RandomVariable[] changeMeltedSensitivitiesOnExercisedPaths(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String curveIndexName, RandomVariable[] meltedBermudanSensis) throws CalculationException, SolverException, CloneNotSupportedException {
+	public RandomVariable[] changeMeltedSensitivitiesOnExercisedPaths(double evaluationTime, LIBORModelMonteCarloSimulationModel model, String curveIndexName, RandomVariable[] meltedBermudanSensis) throws CalculationException, SolverException, CloneNotSupportedException {
 
 		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
 		RandomVariable exerciseTime = (RandomVariable) bermudan.getValues(evaluationTime, model).get("exerciseTime");
@@ -320,7 +320,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
 		RandomVariable exerciseTime = (RandomVariable) bermudan.getValues(time, model).get("exerciseTime");
 		RandomVariable indicator = exerciseTime.sub(time + 0.00001).choose(new RandomVariableFromDoubleArray(0.0), new RandomVariableFromDoubleArray(1.0));
@@ -333,14 +333,14 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// @TODO: Perfomance improvement possible, since this triggerst an unneccesary valuation.
 		RandomVariable exerciseTime = (RandomVariable) bermudan.getValues(0, model).get("exerciseTime");
 		return exerciseTime.getMin();
 	}
 
 	@Override
-	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Bermudan Swaption: Set paths on which we have already exercised to zero.
 		RandomVariable indicator = getExerciseIndicator(evaluationTime, model).sub(0.5).choose(new RandomVariableFromDoubleArray(0.0), new RandomVariableFromDoubleArray(1.0));
@@ -380,7 +380,7 @@ public class SIMMBermudanSwaption extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariable[] getValueNumeraireSensitivities(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// Get Bermudan sensitivities
 		RandomVariable[] bermudanSensis = getValueNumeraireSensitivitiesAAD(evaluationTime, model);
 

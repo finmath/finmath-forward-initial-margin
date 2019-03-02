@@ -9,8 +9,8 @@ import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpect
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
  * This class implements the Dynamic Initial Margin by Regression as described in

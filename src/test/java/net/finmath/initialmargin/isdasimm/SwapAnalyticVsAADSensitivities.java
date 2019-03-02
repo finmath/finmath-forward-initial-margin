@@ -12,8 +12,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulation;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.regression.products.SimpleSwap;
 import net.finmath.initialmargin.regression.products.Swap;
 import net.finmath.initialmargin.regression.products.SwapLeg;
@@ -21,19 +19,21 @@ import net.finmath.initialmargin.regression.products.components.AbstractNotional
 import net.finmath.initialmargin.regression.products.components.Notional;
 import net.finmath.initialmargin.regression.products.indices.AbstractIndex;
 import net.finmath.initialmargin.regression.products.indices.LIBORIndex;
-import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
-import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
+import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
-import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORCorrelationModelExponentialDecay;
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceModelFromVolatilityAndCorrelation;
@@ -42,8 +42,8 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORVolatilityMode
 import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.Schedule;
+import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
 
@@ -67,7 +67,7 @@ public class SwapAnalyticVsAADSensitivities {
 				new double[]{0.02, 0.02, 0.02, 0.02, 0.02},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationInterface model = createLIBORMarketModel(randomVariableFactory, 20000/*numberOfPaths*/, 1 /*numberOfFactors*/,
+		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(randomVariableFactory, 20000/*numberOfPaths*/, 1 /*numberOfFactors*/,
 				discountCurve,
 				forwardCurve, 0.0 /* Correlation */);
 
@@ -139,7 +139,7 @@ public class SwapAnalyticVsAADSensitivities {
 	public RandomVariable[] getAnalyticSwapLiborSensitivities(double evaluationTime,
 			double periodLength,
 			double[] fixingDates,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		MonteCarloConditionalExpectationRegression cOperator = getConditionalExpectationOperator(evaluationTime, model);
 		// Calculate forward sensitivities
@@ -173,7 +173,7 @@ public class SwapAnalyticVsAADSensitivities {
 	 */
 	public RandomVariable[] getAADSwapLiborSensitivities(double evaluationTime,
 			TermStructureMonteCarloProduct product,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		if (this.gradient == null) {
 			RandomVariableDifferentiable value = (RandomVariableDifferentiable) product.getValue(0.0, model);
 			this.gradient = value.getGradient();
@@ -208,17 +208,17 @@ public class SwapAnalyticVsAADSensitivities {
 		return valueLiborSensitivities;
 	}
 
-	private static int getNumberOfRemainingLibors(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	private static int getNumberOfRemainingLibors(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getNumberOfLibors() - nextLiborIndex;
 	}
 
-	private static double getNextLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	private static double getNextLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getLiborPeriodDiscretization().getTime(nextLiborIndex);
 	}
 
-	public static LIBORModelMonteCarloSimulationInterface createLIBORMarketModel(
+	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(
 			AbstractRandomVariableFactory randomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurveInterpolation discountCurve, ForwardCurveInterpolation forwardCurve, double correlationDecayParam) throws CalculationException {
 
@@ -308,7 +308,7 @@ public class SwapAnalyticVsAADSensitivities {
 
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
-		return new LIBORModelMonteCarloSimulation(liborMarketModel, process);
+		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
 	public static TermStructureMonteCarloProduct[] createSwaps(String[] maturities) {
@@ -362,7 +362,7 @@ public class SwapAnalyticVsAADSensitivities {
 		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(), properties);
 	}
 
-	private static MonteCarloConditionalExpectationRegression getConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	private static MonteCarloConditionalExpectationRegression getConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Create a conditional expectation estimator with some basis functions (predictor variables) for conditional expectation estimation.
 		RandomVariable[] regressor = new RandomVariable[2];

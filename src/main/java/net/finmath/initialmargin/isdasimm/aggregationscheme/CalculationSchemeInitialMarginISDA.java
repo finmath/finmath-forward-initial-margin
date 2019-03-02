@@ -16,15 +16,15 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.ArrayUtils;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMPortfolio;
 import net.finmath.initialmargin.isdasimm.products.SIMMSimpleSwap;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.optimizer.OptimizerFactory;
-import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.optimizer.Optimizer;
 import net.finmath.optimizer.Optimizer.ObjectiveFunction;
+import net.finmath.optimizer.OptimizerFactory;
+import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
@@ -467,7 +467,7 @@ public class CalculationSchemeInitialMarginISDA {
 		return relevantBuckets.toArray(new String[relevantBuckets.size()]);
 	}
 
-	public double[] getRiskWeightsCalibrated(final LIBORModelMonteCarloSimulationInterface model, final SIMMSimpleSwap[] calibrationProducts, final double[] calibrationTargetValues, Map<String, Object> calibrationParameters) throws CalculationException {
+	public double[] getRiskWeightsCalibrated(final LIBORModelMonteCarloSimulationModel model, final SIMMSimpleSwap[] calibrationProducts, final double[] calibrationTargetValues, Map<String, Object> calibrationParameters) throws CalculationException {
 
 		if (calibrationParameters == null) {
 			calibrationParameters = new HashMap<String, Object>();

@@ -13,8 +13,6 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
-import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;

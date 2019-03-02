@@ -13,19 +13,22 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
+import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORMarketModelFromCovarianceModelUtilities;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
+import net.finmath.montecarlo.interestrate.LIBORMarketModel;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
  * This class contains the functions and methods which are shared by all products to be considered for
@@ -67,7 +70,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * Model and Product are separate! When we call "getInitialMargin(time, model)", we set modelCache = model!
 	 * Thus, we can check if the model has changed. If it has changed, we have to re-calculate the gradient and clear the sensitivity maps.
 	 */
-	protected LIBORModelMonteCarloSimulationInterface modelCache;
+	protected LIBORModelMonteCarloSimulationModel modelCache;
 	protected double lastEvaluationTime = -1;
 	protected ConditionalExpectationEstimator conditionalExpectationOperator;
 	protected AbstractSIMMSensitivityCalculation sensitivityCalculationScheme;
@@ -127,12 +130,12 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	}
 
 	@Override
-	public RandomVariable getInitialMargin(double evaluationTime, LIBORModelMonteCarloSimulationInterface model, String calculationCCY) throws CalculationException {
+	public RandomVariable getInitialMargin(double evaluationTime, LIBORModelMonteCarloSimulationModel model, String calculationCCY) throws CalculationException {
 		return getInitialMargin(evaluationTime, model, calculationCCY, SensitivityMode.EXACT, WeightMode.CONSTANT, 0, false, true);
 	}
 
 	public RandomVariable getInitialMargin(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			String calculationCCY,
 			SensitivityMode sensitivityMode,
 			WeightMode liborWeightMode,
@@ -160,7 +163,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 	// for risk weight calibration only. Not used in the thesis.
 	public RandomVariable getInitialMargin(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			CalculationSchemeInitialMarginISDA simmScheme) throws CalculationException {
 
 		if (evaluationTime >= getFinalMaturity()) {
@@ -275,19 +278,19 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	public Map<Double, RandomVariable> getNumeraireAdjustmentMap() throws CalculationException {
 		if (this.numeraireAdjustmentMap == null) {
 			getLIBORMonteCarloProduct(0.0).getValue(0.0, modelCache);
-			this.numeraireAdjustmentMap = modelCache.getNumeraireAdjustmentMap();
+			this.numeraireAdjustmentMap = ((LIBORMarketModelFromCovarianceModel)(modelCache.getModel())).getNumeraireAdjustments();
 		}
 		return this.numeraireAdjustmentMap;
 	}
 
 	@Override
-	public Map<Long, RandomVariable> getGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public Map<Long, RandomVariable> getGradient(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (gradient == null) {
 			// Calculate the product value as of time 0.
 			RandomVariableDifferentiable productValue = (RandomVariableDifferentiable) getLIBORMonteCarloProduct(0.0).getValue(0.0, model);
 			// Get the map of numeraire adjustments used specifically for this product
-			this.numeraireAdjustmentMap.putAll(model.getNumeraireAdjustmentMap());
+			this.numeraireAdjustmentMap.putAll(((LIBORMarketModelFromCovarianceModel)model.getModel()).getNumeraireAdjustments());
 			// Calculate the gradient
 			Map<Long, RandomVariable> gradientOfProduct = productValue.getGradient();
 			this.gradient = gradientOfProduct;
@@ -308,7 +311,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @throws CalculationException
 	 */
 	private void setExactDeltaCache(String riskClass, String curveIndexName,
-			double time, LIBORModelMonteCarloSimulationInterface model, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException {
+			double time, LIBORModelMonteCarloSimulationModel model, boolean isMarketRateSensi) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		// Calculate the sensitivities
 		RandomVariable[] deltaSensis = null;
@@ -360,7 +363,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @throws CalculationException
 	 */
 	@Override
-	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		setConditionalExpectationOperator(evaluationTime, model);
 		RandomVariableDifferentiable numeraire = (RandomVariableDifferentiable) model.getNumeraire(evaluationTime);
 
@@ -411,7 +414,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @throws CalculationException
 	 */
 	protected RandomVariable[] getOISModelSensitivities(double evaluationTime, double[] discountTimes,
-			RandomVariable[] dVdP, String riskClass, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			RandomVariable[] dVdP, String riskClass, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (dVdP == null || discountTimes == null) { //i.e. need to calculate it with AAD
 
@@ -429,7 +432,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			ArrayList<Double> relevantDiscountTimes = new ArrayList<Double>();
 			setConditionalExpectationOperator(evaluationTime, model);
 			RandomVariable numeraireAtEval = model.getNumeraire(evaluationTime);
-			RandomVariable adjustmentAtEval = model.getNumeraireOISAdjustmentFactor(evaluationTime);
+			RandomVariable adjustmentAtEval = LIBORMarketModelFromCovarianceModelUtilities.getNumeraireOISAdjustmentFactor(model, evaluationTime);
 
 			for (int i = 0; i < adjustmentTimesAfterEval.length; i++) {
 
@@ -439,7 +442,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 
 				if (!(dVdA.getMin() == 0 && dVdA.getMax() == 0)) { // If dVdA is zero the adjustment is assumed to belong to a different product.
 					// Calculate dV(t)/dP(t_cf;t) where t_cf are the cash flow times of this product
-					RandomVariable bond = model.getForwardBondLibor(adjustmentTimesAfterEval[i], evaluationTime);
+					RandomVariable bond = LIBORMarketModelFromCovarianceModelUtilities.getForwardBondLibor(model, adjustmentTimesAfterEval[i], evaluationTime);
 					dVdPList.add(dVdA.mult(adjustment.squared()).mult(-1.0).div(bond).div(adjustmentAtEval));
 					relevantDiscountTimes.add(adjustmentTimesAfterEval[i]);
 				}
@@ -461,9 +464,9 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 			int lowerIndex = timesP.getTimeIndexNearestLessOrEqual(discountTimes[cfIndex]);
 			double alpha = (discountTimes[cfIndex] - timesP.getTime(lowerIndex)) / deltaT;
 			Arrays.fill(dPdP[cfIndex], new RandomVariableFromDoubleArray(0.0));
-			RandomVariable bondLowerIndex = lowerIndex == 0 ? new RandomVariableFromDoubleArray(1.0) : model.getForwardBondOIS(timesP.getTime(lowerIndex), evaluationTime);
-			RandomVariable bondUpperIndex = model.getForwardBondOIS(timesP.getTime(lowerIndex + 1), evaluationTime);
-			RandomVariable bondAtCF = model.getForwardBondOIS(discountTimes[cfIndex], evaluationTime);
+			RandomVariable bondLowerIndex = lowerIndex == 0 ? new RandomVariableFromDoubleArray(1.0) : LIBORMarketModelFromCovarianceModelUtilities.getForwardBondOIS(model, timesP.getTime(lowerIndex), evaluationTime);
+			RandomVariable bondUpperIndex = LIBORMarketModelFromCovarianceModelUtilities.getForwardBondOIS(model, timesP.getTime(lowerIndex + 1), evaluationTime);
+			RandomVariable bondAtCF = LIBORMarketModelFromCovarianceModelUtilities.getForwardBondOIS(model, discountTimes[cfIndex], evaluationTime);
 			dPdP[cfIndex][lowerIndex] = bondAtCF.mult(1 - alpha).div(bondLowerIndex);
 			dPdP[cfIndex][lowerIndex + 1] = bondAtCF.mult(alpha).div(bondUpperIndex);
 		}
@@ -509,7 +512,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @param model The LIBOR market model
 	 * @throws CalculationException
 	 */
-	public void setGradient(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public void setGradient(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// If the model is set, we must clear all maps and set the gradient to null.
 		clearMaps(); //...the maps containing sensitivities are reset to null (they have to be recalculated under the new model)
 		this.modelCache = model;
@@ -561,23 +564,23 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		this.exerciseIndicator = null;
 	}
 
-	protected RandomVariable getDerivative(RandomVariable parameter, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	protected RandomVariable getDerivative(RandomVariable parameter, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		Map<Long, RandomVariable> gradient = getGradient(model);
 		RandomVariable derivative = gradient.get(((RandomVariableDifferentiable) parameter).getID());
 		return derivative == null ? new RandomVariableFromDoubleArray(0.0) : derivative;
 	}
 
-	protected double getNextLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	protected double getNextLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getLiborPeriodDiscretization().getTime(nextLiborIndex);
 	}
 
-	protected int getNumberOfRemainingLibors(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	protected int getNumberOfRemainingLibors(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		int nextLiborIndex = model.getLiborPeriodDiscretization().getTimeIndexNearestGreaterOrEqual(evaluationTime);
 		return model.getNumberOfLibors() - nextLiborIndex;
 	}
 
-	protected double getPreviousLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) {
+	protected double getPreviousLiborTime(double evaluationTime, LIBORModelMonteCarloSimulationModel model) {
 		if (evaluationTime == 0) {
 			return 0.0;
 		}
@@ -585,7 +588,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 		return model.getLiborPeriodDiscretization().getTime(nextLiborIndex - 1);
 	}
 
-	public double getMVA(LIBORModelMonteCarloSimulationInterface model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException {
+	public double getMVA(LIBORModelMonteCarloSimulationModel model, SensitivityMode sensitivityMode, WeightMode weightMode, double timeStep, double fundingSpread, MVAMode mvaMode) throws CalculationException {
 		double finalMaturity = this.getFinalMaturity();
 		RandomVariable forwardBond;
 		RandomVariable initialMargin;
@@ -618,7 +621,7 @@ public abstract class AbstractSIMMProduct implements SIMMProductInterface {
 	 * @return The forward Numeraire sensitivities of this product
 	 * @throws CalculationException
 	 */
-	protected RandomVariable[] getValueNumeraireSensitivitiesAAD(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	protected RandomVariable[] getValueNumeraireSensitivitiesAAD(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		RandomVariable numeraireAtEval = model.getNumeraire(evaluationTime);
 		Map<Long, RandomVariable> gradientOfNumeraireAtEval = ((RandomVariableDifferentiable) numeraireAtEval).getGradient();

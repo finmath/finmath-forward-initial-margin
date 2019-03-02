@@ -6,13 +6,13 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.ArrayUtils;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.products.AbstractSIMMProduct;
 import net.finmath.initialmargin.isdasimm.products.SIMMBermudanSwaption;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretization;
+import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
  * This class performs linear sensitivity melting of sensitivities.
@@ -33,7 +33,7 @@ import net.finmath.time.TimeDiscretization;
 public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculation {
 
 	private double interpolationStep;
-	private LIBORModelMonteCarloSimulationInterface model;
+	private LIBORModelMonteCarloSimulationModel model;
 
 	/**
 	 * Construct a SIMM sensitivity calculation scheme
@@ -46,7 +46,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	 * @param isConsiderOISSensitivities
 	 */
 	public SIMMSensitivityCalculation(SensitivityMode sensitivityMode, WeightMode liborWeightMode,
-			double interpolationStep, LIBORModelMonteCarloSimulationInterface model, boolean isUseAnalyticSwapSensitivities, boolean isConsiderOISSensitivities) {
+			double interpolationStep, LIBORModelMonteCarloSimulationModel model, boolean isUseAnalyticSwapSensitivities, boolean isConsiderOISSensitivities) {
 
 		super(sensitivityMode, liborWeightMode, isUseAnalyticSwapSensitivities, isConsiderOISSensitivities);
 		this.interpolationStep = interpolationStep;
@@ -62,7 +62,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 	 * @param model                          The LIBOR market model
 	 * @param isUseAnalyticSwapSensitivities
 	 */
-	public SIMMSensitivityCalculation(SensitivityMode sensitivityMode, WeightMode liborWeightMode, double interpolationStep, LIBORModelMonteCarloSimulationInterface model, boolean isUseAnalyticSwapSensitivities) {
+	public SIMMSensitivityCalculation(SensitivityMode sensitivityMode, WeightMode liborWeightMode, double interpolationStep, LIBORModelMonteCarloSimulationModel model, boolean isUseAnalyticSwapSensitivities) {
 
 		this(sensitivityMode, liborWeightMode, interpolationStep, model, isUseAnalyticSwapSensitivities, true /*isConsiderOISSensitivities*/);
 	}
@@ -72,7 +72,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			String riskClass,
 			String curveIndexName,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		RandomVariable[] maturityBucketSensis = null;
 
@@ -132,7 +132,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 
 	@Override
 	public RandomVariable[] getExactDeltaSensitivities(AbstractSIMMProduct product, String curveIndexName, String riskClass,
-			double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
+			double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		//@Todo: Distinguish different risk classes. Works currently only for "INTEREST_RATE"
 		return getSensitivitiesIRMarketRates(product, curveIndexName, evaluationTime, model);
@@ -266,7 +266,7 @@ public class SIMMSensitivityCalculation extends AbstractSIMMSensitivityCalculati
 			String riskClass,
 			String curveIndexName,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws SolverException, CloneNotSupportedException, CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws SolverException, CloneNotSupportedException, CalculationException {
 
 		// time of initial and final sensitivities
 		TimeDiscretization exactSensiTimes = new TimeDiscretizationFromArray(0, 50, interpolationStep);

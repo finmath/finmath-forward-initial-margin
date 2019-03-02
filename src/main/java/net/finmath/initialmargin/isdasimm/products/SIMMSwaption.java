@@ -5,11 +5,12 @@ import java.util.Arrays;
 import java.util.Map;
 
 import net.finmath.exception.CalculationException;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.Swaption;
 import net.finmath.montecarlo.interestrate.products.TermStructureMonteCarloProduct;
@@ -89,7 +90,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable[] getLiborModelSensitivities(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		if (deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) {
 
@@ -111,7 +112,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	@Override
 	public RandomVariable[] getOISModelSensitivities(String riskClass,
 			double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		double[] futureDiscountTimes = null; // the times of the times after evaluation time at which the numeraire has been used for this product
 		RandomVariable[] dVdP = null;
@@ -138,7 +139,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public RandomVariable getExerciseIndicator(double time, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// @TODO Implement proper caching
 		if (exerciseIndicator == null) {
 			exerciseIndicator = swaption.getExerciseIndicator(modelCache);
@@ -152,12 +153,12 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 	}
 
 	@Override
-	public double getMeltingResetTime(LIBORModelMonteCarloSimulationInterface model) {
+	public double getMeltingResetTime(LIBORModelMonteCarloSimulationModel model) {
 		return swaption.getExerciseDate();
 	}
 
 	@Override
-	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	public void setConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		// Swaption: Set paths on which we have not exercised to zero
 		RandomVariable indicator = new RandomVariableFromDoubleArray(1.0);
@@ -197,7 +198,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 			RandomVariableDifferentiable productValue =
 					(RandomVariableDifferentiable) swap.getValue(0.0, modelCache).mult(indicator);
 			// Get the map of numeraire adjustments used specifically for this product
-			super.numeraireAdjustmentMap.putAll(modelCache.getNumeraireAdjustmentMap());
+			super.numeraireAdjustmentMap.putAll(((LIBORMarketModelFromCovarianceModel)modelCache.getModel()).getNumeraireAdjustments());
 			// Calculate the gradient
 			Map<Long, RandomVariable> gradientOfProduct = productValue.getGradient();
 			// Set the gradient
@@ -217,7 +218,7 @@ public class SIMMSwaption extends AbstractSIMMProduct {
 
 	@Override
 	public RandomVariable[] getValueNumeraireSensitivities(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		if (deliveryType == DeliveryType.Physical && evaluationTime >= swaption.getExerciseDate()) {
 			setSwapGradient();
 		}

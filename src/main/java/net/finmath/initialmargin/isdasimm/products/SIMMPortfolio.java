@@ -2,11 +2,11 @@ package net.finmath.initialmargin.isdasimm.products;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.isdasimm.aggregationscheme.CalculationSchemeInitialMarginISDA;
-import net.finmath.initialmargin.isdasimm.changedfinmath.LIBORModelMonteCarloSimulationInterface;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.SensitivityMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCalculation.WeightMode;
 import net.finmath.initialmargin.isdasimm.sensitivity.SIMMSensitivityCalculation;
+import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -23,7 +23,7 @@ public class SIMMPortfolio {
 	private AbstractSIMMProduct[] products;
 	private AbstractSIMMSensitivityCalculation sensitivityCalculationScheme;  // WeightMode and SensitivityMode are set in the class SIMMSensitivityMapping
 	private CalculationSchemeInitialMarginISDA SIMMScheme;
-	private LIBORModelMonteCarloSimulationInterface model;
+	private LIBORModelMonteCarloSimulationModel model;
 
 	/**
 	 * Construct a <code> SIMMPortfolio </code>.
@@ -55,7 +55,7 @@ public class SIMMPortfolio {
 	 * @throws CalculationException
 	 */
 	public RandomVariable getInitialMargin(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			String calculationCCY,
 			SensitivityMode sensitivityMode,
 			WeightMode liborWeightMode,
@@ -78,7 +78,7 @@ public class SIMMPortfolio {
 	 * @throws CalculationException
 	 */
 	public RandomVariable getInitialMargin(double evaluationTime,
-			LIBORModelMonteCarloSimulationInterface model,
+			LIBORModelMonteCarloSimulationModel model,
 			String calculationCCY,
 			SensitivityMode sensitivityMode,
 			WeightMode liborWeightMode,
@@ -102,7 +102,7 @@ public class SIMMPortfolio {
 	 * @param model The LIBOR market model
 	 * @throws CalculationException
 	 */
-	private void setModel(LIBORModelMonteCarloSimulationInterface model) throws CalculationException {
+	private void setModel(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 
 		this.model = model;
 		for (AbstractSIMMProduct product : products) {
