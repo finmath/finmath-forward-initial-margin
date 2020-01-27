@@ -29,7 +29,7 @@ import net.finmath.initialmargin.isdasimm.sensitivity.AbstractSIMMSensitivityCal
 import net.finmath.initialmargin.isdasimm.test.SIMMTest;
 import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
@@ -119,7 +119,7 @@ public class SensitivityApproximationTest {
 		 *  Create a Indices market Model
 		 *
 		 */
-		AbstractRandomVariableFactory randomVariableFactory = SIMMTest.createRandomVariableFactoryAAD();
+		RandomVariableFactory abstractRandomVariableFactory = SIMMTest.createRandomVariableFactoryAAD();
 
 		// CurveFromInterpolationPoints Data as of December 8, 2017
 		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("OIS",
@@ -136,7 +136,7 @@ public class SensitivityApproximationTest {
 				new double[]{-0.002630852, -6.82E-04, 0.002757708, 0.005260602, 0.007848164, 0.010749576, 0.012628982, 0.014583704, 0.017103188, 0.017791957, 0.01917447, 0.019788258, 0.020269155, 0.02327218, 0.01577317, 0.026503375, 0.017980753, 0.016047889, 0.024898978, 0.010798547, 0.027070148, 0.014816786, 0.018220786, 0.016549747, 0.008028913, 0.020022068, 0.015134412, 0.016604122, 0.014386016, 0.026732673, 0.003643934, 0.024595029, 0.002432369, 0.02233176, 0.003397059, 0.020576206},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationModel model = SIMMTest.createLIBORMarketModel(false, randomVariableFactory, numberOfPaths, 1 /*numberOfFactors*/,
+		LIBORModelMonteCarloSimulationModel model = SIMMTest.createLIBORMarketModel(false, abstractRandomVariableFactory, numberOfPaths, 1 /*numberOfFactors*/,
 				discountCurve,
 				forwardCurve,
 				simulationTimeDt);

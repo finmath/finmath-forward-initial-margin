@@ -1,7 +1,7 @@
 package net.finmath.initialmargin.isdasimm;
 
 import net.finmath.montecarlo.BrownianMotion;
-import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFromArrayFactory;
 import net.finmath.montecarlo.interestrate.LIBORModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
@@ -30,7 +30,7 @@ public class SIMMUnitTests {
 				liborPeriodDiscretization,
 				null,
 				null, null,
-				new RandomVariableFactory(), // No AAD here
+				new RandomVariableFromArrayFactory(), // No AAD here
 				null,
 				null,
 				null);

@@ -19,7 +19,7 @@ import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotion;
-import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFromArrayFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
@@ -177,7 +177,7 @@ public class LMMCalibrationTest {
 		final BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 31415 /* seed */);
 
 		// Create a volatility model: Piecewise constant volatility
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(new RandomVariableFactory(), timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.50 / 100}, true);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(new RandomVariableFromArrayFactory(), timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.50 / 100}, true);
 
 		// Create a correlation model
 		LIBORCorrelationModel correlationModel = new LIBORCorrelationModelExponentialDecay(timeDiscretizationFromArray, liborPeriodDiscretization, numberOfFactors, 0.04, true);
@@ -186,7 +186,7 @@ public class LMMCalibrationTest {
 		AbstractLIBORCovarianceModelParametric covarianceModelParametric = new LIBORCovarianceModelFromVolatilityAndCorrelation(timeDiscretizationFromArray, liborPeriodDiscretization, volatilityModel, correlationModel);
 
 		// Create blended local volatility model with fixed parameter 0.0 (that is "lognormal").
-		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(new RandomVariableFactory(), covarianceModelParametric, 0.5, true);
+		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(new RandomVariableFromArrayFactory(), covarianceModelParametric, 0.5, true);
 
 		// Set model properties
 		Map<String, Object> properties = new HashMap<String, Object>();
@@ -231,7 +231,7 @@ public class LMMCalibrationTest {
 				liborPeriodDiscretization,
 				null,
 				forwardCurve, discountCurve,
-				new RandomVariableFactory(), // No AAD here
+				new RandomVariableFromArrayFactory(), // No AAD here
 				covarianceModelBlended,
 				calibrationItemsLMM,
 				properties);

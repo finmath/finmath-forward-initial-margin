@@ -25,10 +25,10 @@ import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.BrownianMotionLazyInit;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFromArrayFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
@@ -76,7 +76,7 @@ public class SIMMTest {
 		/*
 		 *  Create a LIBOR market Model
 		 */
-		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
+		RandomVariableFactory abstractRandomVariableFactory = createRandomVariableFactoryAAD();
 
 		// CurveFromInterpolationPoints Data as of December 8, 2017
 		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("OIS",
@@ -93,7 +93,7 @@ public class SIMMTest {
 				new double[]{-0.002630852, -6.82E-04, 0.002757708, 0.005260602, 0.007848164, 0.010749576, 0.012628982, 0.014583704, 0.017103188, 0.017791957, 0.01917447, 0.019788258, 0.020269155, 0.02327218, 0.01577317, 0.026503375, 0.017980753, 0.016047889, 0.024898978, 0.010798547, 0.027070148, 0.014816786, 0.018220786, 0.016549747, 0.008028913, 0.020022068, 0.015134412, 0.016604122, 0.014386016, 0.026732673, 0.003643934, 0.024595029, 0.002432369, 0.02233176, 0.003397059, 0.020576206},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(false, randomVariableFactory, numberOfPaths, 1 /*numberOfFactors*/,
+		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(false, abstractRandomVariableFactory, numberOfPaths, 1 /*numberOfFactors*/,
 				discountCurve,
 				forwardCurve);
 
@@ -456,13 +456,13 @@ public class SIMMTest {
 	}
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(boolean isUseTenorRefinement,
-			AbstractRandomVariableFactory randomVariableFactory,
+			RandomVariableFactory abstractRandomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurveInterpolation forwardCurve) throws CalculationException {
-		return createLIBORMarketModel(isUseTenorRefinement, randomVariableFactory, numberOfPaths, numberOfFactors, discountCurve, forwardCurve, 0.1);
+		return createLIBORMarketModel(isUseTenorRefinement, abstractRandomVariableFactory, numberOfPaths, numberOfFactors, discountCurve, forwardCurve, 0.1);
 	}
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(boolean isUseTenorRefinement,
-			AbstractRandomVariableFactory randomVariableFactory,
+			RandomVariableFactory abstractRandomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurve discountCurve, ForwardCurveInterpolation forwardCurve, double simulationTimeDt) throws CalculationException {
 
 		/*
@@ -483,7 +483,7 @@ public class SIMMTest {
 		/*
 		 * Create Brownian motions
 		 */
-		final BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 31415 /* seed */, new RandomVariableFactory(false));
+		final BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 31415 /* seed */, new RandomVariableFromArrayFactory(false));
 
 		// Create a volatility model: Piecewise constant volatility calibrated to Swaption Normal implied volatility of December 8, 2017
 		double[] volatility = new double[]{
@@ -526,7 +526,7 @@ public class SIMMTest {
 				0.005};
 
 		//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstantLegacy(randomVariableFactory,timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), volatility, false);
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), volatility, false);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(abstractRandomVariableFactory, timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), volatility, false);
 		//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory,timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), /*new double[]{0.01}*/volatility, false);
 		//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory,timeDiscretizationFromArray, liborPeriodDiscretization, new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.00}, false);
 
@@ -538,7 +538,7 @@ public class SIMMTest {
 
 		// Create blended local volatility model with fixed parameter 0.0 (that is "lognormal").
 		double displacementParameter = 0.5880313623110442;
-		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(randomVariableFactory, covarianceModelParametric, displacementParameter, false);
+		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(abstractRandomVariableFactory, covarianceModelParametric, displacementParameter, false);
 
 		// Set model properties
 		Map<String, Object> properties = new HashMap<String, Object>();
@@ -558,15 +558,15 @@ public class SIMMTest {
 
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
-		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModelFromCurvesAndVols(new Curve[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModelFromCurvesAndVols(new Curve[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, abstractRandomVariableFactory, covarianceModelBlended, calibrationItems, properties);
 
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
-	public static AbstractRandomVariableFactory createRandomVariableFactoryAAD() {
+	public static RandomVariableFactory createRandomVariableFactoryAAD() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("isGradientRetainsLeafNodesOnly", new Boolean(false));
-		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(false), properties);
+		return new RandomVariableDifferentiableAADFactory(new RandomVariableFromArrayFactory(false), properties);
 	}
 
 	public static RandomVariable[] getRVAAD(double[] rates) {
@@ -578,7 +578,7 @@ public class SIMMTest {
 	}
 
 	public static LIBORModelMonteCarloSimulationModel getZeroVolatilityModel(LIBORModelMonteCarloSimulationModel model) throws CalculationException {
-		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
+		RandomVariableFactory abstractRandomVariableFactory = createRandomVariableFactoryAAD();
 
 		// Set brownian motion with one path
 		BrownianMotion originalBM = model.getBrownianMotion();
@@ -588,7 +588,7 @@ public class SIMMTest {
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
 		// Create zero volatility model
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.0}/*volatility*/, false);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(abstractRandomVariableFactory, model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.0}/*volatility*/, false);
 
 		//Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
 		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), model.getNumberOfFactors(), 0);

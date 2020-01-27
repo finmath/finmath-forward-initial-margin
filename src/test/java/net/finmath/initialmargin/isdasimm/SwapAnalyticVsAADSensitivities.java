@@ -23,9 +23,9 @@ import net.finmath.marketdata.model.curves.DiscountCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
-import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFromArrayFactory;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
@@ -57,7 +57,7 @@ public class SwapAnalyticVsAADSensitivities {
 	public void testAADVsAnalyticSensis() throws CalculationException {
 
 		// Create a Indices market Model
-		AbstractRandomVariableFactory randomVariableFactory = createRandomVariableFactoryAAD();
+		RandomVariableFactory abstractRandomVariableFactory = createRandomVariableFactoryAAD();
 		DiscountCurveInterpolation discountCurve = DiscountCurveInterpolation.createDiscountCurveFromDiscountFactors("discountCurve",
 				new double[]{0.5, 1.0, 2.0, 5.0, 30.0} /*times*/,
 				new double[]{0.996, 0.995, 0.994, 0.993, 0.98} /*discountFactors*/);
@@ -67,7 +67,7 @@ public class SwapAnalyticVsAADSensitivities {
 				new double[]{0.02, 0.02, 0.02, 0.02, 0.02},
 				0.5/* tenor / period length */);
 
-		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(randomVariableFactory, 20000/*numberOfPaths*/, 1 /*numberOfFactors*/,
+		LIBORModelMonteCarloSimulationModel model = createLIBORMarketModel(abstractRandomVariableFactory, 20000/*numberOfPaths*/, 1 /*numberOfFactors*/,
 				discountCurve,
 				forwardCurve, 0.0 /* Correlation */);
 
@@ -219,7 +219,7 @@ public class SwapAnalyticVsAADSensitivities {
 	}
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(
-			AbstractRandomVariableFactory randomVariableFactory,
+			RandomVariableFactory abstractRandomVariableFactory,
 			int numberOfPaths, int numberOfFactors, DiscountCurveInterpolation discountCurve, ForwardCurveInterpolation forwardCurve, double correlationDecayParam) throws CalculationException {
 
 		/*
@@ -267,7 +267,7 @@ public class SwapAnalyticVsAADSensitivities {
 				volatility[timeIndex][liborIndex] = instVolatility;
 			}
 		}
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelFromGivenMatrix(randomVariableFactory, timeDiscretizationFromArray, liborPeriodDiscretization, volatility);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelFromGivenMatrix(abstractRandomVariableFactory, timeDiscretizationFromArray, liborPeriodDiscretization, volatility);
 
 		//___________________________________________________
 
@@ -302,7 +302,7 @@ public class SwapAnalyticVsAADSensitivities {
 		 * Create corresponding LIBOR Market Model
 		 */
 
-		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, randomVariableFactory, covarianceModel, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null, forwardCurve, appliedDiscountCurve, abstractRandomVariableFactory, covarianceModel, calibrationItems, properties);
 
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray, numberOfFactors, numberOfPaths, 3141 /* seed */);
 
@@ -356,10 +356,10 @@ public class SwapAnalyticVsAADSensitivities {
 		return swaps;
 	}
 
-	public static AbstractRandomVariableFactory createRandomVariableFactoryAAD() {
+	public static RandomVariableFactory createRandomVariableFactoryAAD() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("isGradientRetainsLeafNodesOnly", new Boolean(false));
-		return new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(), properties);
+		return new RandomVariableDifferentiableAADFactory(new RandomVariableFromArrayFactory(), properties);
 	}
 
 	private static MonteCarloConditionalExpectationRegression getConditionalExpectationOperator(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
