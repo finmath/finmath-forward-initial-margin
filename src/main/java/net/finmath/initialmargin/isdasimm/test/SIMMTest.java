@@ -556,9 +556,9 @@ public class SIMMTest {
 		 * Create corresponding LIBOR Market Model
 		 */
 
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
-
 		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, new AnalyticModelFromCurvesAndVols(new Curve[]{new DiscountCurveFromForwardCurve(forwardCurve), discountCurve}), forwardCurve, discountCurve, abstractRandomVariableFactory, covarianceModelBlended, calibrationItems, properties);
+
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborMarketModel, brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
 
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
@@ -584,9 +584,6 @@ public class SIMMTest {
 		BrownianMotion originalBM = model.getBrownianMotion();
 		BrownianMotion brownianMotion = new BrownianMotionLazyInit(originalBM.getTimeDiscretization(), originalBM.getNumberOfFactors(), 1 /* numberOfPaths */, 3141);
 
-		// Get process
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
-
 		// Create zero volatility model
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(abstractRandomVariableFactory, model.getTimeDiscretization(), model.getLiborPeriodDiscretization(), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new TimeDiscretizationFromArray(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0), new double[]{0.0}/*volatility*/, false);
 
@@ -602,7 +599,13 @@ public class SIMMTest {
 
 		Map<String, Object> dataModified = new HashMap<>();
 		dataModified.put("covarianceModel", covarianceModelBlended);
-		return new LIBORMonteCarloSimulationFromLIBORModel((LIBORModel) model.getModel().getCloneWithModifiedData(dataModified), process);
+
+		LIBORModel liborModelModified = (LIBORModel) model.getModel().getCloneWithModifiedData(dataModified);
+		
+		// Get process
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborModelModified, brownianMotion, EulerSchemeFromProcessModel.Scheme.EULER_FUNCTIONAL);
+
+		return new LIBORMonteCarloSimulationFromLIBORModel(liborModelModified, process);
 	}
 
 	public static Map<String, Object> getModelPropertiesMap(LIBORMarketModelFromCovarianceModel.Measure measure, LIBORMarketModelFromCovarianceModel.StateSpace stateSpace) {
@@ -725,7 +728,7 @@ public class SIMMTest {
 	}
 
 	public static double[] getTargetValuesUnderCalibratedModel(LIBORModel liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborMarketModelCalibrated, brownianMotion);
 		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 
 		double[] valueModel = new double[calibrationItems.length];

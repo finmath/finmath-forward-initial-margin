@@ -34,7 +34,7 @@ public class SIMMUnitTests {
 				null,
 				null,
 				null);
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborMarketModelCalibrated, brownianMotion);
 		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 		return simulationCalibrated;
 	}

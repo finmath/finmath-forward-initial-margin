@@ -17,11 +17,13 @@ import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotionLazyInit;
+import net.finmath.montecarlo.interestrate.LIBORModel;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceModelExponentialForm5Param;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
+import net.finmath.montecarlo.process.MonteCarloProcess;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 import net.finmath.time.TimeDiscretizationFromArray.ShortPeriodLocation;
@@ -60,9 +62,10 @@ public class AnalyticZeroCouponBondTest {
 				new double[] {0.0}, new double[] {forwardRate}, periodLength);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
-		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(
-				new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, covariance),
-				new EulerSchemeFromProcessModel(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
+		LIBORModel model = new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, covariance);
+		MonteCarloProcess process = new EulerSchemeFromProcessModel(model, new BrownianMotionLazyInit(processTenor, 1, 100, 42));
+
+		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(model, process);
 
 		double priceFromForward = 1.0 / (forwardCurve.getValue(0.0)*periodLength + 1.0);
 
@@ -82,9 +85,10 @@ public class AnalyticZeroCouponBondTest {
 				new double[] {0.0, periodLength}, new double[] {forward1, forward2}, periodLength);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
-		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(
-				new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, covariance),
-				new EulerSchemeFromProcessModel(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
+		LIBORModel model = new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, covariance);
+		MonteCarloProcess process = new EulerSchemeFromProcessModel(model, new BrownianMotionLazyInit(processTenor, 1, 100, 42));
+
+		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(model, process);
 
 		double priceFromForward1 = 1.0 / (forwardCurve.getValue(0.0)*periodLength + 1.0);
 		double priceFromForward2 = 1.0 / (forwardCurve.getValue(periodLength)*periodLength + 1.0);

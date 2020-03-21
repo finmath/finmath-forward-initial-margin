@@ -17,6 +17,7 @@ import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveInterpolation;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotionLazyInit;
+import net.finmath.montecarlo.interestrate.LIBORModel;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceModel;
@@ -24,6 +25,7 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceMode
 import net.finmath.montecarlo.interestrate.products.SimpleSwap;
 import net.finmath.montecarlo.interestrate.products.SwapMarketRateProduct;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
+import net.finmath.montecarlo.process.MonteCarloProcess;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 
@@ -64,9 +66,10 @@ public class SwapMarketRateProductTest {
 				Arrays.stream(fixTenor.getAsDoubleArray()).skip(1).toArray(), discountFactors);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
-		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(
-				new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, discountCurve, covariance),
-				new EulerSchemeFromProcessModel(new BrownianMotionLazyInit(processTenor, 1, 100, 42)));
+		LIBORModel model = new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, discountCurve, covariance);
+		MonteCarloProcess process = new EulerSchemeFromProcessModel(model, new BrownianMotionLazyInit(processTenor, 1, 100, 42));
+
+		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(model, process);
 
 		final double numerator = IntStream.range(0, floatTenor.getNumberOfTimeSteps()).
 				mapToDouble(i -> forwardRates[i] * discountFactors[i] * floatTenor.getTimeStep(i)).
@@ -102,9 +105,10 @@ public class SwapMarketRateProductTest {
 				timesFromEnd, discountFactors);
 		LIBORCovarianceModel covariance = new LIBORCovarianceModelExponentialForm5Param(processTenor, periodTenor, 1, new double[] { 0.1, 0.1, 0.1, 0.1, 0.1});
 
-		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(
-				new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, discountCurve, covariance),
-				new EulerSchemeFromProcessModel(new BrownianMotionLazyInit(processTenor, 1, 10000, 42)));
+		LIBORModel model = new LIBORMarketModelFromCovarianceModel(periodTenor, forwardCurve, discountCurve, covariance);
+		MonteCarloProcess process = new EulerSchemeFromProcessModel(model, new BrownianMotionLazyInit(processTenor, 1, 10000, 42));
+
+		LIBORMonteCarloSimulationFromLIBORModel simulation = new LIBORMonteCarloSimulationFromLIBORModel(model, process);
 
 		double parRateToday = parRate.getValue(0.0, simulation).getAverage();
 

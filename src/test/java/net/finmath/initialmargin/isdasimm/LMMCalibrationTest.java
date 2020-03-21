@@ -244,7 +244,8 @@ public class LMMCalibrationTest {
 			System.out.println(p);
 		}
 
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborMarketModelCalibrated, brownianMotion);
+
 		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 
 		System.out.println("\nValuation on calibrated model:");
@@ -344,7 +345,7 @@ public class LMMCalibrationTest {
 	}
 
 	public static double[] getTargetValuesUnderCalibratedModel(LIBORModel liborMarketModelCalibrated, BrownianMotion brownianMotion, CalibrationProduct[] calibrationItems) {
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborMarketModelCalibrated, brownianMotion);
 		LIBORModelMonteCarloSimulationModel simulationCalibrated = new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModelCalibrated, process);
 
 		double[] valueModel = new double[calibrationItems.length];
