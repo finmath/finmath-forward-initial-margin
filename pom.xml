@@ -13,7 +13,7 @@
 		<src.main.java.dir>src/main/java</src.main.java.dir>
 		<src.test.java.dir>src/test/java</src.test.java.dir>
 		<junit.version>4.12</junit.version>
-		<finmath-lib.version>4.1.4</finmath-lib.version>
+		<finmath-lib.version>4.1.7</finmath-lib.version>
 	</properties>
 
 	<developers>
