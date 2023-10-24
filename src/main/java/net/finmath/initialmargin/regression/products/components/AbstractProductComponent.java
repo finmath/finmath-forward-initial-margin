@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import net.finmath.exception.CalculationException;
 import net.finmath.initialmargin.regression.products.AbstractLIBORMonteCarloRegressionProduct;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.interestrate.TermStructureMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
@@ -65,7 +66,7 @@ public abstract class AbstractProductComponent extends AbstractLIBORMonteCarloRe
 	public abstract Set<String> queryUnderlyings();
 
 	@Override
-	public Map<String, Object> getValues(double evaluationTime, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
+	public Map<String, Object> getValues(double evaluationTime, TermStructureMonteCarloSimulationModel model) throws CalculationException {
 		RandomVariable value = this.getValue(evaluationTime, model);
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("value", value);
@@ -73,6 +74,5 @@ public abstract class AbstractProductComponent extends AbstractLIBORMonteCarloRe
 	}
 
 	// INSERTED
-	public abstract RandomVariable getValue(double evaluationTime, double fixingDate,
-			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
+	public abstract RandomVariable getValue(double evaluationTime, double fixingDate, LIBORModelMonteCarloSimulationModel model) throws CalculationException;
 }

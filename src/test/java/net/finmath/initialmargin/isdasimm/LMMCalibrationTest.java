@@ -252,7 +252,7 @@ public class LMMCalibrationTest {
 		double deviationSum = 0.0;
 		double deviationSquaredSum = 0.0;
 		for (int i = 0; i < calibrationProducts.size(); i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationProducts.get(i).getProduct();
+			AbstractLIBORMonteCarloProduct calibrationProduct = (AbstractLIBORMonteCarloProduct) calibrationProducts.get(i).getProduct();
 			try {
 				double valueModel = calibrationProduct.getValue(simulationCalibrated);
 				double valueTarget = calibrationProducts.get(i).getTargetValue().getAverage();
@@ -350,7 +350,7 @@ public class LMMCalibrationTest {
 
 		double[] valueModel = new double[calibrationItems.length];
 		for (int i = 0; i < calibrationItems.length; i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems[i].getProduct();
+			AbstractLIBORMonteCarloProduct calibrationProduct = (AbstractLIBORMonteCarloProduct) calibrationItems[i].getProduct();
 			try {
 				valueModel[i] = calibrationProduct.getValue(simulationCalibrated);
 			} catch (Exception e) {

@@ -733,7 +733,7 @@ public class SIMMTest {
 
 		double[] valueModel = new double[calibrationItems.length];
 		for (int i = 0; i < calibrationItems.length; i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems[i].getProduct();
+			AbstractLIBORMonteCarloProduct calibrationProduct = (AbstractLIBORMonteCarloProduct) calibrationItems[i].getProduct();
 			try {
 				valueModel[i] = calibrationProduct.getValue(simulationCalibrated);
 			} catch (Exception e) {

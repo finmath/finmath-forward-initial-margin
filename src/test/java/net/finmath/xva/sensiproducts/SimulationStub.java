@@ -261,4 +261,11 @@ class SimulationStub implements LIBORModelMonteCarloSimulationModel {
 	public Object getCloneWithModifiedSeed(int seed) {
 		return null;
 	}
+
+	@Override
+	public RandomVariable getForwardRate(double time, double periodStart, double periodEnd)
+			throws CalculationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
