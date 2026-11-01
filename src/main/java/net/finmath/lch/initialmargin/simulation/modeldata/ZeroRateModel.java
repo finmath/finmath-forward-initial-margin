@@ -1,235 +1,292 @@
 package net.finmath.lch.initialmargin.simulation.modeldata;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 
+import net.finmath.exception.CalculationException;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.Currency;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.CurveName;
-import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.time.FloatingpointDate;
+import net.finmath.time.businessdaycalendar.BusinessdayCalendar;
+import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingWeekends;
 
 /**
- * The ZeroRateModel to calculate (forward) initial margin for swaps.
- * It is a time series of StochasticCurve, which are either from the historical input data or LMM generated data.
- * The model provides discount factors and forward rates calculated from the zero rate curves. 
- * LCH uses a standardized zero curve to calculate interest rate risk and scenarios for the historical simulations.
- * If rates/discount factors from historical date are called (evaluationDate < referenceDate) the StochasticCurve internal inter-/extrapolation scheme is used.
- * If rates/discount factors from model data are called (evaluationDate >= referenceDate) the data is directly retrieve from the input model.
- * 
- * @author Raphael Prandtl
+ * One PAIRS risk curve, composed of historical and/or simulated zero-rate sources.
+ * The historical closing curve owns the reference date; only later observations
+ * come from the simulation. Both sources must describe the same curve, units and
+ * constant-tenor convention. There is no implicit rebasing or index conversion.
+ *
+ * Scenario histories contain every configured business day, independently of
+ * previous pricing calls. Original historical curves are never changed. The
+ * compatibility pricing methods derive forwards and discounts from this same
+ * curve; OIS and tenor-basis add-ons are outside this single-curve module.
  */
-public class ZeroRateModel {
-	
-	
-    private final LocalDateTime referenceDate; // date up to which zero rate history is available. Has to be equal to LIBOR model reference date
-    private final LIBORModelMonteCarloSimulationModel processModel;
-    private final NavigableMap<LocalDateTime, StochasticCurve> zeroCurves;
-	
-	private static final double DAILY_STEP_SIZE = 1/365.0; 
+public class ZeroRateModel implements ZeroRateSource {
 
+    /** Absolute zero-rate tolerance: 0.001 basis points, allowing rounded input quotes. */
+    public static final double DEFAULT_INITIAL_CURVE_TOLERANCE = 1E-7;
 
-	public ZeroRateModel(final Currency currency, final CurveName curveName, final LIBORModelMonteCarloSimulationModel processModel, final String inputDataFilePath) throws CalculationException {
-		this.processModel = processModel;
-		this.referenceDate = processModel.getReferenceDate();
-		this.zeroCurves = new ZeroCurveHistory(inputDataFilePath).buildZeroCurveHistory();
-	}		
-	
-	
-	/**
-	 * Returns the historical or model generated zero rate for the given evaluationDate.
-	 * If the evaluationDate < referenceDate of the model it returns the historical rate otherwise the model generated rate
-	 * 
-	 * @param evaluationDate Date for which the rate should be returned
-	 * @param periodLength Maturity of the zero rate
-	 * @param curveshifts If provided, adds a shift to the rate before returning it
-	 * @param pathOrState The path or state of the rate if only one simulation path should be considered
-	 * @return The zero rate of the model
-	 * @throws CalculationException
-	 */
-	public RandomVariable getZeroRate(LocalDateTime evaluationDate, double periodLength, StochasticCurve curveshifts, Integer pathOrState) throws CalculationException {
-		// Case: evaluation date is before reference date -> call zero rates from history
-		if (evaluationDate.isBefore(referenceDate)) {
-			// Case: evaluation date is before first available data point
-			if (evaluationDate.isBefore(zeroCurves.firstKey())) {
-				throw new IllegalArgumentException("Evaluation date is before beginning of available data. First entry at: " + zeroCurves.firstKey());
-			}
-			// Case: evaluation date is not available, e.g. weekend or holiday 
-			if (zeroCurves.get(evaluationDate) == null) {
-				throw new IllegalArgumentException("No data available for " + evaluationDate + ". Check for weekend or holiday.");
-			}
-		}
-		// Case: evaluation date is after reference date  -> call zero rates from model
-		double modelTime = FloatingpointDate.getFloatingPointDateFromDate(referenceDate, evaluationDate);
-		// Case: date is called for the first time -> create a new ZeroCurve for this date
-		if ((evaluationDate.isAfter(referenceDate) || evaluationDate.isEqual(referenceDate)) && zeroCurves.get(evaluationDate) == null) {
-			setUpZeroCurve(evaluationDate);
-		}
-		// Case: curve already available but zero rate not available for periodLength
-		//TODO: check with extrapolation for coarser grid and short periodLengths e.g. get first LIBOR period length
-		if((evaluationDate.isAfter(referenceDate) || evaluationDate.isEqual(referenceDate)) && !zeroCurves.get(evaluationDate).containsRate(periodLength)) {
-			addZeroRateFromProcessModel(evaluationDate, modelTime, periodLength, DAILY_STEP_SIZE); 
-		}
-		// Case: evaluation date is available in historical data set -> call to stochastic curve and internal interpolation if needed
-		// Case: evaluation date is after reference date and zero rate is available for periodLength
-		if (curveshifts == null) {
-			return zeroCurves.get(evaluationDate).getRate(periodLength, pathOrState);
-		}
-		return zeroCurves.get(evaluationDate).getRate(periodLength, pathOrState).add(curveshifts.getRate(periodLength, pathOrState));
-	}
-		
-	
-	/**
-	 * Returns the historical or model generated discount factor for the given evaluationDate.
-	 * @param evaluationDate Date for which the rate should be returned
-	 * @param periodLength Maturity of the zero rate
-	 * @param curveshifts If provided, adds a shift to the rate before calculating the discount factor
-	 * @param pathOrState The path or state of the rate if only one simulation path should be considered
-	 * @return The discount factor calculated from the rate of the model
-	 * @throws CalculationException
-	 */
-	public RandomVariable getDiscountFactor(LocalDateTime evaluationDate, double periodLength, StochasticCurve curveshifts, Integer pathOrState) throws CalculationException {
-		if (periodLength == 0.0) {
-			return new Scalar(1.0);
-		}
-		return getZeroRate(evaluationDate, periodLength, curveshifts, pathOrState).mult(-periodLength).exp();
-	}
-	
-	
-	/**
-	 * Returns the historical or model generated forward rate for the given evaluationDate.
-	 * @param evaluationDate Date for which the rate should be returned
-	 * @param periodStart Start date of the period
-	 * @param periodEnd End date of the period
-	 * @param curveshifts If provided, adds a shift to both rates used for calculating the discount factors
-	 * @param pathOrState The path or state of the rate if only one simulation path should be considered
-	 * @return The forward rate calculated from the rates of the model
-	 * @throws CalculationException
-	 */
-	public RandomVariable getForwardRate(LocalDateTime evaluationDate, double periodStart, double periodEnd, StochasticCurve curveshifts, Integer pathOrState) throws CalculationException {
-		RandomVariable discountFactorPeriodStart = getDiscountFactor(evaluationDate, periodStart, curveshifts, pathOrState);
-		RandomVariable discountFactorPeriodEnd = getDiscountFactor(evaluationDate, periodEnd, curveshifts, pathOrState);
-		return discountFactorPeriodStart.div(discountFactorPeriodEnd).sub(1.0).div(periodEnd - periodStart);
-	}
-	
-	
-	/**
-	 * Returns a time series of random variables use for scenario creation / sampling.
-	 * First call takes the longest time due to interpolation of complete history but for every new call only one rate has to be added
-	 * @param evaluationDate
-	 * @param periodLength The tenor point fixing for which data should be returned  
-	 * @return The time series of zero rates (historical + model data)
-	 * @throws CalculationException
-	 */
-	public NavigableMap<LocalDateTime, RandomVariable> getRateSeries(LocalDateTime evaluationDate, double periodLength) throws CalculationException {
-		// check if periodLength exceeds minimal or maximal periodLength available in history.
-		// Necessary for scenario sampling of "xM" curves, e.g. 3M LIBOR. Since historical data set starts with 3M fixing and if sensitivities for 1d point call the respective scenarios for 1d 
-		// we need a constant extrapolation of the 3M point and adjust the model rates fixing to "continue" with this fixing
-		if (periodLength < zeroCurves.firstEntry().getValue().getFixingSmallest()) {
-			periodLength = zeroCurves.firstEntry().getValue().getFixingSmallest();
-		}
-		if (periodLength > zeroCurves.firstEntry().getValue().getFixingGreatest()) {
-			periodLength = zeroCurves.firstEntry().getValue().getFixingGreatest();
-		}
-		NavigableMap<LocalDateTime, RandomVariable> rateSeries = new TreeMap<>();
-		// Returns the rate series from the beginning of available data until the cutoff date (inclusive)
-		// Scenarios == curveShifts -> curveShifts always null + always sampled on all realizations
-		NavigableMap<LocalDateTime, StochasticCurve> zeroCurveHeadMap = zeroCurves.headMap(evaluationDate, true);
-		for (LocalDateTime date : zeroCurveHeadMap.keySet()) {
-			rateSeries.put(date, this.getZeroRate(date, periodLength, null, null));
-		}
-		return rateSeries;
-	}
-	
-	
-	/**
-	 * 
-	 * @return The maturity of the LIBOR model
-	 */
-	public double getModelMaturity() {
-		return processModel.getLiborPeriodDiscretization().getAsArrayList().get(processModel.getLiborPeriodDiscretization().getNumberOfTimes() - 1);
-	}
-	
-	
-	/**
-	 * 
-	 * @return The reference date (start date) of the LIBOR model
-	 */
-	public LocalDateTime getReferenceDate() {
-		return referenceDate;
-	}
-	
-	
-	/**
-	 * 
-	 * @return The number of paths used in the LIBOR model
-	 */
-	public int getNumberOfPaths() {
-		return processModel.getNumberOfPaths();
-	}
-	
-	
-	// Case: First call to new evaluation date -> new zero curve instantiated
-	private void setUpZeroCurve(LocalDateTime evaluationDate) throws CalculationException {
-		if (evaluationDate.isBefore(processModel.getReferenceDate())) {
-			throw new IllegalArgumentException("Evaluation date is between end of available historical data and beginning of model data.");
-		}
-		zeroCurves.put(evaluationDate, new StochasticCurve());
-	}
-	
-	
-	// Time step interpolation to fit model discretization to daily scenarios
-	private void addZeroRateFromProcessModel(LocalDateTime evaluationDate, double time, double periodLength, double dailyStepSize) throws CalculationException {
-        int timeIndexNearestLessOrEqual = processModel.getTimeDiscretization().getTimeIndexNearestLessOrEqual(time);
-        double timeNearestLessOrEqual = processModel.getTimeDiscretization().getTime(timeIndexNearestLessOrEqual);
-        // if distance to next less time is smaller than half length of a day step size we evaluate at the grid point
-        if (Math.abs(timeNearestLessOrEqual - time) < dailyStepSize/2.0) {
-        	zeroCurves.get(evaluationDate).addRate(periodLength, getZeroRateOnTimeGrid(timeNearestLessOrEqual, periodLength));
-        }
-        int timeIndexNearestGreaterOrEqual  = timeIndexNearestLessOrEqual + 1;
-        double timeNearestGreaterOrEqual = processModel.getTimeDiscretization().getTime(timeIndexNearestGreaterOrEqual);
-        // if nearest greater time exceeds model end use constant extrapolation: timeNearestGreaterOrEqual + periodLength > modelMaturity 
-        if (timeIndexNearestGreaterOrEqual + periodLength > processModel.getLiborPeriodDiscretization().getAsArrayList().get(processModel.getLiborPeriodDiscretization().getNumberOfTimes() - 1)) {
-        	zeroCurves.get(evaluationDate).addRate(periodLength, getZeroRateOnTimeGrid(timeNearestLessOrEqual, periodLength));
-        }
-        // if distance to next greater time is smaller than half length of a day step size we evaluate at the grid point 
-        if (Math.abs(timeNearestGreaterOrEqual - time) < dailyStepSize/2.0) {
-        	zeroCurves.get(evaluationDate).addRate(periodLength, getZeroRateOnTimeGrid(timeNearestGreaterOrEqual, periodLength));
-        }
-        // If not we interpolate the  zero rates linearly between the closest lower and upper grid points for the given time 
-        RandomVariable zeroRateNearestLessOrEqual 	 = getZeroRateOnTimeGrid(timeNearestLessOrEqual, periodLength);
-        RandomVariable zeroRateNearestGreaterOrEqual = getZeroRateOnTimeGrid(timeNearestGreaterOrEqual, periodLength);
-    	// lowerTime < upperTime always ensured due to daily increase in every iteration
-        double weight = (time - timeNearestLessOrEqual) / (timeNearestGreaterOrEqual - timeNearestLessOrEqual);
-        zeroCurves.get(evaluationDate).addRate(periodLength, zeroRateNearestLessOrEqual.mult(1 - weight).add(zeroRateNearestGreaterOrEqual.mult(weight)));
-	}
-	
-	
-	private RandomVariable getZeroRateOnTimeGrid(double time, double periodLength) throws CalculationException {
-		return getForwardBondLibor(time, periodLength).log().div(-periodLength);
-	}
-	
-	
-	private RandomVariable getForwardBondLibor(double time, double periodLength) throws CalculationException {
-		return processModel.getForwardRate(time, time, time + periodLength).mult(periodLength).add(1.0).invert();
-	}
-	
-	
-	/*  
-	 *  Adjustment factor alpha(t) = E^Q[1/N(t)] * P^OIS(t;0)^-1 
-	 *  P^OIS(T;t) = P^L(T;t) * alpha(t)/alpha(T) 
-	 *  P^L(T;t) = (L(t;t,T)*(T-t)+1)^-1
-	 *  alpha(t)/alpha(T) = P^L(t;0)/P^L(T;0) * P^OIS(T;0)/P^OIS(t;0)
-	 *  P^L(t;0)/P^L(T;0) = L(0;t,T)*(T-t)+1
-	 */	
-//	private RandomVariable getForwardBondOIS(double time, double periodLength) throws CalculationException {
-//		RandomVariable forwardAtZero = processModel.getForwardRate(0.0, time, time + periodLength).mult(periodLength).add(1.0);
-//		RandomVariable forwardAtTime = processModel.getForwardRate(time, time, time + periodLength).mult(periodLength).add(1.0);
-//		double oisDiscountFactors = processModel.getModel().getDiscountCurve().getDiscountFactor(time + periodLength)/processModel.getModel().getDiscountCurve().getDiscountFactor(time);
-//		return forwardAtZero.mult(oisDiscountFactors).div(forwardAtTime);
-//	}
+    private final HistoricalZeroRateSource historicalSource;
+    private final ZeroRateSource simulatedSource;
+    private final LocalDate referenceDate;
+    private final LocalDate firstObservationDate;
+    private final BusinessdayCalendar calendar;
+    private final int numberOfPaths;
+    private final double initialCurveTolerance;
+    private final Set<Double> alignedTenors = new HashSet<>();
+    // Only scenario requests populate this cache, never arbitrary payment tenors.
+    private final Map<Double, NavigableMap<LocalDate, RandomVariable>> scenarioObservations = new HashMap<>();
 
+    /**
+     * Legacy file-based entry point. New callers can inject either source directly.
+     * The bundled history contains all weekdays, including TARGET holidays, so
+     * this entry point uses a Monday-Friday observation calendar. For other data
+     * sets inject an explicit calendar. Currency/curveName identify caller-supplied
+     * data; they do not convert or rebootstrap it.
+     */
+    public ZeroRateModel(Currency currency, CurveName curveName, LIBORModelMonteCarloSimulationModel processModel, String inputDataFilePath) throws CalculationException {
+        this(new HistoricalZeroRateSource(new ZeroCurveHistory(inputDataFilePath).buildZeroCurveHistory()),
+                new SimulatedZeroRateSource(processModel, processModel.getReferenceDate().toLocalDate(), processModel.getLiborPeriodDiscretization().getLastTime()),
+                new BusinessdayCalendarExcludingWeekends());
+        Objects.requireNonNull(currency, "currency");
+        Objects.requireNonNull(curveName, "curveName");
+    }
+
+    /** Historical and simulated data for one curve, with a checked common initial state. */
+    public ZeroRateModel(HistoricalZeroRateSource historicalSource, SimulatedZeroRateSource simulatedSource, BusinessdayCalendar calendar) throws CalculationException {
+        this(historicalSource, simulatedSource, simulatedSource.getReferenceDate(), calendar, simulatedSource.getNumberOfPaths(), DEFAULT_INITIAL_CURVE_TOLERANCE);
+    }
+
+    /** A purely historical curve; forward history requests beyond its last date fail. */
+    public ZeroRateModel(HistoricalZeroRateSource historicalSource, BusinessdayCalendar calendar) throws CalculationException {
+        this(historicalSource, null, historicalSource.getLastDate(), calendar, 1, DEFAULT_INITIAL_CURVE_TOLERANCE);
+    }
+
+    /** A purely simulated curve. Scenario windows require an actual simulation warm-up. */
+    public ZeroRateModel(SimulatedZeroRateSource simulatedSource, BusinessdayCalendar calendar) throws CalculationException {
+        this(null, simulatedSource, simulatedSource.getReferenceDate(), calendar, simulatedSource.getNumberOfPaths(), DEFAULT_INITIAL_CURVE_TOLERANCE);
+    }
+
+    /**
+     * General source composition, also usable for a separately constructed PAIRS
+     * standard curve. At least one source is required. Custom simulated sources
+     * must use this reference date and the same ordered paths as product valuation.
+     * The tolerance checks initial levels only; it never shifts either source.
+     * Initial alignment queries the simulation at time zero. A simulation which
+     * precalculates all process times may therefore allocate its full path storage
+     * already during construction; choose its observation horizon accordingly.
+     */
+    public ZeroRateModel(HistoricalZeroRateSource historicalSource, ZeroRateSource simulatedSource, LocalDate referenceDate, BusinessdayCalendar calendar, int numberOfPaths, double initialCurveTolerance) throws CalculationException {
+        if (historicalSource == null && simulatedSource == null) {
+            throw new IllegalArgumentException("At least one zero-rate source is required.");
+        }
+        this.referenceDate = Objects.requireNonNull(referenceDate, "referenceDate");
+        this.calendar = Objects.requireNonNull(calendar, "calendar");
+        if (!calendar.isBusinessday(referenceDate)) {
+            throw new IllegalArgumentException("The reference date must be an observation business day: " + referenceDate);
+        }
+        if (numberOfPaths <= 0) {
+            throw new IllegalArgumentException("numberOfPaths must be positive.");
+        }
+        if (!Double.isFinite(initialCurveTolerance) || initialCurveTolerance < 0.0) {
+            throw new IllegalArgumentException("initialCurveTolerance must be finite and nonnegative.");
+        }
+        if (simulatedSource instanceof SimulatedZeroRateSource) {
+            SimulatedZeroRateSource source = (SimulatedZeroRateSource) simulatedSource;
+            if (!referenceDate.equals(source.getReferenceDate()) || numberOfPaths != source.getNumberOfPaths()) {
+                throw new IllegalArgumentException("Simulated source reference date or path count does not match.");
+            }
+        }
+        this.historicalSource = historicalSource;
+        this.simulatedSource = simulatedSource;
+        this.numberOfPaths = numberOfPaths;
+        this.initialCurveTolerance = initialCurveTolerance;
+        firstObservationDate = historicalSource == null ? referenceDate : historicalSource.getFirstDate();
+
+        if (historicalSource != null) {
+            if (firstObservationDate.isAfter(referenceDate)) {
+                throw new IllegalArgumentException("Historical observations must start on or before the reference date.");
+            }
+            for (LocalDate date = firstObservationDate; !date.isAfter(referenceDate); date = date.plusDays(1)) {
+                if (calendar.isBusinessday(date) && !historicalSource.getObservationDates().contains(date)) {
+                    throw new CalculationException("Missing historical business-day observation at " + date + ".");
+                }
+            }
+            // Check supported initial knots now; every requested tenor is checked on demand.
+            // An unused long historical tenor must not prevent use of a shorter model.
+            if (simulatedSource != null) {
+                for (double tenor : historicalSource.getTenors(referenceDate)) {
+                    if (tenor > 0.0 && (!(simulatedSource instanceof SimulatedZeroRateSource) || tenor <= ((SimulatedZeroRateSource) simulatedSource).getMaturityHorizon())) {
+                        ensureInitialCurveAlignment(tenor);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public RandomVariable getZeroRate(LocalDate observationDate, double tenorYears) throws CalculationException {
+        Objects.requireNonNull(observationDate, "observationDate");
+        if (!Double.isFinite(tenorYears) || tenorYears <= 0.0) {
+            throw new IllegalArgumentException("tenorYears must be finite and strictly positive.");
+        }
+        if (observationDate.isBefore(firstObservationDate)) {
+            throw new CalculationException("Observation " + observationDate + " precedes available data at " + firstObservationDate + ".");
+        }
+        if (!observationDate.isAfter(referenceDate) && historicalSource != null) {
+            // A frozen historical prefix must not trigger queries into a simulated future.
+            if (observationDate.equals(referenceDate)) {
+                ensureInitialCurveAlignment(tenorYears);
+            }
+            return checkedValue(historicalSource.getZeroRate(observationDate, tenorYears), observationDate, true);
+        }
+        if (simulatedSource == null) {
+            throw new CalculationException("No simulated source is configured after " + referenceDate + ".");
+        }
+        ensureInitialCurveAlignment(tenorYears);
+        return checkedValue(simulatedSource.getZeroRate(observationDate, tenorYears), observationDate, false);
+    }
+
+    /**
+     * Compatibility curve access. Shifts are applied to the common zero curve
+     * before selecting a path, so they affect forward and discount roles together.
+     */
+    public RandomVariable getZeroRate(LocalDateTime evaluationDate, double periodLength, StochasticCurve curveShifts, Integer pathOrState) throws CalculationException {
+        LocalDate date = observationDate(evaluationDate);
+        RandomVariable rate = getZeroRate(date, periodLength);
+        if (curveShifts != null) {
+            rate = checkedValue(rate.add(curveShifts.getRate(periodLength, null)), date, false);
+        }
+        if (pathOrState != null) {
+            if (pathOrState < 0 || pathOrState >= numberOfPaths) {
+                throw new IllegalArgumentException("Path index outside [0, " + numberOfPaths + "): " + pathOrState);
+            }
+            return new Scalar(rate.get(pathOrState));
+        }
+        return rate;
+    }
+
+    public RandomVariable getDiscountFactor(LocalDateTime evaluationDate, double periodLength, StochasticCurve curveShifts, Integer pathOrState) throws CalculationException {
+        if (!Double.isFinite(periodLength) || periodLength < 0.0) {
+            throw new IllegalArgumentException("Discount maturity must be finite and nonnegative.");
+        }
+        if (periodLength == 0.0) {
+            return new Scalar(1.0);
+        }
+        return getZeroRate(evaluationDate, periodLength, curveShifts, pathOrState).mult(-periodLength).exp();
+    }
+
+    public RandomVariable getForwardRate(LocalDateTime evaluationDate, double periodStart, double periodEnd, StochasticCurve curveShifts, Integer pathOrState) throws CalculationException {
+        if (!Double.isFinite(periodStart) || !Double.isFinite(periodEnd) || periodStart < 0.0 || periodEnd <= periodStart) {
+            throw new IllegalArgumentException("Forward period must satisfy 0 <= start < end with finite times.");
+        }
+        return getDiscountFactor(evaluationDate, periodStart, curveShifts, pathOrState).div(getDiscountFactor(evaluationDate, periodEnd, curveShifts, pathOrState)).sub(1.0).div(periodEnd - periodStart);
+    }
+
+    /**
+     * Complete history at a constant tenor. Nonbusiness evaluation dates use the
+     * latest preceding business-day observation; no extra return observation is
+     * inserted for a weekend/holiday. Missing required source observations fail.
+     * The returned map is a snapshot; future calls cannot modify earlier results.
+     */
+    public NavigableMap<LocalDateTime, RandomVariable> getRateSeries(LocalDateTime evaluationDate, double periodLength) throws CalculationException {
+        LocalDate cutoff = observationDate(evaluationDate);
+        if (!Double.isFinite(periodLength) || periodLength <= 0.0) {
+            throw new IllegalArgumentException("periodLength must be finite and strictly positive.");
+        }
+        if (cutoff.isBefore(firstObservationDate)) {
+            throw new CalculationException("Scenario cutoff precedes available observations: " + cutoff);
+        }
+        NavigableMap<LocalDate, RandomVariable> cache = scenarioObservations.computeIfAbsent(periodLength, key -> new TreeMap<>());
+        NavigableMap<LocalDateTime, RandomVariable> result = new TreeMap<>();
+        for (LocalDate date = firstObservationDate; !date.isAfter(cutoff); date = date.plusDays(1)) {
+            if (calendar.isBusinessday(date)) {
+                RandomVariable rate = cache.get(date);
+                if (rate == null) {
+                    rate = getZeroRate(date, periodLength);
+                    cache.put(date, rate);
+                }
+                result.put(date.atStartOfDay(), rate);
+            }
+        }
+        if (result.isEmpty()) {
+            throw new CalculationException("No business-day observations on or before " + cutoff + ".");
+        }
+        return Collections.unmodifiableNavigableMap(result);
+    }
+
+    public LocalDateTime getReferenceDate() {
+        return referenceDate.atStartOfDay();
+    }
+
+    public int getNumberOfPaths() {
+        return numberOfPaths;
+    }
+
+    /** @return The declared absolute maturity horizon of the simulated source. */
+    public double getModelMaturity() {
+        if (simulatedSource instanceof SimulatedZeroRateSource) {
+            return ((SimulatedZeroRateSource) simulatedSource).getMaturityHorizon();
+        }
+        throw new UnsupportedOperationException("This source does not declare a model maturity horizon.");
+    }
+
+    private void ensureInitialCurveAlignment(double tenor) throws CalculationException {
+        if (historicalSource == null || simulatedSource == null || alignedTenors.contains(tenor)) {
+            return;
+        }
+        RandomVariable historical = checkedValue(historicalSource.getZeroRate(referenceDate, tenor), referenceDate, true);
+        RandomVariable simulated = checkedValue(simulatedSource.getZeroRate(referenceDate, tenor), referenceDate, false);
+        double difference = simulated.sub(historical).abs().getMax();
+        if (difference > initialCurveTolerance) {
+            throw new CalculationException("Initial zero curves disagree at " + referenceDate + ", tenor " + tenor
+                    + ": maximum absolute difference " + difference + " exceeds tolerance " + initialCurveTolerance
+                    + ". Align curve definitions and initial calibration; no automatic rebasing is applied.");
+        }
+        alignedTenors.add(tenor);
+    }
+
+    private RandomVariable checkedValue(RandomVariable value, LocalDate date, boolean historical) throws CalculationException {
+        if (value == null || value.size() < 1) {
+            throw new CalculationException("Missing zero-rate value at " + date + ".");
+        }
+        if (historical && !value.isDeterministic()) {
+            throw new CalculationException("Historical rates must be deterministic at " + date + ".");
+        }
+        if (!value.isDeterministic() && value.size() != numberOfPaths) {
+            throw new CalculationException("Inconsistent path count at " + date + ": expected " + numberOfPaths + ", got " + value.size());
+        }
+        for (int path = 0; path < value.size(); path++) {
+            if (!Double.isFinite(value.get(path))) {
+                throw new CalculationException("Nonfinite zero rate at " + date + ", path " + path + ".");
+            }
+        }
+        if (!historical) {
+            double time = FloatingpointDate.getFloatingPointDateFromDate(referenceDate.atStartOfDay(), date.atStartOfDay());
+            if (value.getFiltrationTime() > time + 1E-10 || Double.isNaN(value.getFiltrationTime())) {
+                throw new CalculationException("Zero rate at " + date + " depends on a future model state.");
+            }
+        }
+        return value;
+    }
+
+    private static LocalDate observationDate(LocalDateTime date) {
+        Objects.requireNonNull(date, "evaluationDate");
+        if (!date.toLocalTime().equals(LocalTime.MIDNIGHT)) {
+            throw new IllegalArgumentException("Daily zero-rate observations require dates at midnight: " + date);
+        }
+        return date.toLocalDate();
+    }
 }

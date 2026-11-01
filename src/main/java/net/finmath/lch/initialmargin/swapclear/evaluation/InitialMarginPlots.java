@@ -29,17 +29,16 @@ public class InitialMarginPlots {
 	
 	public static void main(String[] args) throws CalculationException {
 	
-		final LIBORModelMonteCarloSimulationModel liborModel = ModelFactory.getModel(CurveName.EUR_EURIBOR_3M);
-		final ZeroRateModel zeroRateModel = new ZeroRateModel(Currency.EUR, CurveName.EUR_EURIBOR_3M, liborModel, "spreadsheets/EUR_EURIBOR_3M_Input_Data.xlsx");
-
 		LchSwap swap1 = PortfolioFactory.create20YReceiverSwap();
 		LchSwap swap2 = PortfolioFactory.create10YPayerSwap();
 		LchSwap swap3 = PortfolioFactory.create15YReceiverSwap();
 		LocalPortfolio swapPortfolio = PortfolioFactory.getSwapPortfolio(swap1).getLocalPortfolio(Currency.EUR); //, swap10Y, swap10YPlusSpread);		
 	    double stepSize = 0.125;
+		LocalDateTime lastPlotDate = getObservationDate(swapPortfolio.getLastPaymentDate() + 5 * stepSize);
+		final LIBORModelMonteCarloSimulationModel liborModel = ModelFactory.getModel(CurveName.EUR_EURIBOR_3M, lastPlotDate.toLocalDate(), 60.0);
+		final ZeroRateModel zeroRateModel = new ZeroRateModel(Currency.EUR, CurveName.EUR_EURIBOR_3M, liborModel, "spreadsheets/EUR_EURIBOR_3M_Input_Data.xlsx");
 		boolean movingWindow = false;
 		boolean pathWiseScenarios = false;
-		// !! Vol-scaling for moving scenarios does not work with this setup since daily evaluation necessary to capture volatility build-up
 		plotIMPaths(InitialMargin.FLOOR, pathWiseScenarios, movingWindow, zeroRateModel, swapPortfolio, stepSize);
 
 	}
@@ -74,10 +73,7 @@ public class InitialMarginPlots {
 	
 	
 	protected static RandomVariable getInitialMargin(double time, ZeroRateModel zeroRateModel, LocalPortfolio localPortfolio, InitialMargin type, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		LocalDateTime date = FloatingpointDate.getDateFromFloatingPointDate(REFERENCE_DATE, time);
-		while (!SchemeStorage.getLocalCalendar(Currency.EUR).isBusinessday(date.toLocalDate())) {
-			date = date.minusDays(1);
-		}	
+		LocalDateTime date = getObservationDate(time);
 		
 		switch (type) {
 		case FLOOR:
@@ -89,6 +85,15 @@ public class InitialMarginPlots {
 		default:
 			throw new IllegalArgumentException("Initial Margin type not defined.");
 		}
+	}
+
+	/** Latest daily observation on or before the requested plot time. */
+	static LocalDateTime getObservationDate(double time) {
+		LocalDateTime date = FloatingpointDate.getDateFromFloatingPointDate(REFERENCE_DATE, time).toLocalDate().atStartOfDay();
+		while (!SchemeStorage.getLocalCalendar(Currency.EUR).isBusinessday(date.toLocalDate())) {
+			date = date.minusDays(1);
+		}
+		return date;
 	}
 	
 	
