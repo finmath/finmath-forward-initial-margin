@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import net.finmath.exception.CalculationException;
@@ -12,7 +13,10 @@ import net.finmath.stochastic.RandomVariable;
 
 
 /**
- * A transformation method to calculate absolute and relative returns based on a return lag of a RandomVariable time series.
+ * Calculates pathwise absolute or relative returns over a lag of observations.
+ * Each return is labeled by its end date, when both observations are available.
+ * A lag of five represents five business days only if the input contains every
+ * relevant business-day observation in chronological order.
  * 
  * @author Raphael Prandtl
  */
@@ -31,13 +35,16 @@ public class RateTransformationReturns extends AbstractRateTransformation {
 	 * Performs a return transformation.
 	 * The length (number of entries) of the initial data set is reduced by the return lag.
 	 * 
-	 * @param returnLag The lag between the data points.
+	 * @param marginPeriodOfRisk Positive lag in observations, not calendar days.
 	 * @param returnType Enum to calculate either absolute or relative returns w.r.t the lag.
 	 */
 	public RateTransformationReturns(final int marginPeriodOfRisk, final ReturnType returnType) {
 		super("Returns"); 		// unique TransformationMethod ID
+		if (marginPeriodOfRisk <= 0) {
+			throw new IllegalArgumentException("marginPeriodOfRisk must be strictly positive.");
+		}
 		this.marginPeriodOfRisk = marginPeriodOfRisk;
-		this.returnType = returnType;
+		this.returnType = Objects.requireNonNull(returnType, "returnType must not be null.");
 	}
 	
 	@Override
@@ -48,27 +55,28 @@ public class RateTransformationReturns extends AbstractRateTransformation {
 		}
 		NavigableMap<LocalDateTime, RandomVariable> returnData = new TreeMap<>();
 		List<LocalDateTime> dates = new ArrayList<>(primaryData.keySet());
-		for (int i = 0; i < dates.size() - marginPeriodOfRisk; i++) {
-			// The marginPeriodOfRisk is forward looking and determines the rate shift (return) that can happen over this time horizon
-			// A scenario is the rate in x-days minus the current rate
-			LocalDateTime scenarioDate = dates.get(i);
-			LocalDateTime mprDate = dates.get(i + marginPeriodOfRisk);
-			RandomVariable scenarioRate = primaryData.get(scenarioDate);
-			RandomVariable mprRate = primaryData.get(mprDate);
+		for (int i = marginPeriodOfRisk; i < dates.size(); i++) {
+			LocalDateTime startDate = dates.get(i - marginPeriodOfRisk);
+			LocalDateTime endDate = dates.get(i);
+			RandomVariable startRate = primaryData.get(startDate);
+			RandomVariable endRate = primaryData.get(endDate);
 			
 			switch (returnType) {
 			case ABSOLUTE:
-				RandomVariable resultAbsolute = mprRate.sub(scenarioRate);
-				returnData.put(scenarioDate, resultAbsolute);
+				RandomVariable resultAbsolute = endRate.sub(startRate);
+				returnData.put(endDate, resultAbsolute);
 				break;
-			case RELATIVE: // case rate 0 missing
-				RandomVariable resultRelative = mprRate.div(scenarioRate).sub(1.0);
-				returnData.put(scenarioDate, resultRelative);
+			case RELATIVE:
+				if (startRate.abs().getMin() == 0.0) {
+					throw new CalculationException("Relative return ending at " + endDate + " has a zero starting rate on at least one path (" + startDate + ").");
+				}
+				RandomVariable resultRelative = endRate.div(startRate).sub(1.0);
+				returnData.put(endDate, resultRelative);
 				break;
 			}
 		}
-	    context.addTransformationResult(this.getId(), returnData);
 	    context.setPrimaryData(returnData);
+	    context.addTransformationResult(this.getId(), context.getPrimaryData());
 	}	
 	
 }

@@ -1,87 +1,96 @@
 package net.finmath.lch.initialmargin.simulation.scenarios;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Objects;
+import java.util.TreeMap;
 
+import net.finmath.exception.CalculationException;
 import net.finmath.lch.initialmargin.simulation.modeldata.RandomVariableSeries;
-import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
 import net.finmath.lch.initialmargin.simulation.ratetransformations.RateTransformation;
 import net.finmath.lch.initialmargin.simulation.ratetransformations.TransformationContext;
-import net.finmath.exception.CalculationException;
 import net.finmath.stochastic.RandomVariable;
 
-
+/**
+ * Transforms an observation history and then selects scenario windows.
+ * The caller supplies consecutive business-day observations at a constant tenor.
+ * Historical scalar values and subsequent simulated path vectors may coexist;
+ * stochastic observations must use the same paths in the same order.
+ *
+ * Only observations on or before the evaluation date enter the transformations.
+ * The complete available prefix is transformed before selecting a window, so
+ * EWMA history is retained and all shocks are rescaled at the evaluation date.
+ */
 public class ScenarioBuilder {
 
+    private final List<RateTransformation> rateTransformations;
 
-	private final ZeroRateModel						zeroRateModel;
-    private final List<RateTransformation> 			rateTransformations; 
-    
-    
-    public ScenarioBuilder(ZeroRateModel zeroRateModel, List<RateTransformation> rateTransformations) {
-        this.zeroRateModel = zeroRateModel;
-    	this.rateTransformations = rateTransformations;
+    public ScenarioBuilder(List<RateTransformation> rateTransformations) {
+        this.rateTransformations = List.copyOf(rateTransformations);
     }
-    
 
-    // For moving scenario window with additional stress period
-    public RandomVariableSeries getTenorPointScenarios(LocalDateTime evaluationDate, double tenorFixing, int numberOfMovingScenarios, LocalDateTime startDateFixedScenarios, LocalDateTime endDateFixedScenarios) throws CalculationException {
-    	NavigableMap<LocalDateTime, RandomVariable> scenarios = getTransformedRateSeries(evaluationDate, tenorFixing);
-    	RandomVariableSeries randomVariableSeries = new RandomVariableSeries(getRatesForLastNDays(scenarios, evaluationDate, numberOfMovingScenarios));
-    	randomVariableSeries.addSeries(getRatesFromTo(scenarios, startDateFixedScenarios, endDateFixedScenarios));
-    	return randomVariableSeries;
-    }
-    
-    
-    // For moving scenario window with fixed length
-    public RandomVariableSeries getTenorPointScenarios(LocalDateTime evaluationDate, double tenorFixing, int numberOfScenarios) throws CalculationException {
-		NavigableMap<LocalDateTime, RandomVariable> scenarios =  getTransformedRateSeries(evaluationDate, tenorFixing);
-    	return new RandomVariableSeries(getRatesForLastNDays(scenarios, evaluationDate, numberOfScenarios));
-    }
-  
-    
-    // For moving scenario window that starts at beginning of available data and extends over time
-    public RandomVariableSeries getTenorPointScenarios(LocalDateTime evaluationDate, double tenorFixing) throws CalculationException {
-    	return new RandomVariableSeries(new HashMap<>(getTransformedRateSeries(evaluationDate, tenorFixing)));
-    }
-       	
-	
-	private NavigableMap<LocalDateTime, RandomVariable> getTransformedRateSeries(LocalDateTime evaluationDate, double tenorFixing) throws CalculationException {
-		NavigableMap<LocalDateTime, RandomVariable> rateSeries = zeroRateModel.getRateSeries(evaluationDate, tenorFixing);
-		TransformationContext context = new TransformationContext(rateSeries);
-        // store the raw data as initial data input
-        context.addTransformationResult("InitialDataInput", rateSeries);
-        // apply the transformation methods one after the other and store the ID and result to the pipeline
-        for (RateTransformation method : rateTransformations) {
-            try {
-				method.applyTransformation(context);
-			} catch (CalculationException e) {
-				e.printStackTrace();
-				throw new RuntimeException("Transformation error while applying " + method.getId(), e);
-			}
-            context.addTransformationResult(method.getId(), context.getPrimaryData());
+    /** Selects the last N scenarios plus an inclusive fixed interval, without duplicates. */
+    public RandomVariableSeries getTenorPointScenarios(LocalDateTime evaluationDate,
+            NavigableMap<LocalDateTime, RandomVariable> rates, int numberOfMovingScenarios,
+            LocalDateTime startDateFixedScenarios, LocalDateTime endDateFixedScenarios) throws CalculationException {
+        Objects.requireNonNull(startDateFixedScenarios, "startDateFixedScenarios");
+        Objects.requireNonNull(endDateFixedScenarios, "endDateFixedScenarios");
+        if (startDateFixedScenarios.isAfter(endDateFixedScenarios)) {
+            throw new IllegalArgumentException("The fixed scenario interval must be chronological.");
         }
-		return context.getPrimaryData();
-	}
-	
-	
-    // Switch to HashMap to increase performance in future calculations since ordering not longer necessary
-	private HashMap<LocalDateTime, RandomVariable> getRatesForLastNDays(NavigableMap<LocalDateTime, RandomVariable> rateSeries, LocalDateTime cutOffDate, int numberOfDays) {
-		NavigableMap<LocalDateTime, RandomVariable> curvesUntil = rateSeries.headMap(cutOffDate, true);
-		ArrayList<LocalDateTime> dates = new ArrayList<LocalDateTime>(curvesUntil.descendingKeySet());
-	    if (numberOfDays >= dates.size()) {
-	        throw new IllegalArgumentException("Number of days exceeds the available data. Available: " + dates.size() + ".");
-	    }
-	    LocalDateTime startDate = dates.get(numberOfDays - 1);
-		return new HashMap<>(rateSeries.subMap(startDate, true, cutOffDate, true));
-	}
-	
-	
-	private HashMap<LocalDateTime, RandomVariable> getRatesFromTo(NavigableMap<LocalDateTime, RandomVariable> rateSeries, LocalDateTime startDate, LocalDateTime endDate) {
-		return new HashMap<>(rateSeries.subMap(startDate, true, endDate, true));
-	}
+        NavigableMap<LocalDateTime, RandomVariable> scenarios = getTransformedRateSeries(evaluationDate, rates);
+        HashMap<LocalDateTime, RandomVariable> selected = getLastScenarios(scenarios, numberOfMovingScenarios);
+        selected.putAll(scenarios.subMap(startDateFixedScenarios, true, endDateFixedScenarios, true));
+        return new RandomVariableSeries(selected);
+    }
 
+    /** Selects the last N scenarios from the transformed history. */
+    public RandomVariableSeries getTenorPointScenarios(LocalDateTime evaluationDate,
+            NavigableMap<LocalDateTime, RandomVariable> rates, int numberOfScenarios) throws CalculationException {
+        return new RandomVariableSeries(getLastScenarios(
+                getTransformedRateSeries(evaluationDate, rates), numberOfScenarios));
+    }
+
+    /** Returns all scenarios in the available history up to the evaluation date. */
+    public RandomVariableSeries getTenorPointScenarios(LocalDateTime evaluationDate,
+            NavigableMap<LocalDateTime, RandomVariable> rates) throws CalculationException {
+        return new RandomVariableSeries(new HashMap<>(getTransformedRateSeries(evaluationDate, rates)));
+    }
+
+    private NavigableMap<LocalDateTime, RandomVariable> getTransformedRateSeries(LocalDateTime evaluationDate,
+            NavigableMap<LocalDateTime, RandomVariable> rates) throws CalculationException {
+        Objects.requireNonNull(evaluationDate, "evaluationDate");
+        Objects.requireNonNull(rates, "rates");
+        // Do not inherit a caller's descending comparator.
+        NavigableMap<LocalDateTime, RandomVariable> chronologicalRates = new TreeMap<>();
+        chronologicalRates.putAll(rates);
+        TransformationContext context = new TransformationContext(chronologicalRates.headMap(evaluationDate, true));
+        context.addTransformationResult("InitialDataInput", context.getPrimaryData());
+        for (RateTransformation transformation : rateTransformations) {
+            transformation.applyTransformation(context);
+        }
+        return context.getPrimaryData();
+    }
+
+    private HashMap<LocalDateTime, RandomVariable> getLastScenarios(
+            NavigableMap<LocalDateTime, RandomVariable> scenarios, int numberOfScenarios) {
+        if (numberOfScenarios <= 0) {
+            throw new IllegalArgumentException("The number of scenarios must be strictly positive.");
+        }
+        if (numberOfScenarios > scenarios.size()) {
+            throw new IllegalArgumentException("Requested " + numberOfScenarios
+                    + " scenarios, but only " + scenarios.size() + " are available.");
+        }
+        HashMap<LocalDateTime, RandomVariable> selected = new HashMap<>();
+        for (Map.Entry<LocalDateTime, RandomVariable> entry : scenarios.descendingMap().entrySet()) {
+            selected.put(entry.getKey(), entry.getValue());
+            if (selected.size() == numberOfScenarios) {
+                break;
+            }
+        }
+        return selected;
+    }
 }
