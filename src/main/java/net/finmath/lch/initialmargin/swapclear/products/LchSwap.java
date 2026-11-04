@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 import net.finmath.lch.initialmargin.simulation.modeldata.StochasticCurve;
 import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
+import net.finmath.lch.initialmargin.valuation.CurveValuation;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.Currency;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.CurveName;
 import net.finmath.lch.initialmargin.swapclear.products.components.LchNotional;
@@ -32,7 +33,7 @@ import net.finmath.time.Schedule;
  * @author Christian Fries
  * @version 1.0
  */
-public class LchSwap extends AbstractTermStructureMonteCarloProduct {
+public class LchSwap extends AbstractTermStructureMonteCarloProduct implements CurveValuation {
 
 	private final LchSwapLeg 						legReceiver;
 	private final LchSwapLeg 						legPayer;
@@ -90,11 +91,18 @@ public class LchSwap extends AbstractTermStructureMonteCarloProduct {
 	}
 	
 
+	/** Common-curve value used identically by sensitivities and scenario revaluation. */
+	@Override
+	public RandomVariable getValue(LocalDateTime evaluationDate, ZeroRateModel model,
+			StochasticCurve shifts, Integer pathOrState) throws CalculationException {
+		return getValue(evaluationDate, model, shifts, model, shifts, pathOrState);
+	}
+
 	// Added method: Values the swap under the zero rate model with curveshifts if provided
 	public RandomVariable getValue(final LocalDateTime evaluationDate, final ZeroRateModel forwardCurveModel, final StochasticCurve forwardCurveShifts, final ZeroRateModel discountCurveModel, final StochasticCurve discountCurveShifts, Integer pathOrState) throws CalculationException {
-		RandomVariable value = ((LchSwapLeg) legReceiver).getValue(evaluationDate, forwardCurveModel, forwardCurveShifts, discountCurveModel, discountCurveShifts, pathOrState);
+		RandomVariable value = legReceiver.getValue(evaluationDate, forwardCurveModel, forwardCurveShifts, discountCurveModel, discountCurveShifts, pathOrState);
 		if(legPayer != null) {
-			value = value.add(((LchSwapLeg) legPayer).getValue(evaluationDate, forwardCurveModel, forwardCurveShifts, discountCurveModel, discountCurveShifts, pathOrState));
+			value = value.add(legPayer.getValue(evaluationDate, forwardCurveModel, forwardCurveShifts, discountCurveModel, discountCurveShifts, pathOrState));
 		}
 		return value;
 	}

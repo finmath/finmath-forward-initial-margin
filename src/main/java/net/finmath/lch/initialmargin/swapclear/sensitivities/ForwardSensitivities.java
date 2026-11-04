@@ -1,51 +1,30 @@
 package net.finmath.lch.initialmargin.swapclear.sensitivities;
 
-
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGrid;
 import net.finmath.lch.initialmargin.swapclear.sensitivities.DiscountFactor.DiscountDate;
 import net.finmath.stochastic.RandomVariable;
 
-
-/**
- * Calculates the sensitivities of a swap component w.r.t. the forward rate (the two discount factors entering into the rate)
- */
+/** Projection contribution to the local coupon delta, holding its discount factor fixed. */
 public class ForwardSensitivities extends AbstractSensitvities {
-	
-	
-	public ForwardSensitivities(SensitivityComponentsForSwapLeg sensitivityComponentsForSwapLeg, TenorGrid tenorGrid) {
-		super(sensitivityComponentsForSwapLeg, tenorGrid);
-	}
-	
 
-	@Override
-	protected void calculateDeltaSensitivity(SensitivityMatrix sensitivityMatrix, SensitivityComponent component) {
-		calculateSensitivity(sensitivityMatrix, component, 1);
-	}
+    public ForwardSensitivities(SensitivityComponentsForSwapLeg components, TenorGrid tenorGrid) {
+        super(components, tenorGrid);
+    }
 
-
-	@Override
-	protected void calculateGammaSensitivity(SensitivityMatrix sensitivityMatrix, SensitivityComponent component) {
-		calculateSensitivity(sensitivityMatrix, component, 2);
-	}
-	
-	
-	private void calculateSensitivity(SensitivityMatrix sensitivityMatrix, SensitivityComponent component, int derivativeOrder) {
-		// if the LIBOR is already fixed no sensitivity -> no discount factors for period start and end date
-    	if (component.getDiscountFactor(DiscountDate.PERIOD_START) == null) {
-    		return;
-    	}
-    	DiscountFactor discountFactorPeriodStart = component.getDiscountFactor(DiscountDate.PERIOD_START);
-    	RandomVariable coefficient = component.getNotional();
-    	if (component.isPayer()) {
-    		coefficient = coefficient.mult(-1.0);
-    	}
-    	RandomVariable sensitivity = discountFactorPeriodStart.getDerivative(derivativeOrder).mult(Math.pow(ZERO_RATE_SHIFT, derivativeOrder)).mult(coefficient);
-		if (derivativeOrder == 1) {
-			mapDeltaToMatrix(sensitivityMatrix, sensitivity, discountFactorPeriodStart.getTimeToMaturity());
-		} else {
-	        mapGammaToMatrix(sensitivityMatrix, sensitivity, discountFactorPeriodStart.getTimeToMaturity(), discountFactorPeriodStart.getTimeToMaturity());
-		}
-	}
-	
-   
+    @Override
+    protected void calculateDeltaSensitivity(SensitivityMatrix matrix, SensitivityComponent component) {
+        DiscountFactor start = component.getDiscountFactor(DiscountDate.PERIOD_START);
+        if (start == null) {
+            return;
+        }
+        DiscountFactor end = component.getDiscountFactor(DiscountDate.PERIOD_END);
+        DiscountFactor payment = component.getDiscountFactor(DiscountDate.PAYMENT);
+        double length = end.getTimeToMaturity() - start.getTimeToMaturity();
+        // dF/dz(a) = -a P(a)/(Delta P(b)); dF/dz(b) = b P(a)/(Delta P(b)).
+        RandomVariable factor = getConstantCoefficient(component.getNotional(), component.getDayCountFraction(), component.isPayer())
+                .mult(payment.getDiscountFactor()).mult(start.getDiscountFactor())
+                .div(end.getDiscountFactor()).mult(ZERO_RATE_SHIFT / length);
+        mapDeltaToMatrix(matrix, factor.mult(-start.getTimeToMaturity()), start.getTimeToMaturity());
+        mapDeltaToMatrix(matrix, factor.mult(end.getTimeToMaturity()), end.getTimeToMaturity());
+    }
 }

@@ -6,14 +6,15 @@ import java.time.LocalDateTime;
 import net.finmath.exception.CalculationException;
 
 /**
- * Interface for the calculation of sensitivitiy curves
+ * Sensitivities of the common PAIRS curve on an explicit tenor grid.
  */
 public interface Sensitivities {
 	
 	/**
-	 * Calculates the delta sensitivities mapped to a fixed grid of standard tenors
+	 * Calculates pathwise zero-rate deltas in currency per basis point, mapped to
+	 * a fixed grid of remaining tenors. Projection and discount contributions add.
 	 * @param evaluationDate The date of the evaluation
-	 * @return The StochasticCurve with all delta sensitivities mapped to fixed tenor points
+	 * @return Delta sensitivities on the diagonal of the matrix
 	 * @throws CalculationException
 	 */
 	public SensitivityMatrix getDeltaSensitivities(LocalDateTime evaluationDate) throws CalculationException;
@@ -22,8 +23,9 @@ public interface Sensitivities {
 	/**
 	 * Calculates the gamma sensitivities mapped to a fixed grid of standard tenors
 	 * @param evaluationDate The date of the evaluation
-	 * @return The StochasticCurve with all sensitivities mapped to fixed tenor points
+	 * @return Gamma sensitivities in the provider's matrix convention
 	 * @throws CalculationException
+	 * @throws UnsupportedOperationException If the provider supplies delta only
 	 */
 	public SensitivityMatrix getGammaSensitivities(LocalDateTime evaluationDate) throws CalculationException;
 			

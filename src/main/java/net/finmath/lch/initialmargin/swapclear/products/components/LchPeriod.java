@@ -201,6 +201,9 @@ public class LchPeriod extends LchAbstractPeriod {
 	
 	// Added method to calculate the value under the zero rate model with a shifted curve if provided
 	public RandomVariable getValue(final LocalDateTime evaluationDate, final LocalDateTime scheduleReferenceDate, final ZeroRateModel forwardCurveModel, final StochasticCurve forwardCurveShifts, final ZeroRateModel discountCurveModel, final StochasticCurve discountCurveShifts, Integer pathOrState) throws CalculationException {
+		if (notionalFlow || isExcludeAccruedInterest) {
+			throw new UnsupportedOperationException("The PAIRS curve valuation supports coupon flows without notional exchanges or accrued-interest exclusion.");
+		}
 
 		LocalDateTime paymentDate = FloatingpointDate.getDateFromFloatingPointDate(scheduleReferenceDate, getPaymentDate());
 		
@@ -242,6 +245,14 @@ public class LchPeriod extends LchAbstractPeriod {
 	// Added method
 	public boolean isCouponFlow() {
 		return couponFlow;
+	}
+
+	public boolean isNotionalFlow() {
+		return notionalFlow;
+	}
+
+	public boolean isExcludeAccruedInterest() {
+		return isExcludeAccruedInterest;
 	}
 	
 	// Added method

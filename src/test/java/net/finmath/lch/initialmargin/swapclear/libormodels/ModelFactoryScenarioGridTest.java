@@ -1,10 +1,12 @@
 package net.finmath.lch.initialmargin.swapclear.libormodels;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -12,6 +14,8 @@ import net.finmath.exception.CalculationException;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.CurveName;
 import net.finmath.marketdata.model.AnalyticModel;
 import net.finmath.marketdata.model.curves.DiscountCurve;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
+import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.models.LIBORMarketModelFromCovarianceModel;
 import net.finmath.montecarlo.interestrate.models.covariance.BlendedLocalVolatilityModel;
@@ -110,6 +114,33 @@ public class ModelFactoryScenarioGridTest {
 			assertEquals(expected[i], -Math.log(discount.getDiscountFactor(curves, tenor)) / tenor, 1E-13);
 			assertEquals(expected[i], Math.log1p(tenor * model.getForwardRate(0.0, 0.0, tenor).doubleValue()) / tenor, 1E-13);
 		}
+	}
+
+	@Test
+	public void optionalAadFactoryPreservesPathsAndFutureNodeDerivatives() throws CalculationException {
+		AnalyticModel curves = ModelFactory.getAnalyticModel(CURVE, new double[] {1.0, 2.0}, new double[] {0.03, 0.03});
+		TimeDiscretization times = new TimeDiscretizationFromArray(0.0, 2, 0.25);
+		LIBORModelMonteCarloSimulationModel ordinary = ModelFactory.createLIBORMarketModel(16, 1, 2.0, 0.25,
+				times, curves, CURVE, new double[] {0.02}, 0.5);
+		RandomVariableDifferentiableAADFactory factory = new RandomVariableDifferentiableAADFactory(
+				Collections.singletonMap("isGradientRetainsLeafNodesOnly", false));
+		LIBORModelMonteCarloSimulationModel differentiable = ModelFactory.createLIBORMarketModel(16, 1, 2.0, 0.25,
+				times, curves, CURVE, new double[] {0.02}, 0.5, factory);
+		RandomVariable ordinaryForward = ordinary.getLIBOR(1, 2);
+		RandomVariable forward = differentiable.getLIBOR(1, 2);
+		assertFalse(ordinaryForward instanceof RandomVariableDifferentiable);
+		assertTrue(forward instanceof RandomVariableDifferentiable);
+		RandomVariableDifferentiable value = (RandomVariableDifferentiable) forward.mult(0.25).add(1.0).invert();
+		RandomVariable delta = value.getGradient().get(((RandomVariableDifferentiable) forward).getID());
+		for (int path = 0; path < 16; path++) {
+			assertEquals(ordinaryForward.get(path), forward.get(path), 1E-14);
+			assertEquals(-0.25 / Math.pow(1.0 + 0.25 * forward.get(path), 2), delta.get(path), 1E-14);
+		}
+		BlendedLocalVolatilityModel blended = (BlendedLocalVolatilityModel)
+				((LIBORMarketModelFromCovarianceModel) differentiable.getModel()).getCovarianceModel();
+		RandomVariable volatility = ((LIBORCovarianceModelFromVolatilityAndCorrelation) blended.getBaseCovarianceModel())
+				.getVolatilityModel().getVolatility(0, 2);
+		assertTrue(volatility instanceof RandomVariableDifferentiable);
 	}
 
 	@Test

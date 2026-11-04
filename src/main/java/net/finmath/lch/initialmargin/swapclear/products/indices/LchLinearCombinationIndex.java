@@ -57,7 +57,8 @@ public class LchLinearCombinationIndex extends LchAbstractIndex {
 	
 	@Override
 	public RandomVariable getValue(LocalDateTime evaluationDate, LocalDateTime fixingDate, ZeroRateModel curveModel, StochasticCurve curveShifts, Integer pathOrState) throws CalculationException {
-		return index1.getValue(evaluationDate, fixingDate, curveModel, curveShifts, pathOrState).add(index2.getValue(evaluationDate, fixingDate, curveModel, curveShifts, pathOrState));
+		return index1.getValue(evaluationDate, fixingDate, curveModel, curveShifts, pathOrState).mult(scaling1)
+				.addProduct(index2.getValue(evaluationDate, fixingDate, curveModel, curveShifts, pathOrState), scaling2);
 	}
 	
 	

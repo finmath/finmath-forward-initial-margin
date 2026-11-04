@@ -1,17 +1,28 @@
 package net.finmath.lch.initialmargin.swapclear.sensitivities;
 
+import java.util.List;
+import java.util.Objects;
 
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGrid;
+import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
+import net.finmath.lch.initialmargin.swapclear.products.LchSwap;
 
 
 /**
- * Calculates the sensitivities of a swap component w.r.t. the forward rate and discount factors, both mapped to the same curve.
+ * Analytical local PAIRS delta: projection and discount contributions mapped to
+ * the same zero-rate buckets. Gamma is deliberately unsupported.
  */
 public class ForwardAndDiscountSensitivities extends AbstractSensitvities {
 
     private ForwardSensitivities forwardSensitivities;
     private DiscountSensitivities discountSensitivities;
 
+    public ForwardAndDiscountSensitivities(LchSwap swap, ZeroRateModel model, TenorGrid tenorGrid) {
+        this(new SensitivityComponentsForSwapLeg(
+                Objects.requireNonNull(swap, "swap").getLegPayer() == null
+                        ? List.of(swap.getLegReceiver()) : List.of(swap.getLegReceiver(), swap.getLegPayer()),
+                model, model), tenorGrid);
+    }
     
     public ForwardAndDiscountSensitivities(SensitivityComponentsForSwapLeg sensitivityComponentsForSwapLeg, TenorGrid tenorGrid) {
         super(sensitivityComponentsForSwapLeg, tenorGrid);
@@ -25,12 +36,4 @@ public class ForwardAndDiscountSensitivities extends AbstractSensitvities {
         forwardSensitivities.calculateDeltaSensitivity(sensitivityMatrix, component);
         discountSensitivities.calculateDeltaSensitivity(sensitivityMatrix, component);
     }
-
-    
-    @Override
-    protected void calculateGammaSensitivity(SensitivityMatrix sensitivityMatrix, SensitivityComponent component) {
-        forwardSensitivities.calculateGammaSensitivity(sensitivityMatrix, component);
-        discountSensitivities.calculateGammaSensitivity(sensitivityMatrix, component);
-    }
-    
 }

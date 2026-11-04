@@ -1,131 +1,142 @@
 package net.finmath.lch.initialmargin.swapclear.sensitivities;
 
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
-import net.finmath.lch.initialmargin.swapclear.products.components.LchPeriod;
-import net.finmath.lch.initialmargin.swapclear.products.components.LchProductCollection;
-import net.finmath.lch.initialmargin.swapclear.products.components.LchSwapLeg;
-import net.finmath.lch.initialmargin.swapclear.sensitivities.DiscountFactor.DiscountDate;
 import net.finmath.exception.CalculationException;
+import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
+import net.finmath.lch.initialmargin.swapclear.products.components.LchNotionalFromConstant;
+import net.finmath.lch.initialmargin.swapclear.products.components.LchPeriod;
+import net.finmath.lch.initialmargin.swapclear.products.components.LchSwapLeg;
+import net.finmath.lch.initialmargin.swapclear.products.indices.LchAbstractIndex;
+import net.finmath.lch.initialmargin.swapclear.products.indices.LchFixedCoupon;
+import net.finmath.lch.initialmargin.swapclear.products.indices.LchLIBORIndex;
+import net.finmath.lch.initialmargin.swapclear.products.indices.LchLinearCombinationIndex;
+import net.finmath.lch.initialmargin.swapclear.sensitivities.DiscountFactor.DiscountDate;
 import net.finmath.montecarlo.interestrate.products.components.AbstractProductComponent;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.FloatingpointDate;
 
-
 /**
- * Collects the sensitivity components of swap legs, i.e., for each period the components are stored as a SensitivityComponent
+ * Analytical reference inputs for the local PAIRS coupon valuation. A linear
+ * combination is decomposed into fixed/LIBOR terms, with its scaling carried by
+ * the notional. Accrual fraction, forward interval and payment maturity remain
+ * distinct. Known coupons, including fixings at the evaluation date, have only
+ * discount risk. Notional exchanges and unsupported product types are rejected.
  */
 public class SensitivityComponentsForSwapLeg {
-	
-	private final List<LchSwapLeg>						swapLegs;
-	private final ZeroRateModel 						forwardCurveModel;
-	private final ZeroRateModel 						discountCurveModel;
 
-	private List<SensitivityComponent> 					sensitivityComponents;
-	private LocalDateTime								lastUsedEvaluationDate = null;
-    private final Object 								sensitivityComponentsLock = new Object();
+    private final List<LchSwapLeg> swapLegs;
+    private final ZeroRateModel forwardCurveModel;
+    private final ZeroRateModel discountCurveModel;
+    private List<SensitivityComponent> sensitivityComponents;
+    private LocalDateTime lastUsedEvaluationDate;
 
-    
-	public SensitivityComponentsForSwapLeg(final List<LchSwapLeg> swapLegs, final ZeroRateModel forwardCurveModel, final ZeroRateModel discountCurveModel) {
-		this.swapLegs = swapLegs;
-		this.forwardCurveModel = forwardCurveModel;
-		this.discountCurveModel = discountCurveModel;
-	}
-	
-	
-	/**
-	 * Calculates the discount factors and stores them together with their maturity and coefficients
-	 * Discounting.LIBOR for single curve setup -> discount factors and LIBOR bonds are all derived from the same curve
-	 * 
-	 * @param evaluationTime
-	 * @throws CalculationException
-	 */
-	public List<SensitivityComponent> getSensitivityComponents(LocalDateTime evaluationDate) throws CalculationException {
-		synchronized (sensitivityComponentsLock) {
-			if (lastUsedEvaluationDate == null || !evaluationDate.equals(lastUsedEvaluationDate)) {
-				doCalculateSensitivityComponents(evaluationDate);
-			} 
-		}
-		return sensitivityComponents;
-	}
-	
-	
-	private void doCalculateSensitivityComponents(LocalDateTime evaluationDate) throws CalculationException {		
-		sensitivityComponents = new ArrayList<>();
-		// Product components (Period) of the swap leg -> times, index, etc.
-		for (LchSwapLeg leg : swapLegs) {
-			double scheduleOffSet = FloatingpointDate.getFloatingPointDateFromDate(leg.getReferenceDate(), evaluationDate);
-			LchProductCollection swapComponents = leg.getComponents();
-			// TODO: double casting correction
-			for (AbstractProductComponent component : swapComponents.getProducts()) {
-				LchPeriod period = (LchPeriod) component;
-				// without coupon flow no payment -> no sensitivity
-				if (!period.isCouponFlow()) {
-					continue;
-				}
-				// if payment date <= evaluation time -> no sensitivity 
-				double paymentDate = period.getPaymentDate();
-				if (paymentDate <= scheduleOffSet) { 
-					continue;
-				}
-				// collect all components of a swap period necessary for the sensitivity calculation
-				LocalDateTime fixingDate = FloatingpointDate.getDateFromFloatingPointDate(leg.getReferenceDate(), period.getFixingDate());
-				// Rate for sensitivity calculation -> needed under current (not-shifted) curve and for all paths
-				RandomVariable rate = period.getLchIndex().getValue(evaluationDate, fixingDate, forwardCurveModel, null, null); 
-				RandomVariable notional = period.getNotional().getConstantNotional();
-				double dayCountFraction = period.getDaycountFraction();
-				boolean isPayerLeg = period.isPayer();
-				// calculate all necessary discount factors for the period
-				Map<DiscountDate, DiscountFactor> discountFactors = getDiscountFactors(evaluationDate, scheduleOffSet, period);
-				
-				SensitivityComponent sensitivityComponent = new SensitivityComponent(discountFactors, rate, dayCountFraction, notional, isPayerLeg);
-				sensitivityComponents.add(sensitivityComponent);
-			}
-		}
-		lastUsedEvaluationDate = evaluationDate;
-	}	
-	
-	
-	private Map<DiscountDate, DiscountFactor> getDiscountFactors(LocalDateTime evaluationDate, double scheduleOffSet, LchPeriod period) throws CalculationException {
-		Map<DiscountDate, DiscountFactor> discountFactors = new HashMap<>();
-		double paymentTime = period.getPaymentDate();
-		// for all indices we need discount factors w.r.t. the payment dates of the cash flows
-		// Either with LIBOR discounting in a single curve set up or OIS discounting in a multi-curve set up
-		if (forwardCurveModel.equals(discountCurveModel)) {
-			discountFactors.put(DiscountDate.PAYMENT, getDiscountFactor(evaluationDate, paymentTime - scheduleOffSet, forwardCurveModel));
-		} else {
-			discountFactors.put(DiscountDate.PAYMENT, getDiscountFactor(evaluationDate, paymentTime - scheduleOffSet, discountCurveModel));
-		}
-		// for float index payments we need additionally discount factors w.r.t. the period start (fixing + periodStartOffSet) and period end (fixing + periodStartOffSet + period length) 
-		// only indices that pay a floating rate do have a periodLength > 0
-		double periodLength = period.getLchIndex().getPeriodLength();
-		if (periodLength > 0) {
-			// If the floating rate is already fixed it does not contribute discount factors (zero rates) to the sensitivities
-			double fixingTime = period.getFixingDate();
-			if (scheduleOffSet < fixingTime) { // EOD valuation -> for "=" already fixed
-				double periodStartOffSet =  period.getLchIndex().getPeriodStartOffset();
-				// We need the floating rate discount factors only for LIBOR discounting 
-				discountFactors.put(DiscountDate.PERIOD_START, getDiscountFactor(evaluationDate, (fixingTime + periodStartOffSet) - scheduleOffSet, forwardCurveModel));
-				// the additional discount factor for the period end (fixing + offset + period length) 
-				discountFactors.put(DiscountDate.PERIOD_END, getDiscountFactor(evaluationDate, (fixingTime + periodStartOffSet + periodLength) - scheduleOffSet, forwardCurveModel));
-			}
-		}
-		return discountFactors;
-	}
-	
-	
-	private DiscountFactor getDiscountFactor(LocalDateTime evaulationDate, double maturity, ZeroRateModel curveModel) throws CalculationException {
-		// Discount factor for sensitivity calculation -> needed under current (not-shifted) curve and for all paths
-		RandomVariable liborBond = curveModel.getDiscountFactor(evaulationDate, maturity, null, null); 
-		DiscountFactor discountFactor = new DiscountFactor(liborBond, maturity);
-		return discountFactor;
-	}
+    public SensitivityComponentsForSwapLeg(List<LchSwapLeg> swapLegs, ZeroRateModel forwardCurveModel,
+            ZeroRateModel discountCurveModel) {
+        this.swapLegs = List.copyOf(Objects.requireNonNull(swapLegs, "swapLegs"));
+        this.forwardCurveModel = Objects.requireNonNull(forwardCurveModel, "forwardCurveModel");
+        this.discountCurveModel = Objects.requireNonNull(discountCurveModel, "discountCurveModel");
+        for (LchSwapLeg leg : this.swapLegs) {
+            for (AbstractProductComponent component : leg.getComponents().getProducts()) {
+                if (!(component instanceof LchPeriod)) {
+                    throw new IllegalArgumentException("Analytical swap deltas require LchPeriod components.");
+                }
+                LchPeriod period = (LchPeriod) component;
+                if (period.isNotionalFlow() || period.isExcludeAccruedInterest()) {
+                    throw new IllegalArgumentException("Analytical local deltas do not support notional exchanges or accrued-interest exclusion.");
+                }
+                if (!(period.getNotional() instanceof LchNotionalFromConstant)) {
+                    throw new IllegalArgumentException("Analytical local deltas require constant notionals.");
+                }
+                if (period.isCouponFlow()) {
+                    validateIndex(period.getLchIndex());
+                }
+            }
+        }
+    }
 
+    private static void validateIndex(LchAbstractIndex index) {
+        Objects.requireNonNull(index, "index");
+        if (index.getClass() == LchLinearCombinationIndex.class) {
+            LchLinearCombinationIndex combination = (LchLinearCombinationIndex) index;
+            if (!Double.isFinite(combination.getScaling1()) || !Double.isFinite(combination.getScaling2())) {
+                throw new IllegalArgumentException("Index scalings must be finite.");
+            }
+            validateIndex(combination.getIndex1());
+            validateIndex(combination.getIndex2());
+        } else if (index.getClass() != LchLIBORIndex.class && index.getClass() != LchFixedCoupon.class) {
+            throw new IllegalArgumentException("Unsupported analytical coupon index: " + index.getClass().getName());
+        }
+    }
 
+    /** Returns the coupon terms for all simulation paths, without path averaging. */
+    public synchronized List<SensitivityComponent> getSensitivityComponents(LocalDateTime evaluationDate)
+            throws CalculationException {
+        Objects.requireNonNull(evaluationDate, "evaluationDate");
+        if (!evaluationDate.equals(evaluationDate.toLocalDate().atStartOfDay())) {
+            throw new IllegalArgumentException("Daily sensitivities require an evaluation date at midnight.");
+        }
+        if (evaluationDate.equals(lastUsedEvaluationDate)) {
+            return sensitivityComponents;
+        }
+        List<SensitivityComponent> result = new ArrayList<>();
+        for (LchSwapLeg leg : swapLegs) {
+            double scheduleOffset = FloatingpointDate.getFloatingPointDateFromDate(leg.getReferenceDate(), evaluationDate);
+            for (AbstractProductComponent component : leg.getComponents().getProducts()) {
+                LchPeriod period = (LchPeriod) component;
+                LocalDateTime paymentDate = FloatingpointDate.getDateFromFloatingPointDate(
+                        leg.getReferenceDate(), period.getPaymentDate());
+                if (!period.isCouponFlow() || !paymentDate.isAfter(evaluationDate)) {
+                    continue;
+                }
+                LocalDateTime fixingDate = FloatingpointDate.getDateFromFloatingPointDate(
+                        leg.getReferenceDate(), period.getFixingDate());
+                DiscountFactor payment = getDiscountFactor(evaluationDate,
+                        period.getPaymentDate() - scheduleOffset, discountCurveModel);
+                addIndexComponents(result, period, period.getLchIndex(), 1.0, evaluationDate, fixingDate, payment);
+            }
+        }
+        sensitivityComponents = List.copyOf(result);
+        lastUsedEvaluationDate = evaluationDate;
+        return sensitivityComponents;
+    }
+
+    private void addIndexComponents(List<SensitivityComponent> result, LchPeriod period,
+            LchAbstractIndex index, double scaling, LocalDateTime evaluationDate,
+            LocalDateTime fixingDate, DiscountFactor payment) throws CalculationException {
+        if (index instanceof LchLinearCombinationIndex) {
+            LchLinearCombinationIndex combination = (LchLinearCombinationIndex) index;
+            addIndexComponents(result, period, combination.getIndex1(), scaling * combination.getScaling1(),
+                    evaluationDate, fixingDate, payment);
+            addIndexComponents(result, period, combination.getIndex2(), scaling * combination.getScaling2(),
+                    evaluationDate, fixingDate, payment);
+            return;
+        }
+        Map<DiscountDate, DiscountFactor> factors = new EnumMap<>(DiscountDate.class);
+        factors.put(DiscountDate.PAYMENT, payment);
+        if (index instanceof LchLIBORIndex && fixingDate.isAfter(evaluationDate)) {
+            LchLIBORIndex libor = (LchLIBORIndex) index;
+            double length = libor.getPeriodLength(forwardCurveModel, fixingDate);
+            double start = FloatingpointDate.getFloatingPointDateFromDate(evaluationDate, fixingDate)
+                    + libor.getPeriodStartOffset();
+            if (!Double.isFinite(length) || length <= 0.0) {
+                throw new IllegalArgumentException("LIBOR period length must be finite and positive.");
+            }
+            factors.put(DiscountDate.PERIOD_START, getDiscountFactor(evaluationDate, start, forwardCurveModel));
+            factors.put(DiscountDate.PERIOD_END, getDiscountFactor(evaluationDate, start + length, forwardCurveModel));
+        }
+        RandomVariable rate = index.getValue(evaluationDate, fixingDate, forwardCurveModel, null, null).getValues();
+        result.add(new SensitivityComponent(factors, rate, period.getDaycountFraction(),
+                period.getNotional().getConstantNotional().getValues().mult(scaling), period.isPayer()));
+    }
+
+    private static DiscountFactor getDiscountFactor(LocalDateTime evaluationDate, double maturity,
+            ZeroRateModel model) throws CalculationException {
+        return new DiscountFactor(model.getDiscountFactor(evaluationDate, maturity, null, null).getValues(), maturity);
+    }
 }

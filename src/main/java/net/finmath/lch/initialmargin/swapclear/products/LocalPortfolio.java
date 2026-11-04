@@ -7,18 +7,21 @@ import java.util.List;
 import java.util.Map;
 
 import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
+import net.finmath.lch.initialmargin.simulation.modeldata.StochasticCurve;
+import net.finmath.lch.initialmargin.valuation.CurveValuation;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.PairsInitialMargin;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.Currency;
 import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.CurveName;
 import net.finmath.lch.initialmargin.swapclear.products.components.LchSwapLeg;
 import net.finmath.exception.CalculationException;
 import net.finmath.stochastic.RandomVariable;
+import net.finmath.stochastic.Scalar;
 
 
 /**
  * The LocalPortfolio stores swaps with different underlyings (curves) but the same currency. Collection of IndexPortfolio.
  */
-public class LocalPortfolio {
+public class LocalPortfolio implements CurveValuation {
 	
 	private Map<CurveName, IndexPortfolio>			localPortfolio;
 	private final Currency 							currency;
@@ -45,7 +48,7 @@ public class LocalPortfolio {
 	 * 
 	 * @param evaluationDate Time for which IM will be calculated
 	 * @param zeroRateModel Model under which IM is valued (risk, swap values, scenarios)
-	 * @param pathWiseEvaluation If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
+	 * @param pathWise If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
 	 * @param movingScenarioWindow If true the scenarios will move with the model evaluation date -> LMM of ZeroRateModel will generate additional scenarios
 	 * @return The Base Initial Margin of the LCH methodology
 	 * @throws CalculationException
@@ -62,7 +65,7 @@ public class LocalPortfolio {
 	 * 
 	 * @param evaluationDate Time for which IM will be calculated
 	 * @param zeroRateModel Model under which IM is valued (risk, swap values, scenarios)
-	 * @param pathWiseEvaluation If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
+	 * @param pathWise If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
 	 * @param movingScenarioWindow If true the scenarios will move with the model evaluation date -> LMM of ZeroRateModel will generate additional scenarios
 	 * @return The Base Initial Margin of the LCH methodology
 	 * @throws CalculationException
@@ -77,7 +80,7 @@ public class LocalPortfolio {
 	 * 
 	 * @param evaluationDate Time for which IM will be calculated
 	 * @param zeroRateModel Model under which IM is valued (risk, swap values, scenarios)
-	 * @param pathWiseEvaluation If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
+	 * @param pathWise If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
 	 * @param movingScenarioWindow If true the scenarios will move with the model evaluation date -> LMM of ZeroRateModel will generate additional scenarios
 	 * @return The Base Initial Margin of the LCH methodology
 	 * @throws CalculationException
@@ -87,6 +90,17 @@ public class LocalPortfolio {
 	}
 	
 	
+	/** Compatibility valuation for existing swap portfolios. New products use CurveValuation directly. */
+	@Override
+	public RandomVariable getValue(LocalDateTime evaluationDate, ZeroRateModel model,
+			StochasticCurve shifts, Integer pathOrState) throws CalculationException {
+		RandomVariable value = new Scalar(0.0);
+		for (LchSwapLeg leg : getSwaps()) {
+			value = value.add(leg.getValue(evaluationDate, model, shifts, pathOrState));
+		}
+		return value;
+	}
+
 	// Base Initial Margin does value all swaps of the same currency under the same standardized curve
 	public List<LchSwapLeg> getSwaps() {
 		List<LchSwapLeg> swapLegs = new ArrayList<>();

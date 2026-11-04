@@ -125,7 +125,9 @@ public class LchLIBORIndex extends LchAbstractIndex {
 		RandomVariable value;
 		// if index has been already fixed in the past, we use the zero curve of the fixing date, which has not been shifted since the shift is a MPR forward scenario
 		if(fixingDate.isBefore(evaluationDate) || fixingDate.isEqual(evaluationDate)) {
-			value = curveModel.getForwardRate(fixingDate, periodStartOffset, periodStartOffset + periodLength, null, pathOrState);
+			// A known coupon is held fixed under today's curve shocks, including
+			// a fixing on the evaluation date. Keep path values, detach AAD ancestry.
+			value = curveModel.getForwardRate(fixingDate, periodStartOffset, periodStartOffset + periodLength, null, pathOrState).getValues();
 		} else {
 			// if not, we use the curve scenario and value the swap analytically under that curve
 			// when valuing the swap in the future and using the fixingTimes of the schedule which is based on the reference date of the schedule (t=0)

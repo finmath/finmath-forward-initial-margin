@@ -24,6 +24,7 @@ import net.finmath.marketdata.model.curves.CurveInterpolation.InterpolationEntit
 import net.finmath.marketdata.model.curves.CurveInterpolation.InterpolationMethod;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.BrownianMotionFromMersenneRandomNumbers;
+import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFromArrayFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
@@ -82,6 +83,18 @@ public class ModelFactory {
 	 * explicit extrapolation assumption, not a recalibration.
 	 */
 	public static LIBORModelMonteCarloSimulationModel getModel(CurveName curveName, LocalDate simulationEndDate, double maxTenor, BusinessdayCalendar calendar) throws CalculationException {
+		return getModel(curveName, simulationEndDate, maxTenor, calendar, new RandomVariableFromArrayFactory());
+	}
+
+	/**
+	 * Optional differentiable simulation for native-model sensitivity diagnostics.
+	 * For AAD at future process nodes, supply a factory configured with
+	 * {@code isGradientRetainsLeafNodesOnly=false}. Keeping the full simulation
+	 * graph can require substantial memory; use an explicit, limited horizon.
+	 * Local PAIRS zero-curve sensitivities do not require an AAD simulation.
+	 */
+	public static LIBORModelMonteCarloSimulationModel getModel(CurveName curveName, LocalDate simulationEndDate,
+			double maxTenor, BusinessdayCalendar calendar, RandomVariableFactory randomVariableFactory) throws CalculationException {
 		requirePositiveFinite(maxTenor, "Maximum tenor");
 		TimeDiscretization observationTimes = createBusinessdayTimeDiscretization(REFERENCE_DATE.toLocalDate(), simulationEndDate, calendar);
 		double observationHorizon = FloatingpointDate.getFloatingPointDateFromDate(REFERENCE_DATE.toLocalDate(), simulationEndDate);
@@ -99,7 +112,7 @@ public class ModelFactory {
 			double[] volatility = new double[] {0.018188757085591742, 0.023669136470620522, 0.018838312991427623, 0.017398721686694832, 0.016157134065584788, 0.012580974937947433, 0.03715426781325657, 0.005, 0.011789390800298272, 0.023835171110197697, 0.017407408943930395, 0.01647740433369315, 0.014694957571607822, 0.012702232360660029, -0.011628112608719269, 0.014145444499685772, 0.021064553112378974, 0.01704151002264071, 0.016478221525674207, 0.013046920133543867, 0.011028286318128655, 0.003453754464521545, -2.3004198146720653E-4, 0.027332804579421253, 0.014488506318889972, 0.013199204327977335, 0.008914059002711453, 0.008878468292101021, 0.012214531788801015, 0.004927497343985883, 0.030667639991621958, 0.01396130678001358, 0.0152163862643317, 0.008136714960180556, 0.002349377408815333, 0.005, -0.007070862361627261, -0.006351041032061278, 0.026574244710620715, 0.01169447786782754, 0.0042076388094646954, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005};
 			double displacementParameter =  0.5077918637651763;
 			final AnalyticModel curveModel = getAnalyticModel(curveName, zeroRateFixings, zeroRates);
-			return createLIBORMarketModel(numberOfPaths, numberOfFactors, maturityHorizon, LIBOR_PERIOD_LENGTH, simulationTimes, curveModel, curveName, extendBaselineVolatility(volatility, maturityHorizon), displacementParameter);
+			return createLIBORMarketModel(numberOfPaths, numberOfFactors, maturityHorizon, LIBOR_PERIOD_LENGTH, simulationTimes, curveModel, curveName, extendBaselineVolatility(volatility, maturityHorizon), displacementParameter, randomVariableFactory);
 		// standard EUR curve should be used for Base & Floor IM
 		// case EUR_EURIBOR: 
 		default:
@@ -156,10 +169,20 @@ public class ModelFactory {
 			final int numberOfPaths, final int numberOfFactors, 
 			final double liborRateTimeHorzion, final double liborPeriodLength, final double simulationTimeStep, 
 			final AnalyticModel curveModel, CurveName curveName, double[] volatility, double displacementParameter) throws CalculationException {
+		return createLIBORMarketModel(numberOfPaths, numberOfFactors, liborRateTimeHorzion, liborPeriodLength,
+				simulationTimeStep, curveModel, curveName, volatility, displacementParameter, new RandomVariableFromArrayFactory());
+	}
+
+	/** Creates a regular-grid simulation using the supplied random-variable factory. */
+	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(
+			final int numberOfPaths, final int numberOfFactors,
+			final double liborRateTimeHorzion, final double liborPeriodLength, final double simulationTimeStep,
+			final AnalyticModel curveModel, CurveName curveName, double[] volatility, double displacementParameter,
+			RandomVariableFactory randomVariableFactory) throws CalculationException {
 		requirePositiveFinite(liborRateTimeHorzion, "Maturity horizon");
 		requirePositiveFinite(simulationTimeStep, "Simulation time step");
 		TimeDiscretization simulationTimes = new TimeDiscretizationFromArray(0.0, liborRateTimeHorzion, simulationTimeStep, TimeDiscretizationFromArray.ShortPeriodLocation.SHORT_PERIOD_AT_END);
-		return createLIBORMarketModel(numberOfPaths, numberOfFactors, liborRateTimeHorzion, liborPeriodLength, simulationTimes, curveModel, curveName, volatility, displacementParameter);
+		return createLIBORMarketModel(numberOfPaths, numberOfFactors, liborRateTimeHorzion, liborPeriodLength, simulationTimes, curveModel, curveName, volatility, displacementParameter, randomVariableFactory);
 	}
 
 	/**
@@ -171,9 +194,24 @@ public class ModelFactory {
 			final int numberOfPaths, final int numberOfFactors,
 			final double liborRateTimeHorizon, final double liborPeriodLength, final TimeDiscretization simulationTimes,
 			final AnalyticModel curveModel, CurveName curveName, double[] volatility, double displacementParameter) throws CalculationException {
+		return createLIBORMarketModel(numberOfPaths, numberOfFactors, liborRateTimeHorizon, liborPeriodLength,
+				simulationTimes, curveModel, curveName, volatility, displacementParameter, new RandomVariableFromArrayFactory());
+	}
+
+	/**
+	 * Uses one factory for the state, volatility and displacement parameters.
+	 * Brownian increments remain independent, non-differentiable inputs. Future
+	 * native-node AAD requires retaining intermediate nodes in the supplied factory.
+	 */
+	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel(
+			final int numberOfPaths, final int numberOfFactors,
+			final double liborRateTimeHorizon, final double liborPeriodLength, final TimeDiscretization simulationTimes,
+			final AnalyticModel curveModel, CurveName curveName, double[] volatility, double displacementParameter,
+			RandomVariableFactory randomVariableFactory) throws CalculationException {
 		requirePositiveFinite(liborRateTimeHorizon, "Maturity horizon");
 		requirePositiveFinite(liborPeriodLength, "LIBOR period length");
 		Objects.requireNonNull(simulationTimes, "Simulation times");
+		Objects.requireNonNull(randomVariableFactory, "Random-variable factory");
 		if (numberOfPaths <= 0 || numberOfFactors <= 0) {
 			throw new IllegalArgumentException("Number of paths and factors must be positive.");
 		}
@@ -195,7 +233,7 @@ public class ModelFactory {
 		final BrownianMotion brownianMotion = new BrownianMotionFromMersenneRandomNumbers(simulationTimes, numberOfFactors, numberOfPaths, 31415 /* seed */);
 
 		// Create a volatility model: Piecewise constant volatility
-		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(new RandomVariableFromArrayFactory(), simulationTimes, liborPeriodDiscretization, new TimeDiscretizationFromArray(VOLATILITY_BUCKETS), new TimeDiscretizationFromArray(VOLATILITY_BUCKETS), volatility, false);
+		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, simulationTimes, liborPeriodDiscretization, new TimeDiscretizationFromArray(VOLATILITY_BUCKETS), new TimeDiscretizationFromArray(VOLATILITY_BUCKETS), volatility, false);
 
 		// Create a correlation model
 		LIBORCorrelationModel correlationModel = new LIBORCorrelationModelExponentialDecay(simulationTimes, liborPeriodDiscretization, numberOfFactors, 0.05, false);
@@ -204,7 +242,7 @@ public class ModelFactory {
 		AbstractLIBORCovarianceModelParametric covarianceModelParametric = new LIBORCovarianceModelFromVolatilityAndCorrelation(simulationTimes, liborPeriodDiscretization, volatilityModel, correlationModel);
 
 		// Blend the local volatility with the supplied displacement parameter.
-		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(new RandomVariableFromArrayFactory(), covarianceModelParametric, displacementParameter, false);
+		AbstractLIBORCovarianceModelParametric covarianceModelBlended = new BlendedLocalVolatilityModel(randomVariableFactory, covarianceModelParametric, displacementParameter, false);
 
 		// Set model properties
 		final Map<String, String> properties = new HashMap<>();
@@ -223,7 +261,7 @@ public class ModelFactory {
 		 */		
 		final LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(
 				liborPeriodDiscretization, curveModel, forwardCurve, discountCurve, 
-				new RandomVariableFromArrayFactory(), covarianceModelBlended, calibrationItems, properties);
+				randomVariableFactory, covarianceModelBlended, calibrationItems, properties);
 
 		final EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(liborMarketModel, brownianMotion);
 

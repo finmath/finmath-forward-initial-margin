@@ -45,6 +45,8 @@ public class ZeroRateModel implements ZeroRateSource {
     private final BusinessdayCalendar calendar;
     private final int numberOfPaths;
     private final double initialCurveTolerance;
+    private final ZeroRateSource pricingSource;
+    private final ZeroRateModel scenarioModel;
     private final Set<Double> alignedTenors = new HashSet<>();
     // Only scenario requests populate this cache, never arbitrary payment tenors.
     private final Map<Double, NavigableMap<LocalDate, RandomVariable>> scenarioObservations = new HashMap<>();
@@ -113,6 +115,8 @@ public class ZeroRateModel implements ZeroRateSource {
         this.simulatedSource = simulatedSource;
         this.numberOfPaths = numberOfPaths;
         this.initialCurveTolerance = initialCurveTolerance;
+        pricingSource = null;
+        scenarioModel = null;
         firstObservationDate = historicalSource == null ? referenceDate : historicalSource.getFirstDate();
 
         if (historicalSource != null) {
@@ -136,6 +140,30 @@ public class ZeroRateModel implements ZeroRateSource {
         }
     }
 
+    private ZeroRateModel(ZeroRateModel original, ZeroRateSource pricingSource) {
+        historicalSource = original.historicalSource;
+        simulatedSource = original.simulatedSource;
+        referenceDate = original.referenceDate;
+        firstObservationDate = original.firstObservationDate;
+        calendar = original.calendar;
+        numberOfPaths = original.numberOfPaths;
+        initialCurveTolerance = original.initialCurveTolerance;
+        this.pricingSource = Objects.requireNonNull(pricingSource, "pricingSource");
+        scenarioModel = original;
+    }
+
+    /**
+     * Creates a lightweight valuation view with the same dates, paths and pricing
+     * conventions. Used to build local AAD graphs or inspect model coordinates.
+     * The caller supplies the replacement pricing values and is responsible for
+     * their economic alignment. Values retain the usual finite/path/time checks.
+     * Scenario histories always delegate to this original model; constructing a
+     * view neither repeats initial calibration checks nor changes historical data.
+     */
+    public ZeroRateModel withPricingSource(ZeroRateSource source) {
+        return new ZeroRateModel(this, source);
+    }
+
     @Override
     public RandomVariable getZeroRate(LocalDate observationDate, double tenorYears) throws CalculationException {
         Objects.requireNonNull(observationDate, "observationDate");
@@ -144,6 +172,9 @@ public class ZeroRateModel implements ZeroRateSource {
         }
         if (observationDate.isBefore(firstObservationDate)) {
             throw new CalculationException("Observation " + observationDate + " precedes available data at " + firstObservationDate + ".");
+        }
+        if (pricingSource != null) {
+            return checkedValue(pricingSource.getZeroRate(observationDate, tenorYears), observationDate, false);
         }
         if (!observationDate.isAfter(referenceDate) && historicalSource != null) {
             // A frozen historical prefix must not trigger queries into a simulated future.
@@ -202,6 +233,9 @@ public class ZeroRateModel implements ZeroRateSource {
      * The returned map is a snapshot; future calls cannot modify earlier results.
      */
     public NavigableMap<LocalDateTime, RandomVariable> getRateSeries(LocalDateTime evaluationDate, double periodLength) throws CalculationException {
+        if (scenarioModel != null) {
+            return scenarioModel.getRateSeries(evaluationDate, periodLength);
+        }
         LocalDate cutoff = observationDate(evaluationDate);
         if (!Double.isFinite(periodLength) || periodLength <= 0.0) {
             throw new IllegalArgumentException("periodLength must be finite and strictly positive.");
