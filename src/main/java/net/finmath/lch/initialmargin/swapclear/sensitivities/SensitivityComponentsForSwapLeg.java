@@ -44,14 +44,14 @@ public class SensitivityComponentsForSwapLeg {
         for (LchSwapLeg leg : this.swapLegs) {
             for (AbstractProductComponent component : leg.getComponents().getProducts()) {
                 if (!(component instanceof LchPeriod)) {
-                    throw new IllegalArgumentException("Analytical swap deltas require LchPeriod components.");
+                    throw new IllegalArgumentException("Analytical swap sensitivities require LchPeriod components.");
                 }
                 LchPeriod period = (LchPeriod) component;
                 if (period.isNotionalFlow() || period.isExcludeAccruedInterest()) {
-                    throw new IllegalArgumentException("Analytical local deltas do not support notional exchanges or accrued-interest exclusion.");
+                    throw new IllegalArgumentException("Analytical local sensitivities do not support notional exchanges or accrued-interest exclusion.");
                 }
                 if (!(period.getNotional() instanceof LchNotionalFromConstant)) {
-                    throw new IllegalArgumentException("Analytical local deltas require constant notionals.");
+                    throw new IllegalArgumentException("Analytical local sensitivities require constant notionals.");
                 }
                 if (period.isCouponFlow()) {
                     validateIndex(period.getLchIndex());

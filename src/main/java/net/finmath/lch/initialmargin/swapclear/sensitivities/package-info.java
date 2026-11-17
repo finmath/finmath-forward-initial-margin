@@ -1,40 +1,26 @@
 /**
- * Local PAIRS risk of the common projection and discount curve.
- * {@link net.finmath.lch.initialmargin.swapclear.sensitivities.AadZeroRateSensitivities}
- * differentiates the existing curve valuation with respect to independent LCH
- * zero-rate bucket shocks. Deltas are RandomVariables in currency per basis point,
- * stored on the diagonal of SensitivityMatrix. Historical and simulated base
- * curves, including the initial historical closing curve, use the same algorithm.
- * Known coupons are held fixed. Simulation paths are preserved without averaging.
+ * Pathwise analytical PAIRS sensitivities of the common projection and discount curve.
+ * Deltas are in currency per basis point, on the diagonal of
+ * {@link net.finmath.lch.initialmargin.swapclear.sensitivities.SensitivityMatrix}.
+ * Gamma is the full symmetric Hessian in currency per squared basis point,
+ * including both orientations of every mixed derivative. Known fixings are
+ * held fixed and simulation paths are not averaged.
  *
- * <p>The ordinary model is sufficient for these local deltas: simulation ancestry
- * is detached and one reverse sweep covers the portfolio. This does not change
- * the valuation to a Monte Carlo cashflow/conditional-expectation estimator.</p>
+ * <p>{@link net.finmath.lch.initialmargin.swapclear.sensitivities.ForwardAndDiscountSensitivities}
+ * differentiates the complete swap coupon
+ * N alpha P(p) [(P(a)/P(b)-1)/Delta + spread], keeping accrual, forward interval
+ * and payment dates distinct. Fixed/LIBOR coupons and their linear combinations
+ * are supported; unsupported features are rejected explicitly.</p>
  *
- * <p>LmmModelSensitivityProjection is a separate diagnostic. It requires an AAD
- * LMM with intermediate-node retention and computes the Jacobian from the same
- * simulated zero-rate source, including its time/tenor interpolation. Its SVD
- * projection reports ranks and residuals and must not replace full bucket risk.
- * Representing sampled quotes does not guarantee the same interpolated LCH shock
- * at every cashflow date. Compare its per-bp deltas with AadZeroRateSensitivities.
- * Use bounded simulation horizons for this optional full-model AAD calculation.</p>
+ * <p>Forward and discount partial derivatives are computed separately, and
+ * their mixed derivatives are added for common-curve gamma. Linear zero-shock
+ * interpolation maps local deltas with W and Hessians with W-transpose H W;
+ * endpoint extrapolation holds the zero-rate shock constant.</p>
  *
- * <p>The shared {@link net.finmath.lch.initialmargin.valuation.CurveValuation}
- * contract is used by AAD and full scenario revaluation. A single LchSwap can
- * be passed to either AadZeroRateSensitivities or ForwardAndDiscountSensitivities
- * and then to the same PairsInitialMargin calculation. The analytical reference
- * differentiates the complete coupon N alpha P(p) [(P(a)/P(b)-1)/Delta + spread],
- * keeping accrual, forward interval and payment dates distinct. Fixed/LIBOR
- * coupons and their linear combinations are supported; unsupported features
- * are rejected explicitly.</p>
- *
- * <p>Run {@link net.finmath.lch.initialmargin.swapclear.evaluation.SwapForwardImComparison}
- * from the repository root for an end-to-end equality and timing comparison.
- * It uses the same swap, paths, grids and PAIRS rules for both providers, warms
- * up both paths, alternates execution order and separates delta from total
- * forward-IM time. PAIRS ranking uses delta only, followed by full revaluation.
- * TODO: implement and validate gamma and cross-gamma before restoring a
- * second-order ranking approximation.</p>
+ * <p>For shocks h expressed in basis points, the Taylor P&amp;L is
+ * delta-transpose h + 1/2 h-transpose gamma h. The factor 1/2 belongs to the
+ * Taylor expansion, not to the stored Hessian. Payments on or before the
+ * evaluation date have no remaining sensitivity.</p>
  * 
  * @author Raphael Prandtl
  */

@@ -21,11 +21,12 @@ public interface Sensitivities {
 
 	
 	/**
-	 * Calculates the gamma sensitivities mapped to a fixed grid of standard tenors
+	 * Calculates the full symmetric zero-rate Hessian in currency per squared
+	 * basis point, on the same remaining-tenor grid as delta. Mixed derivatives
+	 * are stored in both orientations; no Taylor factor 1/2 is included.
 	 * @param evaluationDate The date of the evaluation
-	 * @return Gamma sensitivities in the provider's matrix convention
+	 * @return Gamma sensitivities, including off-diagonal mixed derivatives
 	 * @throws CalculationException
-	 * @throws UnsupportedOperationException If the provider supplies delta only
 	 */
 	public SensitivityMatrix getGammaSensitivities(LocalDateTime evaluationDate) throws CalculationException;
 			

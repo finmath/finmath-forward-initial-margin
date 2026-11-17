@@ -13,9 +13,8 @@ import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
 import net.finmath.lch.initialmargin.swapclear.products.components.LchNotionalFromConstant;
 import net.finmath.lch.initialmargin.swapclear.products.components.LchPeriod;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
-import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.stochastic.RandomVariable;
+import net.finmath.stochastic.Scalar;
 import net.finmath.time.FloatingpointDate;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingWeekends;
 
@@ -30,7 +29,7 @@ public class LchLinearCombinationIndexTest {
     private static final double FIXED_RATE = 0.01;
 
     @Test
-    public void scaledCouponPriceAndAadDeltaMatchIndependentFormula() throws CalculationException {
+    public void scaledCouponPriceAndParallelCurveBumpMatchIndependentFormula() throws CalculationException {
         assertPriceAndDelta(1.0, false);
     }
 
@@ -48,14 +47,11 @@ public class LchLinearCombinationIndexTest {
         double paymentTime = fixingTime + TENOR;
         LchPeriod period = new LchPeriod(REFERENCE.atStartOfDay(), fixingTime, paymentTime, fixingTime, paymentTime,
                 new LchNotionalFromConstant(NOTIONAL), index, TENOR, true, false, false, false);
-        RandomVariableDifferentiable shift = new RandomVariableDifferentiableAAD(0.0);
-        StochasticCurve shifts = new StochasticCurve();
-        shifts.addRate(1.0 / 365.0, shift);
-        shifts.addRate(2.0, shift);
         LocalDateTime date = REFERENCE.atStartOfDay();
-        RandomVariableDifferentiable value = (RandomVariableDifferentiable)
-                period.getValue(date, date, model, shifts, model, shifts, null);
-        RandomVariable delta = value.getGradient().get(shift.getID());
+        RandomVariable value = price(period, date, model, 0.0);
+        double bump = 1E-5;
+        RandomVariable deltaPerBp = price(period, date, model, bump).sub(price(period, date, model, -bump))
+                .mult(1E-4 / (2.0 * bump));
         for (int path = 0; path < ZERO_RATES.length; path++) {
             double zero = ZERO_RATES[path];
             double forward = Math.expm1(zero * TENOR) / TENOR;
@@ -65,7 +61,15 @@ public class LchLinearCombinationIndexTest {
             double expectedDelta = NOTIONAL * TENOR * discount
                     * ((fixed ? 0.0 : FLOAT_SCALE * Math.exp(zero * TENOR)) - paymentTime * coupon);
             assertEquals(expectedPrice, value.get(path), 1E-8);
-            assertEquals(expectedDelta, delta.get(path), 1E-8);
+            assertEquals(expectedDelta * 1E-4, deltaPerBp.get(path), 3E-7);
         }
+    }
+
+    private static RandomVariable price(LchPeriod period, LocalDateTime date, ZeroRateModel model,
+            double parallelShift) throws CalculationException {
+        StochasticCurve shifts = new StochasticCurve();
+        shifts.addRate(1.0 / 365.0, new Scalar(parallelShift));
+        shifts.addRate(2.0, new Scalar(parallelShift));
+        return period.getValue(date, date, model, shifts, model, shifts, null);
     }
 }

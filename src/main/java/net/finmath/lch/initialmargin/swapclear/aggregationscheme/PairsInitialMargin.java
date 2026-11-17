@@ -11,228 +11,159 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.finmath.exception.CalculationException;
 import net.finmath.lch.initialmargin.simulation.modeldata.RandomVariableSeries;
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGrid;
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGridFactory;
-import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGridFactory.GridType;
+import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
 import net.finmath.lch.initialmargin.simulation.scenarios.CurveScenarios;
 import net.finmath.lch.initialmargin.simulation.scenarios.ScenarioFactory;
 import net.finmath.lch.initialmargin.simulation.scenarios.ScenarioFactory.Simulation;
 import net.finmath.lch.initialmargin.swapclear.products.LocalPortfolio;
-import net.finmath.lch.initialmargin.swapclear.sensitivities.AadZeroRateSensitivities;
-import net.finmath.lch.initialmargin.swapclear.sensitivities.Sensitivities;
+import net.finmath.lch.initialmargin.swapclear.products.components.LchSwapLeg;
+import net.finmath.lch.initialmargin.swapclear.sensitivities.ForwardAndDiscountSensitivities;
+import net.finmath.lch.initialmargin.swapclear.sensitivities.SensitivityComponentsForSwapLeg;
 import net.finmath.lch.initialmargin.swapclear.sensitivities.SensitivityMatrix;
-import net.finmath.lch.initialmargin.valuation.CurveValuation;
-import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
 import net.finmath.time.FloatingpointDate;
 
-
 /**
- * Calculation scheme of the LCH PAIRS initial margin methodology.
- * Candidate scenarios are ranked using local zero-rate AAD delta, followed by
- * full revaluation. TODO: add gamma ranking once a validated provider is available.
- * 
+ * Swap PAIRS core: analytical delta-gamma ranking, full revaluation of the twenty
+ * lowest Taylor PnLs, then ES6 for base IM and VaR13 for floor IM. PAIRS takes the
+ * pathwise maximum. The supplied zero curve is shared by projection and discounting.
  */
 public class PairsInitialMargin {
-	
-	private static final double DECIMAL_TO_BASIS_POINT_CONVERSION_FACTOR = 10000.0;
-	private static final int NUMBER_OF_FULL_REVALUATIONS = 20;
-	
-	
-	/**
-	 * Base IM is calculated on a 10y window of historical scenarios.
-	 * A currency-specific standardized zero curve, e.g. EUR_EURIBOR, is used for swap valuing and risk sampling/mapping.
-	 * Initial Margin is calculated as an Expected-Shortfall on the 6 worst losses
-	 * 
-	 * @param evaluationDate Time for which IM will be calculated
-	 * @param zeroRateModel Model under which IM is valued (risk, swap values, scenarios)
-	 * @param localPortfolio Portfolio consisting of interest swaps
-	 * @param pathWiseEvaluation If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
-	 * @param movingScenarioWindow If true the scenarios will move with the model evaluation date -> LMM of ZeroRateModel will generate additional scenarios
-	 * @return The Base Initial Margin of the LCH methodology
-	 * @throws CalculationException
-	 */
-	public static RandomVariable getBaseInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel, LocalPortfolio localPortfolio, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		return getBaseInitialMargin(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio, pathWiseEvaluation, movingScenarioWindow);
-	}
+    private static final double DECIMAL_TO_BASIS_POINT = 10000.0;
+    private static final int NUMBER_OF_FULL_REVALUATIONS = 20;
 
-	/** Local common-curve valuation of any supported product or portfolio. */
-	public static RandomVariable getBaseInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel, CurveValuation valuation, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		TenorGrid grid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
-		return getBaseInitialMargin(evaluationDate, zeroRateModel, valuation, pathWiseEvaluation, movingScenarioWindow,
-				new AadZeroRateSensitivities(valuation, zeroRateModel, grid), grid);
-	}
+    public static RandomVariable getBaseInitialMargin(LocalDateTime evaluationDate, ZeroRateModel model,
+            LocalPortfolio portfolio, boolean pathwise, boolean movingScenarioWindow) throws CalculationException {
+        return getInitialMargin(evaluationDate, model, portfolio, pathwise, movingScenarioWindow,
+                Simulation.EXPECTED_SHORTFALL_6);
+    }
 
-	/** Delta-ranked PAIRS with an explicitly supplied sensitivity provider and risk grid. */
-	public static RandomVariable getBaseInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-			LocalPortfolio localPortfolio, boolean pathWiseEvaluation, boolean movingScenarioWindow,
-			Sensitivities sensitivities, TenorGrid tenorGrid) throws CalculationException {
-		return getBaseInitialMargin(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio, pathWiseEvaluation,
-				movingScenarioWindow, sensitivities, tenorGrid);
-	}
+    public static RandomVariable getFloorInitialMargin(LocalDateTime evaluationDate, ZeroRateModel model,
+            LocalPortfolio portfolio, boolean pathwise, boolean movingScenarioWindow) throws CalculationException {
+        return getInitialMargin(evaluationDate, model, portfolio, pathwise, movingScenarioWindow, Simulation.VALUE_AT_RISK);
+    }
 
-	public static RandomVariable getBaseInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-			CurveValuation valuation, boolean pathWiseEvaluation, boolean movingScenarioWindow,
-			Sensitivities sensitivities, TenorGrid tenorGrid) throws CalculationException {
-		return getRankedInitialMargin(evaluationDate, zeroRateModel, valuation,
-				sensitivities.getDeltaSensitivities(evaluationDate), Simulation.EXPECTED_SHORTFALL_6,
-				pathWiseEvaluation, movingScenarioWindow, tenorGrid);
-	}
-	
-	
+    public static RandomVariable getPairsInitialMargin(LocalDateTime evaluationDate, ZeroRateModel model,
+            LocalPortfolio portfolio, boolean pathwise, boolean movingScenarioWindow) throws CalculationException {
+        TenorGrid grid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
+        ForwardAndDiscountSensitivities sensitivities = sensitivities(portfolio, model, grid);
+        SensitivityMatrix delta = sensitivities.getDeltaSensitivities(evaluationDate);
+        SensitivityMatrix gamma = sensitivities.getGammaSensitivities(evaluationDate);
+        RandomVariable base = getRankedInitialMargin(evaluationDate, model, portfolio, delta, gamma,
+                Simulation.EXPECTED_SHORTFALL_6, pathwise, movingScenarioWindow, grid);
+        RandomVariable floor = getRankedInitialMargin(evaluationDate, model, portfolio, delta, gamma,
+                Simulation.VALUE_AT_RISK, pathwise, movingScenarioWindow, grid);
+        return base.floor(floor);
+    }
 
-	/**
-	 * Floor IM is calculated on a 10y window of historical scenarios plus fixed stress period January 2008 - June 2010.
-	 * A currency-specific standardized zero curve, e.g. EUR_EURIBOR, is used for swap valuing and risk sampling/mapping.
-	 * Initial Margin is calculated as a Value-at-Risk at 13th worst loss.
-	 * 
-	 * @param evaluationDate Time for which IM will be calculated
-	 * @param zeroRateModel Model under which IM is valued (risk, swap values, scenarios)
-	 * @param localPortfolio Portfolio consisting of interest swaps
-	 * @param pathWiseEvaluation If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
-	 * @param movingScenarioWindow If true the scenarios will move with the model evaluation date -> LMM of ZeroRateModel will generate additional scenarios
-	 * @return The Base Initial Margin of the LCH methodology
-	 * @throws CalculationException
-	 */
-	public static RandomVariable getFloorInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel, LocalPortfolio localPortfolio, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		return getFloorInitialMargin(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio, pathWiseEvaluation, movingScenarioWindow);
-	}
+    private static RandomVariable getInitialMargin(LocalDateTime date, ZeroRateModel model,
+            LocalPortfolio portfolio, boolean pathwise, boolean moving, Simulation simulation) throws CalculationException {
+        TenorGrid grid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
+        ForwardAndDiscountSensitivities sensitivities = sensitivities(portfolio, model, grid);
+        return getRankedInitialMargin(date, model, portfolio, sensitivities.getDeltaSensitivities(date),
+                sensitivities.getGammaSensitivities(date), simulation, pathwise, moving, grid);
+    }
 
-	public static RandomVariable getFloorInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel, CurveValuation valuation, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		TenorGrid grid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
-		return getFloorInitialMargin(evaluationDate, zeroRateModel, valuation, pathWiseEvaluation, movingScenarioWindow,
-				new AadZeroRateSensitivities(valuation, zeroRateModel, grid), grid);
-	}
+    private static ForwardAndDiscountSensitivities sensitivities(LocalPortfolio portfolio, ZeroRateModel model,
+            TenorGrid grid) {
+        return new ForwardAndDiscountSensitivities(new SensitivityComponentsForSwapLeg(portfolio.getSwaps(), model, model), grid);
+    }
 
-	/** Delta-ranked floor IM; unavailable gamma is never treated as a zero matrix. */
-	public static RandomVariable getFloorInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-			LocalPortfolio localPortfolio, boolean pathWiseEvaluation, boolean movingScenarioWindow,
-			Sensitivities sensitivities, TenorGrid tenorGrid) throws CalculationException {
-		return getFloorInitialMargin(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio, pathWiseEvaluation,
-				movingScenarioWindow, sensitivities, tenorGrid);
-	}
-
-	public static RandomVariable getFloorInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-			CurveValuation valuation, boolean pathWiseEvaluation, boolean movingScenarioWindow,
-			Sensitivities sensitivities, TenorGrid tenorGrid) throws CalculationException {
-		return getRankedInitialMargin(evaluationDate, zeroRateModel, valuation,
-				sensitivities.getDeltaSensitivities(evaluationDate), Simulation.VALUE_AT_RISK,
-				pathWiseEvaluation, movingScenarioWindow, tenorGrid);
-	}
-	
-	
-	/**
-	 * Pairs IM is the maximum of the Base IM and Floor IM.
-	 * 
-	 * @param evaluationDate Time for which IM will be calculated
-	 * @param zeroRateModel Model under which IM is valued (risk, swap values, scenarios)
-	 * @param localPortfolio Portfolio consisting of interest swaps
-	 * @param pathWiseEvaluation If true scenarios and IM will be calculated on each path separately, otherwise as the average of all paths
-	 * @param movingScenarioWindow If true the scenarios will move with the model evaluation date -> LMM of ZeroRateModel will generate additional scenarios
-	 * @return The Base Initial Margin of the LCH methodology
-	 * @throws CalculationException
-	 */
-	public static RandomVariable getPairsInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel, LocalPortfolio localPortfolio, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		return getPairsInitialMargin(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio, pathWiseEvaluation, movingScenarioWindow);
-	}
-
-	public static RandomVariable getPairsInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel, CurveValuation valuation, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		TenorGrid grid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
-		return getPairsInitialMargin(evaluationDate, zeroRateModel, valuation, pathWiseEvaluation, movingScenarioWindow,
-				new AadZeroRateSensitivities(valuation, zeroRateModel, grid), grid);
-	}
-
-	/** Delta-ranked base/floor comparison using a common provider and complete risk grid. */
-	public static RandomVariable getPairsInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-			LocalPortfolio localPortfolio, boolean pathWiseEvaluation, boolean movingScenarioWindow,
-			Sensitivities sensitivities, TenorGrid tenorGrid) throws CalculationException {
-		return getPairsInitialMargin(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio, pathWiseEvaluation,
-				movingScenarioWindow, sensitivities, tenorGrid);
-	}
-
-	public static RandomVariable getPairsInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-			CurveValuation valuation, boolean pathWiseEvaluation, boolean movingScenarioWindow,
-			Sensitivities sensitivities, TenorGrid tenorGrid) throws CalculationException {
-		SensitivityMatrix delta = sensitivities.getDeltaSensitivities(evaluationDate);
-		RandomVariable baseInitialMargin = getRankedInitialMargin(evaluationDate, zeroRateModel, valuation, delta,
-				Simulation.EXPECTED_SHORTFALL_6, pathWiseEvaluation, movingScenarioWindow, tenorGrid);
-		RandomVariable floorInitialMargin = getRankedInitialMargin(evaluationDate, zeroRateModel, valuation, delta,
-				Simulation.VALUE_AT_RISK, pathWiseEvaluation, movingScenarioWindow, tenorGrid);
-		if (pathWiseEvaluation) {
-			return baseInitialMargin.floor(floorInitialMargin);
-		}
-		return baseInitialMargin.getAverage() > floorInitialMargin.getAverage() ? baseInitialMargin : floorInitialMargin;
-	}
-	
-	
-	private static RandomVariable getRankedInitialMargin(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            CurveValuation valuation, SensitivityMatrix delta, Simulation simulation, boolean pathWiseEvaluation,
-            boolean movingScenarioWindow, TenorGrid tenorGrid)
-            throws CalculationException {
-        LocalDateTime scenarioDate = movingScenarioWindow ? evaluationDate : zeroRateModel.getReferenceDate();
-        InitialMarginContainer data = getDeltaScenarioData(delta,
-                new ScenarioFactory(zeroRateModel, simulation), scenarioDate, simulation, tenorGrid);
-        if (!pathWiseEvaluation) {
-            return getInitialMarginFromLosses(getNWorstLosses(evaluationDate, valuation, zeroRateModel,
-                    data, simulation, NUMBER_OF_FULL_REVALUATIONS, null), simulation);
+    private static RandomVariable getRankedInitialMargin(LocalDateTime date, ZeroRateModel model,
+            LocalPortfolio portfolio, SensitivityMatrix delta, SensitivityMatrix gamma, Simulation simulation,
+            boolean pathwise, boolean moving, TenorGrid grid) throws CalculationException {
+        // Empty or fully expired swap portfolios have no remaining cashflows.
+        if (delta.getSensitivityMatrix().isEmpty() && gamma.getSensitivityMatrix().isEmpty()) {
+            return new Scalar(0.0);
         }
-        double[] margins = new double[zeroRateModel.getNumberOfPaths()];
+        LocalDateTime scenarioDate = moving ? date : model.getReferenceDate();
+        InitialMarginContainer data = getScenarioData(delta, gamma, new ScenarioFactory(model, simulation),
+                scenarioDate, simulation, grid);
+        if (!pathwise) {
+            return getInitialMarginFromLosses(getRevaluationLosses(date, portfolio, model,
+                    data.getCurveScenarios(simulation), data.getPnlSeries(simulation)
+                            .getNLowestValues(NUMBER_OF_FULL_REVALUATIONS, null), null), simulation);
+        }
+        double[] margins = new double[model.getNumberOfPaths()];
         for (int path = 0; path < margins.length; path++) {
-            margins[path] = getInitialMarginFromLosses(getNWorstLosses(evaluationDate, valuation, zeroRateModel,
-                    data, simulation, NUMBER_OF_FULL_REVALUATIONS, path), simulation).get(0);
+            List<LocalDateTime> dates = data.getPnlSeries(simulation).getNLowestValues(NUMBER_OF_FULL_REVALUATIONS, path);
+            margins[path] = getInitialMarginFromLosses(getRevaluationLosses(date, portfolio, model,
+                    data.getCurveScenarios(simulation), dates, path), simulation).get(0);
         }
-        double time = FloatingpointDate.getFloatingPointDateFromDate(zeroRateModel.getReferenceDate(), evaluationDate);
-        return new RandomVariableFromDoubleArray(time, margins);
+        return new RandomVariableFromDoubleArray(FloatingpointDate.getFloatingPointDateFromDate(model.getReferenceDate(), date), margins);
     }
 
     /**
-     * Complete scenario curves and first-order PnL for BP-scaled zero-rate deltas.
-     * Gamma is not calculated or represented by an empty matrix. The fixed risk
-     * grid, rather than the nonzero delta entries, determines the revaluation curve.
+     * Builds complete risk-grid scenarios and delta.h + 1/2 h^T.gamma.h.
+     * Delta is currency/bp, gamma is the full symmetric Hessian in currency/bp^2;
+     * scenario shocks are decimal zero-rate changes. Both matrix orientations of
+     * mixed gamma are traversed, with exactly one Taylor factor 1/2.
      */
-    public static InitialMarginContainer getDeltaScenarioData(SensitivityMatrix delta, ScenarioFactory scenarios,
-            LocalDateTime scenarioDate, Simulation simulation, TenorGrid tenorGrid) throws CalculationException {
+    public static InitialMarginContainer getScenarioData(SensitivityMatrix delta, SensitivityMatrix gamma,
+            ScenarioFactory scenarios, LocalDateTime scenarioDate, Simulation simulation, TenorGrid grid)
+            throws CalculationException {
         Objects.requireNonNull(delta, "delta");
-        CurveScenarios curves = getCurveScenarios(scenarios, scenarioDate, tenorGrid);
-        HashMap<LocalDateTime, RandomVariable> zeroPnls = new HashMap<>();
-        for (LocalDateTime date : curves.getSeries(tenorGrid.getFixingSmallest()).getSeries().keySet()) {
-            zeroPnls.put(date, new Scalar(0.0));
+        Objects.requireNonNull(gamma, "gamma");
+        CurveScenarios curves = getCurveScenarios(scenarios, scenarioDate, grid);
+        HashMap<LocalDateTime, RandomVariable> values = new HashMap<>();
+        for (LocalDateTime date : curves.getSeries(grid.getFixingSmallest()).getSeries().keySet()) {
+            values.put(date, new Scalar(0.0));
         }
-        RandomVariableSeries pnl = new RandomVariableSeries(zeroPnls);
         for (Map.Entry<Double, TreeMap<Double, RandomVariable>> row : delta.getSensitivityMatrix().entrySet()) {
-            RandomVariable sensitivity = row.getValue().get(row.getKey());
-            if (sensitivity == null || row.getValue().size() != 1) {
-                throw new IllegalArgumentException("Delta sensitivities must be diagonal at tenor " + row.getKey());
+            if (row.getValue().size() != 1 || !row.getValue().containsKey(row.getKey())) {
+                throw new IllegalArgumentException("Delta must be diagonal at tenor " + row.getKey());
             }
-            if (!curves.containsSeries(row.getKey())) {
-                throw new IllegalArgumentException("Delta tenor is outside the scenario risk grid: " + row.getKey());
+            RandomVariableSeries shifts = requireSeries(curves, row.getKey());
+            RandomVariable sensitivity = row.getValue().get(row.getKey()).mult(DECIMAL_TO_BASIS_POINT);
+            for (LocalDateTime date : values.keySet()) {
+                values.put(date, values.get(date).addProduct(shifts.getValue(date), sensitivity));
             }
-            pnl.sum(getFirstOrderTaylorTerm(curves.getSeries(row.getKey()), sensitivity));
         }
-        InitialMarginContainer result = new InitialMarginContainer();
-        result.setDeltaSensitivities(delta);
-        result.setCurveScenarios(simulation, curves);
-        result.setPnLSeries(simulation, pnl);
-        return result;
+        for (Map.Entry<Double, TreeMap<Double, RandomVariable>> row : gamma.getSensitivityMatrix().entrySet()) {
+            RandomVariableSeries first = requireSeries(curves, row.getKey());
+            for (Map.Entry<Double, RandomVariable> column : row.getValue().entrySet()) {
+                RandomVariableSeries second = requireSeries(curves, column.getKey());
+                RandomVariable coefficient = column.getValue().mult(0.5 * DECIMAL_TO_BASIS_POINT * DECIMAL_TO_BASIS_POINT);
+                for (LocalDateTime date : values.keySet()) {
+                    values.put(date, values.get(date).addProduct(first.getValue(date).mult(second.getValue(date)), coefficient));
+                }
+            }
+        }
+        InitialMarginContainer data = new InitialMarginContainer();
+        data.setDeltaSensitivities(delta);
+        data.setGammaSensitivities(gamma);
+        data.setCurveScenarios(simulation, curves);
+        data.setPnLSeries(simulation, new RandomVariableSeries(values));
+        return data;
     }
 
-    /** Builds all risk-grid shocks, including buckets with zero or absent delta. */
-    public static CurveScenarios getCurveScenarios(ScenarioFactory scenarios, LocalDateTime scenarioDate,
-            TenorGrid tenorGrid) throws CalculationException {
+    private static RandomVariableSeries requireSeries(CurveScenarios curves, double tenor) {
+        if (!curves.containsSeries(tenor)) {
+            throw new IllegalArgumentException("Sensitivity tenor is outside the scenario risk grid: " + tenor);
+        }
+        return curves.getSeries(tenor);
+    }
+
+    /** Includes zero-risk buckets, which are still needed for shocked-curve interpolation. */
+    public static CurveScenarios getCurveScenarios(ScenarioFactory scenarios, LocalDateTime date, TenorGrid grid)
+            throws CalculationException {
         Objects.requireNonNull(scenarios, "scenarios");
-        Objects.requireNonNull(scenarioDate, "scenarioDate");
-        Objects.requireNonNull(tenorGrid, "tenorGrid");
-        if (tenorGrid.getFixings().isEmpty()) {
+        Objects.requireNonNull(date, "scenarioDate");
+        Objects.requireNonNull(grid, "grid");
+        if (grid.getFixings().isEmpty()) {
             throw new IllegalArgumentException("Scenario risk grid must not be empty.");
         }
         CurveScenarios curves = new CurveScenarios();
         Set<LocalDateTime> dates = null;
-        for (double tenor : tenorGrid.getFixings()) {
-            RandomVariableSeries series = scenarios.getTenorPointScenarios(scenarioDate, tenor);
+        for (double tenor : grid.getFixings()) {
+            RandomVariableSeries series = scenarios.getTenorPointScenarios(date, tenor);
             if (series.getSeries().isEmpty()) {
                 throw new CalculationException("No scenarios at tenor " + tenor);
             }
@@ -245,111 +176,77 @@ public class PairsInitialMargin {
         return curves;
     }
 
-
-	/*
-	 * The Taylor expansion for the PnL calculation is a vector operation.
-	 * The entries of the vector are the pillar points on which the scenarios and sensitivities are sampled.
-	 * This method equals the element-wise multiplication of the i-th entries
-	 */
-	private static RandomVariableSeries getFirstOrderTaylorTerm(RandomVariableSeries tenorPointScenario, RandomVariable sensitivity) {
-		HashMap<LocalDateTime, RandomVariable> pnlOnTenorPoint = new HashMap<>();
-		for (Map.Entry<LocalDateTime, RandomVariable> shift : tenorPointScenario.getSeries().entrySet()) {
-			pnlOnTenorPoint.put(shift.getKey(), shift.getValue().mult(DECIMAL_TO_BASIS_POINT_CONVERSION_FACTOR).mult(sensitivity));
-		}
-		return new RandomVariableSeries(pnlOnTenorPoint);
-	}
-
-	
-	// Revalue the same product used by AAD, under its delta-ranked candidate scenarios.
-	private static List<RandomVariable> getNWorstLosses(LocalDateTime evaluationDate, CurveValuation valuation,
-            ZeroRateModel zeroRateModel, InitialMarginContainer data, Simulation simulation,
-            int numberOfLosses, Integer pathOrState) throws CalculationException {
-        List<LocalDateTime> dates = data.getPnlSeries(simulation).getNLowestValues(numberOfLosses, pathOrState);
-        return getRevaluationLosses(evaluationDate, valuation, zeroRateModel,
-                data.getCurveScenarios(simulation), dates, pathOrState);
-    }
-
-    /**
-     * Full revaluation of every supplied scenario, using the same valuation and
-     * ES/VaR aggregation as delta-ranked PAIRS. No sensitivity provider is required.
-     */
-    public static RandomVariable getInitialMarginWithFullRevaluation(LocalDateTime evaluationDate,
-            ZeroRateModel zeroRateModel, CurveValuation valuation, CurveScenarios scenarios,
-            Simulation simulation, boolean pathWiseEvaluation) throws CalculationException {
-        Objects.requireNonNull(valuation, "valuation");
+    /** Exhaustive scenario revaluation for comparison with the twenty-candidate PAIRS method. */
+    public static RandomVariable getInitialMarginWithFullRevaluation(LocalDateTime date, ZeroRateModel model,
+            LocalPortfolio portfolio, CurveScenarios scenarios, Simulation simulation, boolean pathwise)
+            throws CalculationException {
         if (scenarios.getCurveScenarios().isEmpty()) {
             throw new CalculationException("Full revaluation requires scenario curves.");
         }
-        List<LocalDateTime> dates = new ArrayList<>(scenarios.getCurveScenarios().values().iterator().next()
-                .getSeries().keySet());
-        if (!pathWiseEvaluation) {
-            return getInitialMarginFromLosses(getRevaluationLosses(evaluationDate, valuation, zeroRateModel,
-                    scenarios, dates, null), simulation);
+        List<LocalDateTime> dates = new ArrayList<>(scenarios.getCurveScenarios().values().iterator().next().getSeries().keySet());
+        if (!pathwise) {
+            return getInitialMarginFromLosses(getRevaluationLosses(date, portfolio, model, scenarios, dates, null), simulation);
         }
-        double[] margins = new double[zeroRateModel.getNumberOfPaths()];
+        double[] margins = new double[model.getNumberOfPaths()];
         for (int path = 0; path < margins.length; path++) {
-            margins[path] = getInitialMarginFromLosses(getRevaluationLosses(evaluationDate, valuation,
-                    zeroRateModel, scenarios, dates, path), simulation).get(0);
+            margins[path] = getInitialMarginFromLosses(getRevaluationLosses(date, portfolio, model, scenarios, dates, path), simulation).get(0);
         }
-        double time = FloatingpointDate.getFloatingPointDateFromDate(zeroRateModel.getReferenceDate(), evaluationDate);
-        return new RandomVariableFromDoubleArray(time, margins);
+        return new RandomVariableFromDoubleArray(FloatingpointDate.getFloatingPointDateFromDate(model.getReferenceDate(), date), margins);
     }
 
-    private static List<RandomVariable> getRevaluationLosses(LocalDateTime evaluationDate,
-            CurveValuation valuation, ZeroRateModel zeroRateModel, CurveScenarios scenarios,
-            List<LocalDateTime> dates, Integer pathOrState) throws CalculationException {
-        RandomVariable baseValue = valuation.getValue(evaluationDate, zeroRateModel, null, pathOrState);
-        List<RandomVariable> losses = new ArrayList<>(dates.size());
-        for (LocalDateTime date : dates) {
-            losses.add(valuation.getValue(evaluationDate, zeroRateModel, scenarios.getCurveShifts(date), pathOrState)
-                    .sub(baseValue));
+    /** Signed PnL (shocked value minus base value), with all swap legs netted before ranking. */
+    public static List<RandomVariable> getRevaluationLosses(LocalDateTime date, LocalPortfolio portfolio,
+            ZeroRateModel model, CurveScenarios scenarios, List<LocalDateTime> dates, Integer path)
+            throws CalculationException {
+        List<RandomVariable> values = new ArrayList<>();
+        for (int index = 0; index < dates.size(); index++) {
+            values.add(new Scalar(0.0));
         }
-        return losses;
+        for (LchSwapLeg leg : portfolio.getSwaps()) {
+            RandomVariable base = leg.getValue(date, model, null, path);
+            for (int index = 0; index < dates.size(); index++) {
+                values.set(index, values.get(index).add(leg.getValue(date, model,
+                        scenarios.getCurveShifts(dates.get(index)), path).sub(base)));
+            }
+        }
+        return values;
     }
 
-	
-	/** ES/VaR aggregation shared by delta PnL and full revaluation. */
-	public static RandomVariable getInitialMarginFromLosses(List<RandomVariable> nWorstLosses, Simulation simulation) throws CalculationException {
-	    int numberOfLosses;
-	    switch (simulation) {
-        	case EXPECTED_SHORTFALL_4:
-        		numberOfLosses = 4; 
-        		break;
-	        case EXPECTED_SHORTFALL_6:
-	        	numberOfLosses = 6; 
-	            break;
-	        case VALUE_AT_RISK:
-	        	numberOfLosses = 13;
-	            break;
-	        default:
-	            throw new IllegalArgumentException("Unsupported simulation type: " + simulation);
-	    }
-	    if (nWorstLosses.size() < numberOfLosses) {
-	        throw new CalculationException("Initial margin requires at least " + numberOfLosses + " scenario losses.");
-	    }
-	    // In case of path-wise evaluation we pass a List of Scalars to the method, therefore the comparator works for both cases
-	    PriorityQueue<RandomVariable> worstLosses = new PriorityQueue<>(Comparator.comparingDouble( losses -> {
-	    	return losses.mult(-1.0).getAverage();
-	    }));
-	    for (RandomVariable loss : nWorstLosses) {
-	        worstLosses.add(loss);
-	        if (worstLosses.size() > numberOfLosses) {
-	            worstLosses.poll(); 
-	        }
-	    }	    
-	    RandomVariable initialMargin = new Scalar(0.0);
-	    if (simulation == Simulation.EXPECTED_SHORTFALL_4 || simulation == Simulation.EXPECTED_SHORTFALL_6) {
-	    	// ES: average of 4/6 worst losses
-	        for (RandomVariable loss : worstLosses) {
-	            initialMargin = initialMargin.add(loss);
-	        }
-	        initialMargin = initialMargin.div(numberOfLosses).abs(); 
-	    } else if (simulation == Simulation.VALUE_AT_RISK) {
-	    	// VaR: 13th worst loss
-	        initialMargin = worstLosses.poll().abs();
-	    }
-		return initialMargin;
-	}
-
-	
+    /** Selects the lowest signed PnLs and returns max(0,-ES) or max(0,-VaR). */
+    public static RandomVariable getInitialMarginFromLosses(List<RandomVariable> pnls, Simulation simulation)
+            throws CalculationException {
+        int count;
+        switch (simulation) {
+        case EXPECTED_SHORTFALL_4: count = 4; break;
+        case EXPECTED_SHORTFALL_6: count = 6; break;
+        case VALUE_AT_RISK: count = 13; break;
+        default: throw new IllegalArgumentException("Unsupported simulation: " + simulation);
+        }
+        if (pnls.size() < count) {
+            throw new CalculationException("Initial margin requires at least " + count + " scenario PnLs.");
+        }
+        // Scalars give pathwise ranking; otherwise the average ranks a common scenario set.
+        PriorityQueue<RandomVariable> worst = new PriorityQueue<>(Comparator.comparingDouble(pnl -> -pnl.getAverage()));
+        for (RandomVariable pnl : pnls) {
+            for (int path = 0; path < pnl.size(); path++) {
+                if (!Double.isFinite(pnl.get(path))) {
+                    throw new CalculationException("Scenario PnL must be finite on every path.");
+                }
+            }
+            worst.add(pnl);
+            if (worst.size() > count) {
+                worst.poll();
+            }
+        }
+        RandomVariable tail = new Scalar(0.0);
+        if (simulation == Simulation.VALUE_AT_RISK) {
+            tail = worst.peek();
+        } else {
+            for (RandomVariable pnl : worst) {
+                tail = tail.add(pnl);
+            }
+            tail = tail.div(count);
+        }
+        return tail.mult(-1.0).floor(0.0);
+    }
 }

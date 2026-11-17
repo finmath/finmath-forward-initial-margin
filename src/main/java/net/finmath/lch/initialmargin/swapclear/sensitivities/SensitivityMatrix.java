@@ -9,7 +9,9 @@ import net.finmath.stochastic.Scalar;
  * A RandomVariable matrix to store the delta and gamma sensitivities.
  * The sensitivities are sampled only on fixed tenor grid points, which represent the keys of the two maps.
  * Delta sensitivities are only stored on the diagonal of the matrix, where both keys are equal.
- * Gamma sensitivities are the second order derivative of the discount factors (cross-gamma included) and, therefore, rely on two maturity dates.
+ * Gamma is the full symmetric product-value Hessian in currency per squared
+ * basis point, including both orientations of mixed derivatives. Its entries
+ * do not include the Taylor factor 1/2. Delta is in currency per basis point.
  * The class is solely used for storing calculated sensitivities and returning them for the Taylor Expansion -> no path dependence or interpolation method needed
  * 
  * @author Raphael Prandtl

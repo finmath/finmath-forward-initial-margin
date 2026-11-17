@@ -1,6 +1,5 @@
 package net.finmath.lch.initialmargin.swapclear.evaluation;
 
-import static net.finmath.lch.initialmargin.swapclear.aggregationscheme.PairsInitialMargin.getInitialMarginFromLosses;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import net.finmath.lch.initialmargin.simulation.modeldata.RandomVariableSeries;
-import net.finmath.lch.initialmargin.simulation.modeldata.TenorGrid;
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGridFactory;
 import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
 import net.finmath.lch.initialmargin.simulation.modeldata.TenorGridFactory.GridType;
@@ -23,9 +21,8 @@ import net.finmath.lch.initialmargin.swapclear.aggregationscheme.SchemeStorage.C
 import net.finmath.lch.initialmargin.swapclear.libormodels.ModelFactory;
 import net.finmath.lch.initialmargin.swapclear.products.LchSwap;
 import net.finmath.lch.initialmargin.swapclear.products.LocalPortfolio;
-import net.finmath.lch.initialmargin.swapclear.sensitivities.AadZeroRateSensitivities;
-import net.finmath.lch.initialmargin.swapclear.sensitivities.Sensitivities;
-import net.finmath.lch.initialmargin.valuation.CurveValuation;
+import net.finmath.lch.initialmargin.swapclear.sensitivities.ForwardAndDiscountSensitivities;
+import net.finmath.lch.initialmargin.swapclear.sensitivities.SensitivityComponentsForSwapLeg;
 import net.finmath.exception.CalculationException;
 
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
@@ -136,7 +133,7 @@ public class MarginValuationAdjustment {
 	
 	
 	public static void getMVAWithTaylorPnL(LocalPortfolio localPortfolio, ZeroRateModel zeroRateModel, LIBORModelMonteCarloSimulationModel liborModel, LocalDateTime startDate, int daysPerStep, double fundingSpread, Simulation simulation, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-		System.out.println("Calculating Margin Valuation Adjustment Delta PnL:");
+		System.out.println("Calculating Margin Valuation Adjustment Taylor PnL:");
 		String analysis = "Average";
 		if (pathWiseEvaluation) {
 			analysis = "Pathwise";
@@ -147,8 +144,8 @@ public class MarginValuationAdjustment {
 		}
 		System.out.println("Simulation: " + simulation.toString() + " | Evaluation: " + analysis + " | Scenarios: " + window);
 
-		TenorGrid tenorGrid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
-		Sensitivities sensitivities = new AadZeroRateSensitivities(localPortfolio, zeroRateModel, tenorGrid);
+		SensitivityComponentsForSwapLeg sensitivityComponents = new SensitivityComponentsForSwapLeg(localPortfolio.getSwaps(), zeroRateModel, zeroRateModel);
+		ForwardAndDiscountSensitivities sensitivities = new ForwardAndDiscountSensitivities(sensitivityComponents, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID));
 		ScenarioFactory scenarios = new ScenarioFactory(zeroRateModel, simulation);	
 
 		RandomVariable mva = new RandomVariableFromDoubleArray(0.0);
@@ -158,7 +155,7 @@ public class MarginValuationAdjustment {
 		long startTime = System.nanoTime();
 		for (LocalDateTime date = startDate; date.isBefore(lastPaymentDate); date = date.plusDays(daysPerStep)) {
 			if (SchemeStorage.getLocalCalendar(Currency.EUR).isBusinessday(date.toLocalDate())) {
-				RandomVariable initialMargin = getInitialMarginWithTaylorPnL(date, zeroRateModel, sensitivities, scenarios, simulation, pathWiseEvaluation, movingScenarioWindow, tenorGrid);
+				RandomVariable initialMargin = getInitialMarginWithTaylorPnL(date, zeroRateModel, sensitivities, scenarios, simulation, pathWiseEvaluation, movingScenarioWindow);
 //				System.out.println("Initial Margin as of " + date +": " + initialMargin.getAverage());
 				// d(1/N^fd(t)) = 1/N^fd(t_i+1) - 1/N^fd(t_i)
 				RandomVariable fundingNumeraire = liborModel.getNumeraire(nextTime).mult(Math.exp((nextTime) * fundingSpread)).invert();
@@ -176,38 +173,27 @@ public class MarginValuationAdjustment {
 	}
 	
 	
-    /** First-order PnL only. TODO: gamma requires a separately validated provider. */
+    /** Analytical delta-gamma PnL only, without scenario revaluation. */
     public static RandomVariable getInitialMarginWithTaylorPnL(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            Sensitivities sensitivities, ScenarioFactory scenarios, Simulation simulation,
+            ForwardAndDiscountSensitivities sensitivities, ScenarioFactory scenarios, Simulation simulation,
             boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-        return getInitialMarginWithTaylorPnL(evaluationDate, zeroRateModel, sensitivities, scenarios, simulation,
-                pathWiseEvaluation, movingScenarioWindow, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID));
+        LocalDateTime scenarioDate = movingScenarioWindow ? evaluationDate : zeroRateModel.getReferenceDate();
+        RandomVariableSeries pnls = PairsInitialMargin.getScenarioData(
+                sensitivities.getDeltaSensitivities(evaluationDate), sensitivities.getGammaSensitivities(evaluationDate),
+                scenarios, scenarioDate, simulation, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID))
+                .getPnlSeries(simulation);
+        if (!pathWiseEvaluation) {
+            return PairsInitialMargin.getInitialMarginFromLosses(getLosses(pnls, null), simulation);
+        }
+        double[] margins = new double[zeroRateModel.getNumberOfPaths()];
+        for (int path = 0; path < margins.length; path++) {
+            margins[path] = PairsInitialMargin.getInitialMarginFromLosses(getLosses(pnls, path), simulation).get(0);
+        }
+        double time = FloatingpointDate.getFloatingPointDateFromDate(zeroRateModel.getReferenceDate(), evaluationDate);
+        return new RandomVariableFromDoubleArray(time, margins);
     }
 
-    public static RandomVariable getInitialMarginWithTaylorPnL(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            Sensitivities sensitivities, ScenarioFactory scenarios, Simulation simulation,
-            boolean pathWiseEvaluation, boolean movingScenarioWindow, TenorGrid tenorGrid) throws CalculationException {
-        LocalDateTime scenarioDate = movingScenarioWindow ? evaluationDate : zeroRateModel.getReferenceDate();
-        RandomVariableSeries pnLSeries = PairsInitialMargin.getDeltaScenarioData(
-                sensitivities.getDeltaSensitivities(evaluationDate), scenarios, scenarioDate, simulation, tenorGrid)
-                .getPnlSeries(simulation);
-		RandomVariable initialMargin;
-		if (pathWiseEvaluation) {
-			double[] initialMarginRealizations = new double[zeroRateModel.getNumberOfPaths()];
-			for (int pathNumber = 0; pathNumber < zeroRateModel.getNumberOfPaths(); pathNumber++) {
-				List<RandomVariable> pnLs = getLosses(pnLSeries, pathNumber);
-				initialMarginRealizations[pathNumber] = getInitialMarginFromLosses(pnLs, simulation).get(pathNumber);
-			}
-			double filtrationTime = FloatingpointDate.getFloatingPointDateFromDate(zeroRateModel.getReferenceDate(), evaluationDate);
-			initialMargin = new RandomVariableFromDoubleArray(filtrationTime, initialMarginRealizations);	
-		} else {
-			List<RandomVariable> pnLs = getLosses(pnLSeries, null);
-    		initialMargin = getInitialMarginFromLosses(pnLs, simulation);
-		}
-		return initialMargin;
-	}
-	
-	
+
 	public static void getMVAWithFullRevaluation(LocalPortfolio localPortfolio, ZeroRateModel zeroRateModel, LIBORModelMonteCarloSimulationModel liborModel, LocalDateTime startDate, int daysPerStep, double fundingSpread, Simulation simulation, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
 		System.out.println("Calculating Margin Valuation Adjustment Full Revaluation:");
 		String analysis = "Average";
@@ -220,7 +206,8 @@ public class MarginValuationAdjustment {
 		}
 		System.out.println("Simulation: " + simulation.toString() + " | Evaluation: " + analysis + " | Scenarios: " + window);
 
-		TenorGrid tenorGrid = TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID);
+		SensitivityComponentsForSwapLeg sensitivityComponents = new SensitivityComponentsForSwapLeg(localPortfolio.getSwaps(), zeroRateModel, zeroRateModel);
+		ForwardAndDiscountSensitivities sensitivities = new ForwardAndDiscountSensitivities(sensitivityComponents, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID));
 	
 		RandomVariable mva = new RandomVariableFromDoubleArray(0.0);
 		LocalDateTime lastPaymentDate = FloatingpointDate.getDateFromFloatingPointDate(startDate, localPortfolio.getLastPaymentDate());
@@ -229,7 +216,7 @@ public class MarginValuationAdjustment {
 		long startTime = System.nanoTime();
 		for (LocalDateTime date = startDate; date.isBefore(lastPaymentDate); date = date.plusDays(daysPerStep)) {
 			if (SchemeStorage.getLocalCalendar(Currency.EUR).isBusinessday(date.toLocalDate())) {
-				RandomVariable initialMargin = getInitialMarginWithFullRevaluation(date, zeroRateModel, localPortfolio, simulation, pathWiseEvaluation, movingScenarioWindow, tenorGrid);
+				RandomVariable initialMargin = getInitialMarginWithFullRevaluation(date, zeroRateModel, localPortfolio, sensitivities, simulation, pathWiseEvaluation, movingScenarioWindow);
 //				System.out.println("Initial Margin as of " + date +": " + initialMargin.getAverage());
 				// d(1/N^fd(t)) = 1/N^fd(t_i+1) - 1/N^fd(t_i)
 				RandomVariable fundingNumeraire = liborModel.getNumeraire(nextTime).mult(Math.exp((nextTime) * fundingSpread)).invert();
@@ -246,39 +233,17 @@ public class MarginValuationAdjustment {
 	}
 	
 	
-    /** Compatibility entry point: full revaluation does not require sensitivities. */
+    /** Exhaustive benchmark; sensitivities are retained only for the existing caller signature. */
     public static RandomVariable getInitialMarginWithFullRevaluation(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            LocalPortfolio localPortfolio, Sensitivities sensitivities, Simulation simulation,
+            LocalPortfolio localPortfolio, ForwardAndDiscountSensitivities sensitivities, Simulation simulation,
             boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {
-        return getInitialMarginWithFullRevaluation(evaluationDate, zeroRateModel, localPortfolio, simulation,
-                pathWiseEvaluation, movingScenarioWindow, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID));
-    }
-
-    public static RandomVariable getInitialMarginWithFullRevaluation(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            LocalPortfolio localPortfolio, Simulation simulation, boolean pathWiseEvaluation,
-            boolean movingScenarioWindow, TenorGrid tenorGrid) throws CalculationException {
-        return getInitialMarginWithFullRevaluation(evaluationDate, zeroRateModel, (CurveValuation) localPortfolio,
-                simulation, pathWiseEvaluation, movingScenarioWindow, tenorGrid);
-    }
-
-    public static RandomVariable getInitialMarginWithFullRevaluation(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            CurveValuation valuation, Simulation simulation, boolean pathWiseEvaluation,
-            boolean movingScenarioWindow) throws CalculationException {
-        return getInitialMarginWithFullRevaluation(evaluationDate, zeroRateModel, valuation, simulation,
-                pathWiseEvaluation, movingScenarioWindow, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID));
-    }
-
-    /** Local curve revaluation shared with PAIRS, with product-specific details inside the valuation. */
-    public static RandomVariable getInitialMarginWithFullRevaluation(LocalDateTime evaluationDate, ZeroRateModel zeroRateModel,
-            CurveValuation valuation, Simulation simulation, boolean pathWiseEvaluation,
-            boolean movingScenarioWindow, TenorGrid tenorGrid) throws CalculationException {
         LocalDateTime scenarioDate = movingScenarioWindow ? evaluationDate : zeroRateModel.getReferenceDate();
-        CurveScenarios curveScenarios = PairsInitialMargin.getCurveScenarios(
-                new ScenarioFactory(zeroRateModel, simulation), scenarioDate, tenorGrid);
-		return PairsInitialMargin.getInitialMarginWithFullRevaluation(evaluationDate, zeroRateModel, valuation,
-                curveScenarios, simulation, pathWiseEvaluation);
-	}
-	
+        CurveScenarios scenarios = PairsInitialMargin.getCurveScenarios(new ScenarioFactory(zeroRateModel, simulation),
+                scenarioDate, TenorGridFactory.getTenorGrid(GridType.INITIAL_MARGIN_RISK_GRID));
+        return PairsInitialMargin.getInitialMarginWithFullRevaluation(evaluationDate, zeroRateModel, localPortfolio,
+                scenarios, simulation, pathWiseEvaluation);
+    }
+
 
 	// Piecewise linear
 	public static void getMVAWithInterpolation(LocalPortfolio localPortfolio, ZeroRateModel zeroRateModel, LIBORModelMonteCarloSimulationModel liborModel, LocalDateTime startDate, int pointsInBetween, int daysPerStep, double fundingSpread, InitialMargin type, boolean pathWiseEvaluation, boolean movingScenarioWindow) throws CalculationException {		

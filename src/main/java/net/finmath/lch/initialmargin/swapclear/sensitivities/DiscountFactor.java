@@ -45,11 +45,11 @@ public class DiscountFactor {
 	
 	/**
 	 * @param order The order of the derivative
-	 * @return The inverste derivative of the discount factor i.e. 1/P(T;t) is differentiated
+	 * @return The derivative of the inverse discount factor, i.e. 1/P(T;t)
 	 */
 	public RandomVariable getInverseDerivative(int order) {
-		// Derivative inverted discount factor: (-1)^(n+1) * (T-t)^n / P(T;t)
-        double factor = Math.pow(-1.0, order + 1) * Math.pow(timeToMaturity, order); 
+		// Since 1/P = exp((T-t)*z), all derivative orders have a positive factor.
+        double factor = Math.pow(timeToMaturity, order);
         return discountFactor.invert().mult(factor);
 	}
 	

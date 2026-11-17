@@ -13,7 +13,6 @@ import java.util.Collection;
 
 import net.finmath.lch.initialmargin.simulation.modeldata.StochasticCurve;
 import net.finmath.lch.initialmargin.simulation.modeldata.ZeroRateModel;
-import net.finmath.lch.initialmargin.valuation.CurveValuation;
 import net.finmath.lch.initialmargin.swapclear.products.indices.LchAbstractIndex;
 import net.finmath.lch.initialmargin.swapclear.products.indices.LchFixedCoupon;
 import net.finmath.lch.initialmargin.swapclear.products.indices.LchLinearCombinationIndex;
@@ -31,7 +30,7 @@ import net.finmath.time.Schedule;
  *
  * @version 1.0
  */
-public class LchSwapLeg extends AbstractTermStructureMonteCarloProduct implements CurveValuation {
+public class LchSwapLeg extends AbstractTermStructureMonteCarloProduct {
 
 	private final LchProductCollection				components;
 	private final Schedule 							legSchedule;
@@ -191,7 +190,6 @@ public class LchSwapLeg extends AbstractTermStructureMonteCarloProduct implement
 	
 	
 	// Swap value for single curve setup
-	@Override
 	public RandomVariable getValue(final LocalDateTime evaluationDate, final ZeroRateModel zeroRateModel, final StochasticCurve curveShifts, Integer pathOrState) throws CalculationException {
 		return components.getValue(evaluationDate, legSchedule.getReferenceDate().atStartOfDay(), zeroRateModel, curveShifts, zeroRateModel, curveShifts, pathOrState);
 	}
